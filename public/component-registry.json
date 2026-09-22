@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "DataCore Design",
+  "version": "0.1.0",
+  "purpose": "Machine-readable UI contracts for DataCore main platform and AION-compatible surfaces.",
+  "components": [
+    {
+      "name": "Button",
+      "category": "action",
+      "variants": ["primary", "secondary", "ghost", "danger"],
+      "states": ["default", "hover", "focus-visible", "pressed", "disabled", "loading"],
+      "requiredProps": ["children"],
+      "sideEffectRule": "compute, write, quota, and external actions require explicit confirmation"
+    },
+    {
+      "name": "Field",
+      "category": "form",
+      "states": ["default", "focused", "invalid", "disabled", "read-only"],
+      "requiredProps": ["label"],
+      "accessibility": ["visible label", "aria-describedby for helper/error", "aria-invalid on error"]
+    },
+    {
+      "name": "StatusLine",
+      "category": "feedback",
+      "tones": ["success", "warning", "danger", "neutral"],
+      "requiredProps": ["title", "description", "tone"],
+      "rule": "text and icon must carry meaning; color is supplementary"
+    },
+    {
+      "name": "DataTable",
+      "category": "data",
+      "requiredProps": ["caption", "columns", "rows"],
+      "responsiveRule": "horizontal overflow on narrow screens",
+      "accessibility": ["caption", "th elements", "stable row IDs"]
+    },
+    {
+      "name": "Dialog",
+      "category": "overlay",
+      "requiredProps": ["title", "onClose", "children"],
+      "states": ["closed", "open", "submitting", "error"],
+      "accessibility": ["role=dialog", "aria-modal=true", "Esc close", "focus return"]
+    },
+    {
+      "name": "Citation",
+      "category": "provenance",
+      "requiredProps": ["citationId", "source"],
+      "rule": "stable ID links fact superscript to source record; never infer with string matching"
+    }
+  ]
+}

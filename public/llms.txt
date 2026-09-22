@@ -1,0 +1,34 @@
+# DataCore Design
+
+> Public design-system reference for the DataCore main platform. Synthetic examples only.
+
+## Read first
+
+- Full contract: `llms-full.txt`
+- Machine-readable registry: `component-registry.json`
+- Human site: `https://dptech-yb.github.io/datacore-design/`
+
+## Product context
+
+DataCore is a data-governance and intelligent-collaboration platform for projects, experiments, structured data, agent recommendations, execution systems, and auditable results. AION shares the same interaction principles.
+
+## Non-negotiable interaction rules
+
+1. Show context before action: resource, scope, current state, and next step.
+2. Separate recommendation from execution. External side effects require explicit user confirmation.
+3. Keep stable IDs for projects, tasks, runs, citations, and versions. Never infer relationships from display names alone.
+4. Cover loading, empty, error, disabled, and permission states.
+5. Use semantic HTML and visible keyboard focus. Errors must not rely on color alone.
+6. In citations, render a stable citation ID at the fact and link it to a full source item; do not repeat a long source section in the answer body.
+7. Frontend visibility is not authorization. The backend must enforce permissions again.
+
+## Components
+
+- Button: `primary`, `secondary`, `ghost`, `danger`; supports disabled and loading.
+- Field: label, helper text, `aria-invalid`, and inline error.
+- StatusBadge / StatusLine: success, warning, danger, neutral.
+- DataTable: semantic caption and headers, horizontal overflow on narrow screens.
+- Dialog: labelled, modal, Esc/backdrop close, explicit confirmation action.
+- Citation: stable ID in prose plus linked source list.
+
+Use `llms-full.txt` for props, states, and implementation examples.

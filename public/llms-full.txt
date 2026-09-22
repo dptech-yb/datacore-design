@@ -1,0 +1,109 @@
+# DataCore Design — full AI-readable contract
+
+Version: 0.1.0
+Scope: DataCore main platform UI and AION-compatible interaction patterns
+Source policy: examples are synthetic; this repository intentionally excludes production code and data.
+
+## 1. Design language and foundations
+
+The four working principles are **clarity, certainty, restraint, and growth**. They are practical review criteria, not marketing copy:
+
+- Clarity: organize context, hierarchy, and next action so the first glance is useful.
+- Certainty: make state, scope, side effects, and results explicit.
+- Restraint: add only the controls, color, motion, and copy that help the current task.
+- Growth: keep tokens and APIs stable while leaving extension points for products, devices, and AI workflows.
+
+### Semantic tokens
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `brand.600` | `#2563eb` | primary action, links, current navigation |
+| `success.600` | `#059669` | completed, connected, valid |
+| `warn.600` | `#d97706` | review, pending, expiring |
+| `danger.600` | `#dc2626` | blocked, invalid, destructive |
+| `ink.900` | `#0f172a` | primary text |
+| `ink.500` | `#64748b` | supporting text |
+| `ink.200` | `#e2e8f0` | borders and dividers |
+| `ink.50` | `#f8fafc` | page surface |
+
+Use a 4px spacing base: `4, 8, 16, 24, 32`. Use 4px for compact controls, 8px for fields and buttons, 16px for cards, and 22px or larger only for page-level containers.
+
+### Typography
+
+Use the system Chinese sans stack for UI and `DM Mono`/system monospace for IDs, file names, and machine values. Keep body copy at 14px or larger for primary workflows. Do not encode meaning using font weight alone.
+
+## 2. Component contracts
+
+### Button / Action
+
+Purpose: trigger a user action.
+
+Variants: `primary` for the main next step, `secondary` for an adjacent safe action, `ghost` for low-emphasis navigation, `danger` for destructive actions.
+
+States: default, hover, keyboard focus, pressed, disabled, loading.
+
+Rules:
+
+- Start the label with a verb: `提交计算任务`, `保存草稿`, `重新连接`.
+- During loading, keep the button width and explain what is happening.
+- For compute/write/quota/external actions, show the target scope in nearby copy or confirmation dialog.
+
+Example:
+
+```tsx
+<Button variant="primary" loading={isSubmitting}>提交计算任务</Button>
+```
+
+### Field / Validation
+
+Required contract: visible label, input, optional helper text, and inline error tied to the input with `aria-describedby`. Invalid controls use `aria-invalid="true"`.
+
+Rules:
+
+- Explain accepted format before the user submits when it is non-obvious.
+- Error text should state the fix, not just that validation failed.
+- Optional data-source fields can say that the Agent may search automatically; do not imply that an empty field is an error.
+
+### StatusLine / StatusBadge
+
+Tones: `success`, `warning`, `danger`, `neutral`.
+
+Every status should answer: what happened, does the user need to act, and what happens next. Do not communicate the state with color alone; include text and an icon/shape.
+
+### DataTable
+
+Use a `<caption>`, real `<th>` headers, stable row IDs, and a horizontally scrollable wrapper on narrow screens. Keep status and actions in predictable columns. Use monospace for IDs. Do not turn dense scientific tables into unreadable stacks by default.
+
+### Dialog / Confirmation
+
+Use for actions with external side effects. Required behavior: `role="dialog"`, `aria-modal="true"`, labelled title, visible close/cancel action, Esc close, and focus returned to the trigger in the production implementation.
+
+Confirmation copy must include target, scope, and meaningful side effects (for example project, CPU/time limit, cost or audit record).
+
+### Citation / Source
+
+The model or tool layer emits a stable citation ID, for example `citation:c2`. The renderer maps it to a numbered superscript in the prose and the matching source record in the source list. The frontend must not guess which source supports a sentence by string matching.
+
+Source records should include: `id`, `title`, `url`, `retrievedAt`, and optional `publisher`. If a fact has no reliable source, omit the citation instead of attaching an entire search result set.
+
+## 3. Business patterns
+
+1. Agent recommendation → user confirmation → executable task → status and logs.
+2. Data import → preview → field validation → confirmed write → immutable source/version record.
+3. Prose citation superscript ↔ source detail list.
+4. Permission-aware actions: visible context, disabled or hidden unsafe action, backend enforcement, and an explanation for the user.
+
+## 4. Engineering checklist
+
+- [ ] Works at 320px width and on desktop.
+- [ ] Keyboard focus is visible and order is logical.
+- [ ] Loading, empty, error, disabled and permission states exist.
+- [ ] External side effects require confirmation.
+- [ ] Stable IDs are used for relationships.
+- [ ] No secrets, production URLs, or user data in examples.
+- [ ] `npm run typecheck` and `npm run build` pass.
+- [ ] Registry and this document are updated together.
+
+## 5. Main-platform improvement backlog
+
+The main platform already has useful global classes (`btn-*`, `input`, `card`, `badge-*`). The smallest high-value hardening is to route new pages through shared components and add consistent `:focus-visible`, dialog focus trapping/return, inline validation semantics, and citation rendering. Avoid a broad rewrite of existing business pages until each migration has a regression test.
