@@ -33,7 +33,7 @@ DataCore is a data-governance and intelligent-collaboration platform for project
 
 ## Visual artifact
 
-- `DesignSculpture`: Blender-authored modular form used only as a homepage visual anchor.
+- `DesignSculpture`: modular visual form used only as a homepage visual anchor.
 - Poster: `models/modular-form.webp`; interactive model: `models/modular-form.glb`; editable source: `art/blender/modular-form.blend`.
 - The poster is the default. Load the GLB only after the user chooses “探索 3D”; never auto-rotate, and always keep a static fallback.
 

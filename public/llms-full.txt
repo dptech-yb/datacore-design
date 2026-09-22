@@ -88,7 +88,7 @@ Source records should include: `id`, `title`, `url`, `retrievedAt`, and optional
 
 ### Homepage visual / DesignSculpture
 
-The homepage uses a Blender-authored modular form to make the design language tangible. It is a visual anchor, not a navigation control or a source of product meaning.
+The homepage uses a modular visual form to make the design language tangible. It is a visual anchor, not a navigation control or a source of product meaning.
 
 - Source scene: `art/blender/modular-form.blend`.
 - Poster: `public/models/modular-form.webp` (default, fast path).

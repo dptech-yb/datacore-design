@@ -7,7 +7,7 @@
     {
       "name": "DesignSculpture",
       "category": "visual",
-      "purpose": "A Blender-authored modular form used as a non-semantic homepage visual anchor.",
+      "purpose": "A modular visual form used as a non-semantic homepage visual anchor.",
       "poster": "models/modular-form.webp",
       "model": "models/modular-form.glb",
       "source": "../art/blender/modular-form.blend",

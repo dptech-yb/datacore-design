@@ -9,7 +9,7 @@ const modelPath = "./models/modular-form.glb";
 /**
  * The poster is the default experience. The model-viewer bundle and GLB only
  * enter the page after an explicit request, keeping the design-system home
- * page fast while still offering a real, inspectable Blender artifact.
+ * page fast while still offering a real, inspectable 3D artifact.
  */
 export function DesignSculpture() {
   const [viewerState, setViewerState] = useState<ViewerState>("idle");
@@ -103,7 +103,7 @@ export function DesignSculpture() {
       <figcaption className="sculpture-caption">
         <span className="sculpture-kicker"><SquareStack size={14} /> 模数研究 / MODULAR STUDY</span>
         <strong>相同的单元，更多的组合</strong>
-        <span>由 Blender 制作的组件化视觉研究，表达规则如何在组合中保持秩序。</span>
+        <span>以组件化结构为线索的视觉研究，表达规则如何在组合中保持秩序。</span>
         {viewerState !== "ready" && (
           <button className="sculpture-open" type="button" onClick={showViewer} disabled={viewerState === "loading"}>
             <Rotate3D size={15} /> {viewerState === "loading" ? "正在载入" : "探索 3D"}
