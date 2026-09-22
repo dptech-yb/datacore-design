@@ -3,6 +3,19 @@
   "name": "DataCore Design",
   "version": "0.1.0",
   "purpose": "Machine-readable UI contracts for DataCore main platform and AION-compatible surfaces.",
+  "artifacts": [
+    {
+      "name": "DesignSculpture",
+      "category": "visual",
+      "purpose": "A Blender-authored modular form used as a non-semantic homepage visual anchor.",
+      "poster": "models/modular-form.webp",
+      "model": "models/modular-form.glb",
+      "source": "../art/blender/modular-form.blend",
+      "loadingRule": "Render the poster first; load the interactive model only after an explicit user action.",
+      "accessibility": ["descriptive alt text", "keyboard-accessible controls", "static preview fallback"],
+      "motionRule": "No automatic rotation; user controls the camera and can reset the view."
+    }
+  ],
   "components": [
     {
       "name": "Button",

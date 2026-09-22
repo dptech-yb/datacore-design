@@ -29,6 +29,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { DesignSculpture } from "./components/DesignSculpture";
 
 type Page = "overview" | "foundations" | "components" | "patterns" | "guidance";
 
@@ -114,7 +115,7 @@ export default function App() {
                   >
                     <Icon size={16} strokeWidth={page === item.id ? 2.2 : 1.8} />
                     {item.label}
-                    {item.id === "components" && <span className="nav-count">8</span>}
+                    {item.id === "components" && <span className="nav-count">6</span>}
                   </button>
                 );
               })}
@@ -188,12 +189,8 @@ function Overview({ onNavigate }: { onNavigate: (page: Page) => void }) {
             <a className="button button-secondary" href="./llms-full.txt">阅读 AI 文档 <Terminal size={15} /></a>
           </div>
         </div>
-        <div className="hero-visual" aria-label="DataCore 设计系统的四个关注点">
-          <div className="orbit orbit-one" /><div className="orbit orbit-two" />
-          <div className="hero-node hero-node-main"><Palette size={20} /><strong>Design language</strong><span>让共识可以复用</span></div>
-          <div className="hero-node hero-node-a"><CheckCircle2 size={17} /><span>清晰可读</span></div>
-          <div className="hero-node hero-node-b"><ShieldCheck size={17} /><span>稳定可预期</span></div>
-          <div className="hero-node hero-node-c"><Table2 size={17} /><span>轻量可达</span></div>
+        <div className="hero-visual" aria-label="DataCore Design 的组件化视觉研究">
+          <DesignSculpture />
         </div>
       </section>
 

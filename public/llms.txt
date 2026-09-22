@@ -31,4 +31,10 @@ DataCore is a data-governance and intelligent-collaboration platform for project
 - Dialog: labelled, modal, Esc/backdrop close, explicit confirmation action.
 - Citation: stable ID in prose plus linked source list.
 
+## Visual artifact
+
+- `DesignSculpture`: Blender-authored modular form used only as a homepage visual anchor.
+- Poster: `models/modular-form.webp`; interactive model: `models/modular-form.glb`; editable source: `art/blender/modular-form.blend`.
+- The poster is the default. Load the GLB only after the user chooses “探索 3D”; never auto-rotate, and always keep a static fallback.
+
 Use `llms-full.txt` for props, states, and implementation examples.

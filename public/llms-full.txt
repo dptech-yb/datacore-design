@@ -86,6 +86,17 @@ The model or tool layer emits a stable citation ID, for example `citation:c2`. T
 
 Source records should include: `id`, `title`, `url`, `retrievedAt`, and optional `publisher`. If a fact has no reliable source, omit the citation instead of attaching an entire search result set.
 
+### Homepage visual / DesignSculpture
+
+The homepage uses a Blender-authored modular form to make the design language tangible. It is a visual anchor, not a navigation control or a source of product meaning.
+
+- Source scene: `art/blender/modular-form.blend`.
+- Poster: `public/models/modular-form.webp` (default, fast path).
+- Interactive asset: `public/models/modular-form.glb` (loaded only after an explicit user action).
+- Interaction: camera controls, keyboard-accessible reset and static-preview controls; no automatic rotation.
+- Failure behavior: keep the poster visible and explain that the interactive model could not load.
+- Do not use the model to encode required information, status, permissions, or navigation.
+
 ## 3. Business patterns
 
 1. Agent recommendation → user confirmation → executable task → status and logs.
