@@ -1,3 +1,4 @@
+import { Modal as AccessibleModal } from "../components/Modal";
 import {
   AlertTriangle,
   Check,
@@ -61,7 +62,7 @@ function Toast({ tone, children, spinning }: { tone: ToastTone; children: ReactN
         border: "1px solid var(--line)",
         background: "var(--surface)",
         boxShadow: "var(--shadow-md)",
-        fontSize: 12,
+        fontSize: 14,
       }}
     >
       {spinning ? <span className="spinner spinner-dark" aria-hidden="true" /> : <Icon size={15} style={{ color, flex: "0 0 auto" }} />}
@@ -72,7 +73,7 @@ function Toast({ tone, children, spinning }: { tone: ToastTone; children: ReactN
 
 function DescItem({ label, children, mono }: { label: string; children: ReactNode; mono?: boolean }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 10, padding: "7px 0", borderBottom: "1px solid var(--line)", fontSize: 12 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 10, padding: "7px 0", borderBottom: "1px solid var(--line)", fontSize: 14 }}>
       <span style={{ color: "var(--muted)" }}>{label}</span>
       <span className={mono ? "mono" : undefined} style={mono ? undefined : { minWidth: 0 }}>{children}</span>
     </div>
@@ -85,7 +86,7 @@ const treeRowStyle: CSSProperties = {
   gap: 6,
   padding: "5px 6px",
   borderRadius: 6,
-  fontSize: 12,
+  fontSize: 14,
   color: "var(--text)",
   background: "none",
   cursor: "pointer",
@@ -100,7 +101,7 @@ const fileRowStyle: CSSProperties = {
   padding: "9px 12px",
   border: "1px solid var(--line)",
   borderRadius: 10,
-  fontSize: 12,
+  fontSize: 14,
   background: "var(--surface)",
 };
 
@@ -110,7 +111,7 @@ function TableBasic() {
   return (
     <div className="table-wrap">
       <table>
-        <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--muted)", fontSize: 11 }}>
+        <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--muted)", fontSize: 12 }}>
           示例项目（project-042）· 最近计算任务
         </caption>
         <thead>
@@ -176,7 +177,7 @@ function TableScroll() {
     <div className="demo-stack">
       <div className="table-wrap">
         <table style={{ minWidth: 880 }}>
-          <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--muted)", fontSize: 11 }}>
+          <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--muted)", fontSize: 12 }}>
             数据集 ds-118 · 全部字段（表格最小宽度 880px，窄屏横向滚动）
           </caption>
           <thead>
@@ -264,7 +265,7 @@ function TableBusiness() {
   return (
     <div className="table-wrap">
       <table>
-        <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--muted)", fontSize: 11 }}>
+        <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--muted)", fontSize: 12 }}>
           示例项目（project-042）· 计算任务列表
         </caption>
         <thead>
@@ -371,8 +372,8 @@ function DescriptionsLayout() {
       <div className="demo-grid-2" style={{ maxWidth: 560 }}>
         {items.map((item) => (
           <div key={item.label} style={{ border: "1px solid var(--line)", borderRadius: 8, padding: "9px 12px", background: "var(--surface)" }}>
-            <div style={{ color: "var(--muted)", fontSize: 11 }}>{item.label}</div>
-            <div className={item.mono ? "mono" : undefined} style={{ marginTop: 2, fontSize: 12 }}>
+            <div style={{ color: "var(--muted)", fontSize: 12 }}>{item.label}</div>
+            <div className={item.mono ? "mono" : undefined} style={{ marginTop: 2, fontSize: 14 }}>
               {item.value}
             </div>
           </div>
@@ -421,10 +422,10 @@ function DescriptionsBusiness() {
 function StatBlock({ title, value, suffix, extra }: { title: string; value: string; suffix?: string; extra?: ReactNode }) {
   return (
     <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: "12px 14px", background: "var(--surface)", display: "grid", gap: 4 }}>
-      <span style={{ color: "var(--muted)", fontSize: 11 }}>{title}</span>
-      <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
+      <span style={{ color: "var(--muted)", fontSize: 12 }}>{title}</span>
+      <span style={{ fontSize: 24.0, fontWeight: 700, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
         {value}
-        {suffix && <span style={{ fontSize: 12, fontWeight: 500, color: "var(--muted)", marginLeft: 4 }}>{suffix}</span>}
+        {suffix && <span style={{ fontSize: 14, fontWeight: 500, color: "var(--muted)", marginLeft: 4 }}>{suffix}</span>}
       </span>
       {extra}
     </div>
@@ -450,7 +451,7 @@ function StatisticTrend() {
           value="286.4"
           suffix="秒"
           extra={
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--green)", fontSize: 11 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--green)", fontSize: 12 }}>
               <TrendingDown size={14} />
               -12.3% · 较上周
             </span>
@@ -461,7 +462,7 @@ function StatisticTrend() {
           value="6"
           suffix="个"
           extra={
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--red)", fontSize: 11 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--red)", fontSize: 12 }}>
               <TrendingUp size={14} />
               +2 · 较上周
             </span>
@@ -517,7 +518,7 @@ function TimelineNode({
         {!last && <span style={{ width: 1, flex: 1, background: "var(--line)", marginTop: 2 }} />}
       </span>
       <div style={{ paddingBottom: last ? 0 : 14, minWidth: 0 }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "baseline", fontSize: 12, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "baseline", fontSize: 14, flexWrap: "wrap" }}>
           <strong>{title}</strong>
           <span className="mono" style={{ color: "var(--faint)" }}>
             {time}
@@ -582,7 +583,7 @@ function TimelineBusiness() {
 function TreeBasic() {
   const [open, setOpen] = useState(true);
   return (
-    <div style={{ maxWidth: 380, fontSize: 12 }}>
+    <div style={{ maxWidth: 380, fontSize: 14 }}>
       <button style={treeRowStyle} onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         {open ? <ChevronDown size={14} style={{ color: "var(--muted)" }} /> : <ChevronRight size={14} style={{ color: "var(--muted)" }} />}
         <FolderOpen size={14} style={{ color: "var(--brand)" }} />
@@ -611,7 +612,7 @@ function TreeSelectable() {
   const all = checked["ds-118"] && checked["ds-121"];
   const some = checked["ds-118"] || checked["ds-121"];
   return (
-    <div className="demo-stack" style={{ maxWidth: 380, fontSize: 12 }}>
+    <div className="demo-stack" style={{ maxWidth: 380, fontSize: 14 }}>
       <label style={{ ...treeRowStyle, cursor: "pointer" }}>
         <input
           type="checkbox"
@@ -650,7 +651,7 @@ function TreeBusiness() {
     { key: "ds-130", label: "数据集 ds-130", meta: "无权限", locked: true },
   ];
   return (
-    <div style={{ maxWidth: 400, fontSize: 12 }}>
+    <div style={{ maxWidth: 400, fontSize: 14 }}>
       <div style={{ ...treeRowStyle, cursor: "default" }}>
         <ChevronDown size={14} style={{ color: "var(--muted)" }} />
         <FolderOpen size={14} style={{ color: "var(--brand)" }} />
@@ -688,7 +689,7 @@ const collapsePanelStyle: CSSProperties = {
   padding: "11px 14px",
   background: "var(--surface)",
   cursor: "pointer",
-  fontSize: 12,
+  fontSize: 14,
   fontWeight: 600,
   color: "var(--text)",
   textAlign: "left",
@@ -712,7 +713,7 @@ function CollapseBasic() {
             {panel.title}
           </button>
           {openKey === panel.key && (
-            <div style={{ padding: "10px 14px 12px 36px", fontSize: 12, color: "var(--muted)", borderTop: "1px solid var(--line)" }}>{panel.body}</div>
+            <div style={{ padding: "10px 14px 12px 36px", fontSize: 14, color: "var(--muted)", borderTop: "1px solid var(--line)" }}>{panel.body}</div>
           )}
         </div>
       ))}
@@ -750,7 +751,7 @@ function CollapseBusiness() {
               <span style={{ marginLeft: "auto" }}>{panel.badge}</span>
             </button>
             {openKey === panel.key && (
-              <div style={{ padding: "10px 14px 12px 36px", fontSize: 12, color: "var(--muted)", borderTop: "1px solid var(--line)" }}>{panel.body}</div>
+              <div style={{ padding: "10px 14px 12px 36px", fontSize: 14, color: "var(--muted)", borderTop: "1px solid var(--line)" }}>{panel.body}</div>
             )}
           </div>
         ))}
@@ -773,7 +774,7 @@ function CodeShell({ title, children, onCopy, copied }: { title: string; childre
           padding: "6px 12px",
           borderBottom: "1px solid var(--line)",
           background: "var(--surface-soft)",
-          fontSize: 11,
+          fontSize: 12,
           color: "var(--muted)",
         }}
       >
@@ -801,7 +802,7 @@ function CodeBlockBasic() {
       }}
     >
       <pre style={{ margin: 0, padding: "12px 14px", overflowX: "auto", background: "var(--surface)" }}>
-        <code style={{ fontFamily: '"DM Mono", monospace', fontSize: 12, color: "var(--text)" }}>{code}</code>
+        <code style={{ fontFamily: '"DM Mono", monospace', fontSize: 14, color: "var(--text)" }}>{code}</code>
       </pre>
     </CodeShell>
   );
@@ -830,7 +831,7 @@ function CodeBlockHighlight() {
                 padding: "0 14px 0 0",
                 background: index === 3 ? "var(--brand-soft)" : "transparent",
                 fontFamily: '"DM Mono", monospace',
-                fontSize: 12,
+                fontSize: 14,
                 lineHeight: 1.8,
               }}
             >
@@ -859,7 +860,7 @@ function CodeBlockBusiness() {
         }}
       >
         <pre style={{ margin: 0, padding: "12px 14px", overflowX: "auto", background: "var(--surface)" }}>
-          <code style={{ fontFamily: '"DM Mono", monospace', fontSize: 12, color: "var(--text)" }}>{code}</code>
+          <code style={{ fontFamily: '"DM Mono", monospace', fontSize: 14, color: "var(--text)" }}>{code}</code>
         </pre>
       </CodeShell>
       <p className="demo-note">示例域名一律 example.com；凭证用 *** 占位，绝不展示真实密钥。</p>
@@ -885,7 +886,7 @@ function JsonString({ v }: { v: string }) {
 
 const jsonBoxStyle: CSSProperties = {
   fontFamily: '"DM Mono", monospace',
-  fontSize: 12,
+  fontSize: 14,
   lineHeight: 1.9,
   background: "var(--surface)",
   border: "1px solid var(--line)",
@@ -1023,7 +1024,7 @@ function FileListStates() {
         <AlertTriangle size={16} style={{ color: "var(--red)", flex: "0 0 auto" }} />
         <span style={{ display: "grid", gap: 1, minWidth: 0 }}>
           <span style={{ fontWeight: 600 }}>notes.pdf</span>
-          <span style={{ color: "var(--red)", fontSize: 11 }}>格式不支持（仅支持 .cif / .json）</span>
+          <span style={{ color: "var(--red)", fontSize: 12 }}>格式不支持（仅支持 .cif / .json）</span>
         </span>
         <span style={{ marginLeft: "auto", display: "inline-flex", gap: 8 }}>
           <button className="inline-action" style={{ marginLeft: 0 }}>重试</button>
@@ -1237,7 +1238,7 @@ const noticeCardStyle: CSSProperties = {
   border: "1px solid var(--line)",
   background: "var(--surface)",
   boxShadow: "var(--shadow-md)",
-  fontSize: 12,
+  fontSize: 14,
 };
 
 function NotificationBasic() {
@@ -1326,7 +1327,7 @@ function ProgressBasic() {
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <ProgressBar percent={100} tone="green" />
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--green)", fontSize: 12 }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--green)", fontSize: 14 }}>
           <Check size={14} />
           已完成
         </span>
@@ -1344,7 +1345,7 @@ function ProgressStatus() {
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <ProgressBar percent={45} tone="red" />
-        <span style={{ color: "var(--red)", fontSize: 12 }}>导入中断</span>
+        <span style={{ color: "var(--red)", fontSize: 14 }}>导入中断</span>
       </div>
       <p className="demo-note">error 停在失败点，邻近文案给出原因：第 450 行密度字段格式错误。</p>
     </div>
@@ -1436,7 +1437,7 @@ function SpinBusiness() {
         </button>
       </div>
       <div style={{ position: "relative", border: "1px solid var(--line)", borderRadius: 10, background: "var(--surface)", overflow: "hidden" }}>
-        <div style={{ display: "flex", gap: 24, padding: "10px 14px", borderBottom: "1px solid var(--line)", color: "var(--faint)", fontSize: 10, fontWeight: 700, letterSpacing: ".08em" }}>
+        <div style={{ display: "flex", gap: 24, padding: "10px 14px", borderBottom: "1px solid var(--line)", color: "var(--faint)", fontSize: 12, fontWeight: 700, letterSpacing: ".08em" }}>
           <span>任务</span>
           <span>数据集</span>
           <span>耗时（秒）</span>
@@ -1473,14 +1474,7 @@ function SpinBusiness() {
 
 function ModalBasic() {
   const [open, setOpen] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+
   return (
     <div className="demo-stack">
       <div className="demo-row">
@@ -1490,7 +1484,7 @@ function ModalBasic() {
         <span className="demo-note">Esc 关闭 · 打开后焦点进入对话框 · 关闭后焦点还原</span>
       </div>
       {open && (
-        <div className="dialog-backdrop" onClick={() => setOpen(false)}>
+        <AccessibleModal open={open} onClose={() => setOpen(false)} label="重命名数据集">
           <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="demo-modal-title" onClick={(event) => event.stopPropagation()}>
             <div className="dialog-header">
               <h2 id="demo-modal-title">重命名数据集</h2>
@@ -1509,7 +1503,7 @@ function ModalBasic() {
               </button>
             </div>
           </div>
-        </div>
+        </AccessibleModal>
       )}
     </div>
   );
@@ -1518,14 +1512,7 @@ function ModalBasic() {
 function ModalBusiness() {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !submitting) setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, submitting]);
+
   return (
     <div className="demo-stack">
       <div className="demo-row">
@@ -1535,7 +1522,7 @@ function ModalBusiness() {
         <span className="demo-note">提交中禁用 Esc、遮罩关闭与重复提交</span>
       </div>
       {open && (
-        <div className="dialog-backdrop" onClick={() => !submitting && setOpen(false)}>
+        <AccessibleModal open={open} onClose={() => {if(!submitting)setOpen(false);}} label="创建计算任务">
           <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="demo-modal-biz-title" onClick={(event) => event.stopPropagation()}>
             <div className="dialog-header">
               <h2 id="demo-modal-biz-title">创建计算任务</h2>
@@ -1567,7 +1554,7 @@ function ModalBusiness() {
               </button>
             </div>
           </div>
-        </div>
+        </AccessibleModal>
       )}
     </div>
   );
@@ -1575,28 +1562,11 @@ function ModalBusiness() {
 
 /* ---------- Drawer ---------- */
 
-const drawerBackdropStyle: CSSProperties = { position: "fixed", inset: 0, background: "rgba(15,23,42,.48)", zIndex: 50 };
-const drawerPanelStyle: CSSProperties = {
-  position: "fixed",
-  top: 0,
-  right: 0,
-  bottom: 0,
-  width: "min(430px, 92vw)",
-  background: "var(--surface)",
-  borderLeft: "1px solid var(--line)",
-  boxShadow: "var(--shadow-md)",
-  zIndex: 51,
-  display: "flex",
-  flexDirection: "column",
-};
-
 function DrawerShell({ title, onClose, children, footer }: { title: string; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
   return (
-    <>
-      <div style={drawerBackdropStyle} onClick={onClose} />
-      <div style={drawerPanelStyle} role="dialog" aria-modal="true" aria-label={title}>
+    <AccessibleModal open onClose={onClose} label={title} className="demo-drawer"><div className="drawer-body">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderBottom: "1px solid var(--line)" }}>
-          <strong style={{ fontSize: 14 }}>{title}</strong>
+          <strong style={{ fontSize: 14.0 }}>{title}</strong>
           <button className="icon-button" aria-label="关闭" onClick={onClose}>
             <X size={16} />
           </button>
@@ -1604,20 +1574,13 @@ function DrawerShell({ title, onClose, children, footer }: { title: string; onCl
         <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px" }}>{children}</div>
         {footer && <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "12px 18px", borderTop: "1px solid var(--line)" }}>{footer}</div>}
       </div>
-    </>
+    </AccessibleModal>
   );
 }
 
 function DrawerBasic() {
   const [open, setOpen] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+
   return (
     <div className="demo-stack">
       <div className="demo-row">
@@ -1645,14 +1608,7 @@ function DrawerBasic() {
 
 function DrawerBusiness() {
   const [open, setOpen] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+
   return (
     <div className="demo-stack">
       <div className="demo-row">
@@ -1679,10 +1635,10 @@ function DrawerBusiness() {
           <DescItem label="耗时" mono>286.4 秒</DescItem>
           <DescItem label="费用" mono>¥12.40</DescItem>
           <div style={{ marginTop: 14, border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden" }}>
-            <div style={{ padding: "9px 12px", fontSize: 12, fontWeight: 600, borderBottom: "1px solid var(--line)", background: "var(--surface-soft)" }}>
+            <div style={{ padding: "9px 12px", fontSize: 14, fontWeight: 600, borderBottom: "1px solid var(--line)", background: "var(--surface-soft)" }}>
               日志摘要
             </div>
-            <div style={{ padding: "10px 12px", fontFamily: '"DM Mono", monospace', fontSize: 11, color: "var(--muted)", display: "grid", gap: 4 }}>
+            <div style={{ padding: "10px 12px", fontFamily: '"DM Mono", monospace', fontSize: 12, color: "var(--muted)", display: "grid", gap: 4 }}>
               <span>[09:14:02] 分配到计算节点 node-07</span>
               <span>[09:18:45] SCF 收敛，迭代 58 步</span>
               <span>[09:18:46] 结果写回 run-28003</span>
@@ -1731,7 +1687,7 @@ function PopconfirmBasic() {
             <span style={{ display: "flex", gap: 8 }}>
               <AlertTriangle size={15} style={{ color: "var(--amber)", flex: "0 0 auto", marginTop: 1 }} />
               <span>
-                <strong style={{ fontSize: 12 }}>删除该文件？</strong>
+                <strong style={{ fontSize: 14 }}>删除该文件？</strong>
                 <span className="demo-note" style={{ display: "block", marginTop: 3 }}>
                   structure.cif 将从数据集 ds-118 移除，任务产物不受影响。
                 </span>
@@ -1793,7 +1749,7 @@ function PopconfirmBusiness() {
               <span style={{ display: "flex", gap: 8 }}>
                 <AlertTriangle size={15} style={{ color: "var(--amber)", flex: "0 0 auto", marginTop: 1 }} />
                 <span>
-                  <strong style={{ fontSize: 12 }}>删除该文件？</strong>
+                  <strong style={{ fontSize: 14 }}>删除该文件？</strong>
                   <span className="demo-note" style={{ display: "block", marginTop: 3 }}>
                     raw-data.csv 将从数据集 ds-118 移除，已完成的 2 个任务产物保留。
                   </span>

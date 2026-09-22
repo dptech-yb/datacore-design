@@ -4,12 +4,6 @@ import type { ArticleDoc } from "../catalog/types";
 import { getPreview } from "../previews";
 import { navigate } from "../router";
 
-export function articleToc(doc: ArticleDoc) {
-  const toc = doc.sections.map((section) => ({ id: section.id, label: section.heading }));
-  if (doc.related.length > 0) toc.push({ id: "related", label: "相关内容" });
-  return toc;
-}
-
 export function ArticleDocPage({ doc, eyebrow }: { doc: ArticleDoc; eyebrow: string }) {
   return (
     <article className="doc-page">

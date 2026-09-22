@@ -83,7 +83,7 @@ const tagStyle: CSSProperties = {
   gap: 5,
   padding: "3px 9px",
   borderRadius: 6,
-  fontSize: 11,
+  fontSize: 12,
   fontWeight: 600,
   border: "1px solid var(--line)",
   background: "var(--surface-soft)",
@@ -153,11 +153,11 @@ function IconButtonStates() {
 function IconButtonSizes() {
   return (
     <div className="demo-row" style={{ alignItems: "center" }}>
-      <button className="icon-button" aria-label="编辑（sm）" title="编辑" style={{ width: 28, height: 28, borderRadius: 7 }}>
+      <button className="icon-button" aria-label="编辑（sm）" title="编辑" style={{ width: 32, height: 32, borderRadius: 7 }}>
         <Pencil size={14} />
       </button>
       <button className="icon-button" aria-label="编辑（md）" title="编辑"><Pencil size={16} /></button>
-      <span className="demo-note">sm 28px 用于表格行内；md 32px 为默认尺寸。</span>
+      <span className="demo-note">sm 32px 用于表格行内；md 36px 为默认尺寸。</span>
     </div>
   );
 }
@@ -207,7 +207,7 @@ const stopNav = (e: { preventDefault: () => void }) => e.preventDefault();
 function LinkBasic() {
   return (
     <div className="demo-stack">
-      <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, lineHeight: 1.7 }}>
+      <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.7 }}>
         数据集 <span className="mono">ds-118</span> 已同步到{" "}
         <a className="text-link" href="#/components/link" onClick={stopNav}>示例项目（project-042）</a>
         ，可在项目内直接引用。
@@ -283,7 +283,7 @@ function TypographyBasic() {
       </div>
       <div>
         <span className="type-label">Label · 辅助说明</span>
-        <span style={{ color: "var(--muted)", fontSize: 12 }}>最近更新 · 2026-09-18</span>
+        <span style={{ color: "var(--muted)", fontSize: 14 }}>最近更新 · 2026-09-18</span>
       </div>
       <div>
         <span className="type-label">Mono · ID 与数值</span>
@@ -296,10 +296,10 @@ function TypographyBasic() {
 function TypographyVariants() {
   return (
     <div className="demo-stack">
-      <span style={{ color: "var(--green)", fontSize: 13 }}>计算完成 · 用时 214 秒</span>
-      <span style={{ color: "var(--amber)", fontSize: 13 }}>3 个字段待人工复核</span>
-      <span style={{ color: "var(--red)", fontSize: 13 }}>任务失败：输入文件缺失</span>
-      <span style={{ color: "var(--violet)", fontSize: 13 }}>以下内容由 Agent 生成，请复核后采纳</span>
+      <span style={{ color: "var(--green)", fontSize: 14 }}>计算完成 · 用时 214 秒</span>
+      <span style={{ color: "var(--amber)", fontSize: 14 }}>3 个字段待人工复核</span>
+      <span style={{ color: "var(--red)", fontSize: 14 }}>任务失败：输入文件缺失</span>
+      <span style={{ color: "var(--violet)", fontSize: 14 }}>以下内容由 Agent 生成，请复核后采纳</span>
       <p className="demo-note">语义色只用于状态文本，与 Badge 同一套规则，不用于装饰。</p>
     </div>
   );
@@ -308,9 +308,9 @@ function TypographyVariants() {
 function TypographyBusiness() {
   return (
     <div className="demo-stack" style={{ gap: 6 }}>
-      <span className="type-display" style={{ fontSize: 24 }}>NCM811 高温循环实验</span>
+      <span className="type-display" style={{ fontSize: 24.0 }}>NCM811 高温循环实验</span>
       <span className="type-mono">run-28003</span>
-      <span style={{ color: "var(--muted)", fontSize: 12 }}>所属项目 示例项目（project-042）· 数据集 ds-118</span>
+      <span style={{ color: "var(--muted)", fontSize: 14 }}>所属项目 示例项目（project-042）· 数据集 ds-118</span>
       <p className="demo-note" style={{ marginTop: 8 }}>名称用 display，ID 用 mono 紧随名称，归属信息用 label —— 层级一眼可扫。</p>
     </div>
   );
@@ -320,9 +320,9 @@ function TypographyBusiness() {
 function DividerBasic() {
   return (
     <div>
-      <p style={{ margin: 0, fontSize: 13 }}>项目基础信息与说明，包含名称、负责人与创建时间。</p>
+      <p style={{ margin: 0, fontSize: 14 }}>项目基础信息与说明，包含名称、负责人与创建时间。</p>
       <div role="separator" style={{ borderTop: "1px solid var(--line)", margin: "20px 0" }} />
-      <p style={{ margin: 0, fontSize: 13 }}>参数配置与执行记录，按时间倒序排列。</p>
+      <p style={{ margin: 0, fontSize: 14 }}>参数配置与执行记录，按时间倒序排列。</p>
     </div>
   );
 }
@@ -331,7 +331,7 @@ function DividerVariants() {
   return (
     <div className="demo-stack">
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontSize: 12, fontWeight: 700 }}>参数配置</span>
+        <span style={{ fontSize: 14, fontWeight: 700 }}>参数配置</span>
         <span style={{ flex: 1, borderTop: "1px solid var(--line)" }} />
       </div>
       <div className="demo-row" style={{ gap: 12 }}>
@@ -353,7 +353,7 @@ function DividerBusiness() {
       <div className="demo-grid-2" style={{ gap: 8 }}>
         <div>
           <span className="type-label">项目名称</span>
-          <div style={{ fontSize: 13 }}>示例电解液项目</div>
+          <div style={{ fontSize: 14 }}>示例电解液项目</div>
         </div>
         <div>
           <span className="type-label">项目 ID</span>
@@ -361,7 +361,7 @@ function DividerBusiness() {
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "10px 0 2px" }}>
-        <span style={{ fontSize: 12, fontWeight: 700 }}>执行记录</span>
+        <span style={{ fontSize: 14, fontWeight: 700 }}>执行记录</span>
         <span style={{ flex: 1, borderTop: "1px solid var(--line)" }} />
       </div>
       <span className="demo-note">2026-09-18 · 提交计算任务 run-28003</span>
@@ -403,7 +403,7 @@ function CountBadge({ value }: { value: string }) {
           borderRadius: 999,
           background: "var(--red)",
           color: "#fff",
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: 700,
           display: "inline-flex",
           alignItems: "center",
@@ -607,8 +607,8 @@ function CardBusiness() {
       </div>
       <p>目标：筛选高温稳定配方，覆盖 3 种溶剂体系。</p>
       <div className="demo-row" style={{ gap: 24, margin: "12px 0" }}>
-        <span><strong style={{ fontSize: 18 }}>12</strong> <span className="demo-note">数据集</span></span>
-        <span><strong style={{ fontSize: 18 }}>34</strong> <span className="demo-note">运行次数</span></span>
+        <span><strong style={{ fontSize: 18.0 }}>12</strong> <span className="demo-note">数据集</span></span>
+        <span><strong style={{ fontSize: 18.0 }}>34</strong> <span className="demo-note">运行次数</span></span>
       </div>
       <button className="button button-ghost button-sm" style={{ paddingLeft: 0 }}>查看详情</button>
     </div>
@@ -620,7 +620,7 @@ function EmptyBasic() {
   return (
     <div className="demo-stack" style={{ justifyItems: "center", textAlign: "center", padding: "12px 0" }}>
       <span style={{ ...iconCircle("var(--faint)", "var(--surface-soft)"), borderRadius: 12 }}><Inbox size={20} /></span>
-      <strong style={{ fontSize: 13 }}>还没有实验记录</strong>
+      <strong style={{ fontSize: 14 }}>还没有实验记录</strong>
       <span className="demo-note">创建第一个实验后，数据会展示在这里。</span>
       <button className="button button-primary button-sm">新建实验</button>
     </div>
@@ -632,7 +632,7 @@ function EmptyVariants() {
     <div className="demo-stack">
       <div className="demo-stack" style={{ justifyItems: "center", textAlign: "center", padding: "4px 0" }}>
         <span style={{ ...iconCircle("var(--faint)", "var(--surface-soft)"), borderRadius: 12 }}><SearchX size={20} /></span>
-        <strong style={{ fontSize: 13 }}>没有符合条件的结果</strong>
+        <strong style={{ fontSize: 14 }}>没有符合条件的结果</strong>
         <span className="demo-note">尝试调整筛选条件或关键字。</span>
         <button className="button button-secondary button-sm">清除筛选</button>
       </div>
@@ -646,12 +646,12 @@ function EmptyBusiness() {
     <div className="demo-stack">
       <div className="demo-grid-2">
         <div className="card-demo demo-stack" style={{ justifyItems: "center", textAlign: "center" }}>
-          <strong style={{ fontSize: 12 }}>示例项目（project-042）还没有数据集</strong>
+          <strong style={{ fontSize: 14 }}>示例项目（project-042）还没有数据集</strong>
           <span className="demo-note">导入或新建数据集后即可开始计算。</span>
           <button className="button button-primary button-sm">导入数据集</button>
         </div>
         <div className="card-demo demo-stack" style={{ justifyItems: "center", textAlign: "center" }}>
-          <strong style={{ fontSize: 12 }}>没有符合「进行中」的数据集</strong>
+          <strong style={{ fontSize: 14 }}>没有符合「进行中」的数据集</strong>
           <span className="demo-note">当前筛选条件下没有结果。</span>
           <button className="button button-ghost button-sm">清除筛选</button>
         </div>
@@ -781,7 +781,7 @@ function ResultBasic() {
       {items.map((item) => (
         <div key={item.title} className="demo-stack" style={{ justifyItems: "center", textAlign: "center", gap: 8, padding: 8 }}>
           <span style={iconCircle(item.color, item.bg, 40)}>{item.icon}</span>
-          <strong style={{ fontSize: 13 }}>{item.title}</strong>
+          <strong style={{ fontSize: 14 }}>{item.title}</strong>
         </div>
       ))}
     </div>
@@ -793,13 +793,13 @@ function ResultVariants() {
     <div className="demo-grid-2">
       <div className="card-demo demo-stack" style={{ justifyItems: "center", textAlign: "center" }}>
         <span style={iconCircle("var(--faint)", "var(--surface-soft)", 40)}><FileQuestion size={20} /></span>
-        <strong style={{ fontSize: 13 }}>404 · 页面不存在</strong>
+        <strong style={{ fontSize: 14 }}>404 · 页面不存在</strong>
         <span className="demo-note">页面可能已被移动或删除。</span>
         <button className="button button-secondary button-sm">返回首页</button>
       </div>
       <div className="card-demo demo-stack" style={{ justifyItems: "center", textAlign: "center" }}>
         <span style={iconCircle("var(--amber)", "var(--amber-soft)", 40)}><Lock size={20} /></span>
-        <strong style={{ fontSize: 13 }}>403 · 无访问权限</strong>
+        <strong style={{ fontSize: 14 }}>403 · 无访问权限</strong>
         <span className="demo-note">需要项目 project-042 的查看权限，请联系项目管理员。</span>
         <button className="button button-secondary button-sm">申请权限</button>
       </div>
@@ -811,7 +811,7 @@ function ResultBusiness() {
   return (
     <div className="demo-stack" style={{ justifyItems: "center", textAlign: "center", padding: "8px 0" }}>
       <span style={iconCircle("var(--green)", "var(--green-soft)")}><CheckCircle2 size={22} /></span>
-      <strong style={{ fontSize: 15 }}>计算任务已提交</strong>
+      <strong style={{ fontSize: 15.0 }}>计算任务已提交</strong>
       <span className="demo-note">
         任务 <span className="mono">run-28003</span> 已加入队列，将使用 示例项目（project-042）的额度。
       </span>

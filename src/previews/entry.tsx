@@ -1,3 +1,4 @@
+import { SelectControl } from "../components/SelectControl";
 import {
   AlertCircle,
   Calendar,
@@ -11,7 +12,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useId, useRef, useEffect, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type { PreviewFn } from "./types";
 
@@ -26,7 +27,7 @@ const triggerBase: CSSProperties = {
   borderRadius: 8,
   background: "var(--surface)",
   color: "var(--text)",
-  fontSize: 12,
+  fontSize: 14,
 };
 
 function SelectTrigger({ label, placeholder, width, small }: { label: string; placeholder?: boolean; width?: number | string; small?: boolean }) {
@@ -44,69 +45,13 @@ const panelStyle: CSSProperties = {
   background: "var(--surface)",
   boxShadow: "var(--shadow-md)",
   overflow: "hidden",
-  fontSize: 12,
+  fontSize: 14,
 };
 
-function OptionRow({ label, hint, selected, disabled }: { label: ReactNode; hint?: string; selected?: boolean; disabled?: boolean }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        padding: "8px 10px",
-        color: disabled ? "var(--faint)" : "var(--text)",
-        background: selected ? "var(--brand-soft)" : "transparent",
-        cursor: disabled ? "not-allowed" : "pointer",
-      }}
-    >
-      <span style={{ flex: 1, minWidth: 0 }}>{label}</span>
-      {hint && <span style={{ color: "var(--faint)", fontSize: 11, flex: "0 0 auto" }}>{hint}</span>}
-      {selected && <Check size={14} style={{ color: "var(--brand)", flex: "0 0 auto" }} />}
-    </div>
-  );
-}
-
-function CheckboxBox({ state }: { state: "off" | "on" | "mixed" }) {
-  return (
-    <span
-      style={{
-        width: 15,
-        height: 15,
-        borderRadius: 4,
-        border: state === "off" ? "1.5px solid var(--line-strong)" : "1.5px solid var(--brand)",
-        background: state === "off" ? "var(--surface)" : "var(--brand)",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "white",
-        flex: "0 0 auto",
-      }}
-    >
-      {state === "on" && <Check size={11} strokeWidth={3} />}
-      {state === "mixed" && <Minus size={11} strokeWidth={3} />}
-    </span>
-  );
-}
-
-function RadioDot({ on }: { on: boolean }) {
-  return (
-    <span
-      style={{
-        width: 15,
-        height: 15,
-        borderRadius: "50%",
-        border: on ? "1.5px solid var(--brand)" : "1.5px solid var(--line-strong)",
-        background: "var(--surface)",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flex: "0 0 auto",
-      }}
-    >
-      {on && <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--brand)" }} />}
-    </span>
-  );
+function CheckboxBox({ state, onChange }: {state:"off"|"on"|"mixed";onChange:()=>void}) {
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => {if(ref.current)ref.current.indeterminate = state === "mixed";}, [state]);
+  return <input ref={ref} type="checkbox" checked={state === "on"} onChange={onChange}/>;
 }
 
 function SwitchTrack({ on, loading, disabled, label, onToggle }: { on: boolean; loading?: boolean; disabled?: boolean; label: string; onToggle?: () => void }) {
@@ -153,7 +98,7 @@ function TagChip({ label, onRemove }: { label: string; onRemove?: () => void }) 
         borderRadius: 6,
         background: "var(--brand-soft)",
         color: "var(--brand)",
-        fontSize: 11,
+        fontSize: 12,
         fontWeight: 600,
         whiteSpace: "nowrap",
       }}
@@ -186,7 +131,7 @@ function NumberStepper({ value, onChange, step, min, max, unit, digits }: { valu
       <button type="button" aria-label="减少" onClick={() => onChange(clamp(value - step))} style={stepButton}>
         <Minus size={13} />
       </button>
-      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "0 10px", minWidth: 76, fontSize: 12, fontFamily: '"DM Mono", monospace', color: "var(--text)" }}>
+      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "0 10px", minWidth: 76, fontSize: 14, fontFamily: '"DM Mono", monospace', color: "var(--text)" }}>
         {digits !== undefined ? value.toFixed(digits) : value}
         {unit && <span style={{ color: "var(--faint)", marginLeft: 4 }}>{unit}</span>}
       </span>
@@ -207,7 +152,7 @@ function SearchBox({ value, onChange, placeholder, loading, onClear, width }: { 
         value={value}
         placeholder={placeholder}
         onChange={(event) => onChange?.(event.target.value)}
-        style={{ flex: 1, minWidth: 0, border: 0, outline: "none", background: "transparent", color: "var(--text)", fontSize: 12 }}
+        style={{ flex: 1, minWidth: 0, border: 0, outline: "none", background: "transparent", color: "var(--text)", fontSize: 14 }}
       />
       {loading && <span className="spinner-dark" aria-label="正在搜索" />}
       {!loading && onClear && value && (
@@ -225,13 +170,13 @@ function CalendarPanel({ selectedDay, disableAfter }: { selectedDay?: number; di
   while (cells.length % 7 !== 0) cells.push(null);
   return (
     <div style={{ ...panelStyle, padding: 10, width: 252 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 2px 8px", fontSize: 12, fontWeight: 700 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 2px 8px", fontSize: 14, fontWeight: 700 }}>
         <span>2026 年 9 月</span>
-        <span style={{ color: "var(--faint)", fontWeight: 400, fontSize: 11 }}>今天 9/22</span>
+        <span style={{ color: "var(--faint)", fontWeight: 400, fontSize: 12 }}>今天 9/22</span>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
         {weekdays.map((day) => (
-          <span key={day} style={{ textAlign: "center", color: "var(--faint)", fontSize: 10, padding: "2px 0" }}>
+          <span key={day} style={{ textAlign: "center", color: "var(--faint)", fontSize: 12, padding: "2px 0" }}>
             {day}
           </span>
         ))}
@@ -246,7 +191,7 @@ function CalendarPanel({ selectedDay, disableAfter }: { selectedDay?: number; di
                 textAlign: "center",
                 padding: "4px 0",
                 borderRadius: 6,
-                fontSize: 11,
+                fontSize: 12,
                 color: day === null ? "transparent" : disabled ? "var(--faint)" : selected ? "white" : "var(--text)",
                 background: selected ? "var(--brand)" : "transparent",
                 opacity: disabled ? 0.55 : 1,
@@ -294,7 +239,7 @@ function InputBasic() {
       <label className="field">
         样本编号
         <span style={{ position: "relative", display: "block" }}>
-          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--faint)", fontSize: 12, fontWeight: 400 }}>SMP-</span>
+          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--faint)", fontSize: 14, fontWeight: 400 }}>SMP-</span>
           <input className="field-control" style={{ paddingLeft: 46, fontWeight: 400 }} placeholder="00042" />
         </span>
       </label>
@@ -306,9 +251,9 @@ function InputSizes() {
   return (
     <div className="demo-stack">
       <div className="demo-row" style={{ alignItems: "center" }}>
-        <input className="field-control" style={{ height: 29, width: 180, fontSize: 11.5, fontWeight: 400 }} placeholder="sm · 筛选栏与行内" />
+        <input className="field-control" style={{ height: 29, width: 180, fontSize: 12, fontWeight: 400 }} placeholder="sm · 筛选栏与行内" />
         <input className="field-control" style={{ width: 180, fontWeight: 400 }} placeholder="md · 默认尺寸" />
-        <input className="field-control" style={{ height: 45, width: 180, fontSize: 13, fontWeight: 400 }} placeholder="lg · 页面级录入" />
+        <input className="field-control" style={{ height: 45, width: 180, fontSize: 14, fontWeight: 400 }} placeholder="lg · 页面级录入" />
       </div>
       <p className="demo-note">sm 用于筛选栏和表格行内；lg 仅用于独立录入页。</p>
     </div>
@@ -412,7 +357,7 @@ function TextareaCountAutosize() {
         失败原因说明
         <span style={{ position: "relative", display: "block" }}>
           <textarea className="field-control" style={{ fontWeight: 400, paddingBottom: 22 }} rows={3} maxLength={500} value={value} onChange={(event) => setValue(event.target.value)} />
-          <span style={{ position: "absolute", right: 10, bottom: 7, fontSize: 10, fontWeight: 400, color: nearLimit ? "var(--amber)" : "var(--faint)" }}>{value.length}/500</span>
+          <span style={{ position: "absolute", right: 10, bottom: 7, fontSize: 12, fontWeight: 400, color: nearLimit ? "var(--amber)" : "var(--faint)" }}>{value.length}/500</span>
         </span>
         <small>autoSize 在 3–8 行间伸缩；接近上限时计数变为警示色。</small>
       </label>
@@ -428,7 +373,7 @@ function TextareaBusiness() {
         实验备注（<span className="mono">run-28003</span>）
         <span style={{ position: "relative", display: "block" }}>
           <textarea className="field-control" style={{ fontWeight: 400, paddingBottom: 22 }} rows={3} maxLength={500} value={value} onChange={(event) => setValue(event.target.value)} />
-          <span style={{ position: "absolute", right: 10, bottom: 7, fontSize: 10, fontWeight: 400, color: "var(--faint)" }}>{value.length}/500</span>
+          <span style={{ position: "absolute", right: 10, bottom: 7, fontSize: 12, fontWeight: 400, color: "var(--faint)" }}>{value.length}/500</span>
         </span>
         <small>备注将进入审计记录，导出报告时一并携带，请客观描述事实。</small>
       </label>
@@ -439,127 +384,32 @@ function TextareaBusiness() {
 /* ---------- Select ---------- */
 
 function SelectBasic() {
-  const options = ["运行中", "排队中", "已完成"];
-  const [selected, setSelected] = useState("运行中");
-  return (
-    <div className="demo-stack" style={{ maxWidth: 260 }}>
-      <SelectTrigger label={selected} width="100%" />
-      <div style={panelStyle}>
-        {options.map((option) => (
-          <div key={option} onClick={() => setSelected(option)} style={{ cursor: "pointer" }}>
-            <OptionRow label={option} selected={option === selected} />
-          </div>
-        ))}
-      </div>
-      <p className="demo-note">单选点选即确认并关闭面板，已选值回显在触发器内。</p>
-    </div>
-  );
+  const [value,setValue] = useState(["运行中"]);
+  return <div className="demo-stack" style={{maxWidth:320}}><SelectControl label="任务状态" options={["运行中","排队中","已完成"].map(v=>({value:v,label:v}))} value={value} onChange={setValue}/><p className="demo-note">方向键选择，Enter 确认，Esc 关闭并返回触发器。</p></div>;
 }
-
 function SelectMultiple() {
-  const [selected, setSelected] = useState(["高导配方", "第 3 轮"]);
-  return (
-    <div className="demo-stack" style={{ maxWidth: 340 }}>
-      <span style={{ ...triggerBase, height: "auto", minHeight: 37, padding: "5px 10px", gap: 6, flexWrap: "wrap", justifyContent: "flex-start" }}>
-        {selected.length === 0 && <span style={{ color: "var(--faint)" }}>选择标签</span>}
-        {selected.map((tag) => (
-          <TagChip key={tag} label={tag} onRemove={() => setSelected((list) => list.filter((item) => item !== tag))} />
-        ))}
-        <span style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 4 }}>
-          {selected.length > 0 && (
-            <button type="button" aria-label="清空全部" onClick={() => setSelected([])} style={{ border: 0, background: "transparent", color: "var(--faint)", cursor: "pointer", display: "inline-flex", padding: 2 }}>
-              <X size={13} />
-            </button>
-          )}
-          <ChevronDown size={14} style={{ color: "var(--faint)" }} />
-        </span>
-      </span>
-      <p className="demo-note">多选已选值以 Tag 回显，可单个移除；allowClear 一键清空。</p>
-    </div>
-  );
+  const [value,setValue] = useState(["高导配方","第 3 轮"]);
+  return <div className="demo-stack" style={{maxWidth:340}}><SelectControl label="实验标签" multiple options={["高导配方","第 3 轮","待复核"].map(v=>({value:v,label:v}))} value={value} onChange={setValue}/><div className="demo-row">{value.map(tag=><TagChip key={tag} label={tag} onRemove={()=>setValue(v=>v.filter(t=>t!==tag))}/>)}</div><p className="demo-note">多选后保持面板打开；标签可逐项移除或清空。</p></div>;
 }
-
 function SelectBusiness() {
-  return (
-    <div className="demo-stack" style={{ maxWidth: 340 }}>
-      <SelectTrigger label="电导率筛选第 3 轮（ds-118）" width="100%" />
-      <div style={panelStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 10px", borderBottom: "1px solid var(--line)", color: "var(--muted)" }}>
-          <Search size={13} style={{ color: "var(--faint)" }} />
-          <span style={{ color: "var(--text)" }}>ds-1</span>
-          <span style={{ color: "var(--faint)", fontSize: 11, marginLeft: "auto" }}>3 个匹配</span>
-        </div>
-        <OptionRow label="电导率筛选第 3 轮" hint="ds-118" selected />
-        <OptionRow label="热稳定性复测" hint="ds-120" />
-        <OptionRow label="空白对照组" hint="ds-121" />
-      </div>
-      <p className="demo-note">选项超过 8 个时必须开启搜索；无匹配时空态文案为“没有匹配的数据集”。</p>
-    </div>
-  );
+  const [value,setValue] = useState(["ds-118"]);
+  return <div className="demo-stack" style={{maxWidth:340}}><SelectControl label="输入数据集" searchable options={[{value:"ds-118",label:"电导率筛选第 3 轮",hint:"ds-118"},{value:"ds-120",label:"热稳定性复测",hint:"ds-120"},{value:"ds-121",label:"空白对照组",hint:"ds-121"}]} value={value} onChange={setValue}/><p className="demo-note">可按名称或数据集 ID 搜索，选中后收起面板。</p></div>;
 }
 
 /* ---------- Combobox ---------- */
 
 function ComboboxBasic() {
-  const highlight = (label: string) => (
-    <span>
-      <strong style={{ color: "var(--brand)", fontWeight: 700 }}>碳酸</strong>
-      {label.slice(2)}
-    </span>
-  );
-  return (
-    <div className="demo-stack" style={{ maxWidth: 300 }}>
-      <span style={{ ...triggerBase, height: 37, padding: "0 10px" }}>
-        <span style={{ color: "var(--text)" }}>碳酸</span>
-        <span style={{ width: 1, height: 15, background: "var(--brand)" }} />
-      </span>
-      <div style={panelStyle}>
-        <OptionRow label={highlight("碳酸乙烯酯")} hint="EC" />
-        <OptionRow label={highlight("碳酸二甲酯")} hint="DMC" />
-      </div>
-      <p className="demo-note">输入即时过滤，匹配片段高亮显示。</p>
-    </div>
-  );
+  const [value,setValue] = useState<string[]>([]);
+  return <div style={{maxWidth:320}}><SelectControl label="溶剂" searchable options={[{value:"EC",label:"碳酸乙烯酯",hint:"EC"},{value:"DMC",label:"碳酸二甲酯",hint:"DMC"}]} value={value} onChange={setValue}/></div>;
 }
-
 function ComboboxAllowCreate() {
-  return (
-    <div className="demo-stack" style={{ maxWidth: 300 }}>
-      <span style={{ ...triggerBase, height: 37, padding: "0 10px" }}>
-        <span style={{ color: "var(--text)" }}>碳酸亚乙烯酯</span>
-      </span>
-      <div style={panelStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", color: "var(--brand)", background: "var(--brand-soft)", cursor: "pointer", fontWeight: 600 }}>
-          <Plus size={14} />
-          <span>创建：碳酸亚乙烯酯</span>
-        </div>
-        <OptionRow label="碳酸乙烯酯" hint="已有相似项" />
-      </div>
-      <p className="demo-note">无匹配时首项固定为创建入口；已有相似项前置提示，避免重复数据。</p>
-    </div>
-  );
+  const [value,setValue] = useState<string[]>([]);
+  const [options,setOptions] = useState([{value:"EC",label:"碳酸乙烯酯"}]);
+  return <div className="demo-stack" style={{maxWidth:320}}><SelectControl label="溶剂名称" searchable allowCreate options={options} value={value} onChange={next=>{setValue(next);if(next[0]&&!options.some(o=>o.value===next[0]))setOptions([...options,{value:next[0],label:next[0]}]);}}/><p className="demo-note">无匹配时可创建新的示例选项；已有选项可继续搜索。</p></div>;
 }
-
 function ComboboxBusiness() {
-  return (
-    <div className="demo-stack" style={{ maxWidth: 320 }}>
-      <span style={{ ...triggerBase, height: 37, padding: "0 10px" }}>
-        <span style={{ color: "var(--text)" }}>恒温箱</span>
-      </span>
-      <div style={panelStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px" }}>
-          <span style={{ flex: 1 }}>恒温箱 07</span>
-          <span className="status-badge badge-success"><span className="badge-dot" />可用</span>
-          <Check size={14} style={{ color: "var(--brand)" }} />
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", color: "var(--faint)", cursor: "not-allowed" }}>
-          <span style={{ flex: 1 }}>恒温箱 09</span>
-          <span className="status-badge badge-neutral">维护中</span>
-        </div>
-      </div>
-      <p className="demo-note">选项带状态副信息；不可用仪器禁用并注明原因。</p>
-    </div>
-  );
+  const [value,setValue] = useState(["oven-07"]);
+  return <div className="demo-stack" style={{maxWidth:340}}><SelectControl label="预约仪器" searchable options={[{value:"oven-07",label:"恒温箱 07",hint:"可用"},{value:"oven-09",label:"恒温箱 09",hint:"维护中",disabled:true}]} value={value} onChange={setValue}/><p className="demo-note">不可用仪器保留原因，键盘选择时跳过。</p></div>;
 }
 
 /* ---------- DatePicker ---------- */
@@ -658,8 +508,8 @@ function CheckboxBasic() {
   return (
     <div className="demo-stack" style={{ gap: 10 }}>
       {items.map((item, index) => (
-        <label key={item} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer" }} onClick={() => setChecked((list) => list.map((value, i) => (i === index ? !value : value)))}>
-          <CheckboxBox state={checked[index] ? "on" : "off"} />
+        <label key={item} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
+          <CheckboxBox state={checked[index] ? "on" : "off"} onChange={() => setChecked(list => list.map((value,i) => i === index ? !value : value))} />
           <span>{item}</span>
         </label>
       ))}
@@ -675,14 +525,14 @@ function CheckboxIndeterminate() {
   const parentState = selectedCount === 0 ? "off" : selectedCount === children.length ? "on" : "mixed";
   return (
     <div className="demo-stack" style={{ gap: 10 }}>
-      <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 700, cursor: "pointer" }} onClick={() => setChecked(checked.map(() => selectedCount !== children.length))}>
-        <CheckboxBox state={parentState} />
+      <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+        <CheckboxBox state={parentState} onChange={() => setChecked(checked.map(() => selectedCount !== children.length))} />
         <span>全选（已选 {selectedCount} / {children.length}）</span>
       </label>
       <div style={{ display: "grid", gap: 10, paddingLeft: 23 }}>
         {children.map((child, index) => (
-          <label key={child} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer" }} onClick={() => setChecked((list) => list.map((value, i) => (i === index ? !value : value)))}>
-            <CheckboxBox state={checked[index] ? "on" : "off"} />
+          <label key={child} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
+            <CheckboxBox state={checked[index] ? "on" : "off"} onChange={() => setChecked(list => list.map((value,i) => i === index ? !value : value))} />
             <span className="mono">{child}</span>
           </label>
         ))}
@@ -703,12 +553,10 @@ function CheckboxBusiness() {
   return (
     <div className="demo-stack" style={{ maxWidth: 420 }}>
       {datasets.map((dataset) => (
-        <label key={dataset.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", border: "1px solid var(--line)", borderRadius: 10, cursor: "pointer", fontSize: 12 }}>
-          <span onClick={(event) => { event.preventDefault(); toggle(dataset.id); }} style={{ display: "inline-flex" }}>
-            <CheckboxBox state={selected.includes(dataset.id) ? "on" : "off"} />
-          </span>
+        <label key={dataset.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", border: "1px solid var(--line)", borderRadius: 10, cursor: "pointer", fontSize: 14 }}>
+          <CheckboxBox state={selected.includes(dataset.id) ? "on" : "off"} onChange={() => toggle(dataset.id)} />
           <span style={{ flex: 1, minWidth: 0 }}>
-            <strong style={{ display: "block", fontSize: 12 }}>{dataset.name}</strong>
+            <strong style={{ display: "block", fontSize: 14 }}>{dataset.name}</strong>
             <span className="mono" style={{ color: "var(--faint)" }}>{dataset.id}</span>
           </span>
         </label>
@@ -729,12 +577,13 @@ function RadioBasic() {
   const options = ["全部", "运行中", "已完成"];
   const [value, setValue] = useState("all");
   const keys = ["all", "running", "finished"];
+  const groupName = useId();
   return (
     <div className="demo-stack" style={{ gap: 10 }}>
       <div role="radiogroup" aria-label="任务状态" className="demo-row">
         {options.map((option, index) => (
-          <label key={option} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, cursor: "pointer" }} onClick={() => setValue(keys[index])}>
-            <RadioDot on={value === keys[index]} />
+          <label key={option} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, cursor: "pointer" }}>
+            <input type="radio" name={groupName} value={keys[index]} checked={value === keys[index]} onChange={() => setValue(keys[index])} />
             <span>{option}</span>
           </label>
         ))}
@@ -749,13 +598,9 @@ const modeCards = [
   { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 消耗额度" },
 ];
 
-function RadioCard({ option, selected, disabled, onSelect }: { option: { value: string; label: string; description: string }; selected: boolean; disabled?: boolean; onSelect?: () => void }) {
+function RadioCard({ option, selected, disabled, onSelect, name }: {name:string; option: { value: string; label: string; description: string }; selected: boolean; disabled?: boolean; onSelect?: () => void }) {
   return (
-    <div
-      role="radio"
-      aria-checked={selected}
-      aria-disabled={disabled || undefined}
-      onClick={disabled ? undefined : onSelect}
+    <label
       style={{
         display: "flex",
         gap: 10,
@@ -768,27 +613,29 @@ function RadioCard({ option, selected, disabled, onSelect }: { option: { value: 
         opacity: disabled ? 0.55 : 1,
       }}
     >
-      <RadioDot on={selected} />
+      <input type="radio" name={name} value={option.value} checked={selected} disabled={disabled} onChange={onSelect}/>
       <span style={{ minWidth: 0 }}>
-        <strong style={{ display: "block", fontSize: 12 }}>{option.label}</strong>
-        <span style={{ color: "var(--muted)", fontSize: 11 }}>{option.description}</span>
+        <strong style={{ display: "block", fontSize: 14 }}>{option.label}</strong>
+        <span style={{ color: "var(--muted)", fontSize: 12 }}>{option.description}</span>
       </span>
-    </div>
+    </label>
   );
 }
 
 function RadioCardOptions() {
+  const groupName = useId();
   const [value, setValue] = useState("fast");
   return (
     <div className="demo-grid-2" role="radiogroup" aria-label="计算模式">
       {modeCards.map((option) => (
-        <RadioCard key={option.value} option={option} selected={value === option.value} onSelect={() => setValue(option.value)} />
+        <RadioCard name={groupName} key={option.value} option={option} selected={value === option.value} onSelect={() => setValue(option.value)} />
       ))}
     </div>
   );
 }
 
 function RadioBusiness() {
+  const groupName = useId();
   const options = [
     ...modeCards.map((option) => ({
       ...option,
@@ -801,7 +648,7 @@ function RadioBusiness() {
     <div className="demo-stack">
       <div className="demo-grid-2" role="radiogroup" aria-label="计算模式">
         {options.map((option) => (
-          <RadioCard key={option.value} option={option} selected={value === option.value} disabled={option.value === "ultra"} onSelect={() => setValue(option.value)} />
+          <RadioCard name={groupName} key={option.value} option={option} selected={value === option.value} disabled={option.value === "ultra"} onSelect={() => setValue(option.value)} />
         ))}
       </div>
       <p className="demo-note">有代价的档位写明代价；无权限档位禁用并注明，不隐藏。</p>
@@ -816,11 +663,11 @@ function SwitchBasic() {
   const [autoSave, setAutoSave] = useState(false);
   return (
     <div className="demo-stack" style={{ gap: 12 }}>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12, cursor: "pointer" }}>
+      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, cursor: "pointer" }}>
         <SwitchTrack on={mail} label="邮件通知" onToggle={() => setMail((value) => !value)} />
         <span>邮件通知</span>
       </label>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12, cursor: "pointer" }}>
+      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, cursor: "pointer" }}>
         <SwitchTrack on={autoSave} label="自动保存" onToggle={() => setAutoSave((value) => !value)} />
         <span>自动保存</span>
       </label>
@@ -853,21 +700,21 @@ function SwitchStates() {
   };
   return (
     <div className="demo-stack" style={{ gap: 12 }}>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12 }}>
+      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
         <SwitchTrack on={syncOn} loading={syncPending} label="远程同步" onToggle={toggleSync} />
         <span>远程同步{syncPending && <span style={{ color: "var(--muted)" }}>（写入中…）</span>}</span>
       </label>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12 }}>
+      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
         <SwitchTrack on={shareOn} loading={sharePending} label="团队共享" onToggle={toggleShare} />
         <span>团队共享（演示失败回滚）</span>
         {failed && (
-          <span role="alert" style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--red)", fontSize: 11 }}>
+          <span role="alert" style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--red)", fontSize: 12 }}>
             <AlertCircle size={12} />
             保存失败，已回滚
           </span>
         )}
       </label>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12, color: "var(--muted)" }}>
+      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--muted)" }}>
         <SwitchTrack on={false} disabled label="数据分析" />
         <span>数据分析（需管理员开启）</span>
       </label>
@@ -883,7 +730,7 @@ function SwitchBusiness() {
       <div className="card-demo" style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
         <SwitchTrack on={on} label="任务自动刷新" onToggle={() => setOn((value) => !value)} />
         <div style={{ minWidth: 0 }}>
-          <strong style={{ fontSize: 13 }}>任务自动刷新</strong>
+          <strong style={{ fontSize: 14 }}>任务自动刷新</strong>
           <p>开启后每 30 秒刷新 <span className="mono">run-28003</span> 的状态，关闭即停止，无需任何提交动作。</p>
         </div>
       </div>
@@ -930,7 +777,7 @@ function FormValidation() {
             inputMode="decimal"
             onChange={(event) => setValue(event.target.value)}
           />
-          <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "var(--faint)", fontSize: 11, fontWeight: 400 }}>mg</span>
+          <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "var(--faint)", fontSize: 12, fontWeight: 400 }}>mg</span>
         </span>
         {invalid ? (
           <small role="alert">质量需在 0–500 mg 之间{value.trim() !== "" && !Number.isNaN(num) ? `，当前为 ${value} mg` : ""}。</small>
@@ -1007,8 +854,8 @@ function UploadBasic() {
         }}
       >
         <Upload size={18} style={{ color: "var(--brand)" }} />
-        <strong style={{ fontSize: 13 }}>拖拽文件到此处，或点击选择</strong>
-        <span style={{ color: "var(--muted)", fontSize: 11 }}>支持 .csv / .xlsx，单个 ≤ 50 MB · 示例文件：example.com/templates/battery.csv</span>
+        <strong style={{ fontSize: 14 }}>拖拽文件到此处，或点击选择</strong>
+        <span style={{ color: "var(--muted)", fontSize: 12 }}>支持 .csv / .xlsx，单个 ≤ 50 MB · 示例文件：example.com/templates/battery.csv</span>
       </div>
       <p className="demo-note">接受的格式与大小上限前置写在区域内；不符在选择时即拒绝。</p>
     </div>
@@ -1018,10 +865,10 @@ function UploadBasic() {
 function UploadProgress() {
   return (
     <div className="demo-stack" style={{ maxWidth: 480 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "1px solid var(--line)", borderRadius: 10, fontSize: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "1px solid var(--line)", borderRadius: 10, fontSize: 14 }}>
         <FileText size={15} style={{ color: "var(--brand)", flex: "0 0 auto" }} />
         <span style={{ flex: 1, minWidth: 0 }}>
-          <strong style={{ display: "block", fontSize: 12 }}>cycle_data_20260901.csv</strong>
+          <strong style={{ display: "block", fontSize: 14 }}>cycle_data_20260901.csv</strong>
           <span style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5 }}>
             <span style={{ flex: 1, height: 5, borderRadius: 999, background: "var(--surface-soft)", overflow: "hidden" }}>
               <span role="progressbar" aria-valuenow={72} style={{ display: "block", width: "72%", height: "100%", borderRadius: 999, background: "var(--brand)" }} />
@@ -1031,11 +878,11 @@ function UploadProgress() {
         </span>
         <button className="inline-action">取消</button>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "1px solid color-mix(in srgb, var(--red) 30%, var(--line))", borderRadius: 10, fontSize: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "1px solid color-mix(in srgb, var(--red) 30%, var(--line))", borderRadius: 10, fontSize: 14 }}>
         <FileText size={15} style={{ color: "var(--red)", flex: "0 0 auto" }} />
         <span style={{ flex: 1, minWidth: 0 }}>
-          <strong style={{ display: "block", fontSize: 12 }}>notes_final(2).xlsx</strong>
-          <span role="alert" style={{ color: "var(--red)", fontSize: 11 }}>超过 50 MB 上限（61 MB），未开始上传。</span>
+          <strong style={{ display: "block", fontSize: 14 }}>notes_final(2).xlsx</strong>
+          <span role="alert" style={{ color: "var(--red)", fontSize: 12 }}>超过 50 MB 上限（61 MB），未开始上传。</span>
         </span>
         <button className="inline-action">重试</button>
       </div>
@@ -1060,12 +907,12 @@ function UploadBusiness() {
           gap: 10,
           cursor: "pointer",
           background: "var(--surface)",
-          fontSize: 12,
+          fontSize: 14,
         }}
       >
         <Upload size={16} style={{ color: "var(--brand)" }} />
         <strong>导入仪器原始数据</strong>
-        <span style={{ color: "var(--muted)", fontSize: 11 }}>.csv / .xlsx · ≤ 50 MB</span>
+        <span style={{ color: "var(--muted)", fontSize: 12 }}>.csv / .xlsx · ≤ 50 MB</span>
       </div>
       <div className="notice-card notice-green" style={{ marginTop: 0 }}>
         <div className="notice-icon"><FileText size={16} /></div>
@@ -1085,7 +932,7 @@ function SearchFieldBasic() {
     <div className="demo-stack" style={{ alignItems: "flex-start" }}>
       <span style={{ display: "inline-flex", alignItems: "center", gap: 8, height: 37, padding: "0 10px", border: "1px solid var(--line-strong)", borderRadius: 8, background: "var(--surface)", width: 320 }}>
         <Search size={14} style={{ color: "var(--faint)", flex: "0 0 auto" }} />
-        <input type="search" aria-label="搜索数据集" placeholder="搜索数据集名称或编号" style={{ flex: 1, minWidth: 0, border: 0, outline: "none", background: "transparent", color: "var(--text)", fontSize: 12 }} />
+        <input type="search" aria-label="搜索数据集" placeholder="搜索数据集名称或编号" style={{ flex: 1, minWidth: 0, border: 0, outline: "none", background: "transparent", color: "var(--text)", fontSize: 14 }} />
         <kbd>/</kbd>
       </span>
       <p className="demo-note">占位文本写明可搜字段；页面级搜索支持 / 快捷键聚焦。</p>
@@ -1119,8 +966,8 @@ function SearchFieldBusiness() {
       {matched.length > 0 ? (
         <div className="demo-stack" style={{ gap: 6 }}>
           {matched.map((run) => (
-            <div key={run.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "8px 10px", border: "1px solid var(--line)", borderRadius: 8, fontSize: 12 }}>
-              <strong style={{ fontSize: 12 }}>{run.name}</strong>
+            <div key={run.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "8px 10px", border: "1px solid var(--line)", borderRadius: 8, fontSize: 14 }}>
+              <strong style={{ fontSize: 14 }}>{run.name}</strong>
               <span className="mono" style={{ color: "var(--faint)" }}>{run.id}</span>
             </div>
           ))}

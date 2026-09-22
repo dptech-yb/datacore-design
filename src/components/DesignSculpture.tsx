@@ -1,4 +1,4 @@
-import { Rotate3D, SquareStack, X } from "lucide-react";
+import { Rotate3D, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ModelViewerElement } from "@google/model-viewer";
 
@@ -86,6 +86,7 @@ export function DesignSculpture() {
         {viewerState !== "ready" && (
           <img
             className="sculpture-poster"
+            width="1024" height="1024" loading="eager" decoding="async"
             src="./models/modular-form.webp"
             alt="由相同模数单元组成的 DataCore 设计雕塑"
           />
@@ -101,9 +102,6 @@ export function DesignSculpture() {
         )}
       </div>
       <figcaption className="sculpture-caption">
-        <span className="sculpture-kicker"><SquareStack size={14} /> 模数研究 / MODULAR STUDY</span>
-        <strong>相同的单元，更多的组合</strong>
-        <span>以组件化结构为线索的视觉研究，表达规则如何在组合中保持秩序。</span>
         {viewerState !== "ready" && (
           <button className="sculpture-open" type="button" onClick={showViewer} disabled={viewerState === "loading"}>
             <Rotate3D size={15} /> {viewerState === "loading" ? "正在载入" : "探索 3D"}

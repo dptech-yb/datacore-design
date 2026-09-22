@@ -5,12 +5,12 @@ import type { PreviewFn } from "./types";
 function ColorSemantic() {
   return (
     <div className="swatch-grid">
-      <div className="swatch"><div className="swatch-color" style={{ background: "#2563eb" }}><span>#2563eb</span></div><div className="swatch-label">Brand / 动作与链接</div></div>
+      <div className="swatch"><div className="swatch-color" style={{ background: "#2664e8" }}><span>#2664e8</span></div><div className="swatch-label">Brand / 动作与链接</div></div>
       <div className="swatch"><div className="swatch-color" style={{ background: "#058764" }}><span>#058764</span></div><div className="swatch-label">Success / 完成</div></div>
       <div className="swatch"><div className="swatch-color" style={{ background: "#b87308" }}><span>#b87308</span></div><div className="swatch-label">Warning / 待确认</div></div>
       <div className="swatch"><div className="swatch-color" style={{ background: "#c33636" }}><span>#c33636</span></div><div className="swatch-label">Danger / 阻断</div></div>
       <div className="swatch"><div className="swatch-color" style={{ background: "#7253c7" }}><span>#7253c7</span></div><div className="swatch-label">Violet / Agent</div></div>
-      <div className="swatch"><div className="swatch-color" style={{ background: "#f8fafc" }}><span className="swatch-light-label">#f8fafc</span></div><div className="swatch-label">Surface / 页面背景</div></div>
+      <div className="swatch"><div className="swatch-color" style={{ background: "#ffffff" }}><span className="swatch-light-label">#ffffff</span></div><div className="swatch-label">Surface / 页面背景</div></div>
     </div>
   );
 }
@@ -19,15 +19,15 @@ function TypographyHierarchy() {
   return (
     <div className="type-samples">
       <div>
-        <span className="type-label">Display 30/700 · 页面标题</span>
+        <span className="type-label">Display 36/600 · 页面标题</span>
         <div className="type-display">电导率优化看板</div>
       </div>
       <div>
-        <span className="type-label">Heading 20/700 · 区块标题</span>
+        <span className="type-label">Heading 20/600 · 区块标题</span>
         <div className="type-heading">第 3 轮推荐配方</div>
       </div>
       <div>
-        <span className="type-label">Body 14/400 · 正文</span>
+        <span className="type-label">Body 16/400 · 正文</span>
         <div className="type-body">示例项目 project-042 的第 3 轮优化已完成，推荐配方在 25 °C 下的预测电导率为 10.12 mS/cm，请复核后提交实测。</div>
       </div>
       <div>
@@ -94,7 +94,7 @@ function GapMark({ size }: { size: number }) {
   return (
     <div style={{ height: size, display: "flex", alignItems: "center", gap: 8 }} aria-hidden="true">
       <span style={{ flex: 1, borderTop: "1px dashed var(--line-strong)" }} />
-      <span className="mono" style={{ color: "var(--faint)", fontSize: 10 }}>{size}px</span>
+      <span className="mono" style={{ color: "var(--faint)", fontSize: 12 }}>{size}px</span>
       <span style={{ flex: 1, borderTop: "1px dashed var(--line-strong)" }} />
     </div>
   );
@@ -104,7 +104,7 @@ function SpacingRhythm() {
   return (
     <div style={{ display: "grid" }}>
       <div className="demo-row" style={{ justifyContent: "space-between", flexWrap: "nowrap" }}>
-        <strong style={{ fontSize: 14 }}>计算任务</strong>
+        <strong style={{ fontSize: 14.0 }}>计算任务</strong>
         <button className="button button-primary button-sm">新建任务</button>
       </div>
       <GapMark size={24} />
@@ -158,7 +158,7 @@ function IconSizes() {
       {items.map((item) => (
         <div key={item.size} style={{ display: "grid", justifyItems: "center", gap: 6, color: "var(--text)" }}>
           <span style={{ width: 40, height: 40, display: "grid", placeItems: "center", border: "1px dashed var(--line-strong)", borderRadius: 8 }}>{item.icon}</span>
-          <strong className="mono" style={{ fontSize: 11 }}>{item.size}</strong>
+          <strong className="mono" style={{ fontSize: 12 }}>{item.size}</strong>
           <span className="demo-note">{item.use}</span>
         </div>
       ))}
@@ -177,7 +177,7 @@ function IconSemantic() {
     <div className="demo-stack">
       <div className="demo-row" style={{ gap: 18 }}>
         {states.map((state) => (
-          <span key={state.label} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text)" }}>
+          <span key={state.label} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "var(--text)" }}>
             <span style={{ width: 28, height: 28, display: "grid", placeItems: "center", borderRadius: 8, color: state.color, background: state.bg }}>{state.icon}</span>
             {state.label}
           </span>
@@ -213,7 +213,7 @@ function MotionDuration() {
                 borderRadius: 12,
                 background: on ? "var(--brand-soft)" : "var(--surface)",
                 color: "var(--muted)",
-                fontSize: 11,
+                fontSize: 12,
                 transform: on ? "translateY(-6px)" : "translateY(0)",
                 transition: `all ${box.ms}ms ease-out`,
               }}

@@ -60,7 +60,7 @@ function DetailPageStructure() {
         <div className="demo-row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
           <div style={{ display: "grid", gap: 4 }}>
             <div className="demo-row" style={{ gap: 8 }}>
-              <strong style={{ fontSize: 15 }}>示例项目 · 电解液电导率优化</strong>
+              <strong style={{ fontSize: 15.0 }}>示例项目 · 电解液电导率优化</strong>
               <span className="status-badge badge-success"><span className="badge-dot" />进行中</span>
             </div>
             <span className="mono" style={{ color: "var(--faint)" }}>project-042 · 创建于 2026-08-30</span>
@@ -74,8 +74,8 @@ function DetailPageStructure() {
         <div className="demo-grid-2" style={{ gap: 8 }}>
           {fields.map(([label, value]) => (
             <div key={label} style={{ display: "flex", gap: 10, padding: "8px 10px", border: "1px solid var(--line)", borderRadius: 8 }}>
-              <span style={{ flex: "0 0 56px", color: "var(--faint)", fontSize: 11 }}>{label}</span>
-              <span style={{ color: "var(--text)", fontSize: 12 }}>{value}</span>
+              <span style={{ flex: "0 0 56px", color: "var(--faint)", fontSize: 12 }}>{label}</span>
+              <span style={{ color: "var(--text)", fontSize: 14 }}>{value}</span>
             </div>
           ))}
         </div>
@@ -259,7 +259,7 @@ function DataImportPageStructure() {
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 16, border: "1.5px dashed var(--line-strong)", borderRadius: 12, background: "var(--surface)" }}>
         <Upload size={18} style={{ color: "var(--brand)", flex: "0 0 auto" }} />
         <div style={{ minWidth: 0 }}>
-          <strong style={{ fontSize: 13 }}>electrolyte_batch_042.csv</strong>
+          <strong style={{ fontSize: 14 }}>electrolyte_batch_042.csv</strong>
           <p className="demo-note">128 行 · 已解析进入临时区，正式数据集尚未变更</p>
         </div>
         <span className="status-badge badge-info" style={{ marginLeft: "auto" }}><span className="badge-dot" />临时区</span>
