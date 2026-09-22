@@ -22,19 +22,81 @@ DataCore is a data-governance and intelligent-collaboration platform for project
 6. In citations, render a stable citation ID at the fact and link it to a full source item; do not repeat a long source section in the answer body.
 7. Frontend visibility is not authorization. The backend must enforce permissions again.
 
+## Navigation
+
+- Overview: `#/`
+- Foundations: `#/foundations/color`, `#/foundations/typography`, `#/foundations/spacing-layout`, `#/foundations/radius-elevation`, `#/foundations/icons`, `#/foundations/motion`, `#/foundations/responsive`, `#/foundations/accessibility`
+- Components (66): 通用(11) / 布局(4) / 导航(8) / 数据录入(14) / 数据展示(9) / 反馈(5) / 覆盖层(3) / DataCore 专属(12)
+- Patterns: `#/patterns/agent-confirmation`, `#/patterns/data-import`, `#/patterns/citation-source`, `#/patterns/project-permission`, `#/patterns/reservation-scheduling`, `#/patterns/run-status-logs`, `#/patterns/audit-versioning`
+- Templates: `#/templates/list-page`, `#/templates/detail-page`, `#/templates/form-wizard`, `#/templates/task-workbench`, `#/templates/data-import-page`, `#/templates/agent-workspace`
+
 ## Components
 
-- Button: `primary`, `secondary`, `ghost`, `danger`; supports disabled and loading.
-- Field: label, helper text, `aria-invalid`, and inline error.
-- StatusBadge / StatusLine: success, warning, danger, neutral.
-- DataTable: semantic caption and headers, horizontal overflow on narrow screens.
-- Dialog: labelled, modal, Esc/backdrop close, explicit confirmation action.
-- Citation: stable ID in prose plus linked source list.
-
-## Visual artifact
-
-- `DesignSculpture`: modular visual form used only as a homepage visual anchor.
-- Poster: `models/modular-form.webp`; interactive model: `models/modular-form.glb`; editable source: `art/blender/modular-form.blend`.
-- The poster is the default. Load the GLB only after the user chooses “探索 3D”; never auto-rotate, and always keep a static fallback.
+- Button (按钮, stable): 触发一个动作或提交一段意图，是界面里最主要的动作载体。
+- IconButton (图标按钮, stable): 用一个语义明确的图标触发动作，是空间受限或高频场景下的紧凑动作载体。
+- Link (链接, stable): 导航到另一个页面、资源或位置，只负责跳转，不执行动作。
+- Typography (排版, stable): 用固定的字号、字重与语义色层级表达信息结构，保证全站文字可读、可扫、一致。
+- Divider (分割线, stable): 在内容之间建立分组边界，帮助用户区分不同主题或功能区块。
+- Badge (徽标, stable): 用语义色加短文案标记对象的状态或数量，是状态语义的最小载体。
+- Tag (标签, beta): 标记对象的分类、属性或来源，支持关闭与选择，是属性维度的最小载体。
+- Card (卡片, stable): 把同一主题的内容与动作聚合为一个可扫描、可复用的容器。
+- Empty (空状态, beta): 在没有内容可展示时告诉用户发生了什么、是否需要操作、下一步做什么。
+- Skeleton (骨架屏, beta): 在数据到达前按真实内容的布局占位，让加载前后结构一致、不闪烁、不跳动。
+- Result (结果页, beta): 在流程结束或整页异常时给出明确结论、原因说明与后续动作。
+- Layout (页面骨架, stable): 定义应用骨架：侧边导航、顶栏与内容区的固定结构，所有页面共享同一副骨架。
+- Stack (堆叠布局, stable): 沿一个方向（垂直或水平）排列子元素并统一间距，是使用频率最高的局部布局工具。
+- Grid (栅格, stable): 用 12 列栅格组织二维布局，让卡片与统计块在不同断点下保持对齐。
+- Splitter (分栏器, experimental): 把内容区拆成两个可拖拽调整的面板，让用户按任务需要自行分配空间。
+- PageHeader (页头, stable): 页面顶部的标题区：标题、说明、状态与页面级动作，告诉用户当前页面是什么、能做什么。
+- Breadcrumb (面包屑, stable): 展示当前页面在层级中的位置，并提供逐级向上返回的路径。
+- Menu (导航菜单, beta): 应用的侧边导航：组织跨页面的功能入口，并标示当前所在位置。
+- Tabs (标签页, stable): 在同一页面内切换同层级的内容区块，切换后上下文与已输入状态不丢失。
+- Steps (步骤条, beta): 把多阶段流程拆成有序步骤，告诉用户流程进行到哪一步、每一步的结果。
+- Pagination (分页, beta): 把长列表分页，告诉用户总量与当前位置，并允许翻页与调整每页条数。
+- Dropdown (下拉菜单, beta): 把一组低频动作收进触发元素背后的浮层菜单，保持界面清爽。
+- Segmented (分段选择器, beta): 少量互斥选项的即时切换器，选中立即生效，像开关一样轻量。
+- Input (输入框, stable): 收集单行短文本，是表单里最基础的信息录入单元。
+- InputNumber (数字输入框, beta): 录入带范围、步长和精度约束的数值，把非法数字拦在输入阶段。
+- Textarea (多行文本框, beta): 收集多行、较长的自由文本，如实验备注、失败原因、方法描述。
+- Select (选择器, stable): 从一组确定选项中选择单个或多个值，把自由录入变成受控选择。
+- Combobox (组合框, experimental): 在可搜索的选项列表中既可选择已有值，也允许输入并创建新值。
+- DatePicker (日期选择器, beta): 选择单个日期或日期时间，保证格式合法、范围受控。
+- DateRangePicker (日期范围选择器, beta): 选择一个起止时间段，常用于列表筛选与统计区间。
+- Checkbox (复选框, stable): 在一组互不排斥的选项中做多项选择，或确认一个需要显式同意的条款。
+- Radio (单选框, stable): 在少量互斥选项中选择唯一值，所有选项平铺可见。
+- Switch (开关, stable): 切换一个即时生效的二元设置，开 / 关语义一目了然。
+- Form (表单, stable): 组织一组字段的标签、辅助说明、校验与提交，把录入错误拦在提交之前。
+- Upload (上传, beta): 把本地文件送入平台，是数据导入流程的入口；原始文件必须完整保留、可追溯。
+- SearchField (搜索框, beta): 输入关键词即时定位对象，是列表与全局导航的查找入口。
+- FilterBar (筛选栏, beta): 组织列表的筛选条件：常用条件外露，其余收起，已选条件一目了然。
+- Table (表格, stable): 以行列结构展示结构化数据，是列表页与详情页最核心的数据载体。
+- Descriptions (描述列表, stable): 以“标签 + 值”的形式成组展示单条记录的字段，是详情页的标准载体。
+- Statistic (统计数值, beta): 突出展示单个关键数值及其趋势，用于看板与概览区。
+- Timeline (时间线, beta): 按时间顺序展示事件流，表达“发生了什么、进行到哪、接下来是什么”。
+- Tree (树, beta): 以缩进层级展示父子结构数据，支持展开、选择与定位。
+- Collapse (折叠面板, stable): 将次要内容折叠进面板，让页面默认只呈现主线信息。
+- CodeBlock (代码块, beta): 以等宽字体展示代码与命令，支持语法高亮、行号与一键复制。
+- JsonViewer (JSON 查看器, experimental): 以可折叠树展示 JSON 数据，支持按路径展开与复制节点值。
+- FileList (文件列表, beta): 以列表展示文件及其状态，支持预览、下载、删除与上传进度。
+- Alert (警告提示, stable): 在页面或区块内展示需要持续关注的上下文提示，随内容出现，不自动消失。
+- Message (全局提示, beta): 操作完成后的轻量全局反馈，自动出现、自动消失，不打断流程。
+- Notification (通知, beta): 系统侧的异步事件通知，带标题与操作，可停留等待用户处理。
+- Progress (进度条, beta): 展示确定性任务的完成比例，让用户知道还要等多久。
+- Spin (加载中, stable): 表示正在加载但无法量化进度，以内联或遮罩方式表达等待。
+- Modal (对话框, stable): 在当前页面之上展示需要专注处理的内容或确认，阻断对背景的交互。
+- Drawer (抽屉, beta): 从屏幕边缘滑出的辅助面板，承载与当前页强相关的详情或操作，不打断页面上下文。
+- Popconfirm (气泡确认, beta): 在操作元素旁弹出的小型确认气泡，用于轻量、影响范围小的确认。
+- Citation (引用角标, stable): 在正文或 Agent 答复中为关键论断标注来源，并把角标与来源清单联动，让每一条结论都可追溯。
+- SourceCard (来源卡片, beta): 以卡片形式展示一条来源的完整信息：标题、发布方、更新时间与可访问状态，并提供打开原文的入口。
+- AgentActivity (Agent 活动, beta): 实时展示 Agent 当前在做什么：所处步骤、正在调用的工具、以及是否在等待用户确认。
+- RunStatus (运行状态, stable): 用一致的徽章与状态行表达任务生命周期：排队、运行中、成功、失败、部分完成、需重试。
+- ConfirmPanel (确认面板, stable): 在执行产生副作用的动作前，回显目标、范围、项目、预算与副作用，让用户在完整知情下明确确认。
+- ProjectSelector (项目选择器, beta): 选择动作归属的项目，同时展示项目 ID、默认项目标记与当前用户在项目内的权限状态。
+- DatasetPicker (数据集选择器, beta): 按数据集、批次、版本与来源选择计算或分析的输入数据，并让版本与来源显式可见。
+- PermissionScope (权限范围, beta): 用固定四级语义表达权限范围：可见、可编辑、可执行、管理员，并说明每一级能做什么、不能做什么。
+- AuditTimeline (审计时间线, beta): 按时间顺序记录谁在何时对什么做了什么，让每一次变更可追溯、可问责。
+- ExperimentStep (实验步骤, beta): 把一次实验表达为有序的业务节点流：配置、排队、运行、分析、完成，并标记当前节点与失败节点。
+- DataQualityNotice (数据质量提示, experimental): 在数据进入计算前暴露质量问题：缺失、冲突、来源不可靠、待人工确认，并给出每条问题的处理路径。
+- ToolRunCard (工具运行卡片, beta): 展示一次工具调用的完整留痕：工具名、参数摘要、输入输出、耗时与结果状态。
 
 Use `llms-full.txt` for props, states, and implementation examples.

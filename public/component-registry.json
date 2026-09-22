@@ -2,62 +2,5686 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "DataCore Design",
   "version": "0.1.0",
-  "purpose": "Machine-readable UI contracts for DataCore main platform and AION-compatible surfaces.",
-  "artifacts": [
+  "generated": "2026-09-22",
+  "purpose": "Machine-readable UI contracts for the DataCore main platform and AION-compatible surfaces. Synthetic examples only.",
+  "source": "Generated from src/catalog — do not edit by hand.",
+  "categories": [
     {
-      "name": "DesignSculpture",
-      "category": "visual",
-      "purpose": "A modular visual form used as a non-semantic homepage visual anchor.",
-      "poster": "models/modular-form.webp",
-      "model": "models/modular-form.glb",
-      "source": "../art/blender/modular-form.blend",
-      "loadingRule": "Render the poster first; load the interactive model only after an explicit user action.",
-      "accessibility": ["descriptive alt text", "keyboard-accessible controls", "static preview fallback"],
-      "motionRule": "No automatic rotation; user controls the camera and can reset the view."
+      "id": "general",
+      "name": "General",
+      "chineseName": "通用"
+    },
+    {
+      "id": "layout",
+      "name": "Layout",
+      "chineseName": "布局"
+    },
+    {
+      "id": "navigation",
+      "name": "Navigation",
+      "chineseName": "导航"
+    },
+    {
+      "id": "entry",
+      "name": "Data Entry",
+      "chineseName": "数据录入"
+    },
+    {
+      "id": "display",
+      "name": "Data Display",
+      "chineseName": "数据展示"
+    },
+    {
+      "id": "feedback",
+      "name": "Feedback",
+      "chineseName": "反馈"
+    },
+    {
+      "id": "overlay",
+      "name": "Overlay",
+      "chineseName": "覆盖层"
+    },
+    {
+      "id": "datacore",
+      "name": "DataCore",
+      "chineseName": "DataCore 专属"
     }
   ],
   "components": [
     {
+      "id": "dc.button",
       "name": "Button",
-      "category": "action",
-      "variants": ["primary", "secondary", "ghost", "danger"],
-      "states": ["default", "hover", "focus-visible", "pressed", "disabled", "loading"],
-      "requiredProps": ["children"],
-      "sideEffectRule": "compute, write, quota, and external actions require explicit confirmation"
+      "chineseName": "按钮",
+      "category": "general",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "触发一个动作或提交一段意图，是界面里最主要的动作载体。",
+      "usage": "用于立即执行的动作（提交、保存、确认、重试）。跳转页面请用 Link；只有图标没有文字时请用 IconButton；危险且不可逆的动作必须使用 danger 变体并配合确认。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "empty"
+      ],
+      "requiredProps": [
+        "children"
+      ],
+      "props": [
+        {
+          "name": "variant",
+          "type": "\"primary\" | \"secondary\" | \"ghost\" | \"danger\"",
+          "default": "\"secondary\"",
+          "required": false
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\" | \"lg\"",
+          "default": "\"md\"",
+          "required": false
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "icon",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "onClick",
+          "type": "() => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用原生 <button>，不滥用 div。",
+        "loading 时设置 aria-busy=\"true\"。",
+        "图标按钮必须有 aria-label；图文按钮不重复朗读。",
+        "danger 不单独依赖红色表达危险，配合文案或图标。"
+      ],
+      "keyboard": [
+        "Tab 聚焦，焦点顺序与视觉顺序一致。",
+        "Enter / Space 触发点击。",
+        "loading 或 disabled 时仍可获得焦点并读出状态（使用 aria-disabled 而非移除 tabindex 的场景除外）。"
+      ],
+      "examples": [
+        "button/basic",
+        "button/states",
+        "button/sizes",
+        "button/business"
+      ],
+      "page": "#/components/button",
+      "related": [
+        "icon-button",
+        "link",
+        "dropdown",
+        "modal",
+        "confirm-panel"
+      ]
     },
     {
-      "name": "Field",
-      "category": "form",
-      "states": ["default", "focused", "invalid", "disabled", "read-only"],
-      "requiredProps": ["label"],
-      "accessibility": ["visible label", "aria-describedby for helper/error", "aria-invalid on error"]
+      "id": "dc.icon-button",
+      "name": "IconButton",
+      "chineseName": "图标按钮",
+      "category": "general",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "用一个语义明确的图标触发动作，是空间受限或高频场景下的紧凑动作载体。",
+      "usage": "用于工具栏、卡片角落、表格行内的高频动作（关闭、复制、刷新、更多）。图标含义必须已被约定俗成；含义不直观或低频的动作必须使用带文案的 Button，跳转用 Link。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "empty",
+        "error"
+      ],
+      "requiredProps": [
+        "icon",
+        "label"
+      ],
+      "props": [
+        {
+          "name": "icon",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "variant",
+          "type": "\"ghost\" | \"secondary\" | \"danger\"",
+          "default": "\"ghost\"",
+          "required": false
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\"",
+          "default": "\"md\"",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onClick",
+          "type": "() => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用原生 <button>，aria-label 等于 label。",
+        "图标本身 aria-hidden，朗读只读动作名称。",
+        "disabled 使用 aria-disabled 保留焦点与 Tooltip 入口。",
+        "danger 不只依赖红色，动作名称必须写清后果（“删除数据集”而非“删除”）。"
+      ],
+      "keyboard": [
+        "Tab 聚焦，焦点顺序与视觉顺序一致。",
+        "Enter / Space 触发动作。",
+        "Esc 关闭由按钮打开的浮层后，焦点回到按钮本身。"
+      ],
+      "examples": [
+        "icon-button/basic",
+        "icon-button/states",
+        "icon-button/sizes",
+        "icon-button/business"
+      ],
+      "page": "#/components/icon-button",
+      "related": [
+        "button",
+        "dropdown",
+        "link",
+        "modal"
+      ]
     },
     {
-      "name": "StatusLine",
+      "id": "dc.link",
+      "name": "Link",
+      "chineseName": "链接",
+      "category": "general",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "导航到另一个页面、资源或位置，只负责跳转，不执行动作。",
+      "usage": "用于页面跳转、打开详情、访问外部文档。提交、保存、删除等动作用 Button；当前位置导航用 Breadcrumb；主导航用 Menu。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "loading",
+        "empty"
+      ],
+      "requiredProps": [
+        "href",
+        "children"
+      ],
+      "props": [
+        {
+          "name": "href",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "external",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "variant",
+          "type": "\"default\" | \"muted\" | \"danger\"",
+          "default": "\"default\"",
+          "required": false
+        },
+        {
+          "name": "icon",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true
+        }
+      ],
+      "accessibility": [
+        "使用原生 <a href>，不用 onClick + div 模拟。",
+        "外链附加 rel=noopener noreferrer 与视觉外链图标。",
+        "链接文案脱离上下文也可读懂去向，不写“点击这里”“更多”。"
+      ],
+      "keyboard": [
+        "Tab 聚焦，Enter 触发跳转。",
+        "外链聚焦时读屏器朗读“在新窗口打开”。"
+      ],
+      "examples": [
+        "link/basic",
+        "link/variants",
+        "link/business"
+      ],
+      "page": "#/components/link",
+      "related": [
+        "button",
+        "breadcrumb",
+        "menu",
+        "typography"
+      ]
+    },
+    {
+      "id": "dc.typography",
+      "name": "Typography",
+      "chineseName": "排版",
+      "category": "general",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "用固定的字号、字重与语义色层级表达信息结构，保证全站文字可读、可扫、一致。",
+      "usage": "用于标题、正文、辅助说明、ID 与数值的展示。需要表达状态用 Badge；大段代码用 CodeBlock；不要用手写字号的方式伪造层级。",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled"
+      ],
+      "requiredProps": [
+        "children"
+      ],
+      "props": [
+        {
+          "name": "variant",
+          "type": "\"display\" | \"heading\" | \"body\" | \"label\" | \"mono\"",
+          "default": "\"body\"",
+          "required": false
+        },
+        {
+          "name": "type",
+          "type": "\"default\" | \"secondary\" | \"success\" | \"warning\" | \"danger\" | \"violet\"",
+          "default": "\"default\"",
+          "required": false
+        },
+        {
+          "name": "ellipsis",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "as",
+          "type": "\"h1\" | \"h2\" | \"h3\" | \"h4\" | \"p\" | \"span\"",
+          "required": false
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true
+        }
+      ],
+      "accessibility": [
+        "标题使用真实 h1–h4 标签，层级不跳级。",
+        "正文字号不小于 13px，对比度 ≥ 4.5:1。",
+        "状态文本不只依赖颜色，配合措辞或图标。"
+      ],
+      "keyboard": [
+        "不适用：静态文本无键盘行为；复制 ID 通过相邻 IconButton 触发。",
+        "截断展开的入口必须是可聚焦的按钮，不绑定在文本本身。"
+      ],
+      "examples": [
+        "typography/basic",
+        "typography/variants",
+        "typography/business"
+      ],
+      "page": "#/components/typography",
+      "related": [
+        "divider",
+        "badge",
+        "code-block",
+        "empty",
+        "card"
+      ]
+    },
+    {
+      "id": "dc.divider",
+      "name": "Divider",
+      "chineseName": "分割线",
+      "category": "general",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "在内容之间建立分组边界，帮助用户区分不同主题或功能区块。",
+      "usage": "用于分隔段落、卡片内功能分区、工具栏按钮分组。能用间距（≥24px）表达分组时不加线；列表行之间使用行分隔线，不逐行插 Divider。",
+      "states": [
+        "default",
+        "empty",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "error",
+        "permission-limited"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "orientation",
+          "type": "\"horizontal\" | \"vertical\"",
+          "default": "\"horizontal\"",
+          "required": false
+        },
+        {
+          "name": "dashed",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "textPosition",
+          "type": "\"start\" | \"center\" | \"end\"",
+          "default": "\"center\"",
+          "required": false
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用 <hr> 或 role=\"separator\"，aria-orientation 与方向一致。",
+        "纯装饰分割线标记 aria-hidden。"
+      ],
+      "keyboard": [
+        "不适用：分割线不进入 Tab 序列。",
+        "带文字分割线的文字是静态文本，不绑定快捷键。"
+      ],
+      "examples": [
+        "divider/basic",
+        "divider/variants",
+        "divider/business"
+      ],
+      "page": "#/components/divider",
+      "related": [
+        "typography",
+        "card",
+        "layout",
+        "stack"
+      ]
+    },
+    {
+      "id": "dc.badge",
+      "name": "Badge",
+      "chineseName": "徽标",
+      "category": "general",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "用语义色加短文案标记对象的状态或数量，是状态语义的最小载体。",
+      "usage": "用于表格状态列、任务与运行状态、通知计数。分类与属性用 Tag；需要整段说明的状态用 Alert；可点击的筛选条件用 Tag 或 FilterBar。",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "status",
+          "type": "\"success\" | \"warning\" | \"danger\" | \"info\" | \"violet\" | \"neutral\"",
+          "default": "\"neutral\"",
+          "required": false
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "dot",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "max",
+          "type": "number",
+          "default": "99",
+          "required": false
+        },
+        {
+          "name": "pulse",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "状态不只依赖颜色：dot/颜色之外必须有文案或图标。",
+        "count 徽标提供 aria-label，如“8 条未读通知”。",
+        "pulse 动效遵守 prefers-reduced-motion，降级为静态样式。"
+      ],
+      "keyboard": [
+        "不适用：徽标不进入 Tab 序列。",
+        "count 徽标的入口（如通知中心）由相邻 IconButton 承载键盘行为。"
+      ],
+      "examples": [
+        "badge/basic",
+        "badge/variants",
+        "badge/business"
+      ],
+      "page": "#/components/badge",
+      "related": [
+        "tag",
+        "alert",
+        "table",
+        "run-status",
+        "message"
+      ]
+    },
+    {
+      "id": "dc.tag",
+      "name": "Tag",
+      "chineseName": "标签",
+      "category": "general",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "标记对象的分类、属性或来源，支持关闭与选择，是属性维度的最小载体。",
+      "usage": "用于数据集属性、筛选条件的已选值、用户自定义分类。状态（已完成/失败）用 Badge，不用 Tag；大量选项的管理用 Select。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "loading",
+        "empty",
+        "error"
+      ],
+      "requiredProps": [
+        "children"
+      ],
+      "props": [
+        {
+          "name": "color",
+          "type": "\"default\" | \"info\" | \"success\" | \"warning\" | \"danger\" | \"violet\"",
+          "default": "\"default\"",
+          "required": false
+        },
+        {
+          "name": "closable",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onClose",
+          "type": "() => void",
+          "required": false
+        },
+        {
+          "name": "checkable",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "checked",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(checked: boolean) => void",
+          "required": false
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true
+        }
+      ],
+      "accessibility": [
+        "checkable 使用 aria-pressed 表达选中态。",
+        "closable 标签的 aria-label 说明关闭对象：移除筛选 状态：进行中。",
+        "选中态不只依赖颜色，配合字重或边框变化。"
+      ],
+      "keyboard": [
+        "可交互标签进入 Tab 序列；Enter / Space 触发选择或关闭。",
+        "关闭按钮不单独设焦点，整个标签是一个交互单元。"
+      ],
+      "examples": [
+        "tag/basic",
+        "tag/variants",
+        "tag/business"
+      ],
+      "page": "#/components/tag",
+      "related": [
+        "badge",
+        "filter-bar",
+        "select",
+        "dataset-picker"
+      ]
+    },
+    {
+      "id": "dc.card",
+      "name": "Card",
+      "chineseName": "卡片",
+      "category": "general",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "把同一主题的内容与动作聚合为一个可扫描、可复用的容器。",
+      "usage": "用于信息分组、指标卡、入口卡与列表项。整页只有一个主题时不要套卡；卡片内不嵌套卡片，分区用 Divider。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "disabled"
+      ],
+      "requiredProps": [
+        "children"
+      ],
+      "props": [
+        {
+          "name": "title",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "extra",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "hoverable",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "bordered",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "onClick",
+          "type": "() => void",
+          "required": false
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true
+        }
+      ],
+      "accessibility": [
+        "整卡可点使用 <a> 或 role=\"link\" 加 aria-label，不用裸 div onClick。",
+        "标题使用真实标题标签（h3/h4），不跳级。",
+        "loading 时设置 aria-busy=\"true\"。"
+      ],
+      "keyboard": [
+        "hoverable 卡片进入 Tab 序列，Enter 触发 onClick。",
+        "卡内动作的焦点顺序先内容后操作，与视觉顺序一致。"
+      ],
+      "examples": [
+        "card/basic",
+        "card/variants",
+        "card/business"
+      ],
+      "page": "#/components/card",
+      "related": [
+        "empty",
+        "skeleton",
+        "statistic",
+        "divider",
+        "button"
+      ]
+    },
+    {
+      "id": "dc.empty",
+      "name": "Empty",
+      "chineseName": "空状态",
+      "category": "general",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "在没有内容可展示时告诉用户发生了什么、是否需要操作、下一步做什么。",
+      "usage": "用于列表无数据、筛选无结果、未选择对象等场景。错误导致的无内容用 Result 或 Alert；加载中用 Skeleton；无权限用 Result（403）。",
+      "states": [
+        "default",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading"
+      ],
+      "requiredProps": [
+        "title"
+      ],
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "action",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "variant",
+          "type": "\"no-data\" | \"no-result\"",
+          "default": "\"no-data\"",
+          "required": false
+        },
+        {
+          "name": "size",
+          "type": "\"md\" | \"sm\"",
+          "default": "\"md\"",
+          "required": false
+        },
+        {
+          "name": "image",
+          "type": "ReactNode",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "插画 aria-hidden，信息由标题与说明文本承载。",
+        "标题使用描述性文本，不只显示图标或插画。"
+      ],
+      "keyboard": [
+        "action 按钮正常进入 Tab 序列。",
+        "空状态容器不接收焦点，屏幕阅读器以文本朗读标题与说明。"
+      ],
+      "examples": [
+        "empty/basic",
+        "empty/variants",
+        "empty/business"
+      ],
+      "page": "#/components/empty",
+      "related": [
+        "result",
+        "skeleton",
+        "button",
+        "table",
+        "card"
+      ]
+    },
+    {
+      "id": "dc.skeleton",
+      "name": "Skeleton",
+      "chineseName": "骨架屏",
+      "category": "general",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "在数据到达前按真实内容的布局占位，让加载前后结构一致、不闪烁、不跳动。",
+      "usage": "用于首屏加载与区块级加载（表格、卡片、详情）。超过 10 秒的长任务用 Progress + 日志反馈进度；局部刷新保留旧数据并配合 Spin，不用骨架屏整区替换。",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled"
+      ],
+      "requiredProps": [
+        "loading"
+      ],
+      "props": [
+        {
+          "name": "loading",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "variant",
+          "type": "\"text\" | \"table\" | \"card\"",
+          "default": "\"text\"",
+          "required": false
+        },
+        {
+          "name": "rows",
+          "type": "number",
+          "default": "3",
+          "required": false
+        },
+        {
+          "name": "avatar",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "骨架容器设置 aria-busy=\"true\"，并对读屏器隐藏占位条。",
+        "呼吸动效遵守 prefers-reduced-motion，降级为静态占位。",
+        "不用骨架屏代替进度提示：长任务必须可读地反馈进度。"
+      ],
+      "keyboard": [
+        "不适用：骨架屏不进入 Tab 序列；加载完成后焦点位置保持不丢。",
+        "加载过程的焦点管理由所在页面负责，骨架自身不抢焦点。"
+      ],
+      "examples": [
+        "skeleton/basic",
+        "skeleton/variants",
+        "skeleton/business"
+      ],
+      "page": "#/components/skeleton",
+      "related": [
+        "spin",
+        "progress",
+        "empty",
+        "card",
+        "table"
+      ]
+    },
+    {
+      "id": "dc.result",
+      "name": "Result",
+      "chineseName": "结果页",
+      "category": "general",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "在流程结束或整页异常时给出明确结论、原因说明与后续动作。",
+      "usage": "用于提交成功、整页错误、404、403 等页面级结论。局部错误用 Alert 或 Message；无数据用 Empty；流程中的状态用 Badge 或 RunStatus。",
+      "states": [
+        "default",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "empty"
+      ],
+      "requiredProps": [
+        "status",
+        "title"
+      ],
+      "props": [
+        {
+          "name": "status",
+          "type": "\"success\" | \"info\" | \"warning\" | \"danger\" | \"404\" | \"403\"",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "actions",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "extra",
+          "type": "ReactNode",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "图标 aria-hidden，结论由标题文本承载。",
+        "使用 role=\"status\"（成功/提示）或 role=\"alert\"（失败）向读屏器宣告。",
+        "不只用颜色与图标表达结论，标题必须写清结果。"
+      ],
+      "keyboard": [
+        "动作按钮按视觉顺序进入 Tab 序列。",
+        "页面加载完成焦点落在结果标题（tabindex=-1），Esc 不关闭结果页。"
+      ],
+      "examples": [
+        "result/basic",
+        "result/variants",
+        "result/business"
+      ],
+      "page": "#/components/result",
+      "related": [
+        "empty",
+        "alert",
+        "button",
+        "message",
+        "progress"
+      ]
+    },
+    {
+      "id": "dc.layout",
+      "name": "Layout",
+      "chineseName": "页面骨架",
+      "category": "layout",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "定义应用骨架：侧边导航、顶栏与内容区的固定结构，所有页面共享同一副骨架。",
+      "usage": "用于平台级页面框架，每个页面只出现一次。页面内部的区块排列用 Stack 或 Grid；内容区需要可拖拽分栏时用 Splitter；弹窗、抽屉和卡片内部不要再嵌套一层 Layout。",
+      "states": [
+        "default",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "empty"
+      ],
+      "requiredProps": [
+        "children"
+      ],
+      "props": [
+        {
+          "name": "sider",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "header",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "contentWidth",
+          "type": "\"narrow\" | \"wide\" | \"full\"",
+          "default": "\"wide\"",
+          "required": false
+        },
+        {
+          "name": "siderCollapsible",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true
+        }
+      ],
+      "accessibility": [
+        "使用 <nav>、<header>、<main> 语义标签，每页有且只有一个 <main>。",
+        "侧边栏抽屉的触发按钮设置 aria-expanded，打开后焦点进入抽屉。"
+      ],
+      "keyboard": [
+        "提供跳转主内容的 skip link，键盘用户可跳过整段导航。",
+        "侧边栏抽屉打开时 Esc 关闭，并把焦点归还给触发按钮。"
+      ],
+      "examples": [
+        "layout/basic",
+        "layout/content-width",
+        "layout/business"
+      ],
+      "page": "#/components/layout",
+      "related": [
+        "menu",
+        "breadcrumb",
+        "page-header",
+        "stack",
+        "grid"
+      ]
+    },
+    {
+      "id": "dc.stack",
+      "name": "Stack",
+      "chineseName": "堆叠布局",
+      "category": "layout",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "沿一个方向（垂直或水平）排列子元素并统一间距，是使用频率最高的局部布局工具。",
+      "usage": "用于表单字段、按钮组、卡片列表等一维排列。二维行列关系用 Grid；需要拖拽调整两个区域的比例用 Splitter；整页骨架用 Layout，不要用 Stack 模拟。",
+      "states": [
+        "default",
+        "empty",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "error",
+        "permission-limited"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "direction",
+          "type": "\"vertical\" | \"horizontal\"",
+          "default": "\"vertical\"",
+          "required": false
+        },
+        {
+          "name": "gap",
+          "type": "number",
+          "default": "12",
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "\"start\" | \"center\" | \"end\" | \"stretch\"",
+          "default": "\"stretch\"",
+          "required": false
+        },
+        {
+          "name": "justify",
+          "type": "\"start\" | \"center\" | \"end\" | \"space-between\"",
+          "default": "\"start\"",
+          "required": false
+        },
+        {
+          "name": "wrap",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "纯视觉容器，不添加 aria 角色；有列表语义时用 <ul>/<li> 而不是 Stack 包 <div>。",
+        "不依靠视觉顺序颠倒 DOM 顺序，读屏顺序与视觉顺序保持一致。"
+      ],
+      "keyboard": [
+        "不改变焦点顺序，子元素的 Tab 顺序与 DOM 顺序一致。",
+        "不拦截任何按键，键盘行为完全由子组件决定。"
+      ],
+      "examples": [
+        "stack/basic",
+        "stack/variants",
+        "stack/business"
+      ],
+      "page": "#/components/stack",
+      "related": [
+        "grid",
+        "layout",
+        "divider",
+        "button",
+        "form"
+      ]
+    },
+    {
+      "id": "dc.grid",
+      "name": "Grid",
+      "chineseName": "栅格",
+      "category": "layout",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "用 12 列栅格组织二维布局，让卡片与统计块在不同断点下保持对齐。",
+      "usage": "用于卡片矩阵、仪表盘统计块、多列表单等二维排列。单一方向的排列用 Stack；整页骨架用 Layout；两个区域间需要拖拽调整用 Splitter。",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled"
+      ],
+      "requiredProps": [
+        "span"
+      ],
+      "props": [
+        {
+          "name": "cols",
+          "type": "number",
+          "default": "12",
+          "required": false
+        },
+        {
+          "name": "gap",
+          "type": "number",
+          "default": "12",
+          "required": false
+        },
+        {
+          "name": "span",
+          "type": "number | { base?: number; md?: number; lg?: number }",
+          "required": true
+        }
+      ],
+      "accessibility": [
+        "卡片矩阵有列表语义时容器用 role=\"list\"、单元格用 role=\"listitem\"。",
+        "不用栅格颠倒视觉与读屏顺序，DOM 顺序即阅读顺序。"
+      ],
+      "keyboard": [
+        "容器不参与焦点顺序，卡片内交互元素按先行后列的顺序 Tab。",
+        "不拦截方向键，键盘行为由单元格内组件决定。"
+      ],
+      "examples": [
+        "grid/basic",
+        "grid/responsive",
+        "grid/business"
+      ],
+      "page": "#/components/grid",
+      "related": [
+        "stack",
+        "layout",
+        "card",
+        "statistic",
+        "skeleton"
+      ]
+    },
+    {
+      "id": "dc.splitter",
+      "name": "Splitter",
+      "chineseName": "分栏器",
+      "category": "layout",
+      "status": "experimental",
+      "version": "0.1.0",
+      "purpose": "把内容区拆成两个可拖拽调整的面板，让用户按任务需要自行分配空间。",
+      "usage": "用于主从结构的双栏场景：任务列表 + 日志详情、编辑器 + 预览。固定比例的布局用 Grid；只做视觉分隔用 Divider；窄屏不要用 Splitter，回退为上下堆叠或 Tabs。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "empty",
+        "error",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "loading",
+        "permission-limited"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "defaultSize",
+          "type": "number | string",
+          "default": "\"50%\"",
+          "required": false
+        },
+        {
+          "name": "min",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "max",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "collapsible",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onResize",
+          "type": "(size: number) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "把手使用 role=\"separator\" 并带 aria-orientation。",
+        "aria-valuenow 实时报告当前比例，读屏可感知拖拽结果。"
+      ],
+      "keyboard": [
+        "把手可聚焦，左右方向键按 10px 步进调整，Shift + 方向键按 50px 步进。",
+        "Home 恢复默认尺寸，End 收起至最小。"
+      ],
+      "examples": [
+        "splitter/basic",
+        "splitter/limits",
+        "splitter/business"
+      ],
+      "page": "#/components/splitter",
+      "related": [
+        "layout",
+        "grid",
+        "divider",
+        "tabs",
+        "drawer"
+      ]
+    },
+    {
+      "id": "dc.page-header",
+      "name": "PageHeader",
+      "chineseName": "页头",
+      "category": "navigation",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "页面顶部的标题区：标题、说明、状态与页面级动作，告诉用户当前页面是什么、能做什么。",
+      "usage": "每个内容页使用一次，位于内容区最上方。弹窗与抽屉内的标题不用 PageHeader；跨页位置用 Breadcrumb 表达。页面级主动作最多一个 primary，其余动作降级为 secondary / ghost 或收入 Dropdown。",
+      "states": [
+        "default",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "pressed",
+        "empty"
+      ],
+      "requiredProps": [
+        "title"
+      ],
+      "props": [
+        {
+          "name": "title",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "breadcrumb",
+          "type": "BreadcrumbItem[]",
+          "required": false
+        },
+        {
+          "name": "tags",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "extra",
+          "type": "ReactNode",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "每页只有一个 h1，且只能出现在 PageHeader。",
+        "状态徽章不只靠颜色区分，必须有文字。"
+      ],
+      "keyboard": [
+        "动作区 Tab 顺序与视觉顺序一致。",
+        "面包屑链接先于动作区获得焦点，与页面信息顺序一致。"
+      ],
+      "examples": [
+        "page-header/basic",
+        "page-header/with-breadcrumb",
+        "page-header/business"
+      ],
+      "page": "#/components/page-header",
+      "related": [
+        "breadcrumb",
+        "button",
+        "dropdown",
+        "badge",
+        "tabs"
+      ]
+    },
+    {
+      "id": "dc.breadcrumb",
+      "name": "Breadcrumb",
+      "chineseName": "面包屑",
+      "category": "navigation",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "展示当前页面在层级中的位置，并提供逐级向上返回的路径。",
+      "usage": "用于两层以上的层级页面（项目 → 数据集 → 任务详情）。同级内容切换用 Tabs；全局功能入口用 Menu；只有一层时不渲染。当前页永远不可点击。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "empty",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "disabled",
+        "loading",
+        "error"
+      ],
+      "requiredProps": [
+        "items"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "{ title: ReactNode; href?: string }[]",
+          "required": true
+        },
+        {
+          "name": "maxItems",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "separator",
+          "type": "ReactNode",
+          "default": "\"/\"",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "外层用 <nav aria-label=\"面包屑\">，内部用 <ol> 有序列表。",
+        "当前页设置 aria-current=\"page\"，读屏可识别位置。"
+      ],
+      "keyboard": [
+        "Tab 按层级顺序逐个聚焦链接。",
+        "当前页不进入 Tab 序列，用 aria-current 标识。"
+      ],
+      "examples": [
+        "breadcrumb/basic",
+        "breadcrumb/collapsed",
+        "breadcrumb/business"
+      ],
+      "page": "#/components/breadcrumb",
+      "related": [
+        "page-header",
+        "menu",
+        "link",
+        "tabs",
+        "dropdown"
+      ]
+    },
+    {
+      "id": "dc.menu",
+      "name": "Menu",
+      "chineseName": "导航菜单",
+      "category": "navigation",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "应用的侧边导航：组织跨页面的功能入口，并标示当前所在位置。",
+      "usage": "用于全局或项目级导航，点击后切换整个页面（URL 变化、页面内容整体替换）。同页内的内容切换用 Tabs——Menu 决定“去哪一页”，Tabs 决定“这一页里看哪部分”；少量并列视图的即时切换用 Segmented。层级超过两层时配合分组与折叠。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "loading",
+        "empty",
+        "error"
+      ],
+      "requiredProps": [
+        "items",
+        "selectedKey"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "MenuItem[]",
+          "required": true
+        },
+        {
+          "name": "selectedKey",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "collapsed",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onSelect",
+          "type": "(key: string) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "外层 <nav>，列表 role=\"menu\"，项 role=\"menuitem\"。",
+        "当前项设置 aria-current=\"page\"，不只靠颜色区分。"
+      ],
+      "keyboard": [
+        "↑/↓ 在菜单项间移动焦点，Enter 跳转。",
+        "←/→ 折叠或展开当前分组。"
+      ],
+      "examples": [
+        "menu/basic",
+        "menu/groups",
+        "menu/business"
+      ],
+      "page": "#/components/menu",
+      "related": [
+        "tabs",
+        "breadcrumb",
+        "layout",
+        "badge",
+        "dropdown"
+      ]
+    },
+    {
+      "id": "dc.tabs",
+      "name": "Tabs",
+      "chineseName": "标签页",
+      "category": "navigation",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "在同一页面内切换同层级的内容区块，切换后上下文与已输入状态不丢失。",
+      "usage": "用于同一对象的不同方面（任务详情的概览 / 参数 / 日志 / 产物）。跨页面导航用 Menu——Tabs 不换页、URL 可以不变，Menu 整页替换；2–5 个需要即时生效的视图切换可用 Segmented。标签超过一屏时横向滚动，不换行堆叠。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed"
+      ],
+      "requiredProps": [
+        "items",
+        "activeKey"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "{ key: string; label: ReactNode; badge?: ReactNode; disabled?: boolean }[]",
+          "required": true
+        },
+        {
+          "name": "activeKey",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "onChange",
+          "type": "(key: string) => void",
+          "required": false
+        },
+        {
+          "name": "destroyInactive",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "标签条 role=\"tablist\"，标签 role=\"tab\" 并设 aria-selected。",
+        "面板 role=\"tabpanel\"，用 aria-controls 与标签关联。"
+      ],
+      "keyboard": [
+        "←/→ 在标签间移动选中，Home / End 跳到首尾。",
+        "Tab 键从标签条进入当前面板。"
+      ],
+      "examples": [
+        "tabs/basic",
+        "tabs/badges",
+        "tabs/business"
+      ],
+      "page": "#/components/tabs",
+      "related": [
+        "menu",
+        "segmented",
+        "page-header",
+        "badge",
+        "skeleton"
+      ]
+    },
+    {
+      "id": "dc.steps",
+      "name": "Steps",
+      "chineseName": "步骤条",
+      "category": "navigation",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "把多阶段流程拆成有序步骤，告诉用户流程进行到哪一步、每一步的结果。",
+      "usage": "用于有明确先后顺序的流程：数据导入、表单向导、任务流水线。并列内容切换用 Tabs；可以乱序访问的入口用 Menu。步骤数 2–7 为宜；每步只有 wait（等待）/ process（进行）/ finish（完成）/ error（失败）四种状态。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "error",
+        "mobile",
+        "dark-mode",
+        "finish",
+        "process"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "empty",
+        "permission-limited"
+      ],
+      "requiredProps": [
+        "current",
+        "items"
+      ],
+      "props": [
+        {
+          "name": "current",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "items",
+          "type": "{ title: ReactNode; description?: ReactNode; status?: StepStatus }[]",
+          "required": true
+        },
+        {
+          "name": "status",
+          "type": "\"wait\" | \"process\" | \"finish\" | \"error\"",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(step: number) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用 <ol> 有序列表表达步骤顺序。",
+        "当前步骤 aria-current=\"step\"；失败步骤用 aria-describedby 关联原因文本。"
+      ],
+      "keyboard": [
+        "可点击步骤进入 Tab 序列，Enter 跳转。",
+        "未到达步骤不进入 Tab 序列。"
+      ],
+      "examples": [
+        "steps/basic",
+        "steps/states",
+        "steps/business"
+      ],
+      "page": "#/components/steps",
+      "related": [
+        "form",
+        "progress",
+        "button",
+        "alert",
+        "result"
+      ]
+    },
+    {
+      "id": "dc.pagination",
+      "name": "Pagination",
+      "chineseName": "分页",
+      "category": "navigation",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "把长列表分页，告诉用户总量与当前位置，并允许翻页与调整每页条数。",
+      "usage": "用于数据量超过一屏的列表与表格。持续增长的流式数据（实时日志）用“加载更多”或虚拟滚动；总数少于两页时不渲染。翻页必须保留筛选与排序条件。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "permission-limited"
+      ],
+      "requiredProps": [
+        "current",
+        "total"
+      ],
+      "props": [
+        {
+          "name": "current",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "total",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "default": "20",
+          "required": false
+        },
+        {
+          "name": "showTotal",
+          "type": "(total: number) => ReactNode",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(page: number, pageSize: number) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "外层 <nav aria-label=\"分页\">。",
+        "当前页设置 aria-current=\"page\"，省略号不进入 Tab 序列。"
+      ],
+      "keyboard": [
+        "Tab 顺序：上一页 → 页码 → 下一页 → 跳页输入框。",
+        "跳页输入框 Enter 确认，Esc 还原。"
+      ],
+      "examples": [
+        "pagination/basic",
+        "pagination/full",
+        "pagination/business"
+      ],
+      "page": "#/components/pagination",
+      "related": [
+        "table",
+        "filter-bar",
+        "empty",
+        "skeleton",
+        "search-field"
+      ]
+    },
+    {
+      "id": "dc.dropdown",
+      "name": "Dropdown",
+      "chineseName": "下拉菜单",
+      "category": "navigation",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "把一组低频动作收进触发元素背后的浮层菜单，保持界面清爽。",
+      "usage": "用于“更多操作”、用户菜单、带选项的动作按钮。菜单项是页面导航时用 Menu；需要确认的单个动作用 Popconfirm；从选项里选一个值用 Select。菜单项不超过 9 个，超过时先分组，再考虑换交互。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "empty"
+      ],
+      "requiredProps": [
+        "menu",
+        "children"
+      ],
+      "props": [
+        {
+          "name": "menu",
+          "type": "{ items: MenuItem[]; onSelect?: (key: string) => void }",
+          "required": true
+        },
+        {
+          "name": "trigger",
+          "type": "(\"click\" | \"hover\")[]",
+          "default": "[\"click\"]",
+          "required": false
+        },
+        {
+          "name": "placement",
+          "type": "\"bottomLeft\" | \"bottomRight\" | \"topLeft\" | \"topRight\"",
+          "default": "\"bottomLeft\"",
+          "required": false
+        },
+        {
+          "name": "children",
+          "type": "ReactElement",
+          "required": true
+        }
+      ],
+      "accessibility": [
+        "触发器设 aria-haspopup=\"menu\"，打开时 aria-expanded=\"true\"。",
+        "菜单 role=\"menu\"、项 role=\"menuitem\"；危险项不只靠红色，配合文案或图标。"
+      ],
+      "keyboard": [
+        "Enter / Space / ↓ 打开菜单，↑/↓ 在项间移动。",
+        "Esc 关闭并把焦点归还触发器；Home / End 跳到首末项。"
+      ],
+      "examples": [
+        "dropdown/basic",
+        "dropdown/danger",
+        "dropdown/business"
+      ],
+      "page": "#/components/dropdown",
+      "related": [
+        "button",
+        "icon-button",
+        "popconfirm",
+        "menu",
+        "modal"
+      ]
+    },
+    {
+      "id": "dc.segmented",
+      "name": "Segmented",
+      "chineseName": "分段选择器",
+      "category": "navigation",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "少量互斥选项的即时切换器，选中立即生效，像开关一样轻量。",
+      "usage": "用于 2–5 个互斥选项的即时切换：视图（表格 / 卡片）、时间范围、单位。选项更多或需要确认时用 Select 或 Radio；切换整页内容用 Tabs 或 Menu。Segmented 不产生提交动作，选中即应用。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "loading",
+        "empty",
+        "error"
+      ],
+      "requiredProps": [
+        "options",
+        "value"
+      ],
+      "props": [
+        {
+          "name": "options",
+          "type": "(string | { label: ReactNode; value: string; icon?: ReactNode; disabled?: boolean })[]",
+          "required": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string) => void",
+          "required": false
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\"",
+          "default": "\"md\"",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "容器 role=\"radiogroup\"，选项 role=\"radio\" 并设 aria-checked。",
+        "纯图标选项必须有 Tooltip 与 aria-label。"
+      ],
+      "keyboard": [
+        "整组一个 Tab 位（roving tabindex）。",
+        "←/→ 移动选中，选中即生效。"
+      ],
+      "examples": [
+        "segmented/basic",
+        "segmented/sizes",
+        "segmented/business"
+      ],
+      "page": "#/components/segmented",
+      "related": [
+        "tabs",
+        "radio",
+        "select",
+        "switch",
+        "filter-bar"
+      ]
+    },
+    {
+      "id": "dc.input",
+      "name": "Input",
+      "chineseName": "输入框",
+      "category": "entry",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "收集单行短文本，是表单里最基础的信息录入单元。",
+      "usage": "用于名称、编号、简短标识等单行文本。多行内容用 Textarea；纯数值用 InputNumber；从有限选项中选值用 Select；即时过滤查找用 SearchField。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "loading"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "maxLength",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "allowClear",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "prefix",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\" | \"lg\"",
+          "default": "\"md\"",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "必须用 <label htmlFor> 或 aria-label 关联标签，禁止只用 placeholder 当标签。",
+        "错误状态设置 aria-invalid=\"true\"，错误文案 id 通过 aria-describedby 关联。",
+        "maxLength 的计数提示通过 aria-describedby 关联。",
+        "纯装饰的前缀图标设 aria-hidden=\"true\"。"
+      ],
+      "keyboard": [
+        "Tab 进入 / 离开，焦点顺序与视觉顺序一致。",
+        "方向键移动光标；Enter 在单行输入框内默认触发所在 Form 的提交。"
+      ],
+      "examples": [
+        "input/basic",
+        "input/sizes",
+        "input/states",
+        "input/business"
+      ],
+      "page": "#/components/input",
+      "related": [
+        "textarea",
+        "input-number",
+        "search-field",
+        "form"
+      ]
+    },
+    {
+      "id": "dc.input-number",
+      "name": "InputNumber",
+      "chineseName": "数字输入框",
+      "category": "entry",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "录入带范围、步长和精度约束的数值，把非法数字拦在输入阶段。",
+      "usage": "用于质量、浓度、温度、循环次数等数值字段。展示用数字不要用它（用 Statistic）；编号即使全是数字也用 Input，避免丢失前导零。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "loading"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "value",
+          "type": "number | null",
+          "required": false
+        },
+        {
+          "name": "min",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "max",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "step",
+          "type": "number",
+          "default": "1",
+          "required": false
+        },
+        {
+          "name": "precision",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(value: number | null) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用 role=\"spinbutton\" 语义，同步 aria-valuemin / aria-valuemax / aria-valuenow。",
+        "步进按钮提供 aria-label（增加 / 减少），单位包含在可访问名称或 aria-describedby 中。",
+        "错误时 aria-invalid=\"true\"，错误文案 role=\"alert\" 就近播报。"
+      ],
+      "keyboard": [
+        "Tab 聚焦；↑ / ↓ 按 step 增减。",
+        "输入非法字符被忽略；Esc 放弃本次编辑并还原为进入前的值。"
+      ],
+      "examples": [
+        "input-number/basic",
+        "input-number/precision-unit",
+        "input-number/business"
+      ],
+      "page": "#/components/input-number",
+      "related": [
+        "input",
+        "form",
+        "statistic"
+      ]
+    },
+    {
+      "id": "dc.textarea",
+      "name": "Textarea",
+      "chineseName": "多行文本框",
+      "category": "entry",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "收集多行、较长的自由文本，如实验备注、失败原因、方法描述。",
+      "usage": "用于超过一行的描述性内容。单行文本用 Input；结构化字段（日期、数值）用对应控件；代码 / JSON 片段的展示用 CodeBlock。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "loading"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "rows",
+          "type": "number",
+          "default": "3",
+          "required": false
+        },
+        {
+          "name": "maxLength",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "showCount",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "autoSize",
+          "type": "boolean | { minRows: number; maxRows: number }",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "必须用 <label htmlFor> 或 aria-label 关联标签。",
+        "计数通过 aria-describedby 关联，变化不频繁打断读屏。",
+        "错误时 aria-invalid=\"true\"，错误文案 role=\"alert\" 就近播报。"
+      ],
+      "keyboard": [
+        "Enter 换行；Tab 离开控件（不插入制表符）。",
+        "在 Form 中可配置 Cmd / Ctrl + Enter 提交。"
+      ],
+      "examples": [
+        "textarea/basic",
+        "textarea/count-autosize",
+        "textarea/business"
+      ],
+      "page": "#/components/textarea",
+      "related": [
+        "input",
+        "form",
+        "code-block"
+      ]
+    },
+    {
+      "id": "dc.select",
+      "name": "Select",
+      "chineseName": "选择器",
+      "category": "entry",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "从一组确定选项中选择单个或多个值，把自由录入变成受控选择。",
+      "usage": "选项已知且有限时使用（状态、类型、所属项目）。选项量大或允许创建新值用 Combobox；选项 ≤5 且需要一眼看全用 Radio；布尔设置用 Switch。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [],
+      "requiredProps": [
+        "options"
+      ],
+      "props": [
+        {
+          "name": "value",
+          "type": "string | string[]",
+          "required": false
+        },
+        {
+          "name": "options",
+          "type": "{ value: string; label: ReactNode; disabled?: boolean }[]",
+          "required": true
+        },
+        {
+          "name": "mode",
+          "type": "\"single\" | \"multiple\"",
+          "default": "\"single\"",
+          "required": false
+        },
+        {
+          "name": "showSearch",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "allowClear",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string | string[]) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "触发器使用 role=\"combobox\" 并同步 aria-expanded。",
+        "选项列表 role=\"listbox\"，选项 role=\"option\" 并同步 aria-selected。",
+        "多选已选 Tag 的移除按钮提供 aria-label（移除：运行中）。",
+        "空态文案对读屏可读，不只依赖视觉。"
+      ],
+      "keyboard": [
+        "↓ 打开面板，↑ / ↓ 移动高亮，Enter 选中。",
+        "Esc 关闭面板并保留已选；多选时 Space 切换勾选。"
+      ],
+      "examples": [
+        "select/basic",
+        "select/multiple",
+        "select/business"
+      ],
+      "page": "#/components/select",
+      "related": [
+        "combobox",
+        "radio",
+        "dropdown",
+        "form",
+        "tag"
+      ]
+    },
+    {
+      "id": "dc.combobox",
+      "name": "Combobox",
+      "chineseName": "组合框",
+      "category": "entry",
+      "status": "experimental",
+      "version": "0.1.0",
+      "purpose": "在可搜索的选项列表中既可选择已有值，也允许输入并创建新值。",
+      "usage": "选项量大或允许用户扩展时使用：试剂名称、仪器编号、标签。选项固定且少时用 Select；纯自由文本用 Input。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [],
+      "requiredProps": [
+        "options"
+      ],
+      "props": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "options",
+          "type": "{ value: string; label: ReactNode; hint?: string; disabled?: boolean }[]",
+          "required": true
+        },
+        {
+          "name": "allowCreate",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onCreate",
+          "type": "(name: string) => void",
+          "required": false
+        },
+        {
+          "name": "onSearch",
+          "type": "(keyword: string) => void",
+          "required": false
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "emptyText",
+          "type": "ReactNode",
+          "default": "\"无匹配结果\"",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "输入框使用 role=\"combobox\"，同步 aria-expanded 与 aria-controls。",
+        "aria-activedescendant 指向当前高亮项。",
+        "结果数量变化通过 aria-live=\"polite\" 播报。",
+        "创建入口语义清晰：文案为“创建：输入值”，不只依赖加号图标。"
+      ],
+      "keyboard": [
+        "输入字符即搜索；↓ 进入列表，↑ / ↓ 移动高亮。",
+        "Enter 选中高亮项或触发创建；Esc 关闭面板并保留输入。"
+      ],
+      "examples": [
+        "combobox/basic",
+        "combobox/allow-create",
+        "combobox/business"
+      ],
+      "page": "#/components/combobox",
+      "related": [
+        "select",
+        "input",
+        "tag",
+        "form"
+      ]
+    },
+    {
+      "id": "dc.date-picker",
+      "name": "DatePicker",
+      "chineseName": "日期选择器",
+      "category": "entry",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "选择单个日期或日期时间，保证格式合法、范围受控。",
+      "usage": "用于实验日期、截止日、计划开始时间。选择时间段用 DateRangePicker；只按相对时间筛选（最近 7 天）可直接用 FilterBar 的快捷项。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "loading"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "value",
+          "type": "string | null",
+          "required": false
+        },
+        {
+          "name": "showTime",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "disabledDate",
+          "type": "(date: Date) => boolean",
+          "required": false
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "default": "\"YYYY-MM-DD\"",
+          "required": false
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string | null) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "触发器使用 aria-haspopup=\"dialog\" 并同步 aria-expanded。",
+        "日期网格 role=\"grid\"，日期单元同步 aria-selected，禁用日期 aria-disabled=\"true\"。",
+        "手动输入框必须关联标签（预约日期），不能只靠图标。"
+      ],
+      "keyboard": [
+        "Tab 聚焦触发器，Enter / ↓ 打开面板。",
+        "方向键移动日期，PageUp / PageDown 切换月份，Enter 选中，Esc 关闭。"
+      ],
+      "examples": [
+        "date-picker/basic",
+        "date-picker/disabled-date",
+        "date-picker/business"
+      ],
+      "page": "#/components/date-picker",
+      "related": [
+        "date-range-picker",
+        "form",
+        "filter-bar"
+      ]
+    },
+    {
+      "id": "dc.date-range-picker",
+      "name": "DateRangePicker",
+      "chineseName": "日期范围选择器",
+      "category": "entry",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "选择一个起止时间段，常用于列表筛选与统计区间。",
+      "usage": "用于按创建时间筛选任务、导出某区间数据。单日选择用 DatePicker；高频相对区间（最近 7 天）必须提供快捷项，不让用户逐日点选。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "loading"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "value",
+          "type": "[string, string] | null",
+          "required": false
+        },
+        {
+          "name": "presets",
+          "type": "{ label: string; value: [string, string] }[]",
+          "required": false
+        },
+        {
+          "name": "disabledDate",
+          "type": "(date: Date) => boolean",
+          "required": false
+        },
+        {
+          "name": "placeholder",
+          "type": "[string, string]",
+          "default": "[\"开始日期\", \"结束日期\"]",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(value: [string, string] | null) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "开始与结束输入各自拥有标签（开始日期 / 结束日期）。",
+        "区间高亮同时用颜色与文字（已选 22 天）表达，不只依赖颜色。",
+        "快捷项为真实按钮，可 Tab 到达。"
+      ],
+      "keyboard": [
+        "Tab 在开始 / 结束输入间切换，Enter / ↓ 打开面板。",
+        "面板内方向键移动，Enter 确认，Esc 关闭并保留已选。"
+      ],
+      "examples": [
+        "date-range-picker/basic",
+        "date-range-picker/presets",
+        "date-range-picker/business"
+      ],
+      "page": "#/components/date-range-picker",
+      "related": [
+        "date-picker",
+        "filter-bar",
+        "form"
+      ]
+    },
+    {
+      "id": "dc.checkbox",
+      "name": "Checkbox",
+      "chineseName": "复选框",
+      "category": "entry",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "在一组互不排斥的选项中做多项选择，或确认一个需要显式同意的条款。",
+      "usage": "用于多选属性、批量选择行、勾选“我已阅读”。勾选只改变待提交状态，随表单或批量动作一起生效；需要即时生效的布尔设置用 Switch，二者不可混用。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "loading",
+        "empty"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "checked",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "indeterminate",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(checked: boolean) => void",
+          "required": false
+        },
+        {
+          "name": "Checkbox.Group value",
+          "type": "string[]",
+          "required": false
+        },
+        {
+          "name": "Checkbox.Group options",
+          "type": "{ value: string; label: ReactNode; disabled?: boolean }[]",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用原生 input type=\"checkbox\"，半选态同步 aria-checked=\"mixed\"。",
+        "Group 使用 fieldset / legend 或 role=\"group\" + aria-label 表达分组含义。",
+        "必勾选错误时 aria-invalid=\"true\"，错误文案 role=\"alert\" 就近播报。"
+      ],
+      "keyboard": [
+        "Tab 聚焦，焦点顺序与视觉顺序一致。",
+        "Space 切换选中。"
+      ],
+      "examples": [
+        "checkbox/basic",
+        "checkbox/indeterminate",
+        "checkbox/business"
+      ],
+      "page": "#/components/checkbox",
+      "related": [
+        "switch",
+        "radio",
+        "form",
+        "table"
+      ]
+    },
+    {
+      "id": "dc.radio",
+      "name": "Radio",
+      "chineseName": "单选框",
+      "category": "entry",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "在少量互斥选项中选择唯一值，所有选项平铺可见。",
+      "usage": "用于 2–5 个互斥选项且需要一眼看全的场景：计算模式、精度档位。选项多或需节省空间用 Select；布尔设置用 Switch 或 Checkbox。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "loading"
+      ],
+      "requiredProps": [
+        "options"
+      ],
+      "props": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "options",
+          "type": "{ value: string; label: ReactNode; description?: ReactNode; disabled?: boolean }[]",
+          "required": true
+        },
+        {
+          "name": "optionType",
+          "type": "\"default\" | \"card\"",
+          "default": "\"default\"",
+          "required": false
+        },
+        {
+          "name": "defaultValue",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用 role=\"radiogroup\" 表达分组，选项 role=\"radio\" 并同步 aria-checked。",
+        "卡片样式的描述文本通过 aria-describedby 关联到对应选项。",
+        "禁用原因对读屏可读，不只依赖灰化样式。"
+      ],
+      "keyboard": [
+        "Tab 进入组一次，落在当前选中项。",
+        "↑ / ↓ / ← / → 在同组内移动并同时选中。"
+      ],
+      "examples": [
+        "radio/basic",
+        "radio/card-options",
+        "radio/business"
+      ],
+      "page": "#/components/radio",
+      "related": [
+        "select",
+        "checkbox",
+        "switch",
+        "segmented",
+        "form"
+      ]
+    },
+    {
+      "id": "dc.switch",
+      "name": "Switch",
+      "chineseName": "开关",
+      "category": "entry",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "切换一个即时生效的二元设置，开 / 关语义一目了然。",
+      "usage": "用于通知开关、自动刷新、对团队可见等即时生效的设置。需要随表单提交才生效的选择用 Checkbox：这是两者唯一的分工标准。两个非布尔互斥项用 Radio 或 Segmented。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "empty"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "checked",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "aria-label",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(checked: boolean) => void | Promise<void>",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用 role=\"switch\" 并同步 aria-checked。",
+        "必须有可关联标签或 aria-label，说明控制对象。",
+        "状态不只靠颜色：位置与文案双重表达。"
+      ],
+      "keyboard": [
+        "Tab 聚焦。",
+        "Space / Enter 切换。"
+      ],
+      "examples": [
+        "switch/basic",
+        "switch/states",
+        "switch/business"
+      ],
+      "page": "#/components/switch",
+      "related": [
+        "checkbox",
+        "radio",
+        "form",
+        "message"
+      ]
+    },
+    {
+      "id": "dc.form",
+      "name": "Form",
+      "chineseName": "表单",
+      "category": "entry",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "组织一组字段的标签、辅助说明、校验与提交，把录入错误拦在提交之前。",
+      "usage": "任何需要用户录入并提交的场景：新建项目、提交计算任务、修改配置。只读展示用 Descriptions；单字段即时设置（如开关）不需要包一层 Form。",
+      "states": [
+        "default",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "pressed"
+      ],
+      "requiredProps": [
+        "onSubmit",
+        "Form.Item label"
+      ],
+      "props": [
+        {
+          "name": "layout",
+          "type": "\"vertical\" | \"inline\"",
+          "default": "\"vertical\"",
+          "required": false
+        },
+        {
+          "name": "validateTrigger",
+          "type": "\"onBlur\" | \"onChange\" | \"onSubmit\"",
+          "default": "\"onBlur\"",
+          "required": false
+        },
+        {
+          "name": "onSubmit",
+          "type": "(values: Record<string, unknown>) => void | Promise<void>",
+          "required": true
+        },
+        {
+          "name": "Form.Item label",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "Form.Item required",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "Form.Item help",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "Form.Item error",
+          "type": "ReactNode",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "每个控件用 <label htmlFor> 或 aria-labelledby 关联标签。",
+        "出错时控件 aria-invalid=\"true\"，错误文案 role=\"alert\" 并经 aria-describedby 关联。",
+        "必填同时提供视觉星号与 aria-required=\"true\"。",
+        "辅助文本常驻并经 aria-describedby 关联，不塞进 placeholder。"
+      ],
+      "keyboard": [
+        "Tab 按视觉顺序走字段，不错位不跳过。",
+        "Enter 在单行控件内提交表单（多行 Textarea 除外）。",
+        "校验失败后焦点移到首个错误字段。"
+      ],
+      "examples": [
+        "form/basic",
+        "form/validation",
+        "form/business"
+      ],
+      "page": "#/components/form",
+      "related": [
+        "input",
+        "select",
+        "checkbox",
+        "button",
+        "alert"
+      ]
+    },
+    {
+      "id": "dc.upload",
+      "name": "Upload",
+      "chineseName": "上传",
+      "category": "entry",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "把本地文件送入平台，是数据导入流程的入口；原始文件必须完整保留、可追溯。",
+      "usage": "用于导入仪器原始数据（.csv / .txt / .xlsx）与上传附件。粘贴小段文本用 Textarea；选择平台已有数据用 DatasetPicker。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed"
+      ],
+      "requiredProps": [
+        "accept",
+        "maxSize"
+      ],
+      "props": [
+        {
+          "name": "accept",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "maxSize",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "multiple",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "keepOriginal",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "onProgress",
+          "type": "(file: UploadFile, percent: number) => void",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(files: UploadFile[]) => void",
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "上传区使用按钮语义，并经 aria-describedby 指向格式与上限说明。",
+        "进度条使用 role=\"progressbar\" 并同步 aria-valuenow。",
+        "失败原因 role=\"alert\" 就近播报；文件列表每项可朗读名称、大小与状态。"
+      ],
+      "keyboard": [
+        "Tab 聚焦上传区，Enter / Space 打开文件选择。",
+        "文件项的操作（重试、删除、取消）均可 Tab 到达并触发。"
+      ],
+      "examples": [
+        "upload/basic",
+        "upload/progress",
+        "upload/business"
+      ],
+      "page": "#/components/upload",
+      "related": [
+        "file-list",
+        "progress",
+        "dataset-picker",
+        "form",
+        "alert"
+      ]
+    },
+    {
+      "id": "dc.search-field",
+      "name": "SearchField",
+      "chineseName": "搜索框",
+      "category": "entry",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "输入关键词即时定位对象，是列表与全局导航的查找入口。",
+      "usage": "用于按名称 / 编号搜索数据集、任务、项目。枚举条件组合筛选用 FilterBar；精确单字段录入用 Input。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed"
+      ],
+      "requiredProps": [
+        "onSearch"
+      ],
+      "props": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "debounce",
+          "type": "number",
+          "default": "300",
+          "required": false
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "allowClear",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "shortcut",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "onSearch",
+          "type": "(keyword: string) => void",
+          "required": true
+        }
+      ],
+      "accessibility": [
+        "使用 type=\"search\" 或 role=\"searchbox\"，并提供 aria-label。",
+        "结果数量变化通过 aria-live=\"polite\" 播报。",
+        "清除按钮提供 aria-label（清除搜索）。"
+      ],
+      "keyboard": [
+        "/ 聚焦搜索框（页面级场景）。",
+        "Enter 立即搜索；Esc 清空并失焦。",
+        "有建议列表时 ↓ 进入列表，Enter 选中。"
+      ],
+      "examples": [
+        "search-field/basic",
+        "search-field/loading-clear",
+        "search-field/business"
+      ],
+      "page": "#/components/search-field",
+      "related": [
+        "input",
+        "filter-bar",
+        "combobox",
+        "empty"
+      ]
+    },
+    {
+      "id": "dc.filter-bar",
+      "name": "FilterBar",
+      "chineseName": "筛选栏",
+      "category": "entry",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "组织列表的筛选条件：常用条件外露，其余收起，已选条件一目了然。",
+      "usage": "用于任务 / 数据集 / 项目列表顶部。单一关键词查找用 SearchField；筛选只改变查询，不产生任何写操作。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed"
+      ],
+      "requiredProps": [
+        "filters",
+        "value",
+        "onChange"
+      ],
+      "props": [
+        {
+          "name": "filters",
+          "type": "FilterField[]",
+          "required": true
+        },
+        {
+          "name": "value",
+          "type": "Record<string, unknown>",
+          "required": true
+        },
+        {
+          "name": "visibleCount",
+          "type": "number",
+          "default": "3",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(value: Record<string, unknown>) => void",
+          "required": true
+        },
+        {
+          "name": "onReset",
+          "type": "() => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "区域使用 role=\"search\" 或 aria-label=\"筛选条件\"。",
+        "已选 Tag 的移除按钮提供 aria-label（移除筛选：状态 = 运行中）。",
+        "结果计数变化通过 aria-live=\"polite\" 播报。"
+      ],
+      "keyboard": [
+        "Tab 顺序：外露条件 → 更多筛选 → 重置。",
+        "“更多筛选”面板内 Esc 关闭并保留已选条件。"
+      ],
+      "examples": [
+        "filter-bar/basic",
+        "filter-bar/active-filters",
+        "filter-bar/business"
+      ],
+      "page": "#/components/filter-bar",
+      "related": [
+        "search-field",
+        "select",
+        "date-range-picker",
+        "table",
+        "tag"
+      ]
+    },
+    {
+      "id": "dc.table",
+      "name": "Table",
+      "chineseName": "表格",
+      "category": "display",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "以行列结构展示结构化数据，是列表页与详情页最核心的数据载体。",
+      "usage": "用于两条以上、字段结构一致的数据集合。单条记录的字段明细用 Descriptions；单个关键数值用 Statistic；层级数据用 Tree。数据超过一屏必须配合 Pagination 或虚拟滚动，不允许无限长高。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode",
+        "selected"
+      ],
+      "notApplicableStates": [],
+      "requiredProps": [
+        "caption"
+      ],
+      "props": [
+        {
+          "name": "caption",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "rowKey",
+          "type": "string",
+          "default": "\"id\"",
+          "required": false
+        },
+        {
+          "name": "scroll",
+          "type": "{ x?: number | string; y?: number | string }",
+          "required": false
+        },
+        {
+          "name": "stickyFirstColumn",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "empty",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "error",
+          "type": "{ message: string; onRetry?: () => void }",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用原生 table 语义：caption 描述表格范围，th 配 scope=\"col\" / \"row\"。",
+        "排序状态用 aria-sort 标注；加载时容器 aria-busy=\"true\"。",
+        "数字列右对齐、等宽数字，表头与单元格对齐方向一致。",
+        "状态列不只用颜色：Badge 必须同时带文字。"
+      ],
+      "keyboard": [
+        "排序按钮进入 Tab 序列，Enter / Space 切换升序、降序、不排序。",
+        "可点击行聚焦后 Enter 打开详情；行内按钮按视觉顺序逐个到达。",
+        "横向滚动容器可聚焦，方向键左右滚动。"
+      ],
+      "examples": [
+        "table/basic",
+        "table/scroll",
+        "table/states",
+        "table/business"
+      ],
+      "page": "#/components/table",
+      "related": [
+        "pagination",
+        "filter-bar",
+        "badge",
+        "empty",
+        "skeleton"
+      ]
+    },
+    {
+      "id": "dc.descriptions",
+      "name": "Descriptions",
+      "chineseName": "描述列表",
+      "category": "display",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "以“标签 + 值”的形式成组展示单条记录的字段，是详情页的标准载体。",
+      "usage": "用于一条记录（任务、数据集、项目）的字段明细。多条记录的对比用 Table；层级数据用 Tree。超过 12 个字段时分组，次要字段收入 Collapse。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "disabled"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "title",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "column",
+          "type": "number | { xs?: number; sm?: number; md?: number }",
+          "default": "3",
+          "required": false
+        },
+        {
+          "name": "layout",
+          "type": "\"horizontal\" | \"vertical\"",
+          "default": "\"horizontal\"",
+          "required": false
+        },
+        {
+          "name": "bordered",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "items",
+          "type": "Array<{ label: ReactNode; children: ReactNode; span?: number }>",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用 dl / dt / dd 语义，不用 table 或纯 div 拼接。",
+        "标签与值一一对应，屏读顺序与视觉顺序一致。"
+      ],
+      "keyboard": [
+        "值内的链接与复制按钮进入 Tab 序列。",
+        "截断值展开后可聚焦，便于读屏朗读完整内容。"
+      ],
+      "examples": [
+        "descriptions/basic",
+        "descriptions/layout",
+        "descriptions/business"
+      ],
+      "page": "#/components/descriptions",
+      "related": [
+        "table",
+        "card",
+        "collapse",
+        "tag"
+      ]
+    },
+    {
+      "id": "dc.statistic",
+      "name": "Statistic",
+      "chineseName": "统计数值",
+      "category": "display",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "突出展示单个关键数值及其趋势，用于看板与概览区。",
+      "usage": "用于需要一眼读到的核心指标（任务数、成功率、费用）。成组字段明细用 Descriptions；完整分布用 Table 或图表。一屏统计卡不超过 6 个。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "disabled"
+      ],
+      "requiredProps": [
+        "title",
+        "value"
+      ],
+      "props": [
+        {
+          "name": "title",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "value",
+          "type": "number | string",
+          "required": true
+        },
+        {
+          "name": "precision",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "prefix",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "suffix",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "trend",
+          "type": "{ value: string; direction: \"up\" | \"down\" | \"flat\"; label?: string }",
+          "required": false
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "趋势方向不只用颜色：配合 ↑↓ 箭头与文字。",
+        "数值朗读包含单位与统计周期（aria-label 补全）。"
+      ],
+      "keyboard": [
+        "可点击统计卡进入 Tab 序列，Enter 触发跳转。",
+        "趋势的补充说明可被聚焦，便于读屏朗读。"
+      ],
+      "examples": [
+        "statistic/basic",
+        "statistic/trend",
+        "statistic/business"
+      ],
+      "page": "#/components/statistic",
+      "related": [
+        "card",
+        "table",
+        "progress",
+        "descriptions"
+      ]
+    },
+    {
+      "id": "dc.timeline",
+      "name": "Timeline",
+      "chineseName": "时间线",
+      "category": "display",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "按时间顺序展示事件流，表达“发生了什么、进行到哪、接下来是什么”。",
+      "usage": "用于任务执行记录、审计事件、版本历史等有明确时间顺序的场景。纯步骤导航用 Steps；层级结构用 Tree；审计场景优先使用 audit-timeline。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "disabled"
+      ],
+      "requiredProps": [
+        "items"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "TimelineItem[]",
+          "required": true
+        },
+        {
+          "name": "status",
+          "type": "\"default\" | \"success\" | \"warning\" | \"error\" | \"processing\"",
+          "required": false
+        },
+        {
+          "name": "pending",
+          "type": "ReactNode | boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "reverse",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "\"left\" | \"alternate\"",
+          "default": "\"left\"",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用 ol / li 语义表达先后顺序。",
+        "状态不只靠颜色：图标 + 文字同时表达。",
+        "进行中节点 aria-live=\"polite\" 节流播报关进度变化。"
+      ],
+      "keyboard": [
+        "可展开节点 Tab 聚焦，Enter / Space 展开或收起。",
+        "节点内的链接按视觉顺序逐个到达。"
+      ],
+      "examples": [
+        "timeline/basic",
+        "timeline/status",
+        "timeline/business"
+      ],
+      "page": "#/components/timeline",
+      "related": [
+        "steps",
+        "run-status",
+        "audit-timeline",
+        "badge"
+      ]
+    },
+    {
+      "id": "dc.tree",
+      "name": "Tree",
+      "chineseName": "树",
+      "category": "display",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "以缩进层级展示父子结构数据，支持展开、选择与定位。",
+      "usage": "用于项目目录、数据集层级、分类体系。扁平列表用 Table；时间顺序用 Timeline。层级超过 4 层时必须提供搜索定位。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [],
+      "requiredProps": [
+        "data"
+      ],
+      "props": [
+        {
+          "name": "data",
+          "type": "TreeNode[]",
+          "required": true
+        },
+        {
+          "name": "checkable",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "selectable",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "defaultExpandedKeys",
+          "type": "string[]",
+          "required": false
+        },
+        {
+          "name": "onSelect",
+          "type": "(keys: string[], node: TreeNode) => void",
+          "required": false
+        },
+        {
+          "name": "onCheck",
+          "type": "(keys: string[]) => void",
+          "required": false
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用 role=\"tree\" / \"treeitem\"，aria-expanded / aria-selected / aria-checked 齐全。",
+        "层级用 aria-level 标注。",
+        "无权限节点的锁图标必须配合文字，不只靠图标。"
+      ],
+      "keyboard": [
+        "↑↓ 移动焦点，→ 展开 / ← 收起。",
+        "Enter / Space 选中或勾选当前节点。",
+        "Home / End 跳到首末节点。"
+      ],
+      "examples": [
+        "tree/basic",
+        "tree/selectable",
+        "tree/business"
+      ],
+      "page": "#/components/tree",
+      "related": [
+        "table",
+        "search-field",
+        "checkbox",
+        "collapse"
+      ]
+    },
+    {
+      "id": "dc.collapse",
+      "name": "Collapse",
+      "chineseName": "折叠面板",
+      "category": "display",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "将次要内容折叠进面板，让页面默认只呈现主线信息。",
+      "usage": "用于高级参数、详情补充、FAQ 等低频但必要的内容。层级导航用 Tree；单条记录的字段分组用 Descriptions 分组。关键副作用、费用、错误信息不允许折叠。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "empty"
+      ],
+      "requiredProps": [
+        "header"
+      ],
+      "props": [
+        {
+          "name": "accordion",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "defaultActiveKeys",
+          "type": "string[]",
+          "required": false
+        },
+        {
+          "name": "bordered",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "header",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "extra",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "collapsible",
+          "type": "\"header\" | \"icon\" | \"disabled\"",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "面板头使用 button + aria-expanded + aria-controls。",
+        "内容区 role=\"region\" 并与面板头关联。"
+      ],
+      "keyboard": [
+        "Tab 聚焦面板头，Enter / Space 切换展开。",
+        "↑↓ 在面板头之间移动焦点（Accordion 键盘模式）。"
+      ],
+      "examples": [
+        "collapse/basic",
+        "collapse/business"
+      ],
+      "page": "#/components/collapse",
+      "related": [
+        "descriptions",
+        "card",
+        "tree",
+        "badge"
+      ]
+    },
+    {
+      "id": "dc.code-block",
+      "name": "CodeBlock",
+      "chineseName": "代码块",
+      "category": "display",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "以等宽字体展示代码与命令，支持语法高亮、行号与一键复制。",
+      "usage": "用于 API 调用示例、配置文件、命令行片段。结构化 JSON 的浏览用 JsonViewer；超长日志用日志查看器。超过 50 行的文件用文件预览，不用 CodeBlock。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "disabled",
+        "loading",
+        "empty",
+        "error"
+      ],
+      "requiredProps": [
+        "language"
+      ],
+      "props": [
+        {
+          "name": "language",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "showCopy",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "lineNumbers",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "highlightLines",
+          "type": "number[]",
+          "required": false
+        },
+        {
+          "name": "maxHeight",
+          "type": "number",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用 pre / code 语义；复制按钮 aria-label=\"复制代码\"。",
+        "语法高亮对比度 ≥ 4.5:1。",
+        "高亮行不只靠颜色：配合行号文字说明（“第 4 行”）。"
+      ],
+      "keyboard": [
+        "复制按钮进入 Tab 序列，Enter / Space 触发复制。",
+        "代码区域可聚焦，方向键滚动长代码。"
+      ],
+      "examples": [
+        "code-block/basic",
+        "code-block/highlight",
+        "code-block/business"
+      ],
+      "page": "#/components/code-block",
+      "related": [
+        "json-viewer",
+        "message",
+        "typography",
+        "file-list"
+      ]
+    },
+    {
+      "id": "dc.json-viewer",
+      "name": "JsonViewer",
+      "chineseName": "JSON 查看器",
+      "category": "display",
+      "status": "experimental",
+      "version": "0.1.0",
+      "purpose": "以可折叠树展示 JSON 数据，支持按路径展开与复制节点值。",
+      "usage": "用于调试面板、参数快照、API 响应预览等开发态场景。面向普通用户的结构化信息用 Descriptions 或 Table；纯代码文本用 CodeBlock。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "disabled",
+        "loading"
+      ],
+      "requiredProps": [
+        "data"
+      ],
+      "props": [
+        {
+          "name": "data",
+          "type": "unknown",
+          "required": true
+        },
+        {
+          "name": "defaultExpandDepth",
+          "type": "number",
+          "default": "1",
+          "required": false
+        },
+        {
+          "name": "enableCopy",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "enableCopyPath",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "maxHeight",
+          "type": "number",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "树结构使用 role=\"tree\" / \"treeitem\"，aria-expanded 标注。",
+        "类型着色不只靠颜色：null 与错误值同时有文本标记。"
+      ],
+      "keyboard": [
+        "展开按钮 Tab 聚焦，Enter / Space 切换。",
+        "树内支持方向键导航（同 Tree 键盘模式）。"
+      ],
+      "examples": [
+        "json-viewer/basic",
+        "json-viewer/business"
+      ],
+      "page": "#/components/json-viewer",
+      "related": [
+        "code-block",
+        "descriptions",
+        "collapse",
+        "message"
+      ]
+    },
+    {
+      "id": "dc.file-list",
+      "name": "FileList",
+      "chineseName": "文件列表",
+      "category": "display",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "以列表展示文件及其状态，支持预览、下载、删除与上传进度。",
+      "usage": "用于数据集附件、任务产物、导入文件清单。大目录浏览用 Tree + Table；上传交互本身用 Upload；轻量删除确认用 Popconfirm。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [],
+      "requiredProps": [
+        "files"
+      ],
+      "props": [
+        {
+          "name": "files",
+          "type": "FileItem[]",
+          "required": true
+        },
+        {
+          "name": "status",
+          "type": "\"uploading\" | \"success\" | \"error\"",
+          "required": false
+        },
+        {
+          "name": "onDownload",
+          "type": "(file: FileItem) => void",
+          "required": false
+        },
+        {
+          "name": "onRemove",
+          "type": "(file: FileItem) => void",
+          "required": false
+        },
+        {
+          "name": "maxVisible",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "emptyText",
+          "type": "ReactNode",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "文件状态有文字表达，不只靠图标颜色。",
+        "上传进度使用 Progress 语义（role=\"progressbar\"）。"
+      ],
+      "keyboard": [
+        "行内操作按视觉顺序进入 Tab 序列。",
+        "焦点位于上传中行时，Esc 请求取消上传。"
+      ],
+      "examples": [
+        "file-list/basic",
+        "file-list/states",
+        "file-list/business"
+      ],
+      "page": "#/components/file-list",
+      "related": [
+        "upload",
+        "popconfirm",
+        "progress",
+        "empty"
+      ]
+    },
+    {
+      "id": "dc.alert",
+      "name": "Alert",
+      "chineseName": "警告提示",
       "category": "feedback",
-      "tones": ["success", "warning", "danger", "neutral"],
-      "requiredProps": ["title", "description", "tone"],
-      "rule": "text and icon must carry meaning; color is supplementary"
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "在页面或区块内展示需要持续关注的上下文提示，随内容出现，不自动消失。",
+      "usage": "用于与当前上下文强相关、需要用户看到或处理的信息：数据质量问题、权限提醒、阻断原因。三者分工：操作结果的轻量反馈用 Message（自动消失）；与当前页面弱相关的异步事件用 Notification（可停留）；需要持续关注的上下文信息用 Alert（常驻页面）。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "disabled",
+        "loading",
+        "empty"
+      ],
+      "requiredProps": [
+        "type",
+        "title"
+      ],
+      "props": [
+        {
+          "name": "type",
+          "type": "\"info\" | \"success\" | \"warning\" | \"error\"",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "closable",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "action",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "icon",
+          "type": "ReactNode",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "一般提示 role=\"status\"，阻断错误 role=\"alert\"。",
+        "类型不只靠颜色：图标 + 文字同时表达。",
+        "新出现的 Alert 由 aria-live 播报，不抢占焦点。"
+      ],
+      "keyboard": [
+        "关闭按钮 aria-label=\"关闭提示\"，进入 Tab 序列。",
+        "action 按钮按视觉顺序到达。"
+      ],
+      "examples": [
+        "alert/basic",
+        "alert/closable",
+        "alert/business"
+      ],
+      "page": "#/components/alert",
+      "related": [
+        "message",
+        "notification",
+        "data-quality-notice",
+        "result"
+      ]
     },
     {
-      "name": "DataTable",
-      "category": "data",
-      "requiredProps": ["caption", "columns", "rows"],
-      "responsiveRule": "horizontal overflow on narrow screens",
-      "accessibility": ["caption", "th elements", "stable row IDs"]
+      "id": "dc.message",
+      "name": "Message",
+      "chineseName": "全局提示",
+      "category": "feedback",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "操作完成后的轻量全局反馈，自动出现、自动消失，不打断流程。",
+      "usage": "用于保存成功、复制成功、提交已受理等即时结果反馈。三者分工：Message 是即时轻反馈（自动消失、无需处理）；Alert 是页面内持续提醒（需要看到或处理）；Notification 是异步事件通知（可停留、带操作）。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "disabled",
+        "empty"
+      ],
+      "requiredProps": [
+        "type",
+        "content"
+      ],
+      "props": [
+        {
+          "name": "type",
+          "type": "\"success\" | \"error\" | \"warning\" | \"info\" | \"loading\"",
+          "required": true
+        },
+        {
+          "name": "content",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "default": "3",
+          "required": false
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "maxCount",
+          "type": "number",
+          "default": "3",
+          "required": false
+        },
+        {
+          "name": "onClose",
+          "type": "() => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "role=\"status\" 播报；error 用 role=\"alert\"。",
+        "自动消失时间 ≥ 3 秒，重要结果建议 5 秒。"
+      ],
+      "keyboard": [
+        "弹出时不抢占焦点。",
+        "内嵌按钮（重试等）可 Tab 到达。"
+      ],
+      "examples": [
+        "message/basic",
+        "message/types",
+        "message/business"
+      ],
+      "page": "#/components/message",
+      "related": [
+        "alert",
+        "notification",
+        "spin",
+        "button"
+      ]
     },
     {
-      "name": "Dialog",
+      "id": "dc.notification",
+      "name": "Notification",
+      "chineseName": "通知",
+      "category": "feedback",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "系统侧的异步事件通知，带标题与操作，可停留等待用户处理。",
+      "usage": "用于任务完成、审批结果、预约到点等与当前页面上下文弱相关的事件。三者分工：Notification 是异步事件通知（带标题与操作、可停留）；Message 是当前操作的即时轻反馈；Alert 是页面内的持续上下文提醒。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "disabled",
+        "loading",
+        "empty"
+      ],
+      "requiredProps": [
+        "type",
+        "title",
+        "description"
+      ],
+      "props": [
+        {
+          "name": "type",
+          "type": "\"success\" | \"error\" | \"warning\" | \"info\"",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "actions",
+          "type": "Array<{ label: string; href?: string; onClick?: () => void }>",
+          "required": false
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "default": "4.5",
+          "required": false
+        },
+        {
+          "name": "placement",
+          "type": "\"topRight\" | \"bottomRight\"",
+          "default": "\"topRight\"",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "role=\"status\"；error 用 role=\"alert\"。",
+        "常驻通知必须有可见的关闭按钮。"
+      ],
+      "keyboard": [
+        "出现时不抢占焦点。",
+        "通知内的操作与关闭按钮可 Tab 到达。"
+      ],
+      "examples": [
+        "notification/basic",
+        "notification/business"
+      ],
+      "page": "#/components/notification",
+      "related": [
+        "alert",
+        "message",
+        "run-status",
+        "badge"
+      ]
+    },
+    {
+      "id": "dc.progress",
+      "name": "Progress",
+      "chineseName": "进度条",
+      "category": "feedback",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "展示确定性任务的完成比例，让用户知道还要等多久。",
+      "usage": "用于可量化进度：数据导入、文件上传、批量计算完成度。无法量化进度的等待用 Spin；任务整体状态用 run-status / Steps。",
+      "states": [
+        "default",
+        "loading",
+        "error",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "empty",
+        "permission-limited"
+      ],
+      "requiredProps": [
+        "percent"
+      ],
+      "props": [
+        {
+          "name": "percent",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "status",
+          "type": "\"active\" | \"success\" | \"error\"",
+          "required": false
+        },
+        {
+          "name": "showInfo",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "size",
+          "type": "\"default\" | \"sm\"",
+          "default": "\"default\"",
+          "required": false
+        },
+        {
+          "name": "format",
+          "type": "(percent: number) => ReactNode",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "role=\"progressbar\" + aria-valuenow / valuemin / valuemax。",
+        "进度不逐次播报；阶段变化（开始、失败、完成）才播报。"
+      ],
+      "keyboard": [
+        "进度条本身不在 Tab 序列。",
+        "内嵌的取消按钮在 Tab 序列中。"
+      ],
+      "examples": [
+        "progress/basic",
+        "progress/status",
+        "progress/business"
+      ],
+      "page": "#/components/progress",
+      "related": [
+        "spin",
+        "message",
+        "file-list",
+        "run-status"
+      ]
+    },
+    {
+      "id": "dc.spin",
+      "name": "Spin",
+      "chineseName": "加载中",
+      "category": "feedback",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "表示正在加载但无法量化进度，以内联或遮罩方式表达等待。",
+      "usage": "用于区块加载、按钮内加载、提交中等待。可量化进度用 Progress；整页首屏骨架用 Skeleton；异步任务的状态跟踪用 run-status。",
+      "states": [
+        "default",
+        "loading",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "empty",
+        "error",
+        "permission-limited"
+      ],
+      "requiredProps": [],
+      "props": [
+        {
+          "name": "spinning",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"default\" | \"lg\"",
+          "default": "\"default\"",
+          "required": false
+        },
+        {
+          "name": "tip",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "delay",
+          "type": "number",
+          "default": "0",
+          "required": false
+        },
+        {
+          "name": "fullscreen",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "role=\"status\" 并朗读 tip；容器 aria-busy=\"true\"。",
+        "不只靠旋转动画：必须有 tip 或 sr-only 文本。"
+      ],
+      "keyboard": [
+        "容器加载期间，焦点移出被遮罩的内容。",
+        "显式提供的取消按钮在 Tab 序列中。"
+      ],
+      "examples": [
+        "spin/basic",
+        "spin/container",
+        "spin/business"
+      ],
+      "page": "#/components/spin",
+      "related": [
+        "skeleton",
+        "progress",
+        "button",
+        "message"
+      ]
+    },
+    {
+      "id": "dc.modal",
+      "name": "Modal",
+      "chineseName": "对话框",
       "category": "overlay",
-      "requiredProps": ["title", "onClose", "children"],
-      "states": ["closed", "open", "submitting", "error"],
-      "accessibility": ["role=dialog", "aria-modal=true", "Esc close", "focus return"]
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "在当前页面之上展示需要专注处理的内容或确认，阻断对背景的交互。",
+      "usage": "用于需要用户完成一件事才能继续的场景：创建任务、编辑参数、聚焦查看。与 ConfirmPanel 的关系：ConfirmPanel 基于 Modal 实现，额外回显目标、范围、预算与副作用——凡是有外部副作用或不可恢复的确认动作必须用 ConfirmPanel；轻量就地确认用 Popconfirm；大表单与详情用 Drawer。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [],
+      "requiredProps": [
+        "open",
+        "title",
+        "onClose"
+      ],
+      "props": [
+        {
+          "name": "open",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "onClose",
+          "type": "() => void",
+          "required": true
+        },
+        {
+          "name": "footer",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "default": "520",
+          "required": false
+        },
+        {
+          "name": "maskClosable",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "destroyOnClose",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "role=\"dialog\" + aria-modal=\"true\" + aria-labelledby 指向标题。",
+        "打开时背景根节点设为 inert / aria-hidden。",
+        "焦点管理三件套缺一不可：进入聚焦、循环陷阱、退出还原。",
+        "必须有可见关闭按钮，不能只靠遮罩点击。"
+      ],
+      "keyboard": [
+        "Esc 触发 onClose（提交中禁用）。",
+        "Tab 循环陷阱：焦点在对话框内首尾循环。",
+        "焦点顺序：关闭按钮 → 内容区 → footer 次动作 → 主动作。"
+      ],
+      "examples": [
+        "modal/basic",
+        "modal/business"
+      ],
+      "page": "#/components/modal",
+      "related": [
+        "confirm-panel",
+        "drawer",
+        "popconfirm",
+        "button",
+        "form"
+      ]
     },
     {
+      "id": "dc.drawer",
+      "name": "Drawer",
+      "chineseName": "抽屉",
+      "category": "overlay",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "从屏幕边缘滑出的辅助面板，承载与当前页强相关的详情或操作，不打断页面上下文。",
+      "usage": "用于任务详情、日志查看、宽表单等需要较大空间但不想离开当前列表的场景。简短确认用 Popconfirm；聚焦单件事用 Modal；有副作用的确认用 ConfirmPanel。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [],
+      "requiredProps": [
+        "open",
+        "title",
+        "onClose"
+      ],
+      "props": [
+        {
+          "name": "open",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "onClose",
+          "type": "() => void",
+          "required": true
+        },
+        {
+          "name": "placement",
+          "type": "\"right\" | \"left\" | \"top\" | \"bottom\"",
+          "default": "\"right\"",
+          "required": false
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "default": "480",
+          "required": false
+        },
+        {
+          "name": "maskClosable",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "footer",
+          "type": "ReactNode",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "role=\"dialog\" aria-modal=\"true\" aria-labelledby 指向标题。",
+        "背景 inert；焦点陷阱与还原同 Modal。"
+      ],
+      "keyboard": [
+        "Esc 关闭（提交中禁用）。",
+        "Tab 循环限制在抽屉内。"
+      ],
+      "examples": [
+        "drawer/basic",
+        "drawer/business"
+      ],
+      "page": "#/components/drawer",
+      "related": [
+        "modal",
+        "descriptions",
+        "table",
+        "confirm-panel"
+      ]
+    },
+    {
+      "id": "dc.popconfirm",
+      "name": "Popconfirm",
+      "chineseName": "气泡确认",
+      "category": "overlay",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "在操作元素旁弹出的小型确认气泡，用于轻量、影响范围小的确认。",
+      "usage": "用于删除一行、移除标签等轻量确认。涉及计算、费用、外部副作用或不可恢复的动作必须用 ConfirmPanel；需要在气泡里放表单或复杂内容时用 Modal。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "empty"
+      ],
+      "requiredProps": [
+        "title"
+      ],
+      "props": [
+        {
+          "name": "title",
+          "type": "ReactNode",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "okText",
+          "type": "string",
+          "default": "\"确认\"",
+          "required": false
+        },
+        {
+          "name": "cancelText",
+          "type": "string",
+          "default": "\"取消\"",
+          "required": false
+        },
+        {
+          "name": "okDanger",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "onConfirm",
+          "type": "() => void | Promise<void>",
+          "required": false
+        },
+        {
+          "name": "placement",
+          "type": "\"top\" | \"bottom\" | \"left\" | \"right\"",
+          "default": "\"top\"",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "role=\"alertdialog\" + aria-describedby 指向描述。",
+        "触发元素与气泡之间焦点往返管理。"
+      ],
+      "keyboard": [
+        "Esc 取消并关闭，焦点回到触发元素。",
+        "打开后焦点默认在取消按钮；Tab 在气泡内循环。"
+      ],
+      "examples": [
+        "popconfirm/basic",
+        "popconfirm/business"
+      ],
+      "page": "#/components/popconfirm",
+      "related": [
+        "modal",
+        "confirm-panel",
+        "button",
+        "file-list"
+      ]
+    },
+    {
+      "id": "dc.citation",
       "name": "Citation",
-      "category": "provenance",
-      "requiredProps": ["citationId", "source"],
-      "rule": "stable ID links fact superscript to source record; never infer with string matching"
+      "chineseName": "引用角标",
+      "category": "datacore",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "在正文或 Agent 答复中为关键论断标注来源，并把角标与来源清单联动，让每一条结论都可追溯。",
+      "usage": "用于 Agent 答复、报告正文与数据结论旁的来源标注。角标必须绑定稳定的 citationId，点击后在来源清单中定位并高亮对应条目。无需追溯的常识不标注；需要展示来源完整信息（发布方、更新时间、可访问性）时配合 SourceCard。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode",
+        "located"
+      ],
+      "notApplicableStates": [
+        "disabled",
+        "loading",
+        "empty"
+      ],
+      "requiredProps": [
+        "citationId",
+        "index"
+      ],
+      "props": [
+        {
+          "name": "citationId",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "index",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "status",
+          "type": "\"available\" | \"unavailable\" | \"pending\"",
+          "default": "\"available\"",
+          "required": false
+        },
+        {
+          "name": "onLocate",
+          "type": "(citationId: string) => void",
+          "required": false
+        },
+        {
+          "name": "source",
+          "type": "{ id: string; title: string }",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "角标使用 <a> 或 <button>，aria-label 为“来源 {index}：{标题}”，不能只朗读一个数字。",
+        "高亮变化通过 aria-live=\"polite\" 区域通知，不打扰当前朗读。",
+        "不单独依赖颜色区分失效来源，配合图标或“不可访问”文字。"
+      ],
+      "keyboard": [
+        "Tab 依序聚焦各角标，顺序与文档阅读顺序一致。",
+        "Enter 触发定位与高亮，等价于点击。",
+        "高亮状态下按 Esc 取消高亮，并把焦点移到被高亮的来源项。"
+      ],
+      "examples": [
+        "citation/basic",
+        "citation/locate",
+        "citation/unavailable",
+        "citation/business"
+      ],
+      "page": "#/components/citation",
+      "related": [
+        "source-card",
+        "link",
+        "typography",
+        "data-quality-notice"
+      ]
+    },
+    {
+      "id": "dc.source-card",
+      "name": "SourceCard",
+      "chineseName": "来源卡片",
+      "category": "datacore",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "以卡片形式展示一条来源的完整信息：标题、发布方、更新时间与可访问状态，并提供打开原文的入口。",
+      "usage": "用于来源清单、引用详情与数据血缘面板。正文中的轻量标注用 Citation；需要展示更新时间与可访问性、支持打开原文时用 SourceCard。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode",
+        "unavailable"
+      ],
+      "notApplicableStates": [
+        "disabled",
+        "empty"
+      ],
+      "requiredProps": [
+        "source"
+      ],
+      "props": [
+        {
+          "name": "source",
+          "type": "SourceInfo",
+          "required": true
+        },
+        {
+          "name": "onOpen",
+          "type": "(id: string) => void",
+          "required": false
+        },
+        {
+          "name": "compact",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "highlighted",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "整卡表达为单一链接或按钮语义，内部不嵌套多个可点击元素。",
+        "可访问状态用图标加文字表达，不单独依赖颜色。",
+        "aria-label 包含标题与状态：“{标题}，{状态}”。"
+      ],
+      "keyboard": [
+        "Tab 聚焦卡片，焦点顺序与视觉顺序一致。",
+        "Enter 打开来源，等价于点击。"
+      ],
+      "examples": [
+        "source-card/basic",
+        "source-card/access",
+        "source-card/business"
+      ],
+      "page": "#/components/source-card",
+      "related": [
+        "citation",
+        "card",
+        "badge",
+        "empty"
+      ]
+    },
+    {
+      "id": "dc.agent-activity",
+      "name": "AgentActivity",
+      "chineseName": "Agent 活动",
+      "category": "datacore",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "实时展示 Agent 当前在做什么：所处步骤、正在调用的工具、以及是否在等待用户确认。",
+      "usage": "用于 Agent 工作区与任务详情页的实时活动流。Agent 语义统一使用紫色；只展示任务的最终状态用 RunStatus，确认动作本身用 ConfirmPanel，单次工具调用的详情用 ToolRunCard。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode",
+        "waiting"
+      ],
+      "notApplicableStates": [
+        "disabled"
+      ],
+      "requiredProps": [
+        "steps"
+      ],
+      "props": [
+        {
+          "name": "steps",
+          "type": "AgentStep[]",
+          "required": true
+        },
+        {
+          "name": "currentTool",
+          "type": "{ name: string; summary: string }",
+          "required": false
+        },
+        {
+          "name": "waitingFor",
+          "type": "\"user-confirmation\" | \"resource\" | null",
+          "default": "null",
+          "required": false
+        },
+        {
+          "name": "onConfirm",
+          "type": "() => void",
+          "required": false
+        },
+        {
+          "name": "onRetry",
+          "type": "(stepId: string) => void",
+          "required": false
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "当前步骤变化通过 aria-live=\"polite\" 播报，如“正在调用 conductivity-optimize”。",
+        "spinner 必须伴随文字“进行中”，不做纯动画。",
+        "Agent 语义不只靠紫色表达，配合 Sparkles 图标与文字。"
+      ],
+      "keyboard": [
+        "确认、重试按钮 Tab 可达，Enter 触发。",
+        "步骤行可聚焦，Enter 展开或收起详情。"
+      ],
+      "examples": [
+        "agent-activity/basic",
+        "agent-activity/waiting",
+        "agent-activity/failed",
+        "agent-activity/business"
+      ],
+      "page": "#/components/agent-activity",
+      "related": [
+        "run-status",
+        "confirm-panel",
+        "tool-run-card",
+        "steps",
+        "badge"
+      ]
+    },
+    {
+      "id": "dc.run-status",
+      "name": "RunStatus",
+      "chineseName": "运行状态",
+      "category": "datacore",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "用一致的徽章与状态行表达任务生命周期：排队、运行中、成功、失败、部分完成、需重试。",
+      "usage": "用于任务列表、任务详情与批处理结果。六态是封闭集合，不允许新增第七种状态色；需要展示实时进度时配合 Progress，需要展示执行过程时配合 AgentActivity。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "disabled",
+        "empty"
+      ],
+      "requiredProps": [
+        "status"
+      ],
+      "props": [
+        {
+          "name": "status",
+          "type": "\"queued\" | \"running\" | \"succeeded\" | \"failed\" | \"partial\" | \"retry-needed\"",
+          "required": true
+        },
+        {
+          "name": "detail",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "onRetry",
+          "type": "() => void",
+          "required": false
+        },
+        {
+          "name": "onViewDetail",
+          "type": "() => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "状态用图标加文字表达，不单独依赖颜色。",
+        "状态变化通过 aria-live=\"polite\" 播报，如“任务 run-28003 已失败”。",
+        "徽章容器使用 role=\"status\" 或语义化文本，读屏可直接读出状态。"
+      ],
+      "keyboard": [
+        "状态行内的重试、查看明细按钮 Tab 可达，Enter 触发。",
+        "徽章本身只读时可聚焦，焦点态朗读状态与 detail。"
+      ],
+      "examples": [
+        "run-status/basic",
+        "run-status/detail",
+        "run-status/flow",
+        "run-status/business"
+      ],
+      "page": "#/components/run-status",
+      "related": [
+        "badge",
+        "progress",
+        "alert",
+        "agent-activity",
+        "tool-run-card"
+      ]
+    },
+    {
+      "id": "dc.confirm-panel",
+      "name": "ConfirmPanel",
+      "chineseName": "确认面板",
+      "category": "datacore",
+      "status": "stable",
+      "version": "0.1.0",
+      "purpose": "在执行产生副作用的动作前，回显目标、范围、项目、预算与副作用，让用户在完整知情下明确确认。",
+      "usage": "用于 Agent 推荐执行、批量操作与危险动作的确认。确认面板之外不允许“顺手执行”。简单的行内二次确认（删除一行）用 Popconfirm；涉及项目、预算或外部副作用的动作必须用 ConfirmPanel。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "pressed",
+        "disabled",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode",
+        "confirmed"
+      ],
+      "notApplicableStates": [
+        "empty"
+      ],
+      "requiredProps": [
+        "title",
+        "target",
+        "scope",
+        "project",
+        "sideEffects",
+        "onConfirm",
+        "onCancel"
+      ],
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "target",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "project",
+          "type": "{ id: string; name: string }",
+          "required": true
+        },
+        {
+          "name": "budget",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "sideEffects",
+          "type": "string[]",
+          "required": true
+        },
+        {
+          "name": "danger",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "confirmText",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "onConfirm",
+          "type": "() => void | Promise<void>",
+          "required": true
+        },
+        {
+          "name": "onCancel",
+          "type": "() => void",
+          "required": true
+        }
+      ],
+      "accessibility": [
+        "使用 role=\"dialog\" 与 aria-modal=\"true\"，标题关联 aria-labelledby。",
+        "副作用清单使用列表语义，读屏可逐条朗读。",
+        "danger 不单独依赖红色，配合图标与后果文案。"
+      ],
+      "keyboard": [
+        "打开后焦点落在取消按钮，避免打开即 Enter 误触发危险动作。",
+        "Tab 在面板内循环，不会移出面板的聚焦陷阱。",
+        "Esc 取消并关闭，等价于点击取消。"
+      ],
+      "examples": [
+        "confirm-panel/basic",
+        "confirm-panel/danger",
+        "confirm-panel/business"
+      ],
+      "page": "#/components/confirm-panel",
+      "related": [
+        "modal",
+        "button",
+        "agent-activity",
+        "run-status",
+        "popconfirm"
+      ]
+    },
+    {
+      "id": "dc.project-selector",
+      "name": "ProjectSelector",
+      "chineseName": "项目选择器",
+      "category": "datacore",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "选择动作归属的项目，同时展示项目 ID、默认项目标记与当前用户在项目内的权限状态。",
+      "usage": "用于提交任务、创建资源前的项目归属选择。项目是所有计算与数据动作的归属边界，不允许“无项目”提交；只读展示项目信息时用 Descriptions。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed"
+      ],
+      "requiredProps": [
+        "projects",
+        "onChange"
+      ],
+      "props": [
+        {
+          "name": "projects",
+          "type": "ProjectOption[]",
+          "required": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(projectId: string) => void",
+          "required": true
+        },
+        {
+          "name": "requiredPermission",
+          "type": "\"viewer\" | \"editor\" | \"executor\" | \"admin\"",
+          "default": "\"viewer\"",
+          "required": false
+        },
+        {
+          "name": "onRequestAccess",
+          "type": "(project: ProjectOption) => void",
+          "required": false
+        },
+        {
+          "name": "showId",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用 listbox / option 语义，选中项 aria-selected=\"true\"。",
+        "禁用选项的 aria-label 包含原因：“共享数据池，仅可见，需要可执行权限”。",
+        "权限徽章用图标加文字，不单独依赖颜色。"
+      ],
+      "keyboard": [
+        "触发器 Enter / Space 展开，上下方向键移动选项。",
+        "Enter 选中并关闭，Esc 放弃并关闭。",
+        "禁用选项可聚焦朗读原因，但不响应选中。"
+      ],
+      "examples": [
+        "project-selector/basic",
+        "project-selector/limited",
+        "project-selector/business"
+      ],
+      "page": "#/components/project-selector",
+      "related": [
+        "select",
+        "combobox",
+        "permission-scope",
+        "badge",
+        "form"
+      ]
+    },
+    {
+      "id": "dc.dataset-picker",
+      "name": "DatasetPicker",
+      "chineseName": "数据集选择器",
+      "category": "datacore",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "按数据集、批次、版本与来源选择计算或分析的输入数据，并让版本与来源显式可见。",
+      "usage": "用于选择训练集、优化输入与分析对象。版本必须显式选择或显式标注默认到最新稳定版，不允许隐式漂移；仅需上传本地文件时用 Upload。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed"
+      ],
+      "requiredProps": [
+        "datasets",
+        "onChange"
+      ],
+      "props": [
+        {
+          "name": "datasets",
+          "type": "DatasetOption[]",
+          "required": true
+        },
+        {
+          "name": "value",
+          "type": "string | string[]",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string | string[]) => void",
+          "required": true
+        },
+        {
+          "name": "selectionMode",
+          "type": "\"single\" | \"multiple\"",
+          "default": "\"single\"",
+          "required": false
+        },
+        {
+          "name": "latestOnly",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "emptyAction",
+          "type": "{ label: string; onClick: () => void }",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "单选使用 radio 语义，多选使用 checkbox 语义。",
+        "accessible name 包含名称、版本与来源：“电解液电导率数据集，v3，计算产出”。",
+        "禁用选项朗读禁用原因。"
+      ],
+      "keyboard": [
+        "上下方向键移动选项，单选 Enter 选中。",
+        "多选模式 Space 切换勾选，Enter 确认。",
+        "Esc 关闭下拉并保留已选值。"
+      ],
+      "examples": [
+        "dataset-picker/basic",
+        "dataset-picker/multi",
+        "dataset-picker/empty",
+        "dataset-picker/business"
+      ],
+      "page": "#/components/dataset-picker",
+      "related": [
+        "select",
+        "table",
+        "tag",
+        "data-quality-notice",
+        "upload"
+      ]
+    },
+    {
+      "id": "dc.permission-scope",
+      "name": "PermissionScope",
+      "chineseName": "权限范围",
+      "category": "datacore",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "用固定四级语义表达权限范围：可见、可编辑、可执行、管理员，并说明每一级能做什么、不能做什么。",
+      "usage": "用于项目成员列表、共享设置与动作前的权限提示。四级是封闭集合；权限判断在服务端执行，前端只做展示与引导，不允许用隐藏按钮代替权限校验。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "disabled",
+        "empty"
+      ],
+      "requiredProps": [
+        "scope"
+      ],
+      "props": [
+        {
+          "name": "scope",
+          "type": "\"viewer\" | \"editor\" | \"executor\" | \"admin\"",
+          "required": true
+        },
+        {
+          "name": "showDescription",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "required",
+          "type": "\"viewer\" | \"editor\" | \"executor\" | \"admin\"",
+          "required": false
+        },
+        {
+          "name": "onRequestUpgrade",
+          "type": "() => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "级别用图标加文字表达，不单独依赖颜色。",
+        "能力说明浮层与徽章关联 aria-describedby。",
+        "矩阵表使用 scope 表头，读屏可按行列朗读。"
+      ],
+      "keyboard": [
+        "徽章 Tab 可聚焦，Enter 展开能力说明，Esc 收起。",
+        "申请入口是链接或按钮语义，Enter 触发。"
+      ],
+      "examples": [
+        "permission-scope/basic",
+        "permission-scope/matrix",
+        "permission-scope/business"
+      ],
+      "page": "#/components/permission-scope",
+      "related": [
+        "badge",
+        "tag",
+        "project-selector",
+        "table",
+        "button"
+      ]
+    },
+    {
+      "id": "dc.audit-timeline",
+      "name": "AuditTimeline",
+      "chineseName": "审计时间线",
+      "category": "datacore",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "按时间顺序记录谁在何时对什么做了什么，让每一次变更可追溯、可问责。",
+      "usage": "用于项目审计、任务历史与数据版本变更记录。审计记录只增不改；需要展示未来计划或流程进度时用 ExperimentStep 或 Steps。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "disabled"
+      ],
+      "requiredProps": [
+        "events"
+      ],
+      "props": [
+        {
+          "name": "events",
+          "type": "AuditEvent[]",
+          "required": true
+        },
+        {
+          "name": "filter",
+          "type": "\"all\" | \"critical\"",
+          "default": "\"all\"",
+          "required": false
+        },
+        {
+          "name": "onFilterChange",
+          "type": "(filter: string) => void",
+          "required": false
+        },
+        {
+          "name": "onLoadMore",
+          "type": "() => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "使用列表语义；时间使用 <time> 元素并带 datetime 属性。",
+        "级别用图标加文字表达，不单独依赖颜色。",
+        "展开按钮带 aria-expanded 与“查看事件详情”标签。"
+      ],
+      "keyboard": [
+        "可展开行 Tab 可达，Enter 展开或收起详情。",
+        "过滤控件遵循各自组件的键盘规则。"
+      ],
+      "examples": [
+        "audit-timeline/basic",
+        "audit-timeline/incident",
+        "audit-timeline/business"
+      ],
+      "page": "#/components/audit-timeline",
+      "related": [
+        "timeline",
+        "badge",
+        "permission-scope",
+        "run-status",
+        "table"
+      ]
+    },
+    {
+      "id": "dc.experiment-step",
+      "name": "ExperimentStep",
+      "chineseName": "实验步骤",
+      "category": "datacore",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "把一次实验表达为有序的业务节点流：配置、排队、运行、分析、完成，并标记当前节点与失败节点。",
+      "usage": "用于实验详情与优化轮次进度。节点是业务语义步骤（不是 UI 分步表单）；表单分步填写用 Steps。任务粒度的状态用 RunStatus。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "disabled",
+        "empty"
+      ],
+      "requiredProps": [
+        "steps",
+        "current"
+      ],
+      "props": [
+        {
+          "name": "steps",
+          "type": "ExperimentNode[]",
+          "required": true
+        },
+        {
+          "name": "current",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "onRetry",
+          "type": "(stepId: string) => void",
+          "required": false
+        },
+        {
+          "name": "onOpenArtifact",
+          "type": "(stepId: string) => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "当前节点标记 aria-current=\"step\"。",
+        "节点状态用图标加文字表达，不单独依赖颜色。",
+        "节点流使用有序列表语义，读屏可读出“第 3 步，共 5 步”。"
+      ],
+      "keyboard": [
+        "节点 Tab 可达，Enter 查看详情或产物。",
+        "失败节点内重试按钮 Enter 触发。"
+      ],
+      "examples": [
+        "experiment-step/basic",
+        "experiment-step/failed",
+        "experiment-step/business"
+      ],
+      "page": "#/components/experiment-step",
+      "related": [
+        "steps",
+        "run-status",
+        "progress",
+        "agent-activity"
+      ]
+    },
+    {
+      "id": "dc.data-quality-notice",
+      "name": "DataQualityNotice",
+      "chineseName": "数据质量提示",
+      "category": "datacore",
+      "status": "experimental",
+      "version": "0.1.0",
+      "purpose": "在数据进入计算前暴露质量问题：缺失、冲突、来源不可靠、待人工确认，并给出每条问题的处理路径。",
+      "usage": "用于数据导入报告、数据集详情与计算前检查。问题分提醒与阻断两级：阻断级未处理前不允许提交计算；纯粹的统计概览用 Statistic，单条全局提示用 Alert。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "loading",
+        "empty",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode",
+        "resolved"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "disabled"
+      ],
+      "requiredProps": [
+        "issues"
+      ],
+      "props": [
+        {
+          "name": "issues",
+          "type": "QualityIssue[]",
+          "required": true
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "onResolve",
+          "type": "(issueId: string, action: string) => void",
+          "required": false
+        },
+        {
+          "name": "onDownloadReport",
+          "type": "() => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "级别用图标加文字表达（提醒 / 阻断），不单独依赖颜色。",
+        "提交按钮的 disabled 原因通过 aria-describedby 关联阻断提示。",
+        "问题列表使用列表语义，读屏可逐条朗读。"
+      ],
+      "keyboard": [
+        "处理动作按钮 Tab 可达，Enter 触发。",
+        "已解决区域可聚焦展开，Enter 展开或收起。"
+      ],
+      "examples": [
+        "data-quality-notice/basic",
+        "data-quality-notice/actionable",
+        "data-quality-notice/business"
+      ],
+      "page": "#/components/data-quality-notice",
+      "related": [
+        "alert",
+        "badge",
+        "dataset-picker",
+        "button",
+        "citation"
+      ]
+    },
+    {
+      "id": "dc.tool-run-card",
+      "name": "ToolRunCard",
+      "chineseName": "工具运行卡片",
+      "category": "datacore",
+      "status": "beta",
+      "version": "0.1.0",
+      "purpose": "展示一次工具调用的完整留痕：工具名、参数摘要、输入输出、耗时与结果状态。",
+      "usage": "用于 Agent 活动流、任务日志与调试面板。工具调用必须留痕可查；只展示最终答案不需要 ToolRunCard，过程性步骤用 AgentActivity。",
+      "states": [
+        "default",
+        "hover",
+        "focus-visible",
+        "loading",
+        "error",
+        "permission-limited",
+        "mobile",
+        "dark-mode"
+      ],
+      "notApplicableStates": [
+        "pressed",
+        "disabled",
+        "empty"
+      ],
+      "requiredProps": [
+        "tool",
+        "status",
+        "paramsSummary"
+      ],
+      "props": [
+        {
+          "name": "tool",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "status",
+          "type": "\"running\" | \"succeeded\" | \"failed\"",
+          "required": true
+        },
+        {
+          "name": "paramsSummary",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "input",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "output",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "collapsible",
+          "type": "boolean",
+          "default": "true",
+          "required": false
+        },
+        {
+          "name": "onRetry",
+          "type": "() => void",
+          "required": false
+        }
+      ],
+      "accessibility": [
+        "状态用图标加文字表达（运行中 / 已完成 / 已失败），不单独依赖颜色。",
+        "运行中状态变化通过 aria-live=\"polite\" 克制播报（完成与失败各一次）。",
+        "mono 区域保持可读字号，不低于 11px。"
+      ],
+      "keyboard": [
+        "展开按钮 Enter / Space 切换，带 aria-expanded。",
+        "重试按钮 Tab 可达，Enter 触发。"
+      ],
+      "examples": [
+        "tool-run-card/basic",
+        "tool-run-card/states",
+        "tool-run-card/business"
+      ],
+      "page": "#/components/tool-run-card",
+      "related": [
+        "agent-activity",
+        "run-status",
+        "code-block",
+        "json-viewer",
+        "collapse"
+      ]
     }
-  ]
+  ],
+  "patterns": [
+    {
+      "id": "agent-confirmation",
+      "name": "Agent Confirmation",
+      "chineseName": "Agent 推荐 → 用户确认 → 执行",
+      "summary": "推荐与执行分离：Agent 说明计划，用户确认范围，系统创建可追踪任务。",
+      "page": "#/patterns/agent-confirmation"
+    },
+    {
+      "id": "data-import",
+      "name": "Data Import",
+      "chineseName": "数据导入 → 预览 → 校验 → 写入",
+      "summary": "数据先进入临时区，经过预览、字段映射与校验后才允许写入正式数据集；原始文件与每次写入的版本全程保留。",
+      "page": "#/patterns/data-import"
+    },
+    {
+      "id": "citation-source",
+      "name": "Citation Source",
+      "chineseName": "正文引用 → 来源定位",
+      "summary": "事实处挂稳定引用编号，来源清单集中管理标题、链接与抓取时间；点击编号即定位来源，正文不重复粘贴长来源。",
+      "page": "#/patterns/citation-source"
+    },
+    {
+      "id": "project-permission",
+      "name": "Project Permission",
+      "chineseName": "项目与权限边界",
+      "summary": "角色与资源范围决定可见与可操作：无权限的动作禁用并解释原因，前端可见性永远只是提示，授权由后端二次校验兜底。",
+      "page": "#/patterns/project-permission"
+    },
+    {
+      "id": "reservation-scheduling",
+      "name": "Reservation Scheduling",
+      "chineseName": "预约与排程",
+      "summary": "先选设备再选时段，冲突即时提示并给出替代方案；确认后完整回显预约结果，日历视图按统一语义着色。",
+      "page": "#/patterns/reservation-scheduling"
+    },
+    {
+      "id": "run-status-logs",
+      "name": "Run Status & Logs",
+      "chineseName": "运行状态与日志",
+      "summary": "所有任务共享同一状态机：排队 → 运行 → 成功 / 失败 / 部分完成；日志实时跟随当前状态，失败任务一键回到可重试。",
+      "page": "#/patterns/run-status-logs"
+    },
+    {
+      "id": "audit-versioning",
+      "name": "Audit & Versioning",
+      "chineseName": "审计与版本",
+      "summary": "每一次变更都回答谁、何时、改了什么；版本之间可对比，任何状态可回溯，审计记录只增不改。",
+      "page": "#/patterns/audit-versioning"
+    }
+  ],
+  "foundations": [
+    {
+      "id": "color",
+      "name": "Color",
+      "chineseName": "色彩",
+      "summary": "颜色只表达语义，不负责装饰：品牌蓝用于动作，绿/黄/红/紫/橙各归其位。",
+      "page": "#/foundations/color"
+    },
+    {
+      "id": "typography",
+      "name": "Typography",
+      "chineseName": "排版",
+      "summary": "中文系统字体优先，数字与 ID 一律等宽；层级只有 Display / Heading / Body / Mono 四档。",
+      "page": "#/foundations/typography"
+    },
+    {
+      "id": "spacing-layout",
+      "name": "Spacing & Layout",
+      "chineseName": "间距与布局",
+      "summary": "以 4px 为基准的间距刻度，8/16/24 构成页面节奏；布局容器克制，同屏只对齐一套栅格。",
+      "page": "#/foundations/spacing-layout"
+    },
+    {
+      "id": "radius-elevation",
+      "name": "Radius & Elevation",
+      "chineseName": "圆角与阴影",
+      "summary": "圆角表达容器层级：控件小圆角、卡片大圆角；阴影只有两档，克制到几乎不被察觉。",
+      "page": "#/foundations/radius-elevation"
+    },
+    {
+      "id": "icons",
+      "name": "Icons",
+      "chineseName": "图标",
+      "summary": "只用 Lucide，16/18/20 三档尺寸，浅色底 + 深色图标；图标有语义才出现，不做装饰。",
+      "page": "#/foundations/icons"
+    },
+    {
+      "id": "motion",
+      "name": "Motion",
+      "chineseName": "动效",
+      "summary": "动效只解释界面发生了什么：时长小于 200ms，加载用骨架屏，尊重 prefers-reduced-motion。",
+      "page": "#/foundations/motion"
+    },
+    {
+      "id": "responsive",
+      "name": "Responsive",
+      "chineseName": "响应式",
+      "summary": "320px 起可用：内容重排而不是消失，宽表横向滚动，导航收进抽屉，点击区不小于 40px。",
+      "page": "#/foundations/responsive"
+    },
+    {
+      "id": "accessibility",
+      "name": "Accessibility",
+      "chineseName": "无障碍",
+      "summary": "键盘可达、焦点可见、错误可读：支持 200% 缩放，文本对比度不低于 WCAG AA。",
+      "page": "#/foundations/accessibility"
+    }
+  ],
+  "templates": [
+    {
+      "id": "list-page",
+      "name": "List Page",
+      "chineseName": "列表页",
+      "summary": "筛选栏 + 数据表格 + 分页 + 状态反馈的标准组合，覆盖平台 80% 的列表场景。",
+      "page": "#/templates/list-page"
+    },
+    {
+      "id": "detail-page",
+      "name": "Detail Page",
+      "chineseName": "详情页",
+      "summary": "标题与状态、Descriptions 属性区、关联数据区、操作区的标准组合，适用于项目、任务、数据集等一切实体。",
+      "page": "#/templates/detail-page"
+    },
+    {
+      "id": "form-wizard",
+      "name": "Form Wizard",
+      "chineseName": "表单向导",
+      "summary": "Steps 把复杂表单拆成有序步骤：每步独立校验、可随时回退，最后一步完整回显所有输入，确认后才真正提交。",
+      "page": "#/templates/form-wizard"
+    },
+    {
+      "id": "task-workbench",
+      "name": "Task Workbench",
+      "chineseName": "任务工作台",
+      "summary": "左侧任务列表、右侧任务详情的双栏工作台：状态筛选定位任务，单条追踪与批量操作在同一视图完成。",
+      "page": "#/templates/task-workbench"
+    },
+    {
+      "id": "data-import-page",
+      "name": "Data Import Page",
+      "chineseName": "数据导入页",
+      "summary": "Upload 上传区、预览校验区与确认写入条的完整页面，落地“导入 → 预览 → 校验 → 写入”pattern 的全部约定。",
+      "page": "#/templates/data-import-page"
+    },
+    {
+      "id": "agent-workspace",
+      "name": "Agent Workspace",
+      "chineseName": "Agent 工作区",
+      "summary": "AgentActivity 动态流、ConfirmPanel 确认面板、结果区与引用的完整工作区，承接“推荐 → 确认 → 执行”的闭环。",
+      "page": "#/templates/agent-workspace"
+    }
+  ],
+  "artifact": {
+    "name": "DesignSculpture",
+    "category": "visual",
+    "purpose": "A modular visual form used only as a non-semantic homepage visual anchor.",
+    "poster": "models/modular-form.webp",
+    "model": "models/modular-form.glb",
+    "loadingRule": "Render the poster first; load the interactive model only after an explicit user action.",
+    "motionRule": "No automatic rotation; user controls the camera and can reset the view."
+  }
 }

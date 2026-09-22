@@ -1,120 +1,6226 @@
-# DataCore Design — full AI-readable contract
+# DataCore Design — full design contract
+# Generated from src/catalog on 2026-09-22. Do not edit by hand.
+# Companion files: llms.txt (navigation), component-registry.json (machine-readable).
 
-Version: 0.1.0
-Scope: DataCore main platform UI and AION-compatible interaction patterns
-Source policy: examples are synthetic; this repository intentionally excludes production code and data.
+========================================================================
+1. DESIGN PRINCIPLES
+========================================================================
 
-## 1. Design language and foundations
+1. 清晰 Clarity — information hierarchy first; users always know where they are and what they can do.
+2. 确定 Certainty — important actions have explicit feedback; state, scope and result are never guessed.
+3. 克制 Restraint — color and icons carry semantics only; no decorative color, no decorative icons.
+4. 生长 Growth — stable rules with room for new business, devices, and AI-agent collaboration.
 
-The four working principles are **clarity, certainty, restraint, and growth**. They are practical review criteria, not marketing copy:
+Non-negotiable rules:
+  - Show context before action: resource, scope, current state, next step.
+  - Separate recommendation from execution; external side effects require explicit confirmation.
+  - Stable IDs for projects, tasks, runs, citations, versions. Never infer from display names.
+  - Every component answers the full state set; mark N/A states explicitly.
+  - Semantic HTML and visible keyboard focus; errors never rely on color alone.
+  - Citations use a stable citation ID at the fact, linked to a full source item.
+  - Frontend visibility is not authorization; the backend enforces permissions again.
 
-- Clarity: organize context, hierarchy, and next action so the first glance is useful.
-- Certainty: make state, scope, side effects, and results explicit.
-- Restraint: add only the controls, color, motion, and copy that help the current task.
-- Growth: keep tokens and APIs stable while leaving extension points for products, devices, and AI workflows.
+========================================================================
+2. FOUNDATIONS
+========================================================================
 
-### Semantic tokens
+## Color 色彩 (#/foundations/color)
+颜色只表达语义，不负责装饰：品牌蓝用于动作，绿/黄/红/紫/橙各归其位。
+### 语义优先
+DataCore 的颜色系统按语义组织，而不是按色相组织。同一个“成功”在浅色和深色主题中都读得出来，同一屏里不出现两种表达同一语义的颜色。
+页面背景使用中性浅灰，内容容器使用白色；主色只出现在主要动作、链接和当前导航上，避免整页蓝色卡片。
+### 语义角色
+每个语义色只承担一种含义，不能跨语义混用。
+  - Brand #2563eb — 主要动作、链接、当前导航。
+  - Success #058764 — 成功、已完成、可用。
+  - Warning #b87308 — 待确认、需复核、即将到期。
+  - Danger #c33636 — 阻断、错误、危险动作。
+  - Violet #7253c7 — Agent、模型、智能建议。
+  - Orange — 执行、设备、外部系统。
+### 使用规则
+信息层级靠字号、字重和间距表达，不靠新增颜色。一个区块一种语义色；没有语义的装饰不使用彩色。
+深色主题使用同一组语义令牌自动适配，业务代码不手写两套色值。
 
-| Token | Value | Use |
-| --- | --- | --- |
-| `brand.600` | `#2563eb` | primary action, links, current navigation |
-| `success.600` | `#059669` | completed, connected, valid |
-| `warn.600` | `#d97706` | review, pending, expiring |
-| `danger.600` | `#dc2626` | blocked, invalid, destructive |
-| `ink.900` | `#0f172a` | primary text |
-| `ink.500` | `#64748b` | supporting text |
-| `ink.200` | `#e2e8f0` | borders and dividers |
-| `ink.50` | `#f8fafc` | page surface |
+## Typography 排版 (#/foundations/typography)
+中文系统字体优先，数字与 ID 一律等宽；层级只有 Display / Heading / Body / Mono 四档。
+### 字体栈
+中文界面以系统字体为先：Noto Sans SC、PingFang SC、Microsoft YaHei 依次回退，西文与数字共用同一套字族，不为装饰引入额外字体。
+等宽字体只用于需要对齐与核对的内容：任务 ID、数据集 ID、数值、时间戳。正文段落不使用等宽字体。
+### 四级层级
+层级收敛为四档，信息高低靠字号与字重表达，不靠新增颜色。
+  - Display 30/700 — 页面标题，一页一个。
+  - Heading 20/700 — 区块标题与卡片组标题。
+  - Body 14/400 — 正文、表格与表单；辅助说明 12px 并降低明度。
+  - Mono 13 — ID、数字与代码片段。
+### 数字与 ID 等宽
+任务 ID（run-28003）、数据集 ID（ds-118）、电导率、时长、迭代次数等数值一律使用等宽字体，保证纵向对齐、逐位可比。
+表格中的数值列右对齐；ID 列保持左对齐并使用等宽，复制时不带额外格式。
+### 使用规则
+排版的纪律比字体本身更重要，以下规则全站生效。
+  - 一个页面只有一个 Display，不靠加粗一切来制造层级。
+  - 正文行高 1.5–1.7，段落之间用间距分隔，不用空行或分隔线堆砌。
+  - 标题不写句号，正文用全角标点；数字与单位之间留一个半角空格。
+  - 不手写 font-size 像素值，统一引用层级令牌。
 
-Use a 4px spacing base: `4, 8, 16, 24, 32`. Use 4px for compact controls, 8px for fields and buttons, 16px for cards, and 22px or larger only for page-level containers.
+## Spacing & Layout 间距与布局 (#/foundations/spacing-layout)
+以 4px 为基准的间距刻度，8/16/24 构成页面节奏；布局容器克制，同屏只对齐一套栅格。
+### 间距刻度
+所有间距从 4px 基准派生，常用刻度为 4、8、12、16、24、32。不允许出现 7px、13px 这类刻度外数值。
+  - 4 — 图标与文字之间、徽标内边距。
+  - 8 — 组件内部元素、行内操作间隔。
+  - 16 — 卡片内边距、卡片之间。
+  - 24 — 区块之间、筛选区与表格之间。
+  - 32 — 页面级分隔，仅在页面骨架使用。
+### 节奏规则
+页面自上而下是稳定的节奏：标题区与筛选区间隔 24，筛选区与表格间隔 16，卡片内部元素间隔 8–12。节奏一致时，用户不需要重新学习每一页。
+### 布局容器
+文档与表单内容最大宽度 880px，数据密集型页面最大 1240px，居中并保留 24–32px 左右留白，窄屏收敛到 16px。
+同屏只使用一套栅格：卡片栅格列数随宽度 4 → 2 → 1 收敛，不混用两套不同列宽的网格。
+### 使用规则
+间距是布局的第一手段，以下规则全站生效。
+  - 用 Stack / Grid 组件管理间距，不在业务代码里手写 margin 硬撑布局。
+  - 优先用间距分组，其次才是分隔线；能空开的就不要划线。
+  - 相邻元素的间距归属唯一：统一由容器 gap 负责，不双重叠加。
 
-### Typography
+## Radius & Elevation 圆角与阴影 (#/foundations/radius-elevation)
+圆角表达容器层级：控件小圆角、卡片大圆角；阴影只有两档，克制到几乎不被察觉。
+### 圆角层级
+圆角从小到大对应“控件 → 输入 → 容器”的层级。嵌套时外层圆角必须大于内层，视觉上才成立。
+  - radius-sm 4–6 — 徽标、标签、小按钮。
+  - radius-md 8–10 — 按钮、输入框、下拉面板。
+  - radius-lg 16 — 卡片、对话框、页面级容器。
+  - radius-xl 22 — 仅首页主视觉等大型容器使用。
+### 阴影与高度
+阴影只表达“浮起”这一件事：静止卡片使用 shadow-sm，悬停或浮层（下拉、对话框、抽屉）使用 shadow-md，没有第三档。
+深色主题下阴影效果减弱，浮层主要靠边框与背景色区分，不加深阴影。
+### 使用规则
+圆角与阴影服务于层级，不服务于装饰。
+  - 边框优先于阴影：默认用 1px 边框界定容器，阴影只在浮起时追加。
+  - 同一层级的容器圆角一致；卡片套卡片时内层降一档。
+  - 不用大圆角加强阴影的组合制造“气球感”。
 
-Use the system Chinese sans stack for UI and `DM Mono`/system monospace for IDs, file names, and machine values. Keep body copy at 14px or larger for primary workflows. Do not encode meaning using font weight alone.
+## Icons 图标 (#/foundations/icons)
+只用 Lucide，16/18/20 三档尺寸，浅色底 + 深色图标；图标有语义才出现，不做装饰。
+### 图标库
+全站统一使用 Lucide，不混用其他图标库、emoji 或自制 SVG。同一语义在全站使用同一个图标：任务一律 flask，数据集一律 database，Agent 一律 bot。
+### 尺寸
+只有三档尺寸，随上下文选择，不在同一行混用多档。
+  - 16 — 按钮内、表格行内、状态文字前。
+  - 18 — 导航、卡片操作区、常规功能入口。
+  - 20 — 空状态、结果页等页面级图形。
+### 有语义才出现
+每个图标都必须能回答“它代表什么对象或状态”。状态类信息使用浅色图标底 + 深色图标的组合：成功绿底、警告黄底、失败红底、Agent 紫底。
+卡片标题前不放图标：标题靠文字本身表达，成排卡片标题前重复的图标是噪音。只有功能入口与状态标识才使用图标。
+### 使用规则
+图标是界面里最被滥用的元素，以下规则全站生效。
+  - 图标与文字基线对齐，间距 6–8px。
+  - 纯图标按钮必须有 aria-label，关键操作不能只靠图标传达。
+  - 不为没有语义的装饰需求找“差不多”的图形，宁可不用。
 
-## 2. Component contracts
+## Motion 动效 (#/foundations/motion)
+动效只解释界面发生了什么：时长小于 200ms，加载用骨架屏，尊重 prefers-reduced-motion。
+### 时长与缓动
+微交互 120–160ms，面板展开与浮层 160–200ms；任何超过 200ms 的动效都需要理由，超过 400ms 不允许。
+进入用 ease-out，离开用 ease-in；不使用弹性、弹跳曲线，界面不是玩具。
+### 加载用骨架屏
+预计超过 300ms 的加载展示骨架屏，骨架的结构与真实内容一一对应，加载完成后原位替换，不抖动。
+Spinner 只用于按钮内和小面积区域；整页加载不允许“白屏转圈”。
+### 尊重降低动态偏好
+prefers-reduced-motion 下取消位移与缩放，只保留透明度渐变；骨架屏退化为静态占位，自动播放与循环动画停止。
+任何信息都不能只通过动画传达：进度变化必须同时有文字或数值。
+### 使用规则
+动效是解释，不是表演。
+  - 动效回答“它从哪里来、到哪里去”，不回答“好看”。
+  - 列表入场不逐项 stagger 超过 5 项，批量更新直接到位。
+  - 动画期间不阻塞交互：加载中可以取消、可以离开。
 
-### Button / Action
+## Responsive 响应式 (#/foundations/responsive)
+320px 起可用：内容重排而不是消失，宽表横向滚动，导航收进抽屉，点击区不小于 40px。
+### 原则与断点
+最小支持宽度 320px。断点为 760px 与 1100px：1100px 以下收起辅助栏，760px 以下进入移动布局。
+桌面端的功能在移动端降级而不是消失：复杂操作收入菜单，多栏重排为单栏。
+### 内容自适应
+宽表、代码块、JSON 预览在窄屏横向滚动，列不被压缩，首列语义保持可见。
+卡片栅格随宽度 4 → 2 → 1 收敛；长文本截断并提供完整查看入口。
+### 导航与抽屉
+760px 以下侧边导航收进抽屉：遮罩可点击关闭，Esc 可关闭；打开时焦点进入抽屉，关闭后返还触发按钮。
+顶栏保留菜单、搜索与页面主操作；面包屑在窄屏只保留当前页。
+### 触控目标
+可点击元素最小 40×40px，相邻目标间距不小于 8px；行内文字按钮在移动端自动增高。
+仅 hover 才出现的操作在触控设备上常显，或收入行尾菜单。
 
-Purpose: trigger a user action.
+## Accessibility 无障碍 (#/foundations/accessibility)
+键盘可达、焦点可见、错误可读：支持 200% 缩放，文本对比度不低于 WCAG AA。
+### 键盘可达与焦点可见
+所有交互元素 Tab 可达，焦点顺序与视觉顺序一致；focus-visible 使用 3px 品牌色外发光，不允许 outline: none 而无替代方案。
+弹层打开时焦点进入，Esc 关闭并返还焦点到触发元素；不可见的元素不可聚焦。
+### 表单错误与读屏
+出错输入设置 aria-invalid="true"，错误文案容器使用 role="alert"，提交失败即时播报；label 通过 for/id 与控件关联。
+错误不只靠红色表达：必须同时有文字说明与图标，颜色只是增强。
+### 缩放与对比度
+200% 缩放下布局不破坏、内容不丢失，除宽表数据区外不出现横向滚动。
+正文对比度不低于 4.5:1，大字号文本与图标不低于 3:1；深浅两个主题都需满足。disabled 不通过把对比度降到不可读来“变灰”。
+### 交付检查清单
+每个页面交付前完成以下走查，缺一不可。
+  - 键盘全流程走查：能到、能触发、能离开。
+  - 读屏走查关键流程：状态变化（提交成功、任务失败）被播报。
+  - 200% 缩放与 320px 宽度各走查一遍核心页面。
+  - 深色主题复核对比度与焦点可见性。
 
-Variants: `primary` for the main next step, `secondary` for an adjacent safe action, `ghost` for low-emphasis navigation, `danger` for destructive actions.
+========================================================================
+3. COMPONENTS
+========================================================================
 
-States: default, hover, keyboard focus, pressed, disabled, loading.
+## dc.button — Button 按钮 [stable] v0.1.0 (#/components/button)
+Category: general
+Purpose: 触发一个动作或提交一段意图，是界面里最主要的动作载体。
+Usage: 用于立即执行的动作（提交、保存、确认、重试）。跳转页面请用 Link；只有图标没有文字时请用 IconButton；危险且不可逆的动作必须使用 danger 变体并配合确认。
 
-Rules:
+Props:
+  - variant: "primary" | "secondary" | "ghost" | "danger" = "secondary" — 视觉层级。primary 一屏最多一个。
+  - size: "sm" | "md" | "lg" = "md" — sm 用于行内，lg 仅用于页面级主动作。
+  - loading: boolean = false — 展示 spinner 并禁止重复点击，保留按钮宽度。
+  - disabled: boolean = false — 禁止交互；原因必须由邻近文案或 Tooltip 说明。
+  - icon: ReactNode — 可选前置图标，仅在有语义时使用，尺寸 16。
+  - children (required): ReactNode — 按钮文案，必须以动词开头。
+  - onClick: () => void — 点击回调；异步动作必须进入 loading。
 
-- Start the label with a verb: `提交计算任务`, `保存草稿`, `重新连接`.
-- During loading, keep the button width and explain what is happening.
-- For compute/write/quota/external actions, show the target scope in nearby copy or confirmation dialog.
+States:
+  - default: 文案以动词开头，primary 一屏最多一个。
+  - hover: 背景加深或边框变为品牌色，不改变尺寸。
+  - focus-visible: 3px 品牌色外发光，键盘可达，不能被 outline: none 移除。
+  - pressed: 轻微下沉（translateY 0），颜色再深一档，时长 < 120ms。
+  - disabled: opacity .45 + not-allowed；必须在上下文中解释原因，不能只变灰。
+  - loading: spinner 替换前置图标位，文案保留，宽度不变，阻止重复提交。
+  - empty [N/A]: 不适用：按钮不存在空状态。
+  - error: 按钮本身不展示错误；失败反馈由 Alert/Message 在动作附近给出。
+  - permission-limited: 无权限时渲染为 disabled 并说明所需权限，而不是隐藏。
+  - mobile: 最小点击区域 40×40px，sm 尺寸在移动端自动增高到 40px。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
 
-Example:
+Interaction rules:
+  - 点击后立即给出反馈：同步动作直接进入结果态，异步动作进入 loading。
+  - 涉及计算、写入、额度或外部调用的动作，按钮旁给出影响范围（项目、预算、数量）。
+  - 危险动作（danger）必须二次确认，确认面板回显目标和范围。
+  - 同一区域只保留一个 primary；其余动作降级为 secondary 或 ghost。
 
-```tsx
-<Button variant="primary" loading={isSubmitting}>提交计算任务</Button>
-```
+Keyboard:
+  - Tab 聚焦，焦点顺序与视觉顺序一致。
+  - Enter / Space 触发点击。
+  - loading 或 disabled 时仍可获得焦点并读出状态（使用 aria-disabled 而非移除 tabindex 的场景除外）。
 
-### Field / Validation
+Accessibility:
+  - 使用原生 <button>，不滥用 div。
+  - loading 时设置 aria-busy="true"。
+  - 图标按钮必须有 aria-label；图文按钮不重复朗读。
+  - danger 不单独依赖红色表达危险，配合文案或图标。
 
-Required contract: visible label, input, optional helper text, and inline error tied to the input with `aria-describedby`. Invalid controls use `aria-invalid="true"`.
+Responsive:
+  - 移动端最小高度 40px。
+  - 窄屏下动作组允许换行，主动作保持在最前。
+  - 不因为空间不足而省略文案改纯图标；空间不足时收入 Dropdown。
 
-Rules:
+Content guidelines:
+  - 文案以动词开头：开始计算、保存草稿、撤销任务。
+  - 不用“确定/提交”这类无上下文文案；写清提交什么。
+  - loading 文案说明进行中：正在提交，而不是转圈无字。
 
-- Explain accepted format before the user submits when it is non-obvious.
-- Error text should state the fix, not just that validation failed.
-- Optional data-source fields can say that the Agent may search automatically; do not imply that an empty field is an error.
+Do:
+  - 一屏一个 primary，层级清晰。
+  - 异步动作进入 loading 并保留宽度。
+  - 危险动作使用 danger + 确认面板。
 
-### StatusLine / StatusBadge
+Don't:
+  - 不要用按钮做页面跳转（用 Link）。
+  - 不要禁用按钮却不给原因。
+  - 不要在一排里放两个 primary。
+  - 不要用纯装饰图标替代文案。
 
-Tones: `success`, `warning`, `danger`, `neutral`.
+Examples:
+  --- basic (basic) 基础示例
+  <Button variant="primary">开始计算</Button>
+  <Button variant="secondary">保存草稿</Button>
+  <Button variant="ghost">查看详情</Button>
+  <Button variant="danger">撤销任务</Button>
+  --- states (state) 状态示例
+  <Button variant="primary" loading>正在提交</Button>
+  <Button variant="primary" disabled>不可用</Button>
+  --- sizes (size) 尺寸示例
+  <Button size="sm" variant="secondary">行内操作</Button>
+  <Button size="md" variant="primary">默认尺寸</Button>
+  <Button size="lg" variant="primary">页面主动作</Button>
+  --- business (business) 真实业务示例
+  function SubmitRunAction() {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    return (
+      <div className="action-with-scope">
+        <Button
+          variant="primary"
+          loading={isSubmitting}
+          onClick={async () => {
+            setIsSubmitting(true);
+            await submitRun({ projectId: "project-042" }); // synthetic
+            setIsSubmitting(false);
+          }}
+        >
+          提交计算任务
+        </Button>
+        <span>将使用 示例项目（project-042）· 预计最长 300 秒</span>
+      </div>
+    );
+  }
 
-Every status should answer: what happened, does the user need to act, and what happens next. Do not communicate the state with color alone; include text and an icon/shape.
+Related: icon-button, link, dropdown, modal, confirm-panel
 
-### DataTable
+## dc.icon-button — IconButton 图标按钮 [stable] v0.1.0 (#/components/icon-button)
+Category: general
+Purpose: 用一个语义明确的图标触发动作，是空间受限或高频场景下的紧凑动作载体。
+Usage: 用于工具栏、卡片角落、表格行内的高频动作（关闭、复制、刷新、更多）。图标含义必须已被约定俗成；含义不直观或低频的动作必须使用带文案的 Button，跳转用 Link。
 
-Use a `<caption>`, real `<th>` headers, stable row IDs, and a horizontally scrollable wrapper on narrow screens. Keep status and actions in predictable columns. Use monospace for IDs. Do not turn dense scientific tables into unreadable stacks by default.
+Props:
+  - icon (required): ReactNode — 图标，尺寸 14–16px，不允许替换为插画或文字。
+  - label (required): string — 动作的完整名称，同时用于 aria-label 与 Tooltip。
+  - variant: "ghost" | "secondary" | "danger" = "ghost" — ghost 用于工具栏，secondary 用于需要边框的场景，danger 用于不可逆动作。
+  - size: "sm" | "md" = "md" — sm 高度 28px 用于行内，md 高度 32px。
+  - disabled: boolean = false — 禁止交互；原因必须由 Tooltip 或邻近文案说明。
+  - onClick: () => void — 点击回调；异步动作由外部状态驱动 loading 替换图标位。
 
-### Dialog / Confirmation
+States:
+  - default: 单个图标居中，无文案；动作名称由 label 通过 Tooltip 与 aria-label 提供。
+  - hover: 背景变为 surface-soft 并显示 Tooltip（动作名称 + 快捷键，如有）。
+  - focus-visible: 3px 品牌色外发光，焦点样式与 Button 一致，不能被 outline: none 移除。
+  - pressed: 背景再深一档，不改变尺寸与图标。
+  - disabled: opacity .45 + not-allowed；Tooltip 说明原因，例如“需要项目编辑权限”。
+  - loading: 图标位替换为 spinner，尺寸不变，禁止重复点击。
+  - empty [N/A]: 不适用：图标按钮不存在空状态。
+  - error [N/A]: 不适用：动作失败由 Message/Alert 反馈，按钮自身不表达错误。
+  - permission-limited: 无权限时渲染为 disabled 并在 Tooltip 说明所需权限，不隐藏。
+  - mobile: 命中区域不小于 40×40px，视觉尺寸可保持 32px，命中区域外扩。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
 
-Use for actions with external side effects. Required behavior: `role="dialog"`, `aria-modal="true"`, labelled title, visible close/cancel action, Esc close, and focus returned to the trigger in the production implementation.
+Interaction rules:
+  - 点击后立即反馈：同步动作直接生效，异步动作图标位变 spinner。
+  - danger 变体的不可逆动作必须接确认（Popconfirm 或确认面板）。
+  - 同一行内图标按钮不超过 3 个，其余收入 Dropdown。
+  - Tooltip 只显示动作名称，不承载教学文案。
 
-Confirmation copy must include target, scope, and meaningful side effects (for example project, CPU/time limit, cost or audit record).
+Keyboard:
+  - Tab 聚焦，焦点顺序与视觉顺序一致。
+  - Enter / Space 触发动作。
+  - Esc 关闭由按钮打开的浮层后，焦点回到按钮本身。
 
-### Citation / Source
+Accessibility:
+  - 使用原生 <button>，aria-label 等于 label。
+  - 图标本身 aria-hidden，朗读只读动作名称。
+  - disabled 使用 aria-disabled 保留焦点与 Tooltip 入口。
+  - danger 不只依赖红色，动作名称必须写清后果（“删除数据集”而非“删除”）。
 
-The model or tool layer emits a stable citation ID, for example `citation:c2`. The renderer maps it to a numbered superscript in the prose and the matching source record in the source list. The frontend must not guess which source supports a sentence by string matching.
+Responsive:
+  - 移动端命中区域 ≥ 40×40px。
+  - 窄屏工具条优先保留高频动作，其余收入 Dropdown，不换行堆叠。
 
-Source records should include: `id`, `title`, `url`, `retrievedAt`, and optional `publisher`. If a fact has no reliable source, omit the citation instead of attaching an entire search result set.
+Content guidelines:
+  - label 使用动宾结构：复制任务 ID、刷新列表、关闭面板。
+  - 不用“操作”“功能”这类无信息名称。
+  - 危险动作名称包含对象：删除数据集 ds-118，而不是“删除”。
 
-### Homepage visual / DesignSculpture
+Do:
+  - 只放约定俗成的图标：关闭、复制、刷新、更多、编辑。
+  - 为每个图标按钮提供 label（Tooltip + aria-label）。
+  - 行内动作超出 3 个时收入 Dropdown。
 
-The homepage uses a modular visual form to make the design language tangible. It is a visual anchor, not a navigation control or a source of product meaning.
+Don't:
+  - 不要用含义不直观的图标省掉文案（改用 Button）。
+  - 不要禁用却不说明原因。
+  - 不要把危险动作与常规动作无差别平铺。
+  - 不要在图标按钮里塞数字或文字。
 
-- Source scene: `art/blender/modular-form.blend`.
-- Poster: `public/models/modular-form.webp` (default, fast path).
-- Interactive asset: `public/models/modular-form.glb` (loaded only after an explicit user action).
-- Interaction: camera controls, keyboard-accessible reset and static-preview controls; no automatic rotation.
-- Failure behavior: keep the poster visible and explain that the interactive model could not load.
-- Do not use the model to encode required information, status, permissions, or navigation.
+Examples:
+  --- basic (basic) 基础示例
+  <IconButton icon={<X size={16} />} label="关闭面板" />
+  <IconButton icon={<Copy size={16} />} label="复制任务 ID" />
+  <IconButton icon={<RefreshCw size={16} />} label="刷新列表" />
+  <IconButton icon={<MoreHorizontal size={16} />} label="更多操作" />
+  --- states (state) 状态示例
+  <IconButton icon={<Trash2 size={16} />} label="删除数据集 ds-118" variant="danger" />
+  <IconButton icon={<Share2 size={16} />} label="分享（需要项目编辑权限）" disabled />
+  --- sizes (size) 尺寸示例
+  <IconButton size="sm" icon={<Pencil size={14} />} label="编辑" />
+  <IconButton size="md" icon={<Pencil size={16} />} label="编辑" />
+  --- business (business) 真实业务示例
+  <div className="row-actions">
+    <IconButton icon={<Eye size={15} />} label="查看 run-28003 详情" onClick={openDetail} />
+    <IconButton icon={<Copy size={15} />} label="复制任务 ID" onClick={copyRunId} />
+    <IconButton icon={<MoreHorizontal size={15} />} label="更多操作" onClick={openMenu} />
+  </div>
 
-## 3. Business patterns
+Related: button, dropdown, link, modal
 
-1. Agent recommendation → user confirmation → executable task → status and logs.
-2. Data import → preview → field validation → confirmed write → immutable source/version record.
-3. Prose citation superscript ↔ source detail list.
-4. Permission-aware actions: visible context, disabled or hidden unsafe action, backend enforcement, and an explanation for the user.
+## dc.link — Link 链接 [stable] v0.1.0 (#/components/link)
+Category: general
+Purpose: 导航到另一个页面、资源或位置，只负责跳转，不执行动作。
+Usage: 用于页面跳转、打开详情、访问外部文档。提交、保存、删除等动作用 Button；当前位置导航用 Breadcrumb；主导航用 Menu。
 
-## 4. Engineering checklist
+Props:
+  - href (required): string — 目标地址；站内用路由路径，站外用完整 URL。
+  - external: boolean = false — 外链标识：新标签页打开，附加 rel=noopener noreferrer 与外链图标。
+  - variant: "default" | "muted" | "danger" = "default" — muted 用于次级导航，danger 仅用于离开/放弃类导航。
+  - icon: ReactNode — 可选图标；方向类图标放右侧，语义图标放左侧。
+  - disabled: boolean = false — 禁止跳转，渲染为普通文本并由邻近文案说明原因。
+  - children (required): ReactNode — 链接文案，写清去向，不写“点击这里”。
 
-- [ ] Works at 320px width and on desktop.
-- [ ] Keyboard focus is visible and order is logical.
-- [ ] Loading, empty, error, disabled and permission states exist.
-- [ ] External side effects require confirmation.
-- [ ] Stable IDs are used for relationships.
-- [ ] No secrets, production URLs, or user data in examples.
-- [ ] `npm run typecheck` and `npm run build` pass.
-- [ ] Registry and this document are updated together.
+States:
+  - default: 品牌色；文内链接默认无下划线，hover 时出现。
+  - hover: 出现下划线，颜色加深；不改变字重，避免行内抖动。
+  - focus-visible: 3px 品牌色外发光，与 Button 焦点样式一致。
+  - pressed: 颜色再深一档；站内导航不记忆 visited 态。
+  - disabled: 渲染为 muted 文本，去掉跳转能力，邻近文案说明原因。
+  - loading [N/A]: 不适用：跳转由路由接管，目标页加载用 Skeleton/Spin。
+  - empty [N/A]: 不适用：链接不存在空状态。
+  - error: 目标不存在时由目标页的 Result（404）承载，链接自身不表达错误。
+  - permission-limited: 目标无权限时可点击并展示 403 结果页，或按场景渲染为 disabled 文本。
+  - mobile: 行内链接命中区域上下扩展到 ≥ 40px 高。
+  - dark-mode: 品牌色在深色主题下自动提亮一档，保证对比度。
 
-## 5. Main-platform improvement backlog
+Interaction rules:
+  - 站内跳转使用路由，外链新标签页打开并带外链图标。
+  - 下载类链接写清文件名与格式，例如“导出记录（CSV）”。
+  - danger 链接只做“离开/放弃”导航，破坏性动作一律用 Button + 确认。
 
-The main platform already has useful global classes (`btn-*`, `input`, `card`, `badge-*`). The smallest high-value hardening is to route new pages through shared components and add consistent `:focus-visible`, dialog focus trapping/return, inline validation semantics, and citation rendering. Avoid a broad rewrite of existing business pages until each migration has a regression test.
+Keyboard:
+  - Tab 聚焦，Enter 触发跳转。
+  - 外链聚焦时读屏器朗读“在新窗口打开”。
+
+Accessibility:
+  - 使用原生 <a href>，不用 onClick + div 模拟。
+  - 外链附加 rel=noopener noreferrer 与视觉外链图标。
+  - 链接文案脱离上下文也可读懂去向，不写“点击这里”“更多”。
+
+Responsive:
+  - 移动端行内链接命中区域 ≥ 40px 高。
+  - 长 URL 与长名称使用 ellipsis 截断，完整值在 title 中给出。
+
+Content guidelines:
+  - 文案写去向：查看运行详情、字段规范文档。
+  - 表格实体名做链接，ID 用等宽字体展示但不重复链接。
+  - 不用“点击这里”“链接”作为文案。
+
+Do:
+  - 跳转用 Link，动作用 Button，职责分清。
+  - 外链新标签页打开并给外链图标。
+  - 表格实体名称链接到对应详情页。
+
+Don't:
+  - 不要用 Link 执行提交、删除等动作。
+  - 不要整段文字都做成链接，只链接关键名词。
+  - 不要在同一视图里为同一目标重复多个链接。
+  - 不要用按钮样式包装链接假装动作。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Link href="#/projects/project-042">示例项目（project-042）</Link>
+  <Link href="#/runs/run-28003" icon={<ArrowRight size={14} />}>查看运行详情</Link>
+  <Link href="https://example.com/docs/fields" external>字段规范文档</Link>
+  --- variants (variant) 变体示例
+  <Link href="#/datasets" variant="muted">返回数据集列表</Link>
+  <Link href="#/projects/project-042/archive" variant="danger">放弃本次编辑并离开</Link>
+  --- business (business) 真实业务示例
+  <div className="cell-main">
+    <Link href="#/projects/project-042">示例电解液项目</Link>
+    <span className="mono">project-042</span>
+  </div>
+
+Related: button, breadcrumb, menu, typography
+
+## dc.typography — Typography 排版 [stable] v0.1.0 (#/components/typography)
+Category: general
+Purpose: 用固定的字号、字重与语义色层级表达信息结构，保证全站文字可读、可扫、一致。
+Usage: 用于标题、正文、辅助说明、ID 与数值的展示。需要表达状态用 Badge；大段代码用 CodeBlock；不要用手写字号的方式伪造层级。
+
+Props:
+  - variant: "display" | "heading" | "body" | "label" | "mono" = "body" — 层级变体；display 每屏最多一个。
+  - type: "default" | "secondary" | "success" | "warning" | "danger" | "violet" = "default" — 语义色；只用于状态文本，不用于装饰。
+  - ellipsis: boolean = false — 单行截断并在 title 中给出完整值。
+  - as: "h1" | "h2" | "h3" | "h4" | "p" | "span" — 覆盖渲染标签，保证标题层级语义。
+  - children (required): ReactNode — 文本内容。
+
+States:
+  - default: 按 variant 渲染固定字号/字重/行高，不允许局部覆盖。
+  - hover [N/A]: 不适用：静态文本无 hover；可交互文本的 hover 由承载控件定义。
+  - focus-visible [N/A]: 不适用：静态文本不接收焦点。
+  - pressed [N/A]: 不适用：静态文本无按压态。
+  - disabled [N/A]: 不适用：禁用态由对应控件表达，文本不单独变灰。
+  - loading: 数据未到时用 Skeleton 占位，不渲染“加载中…”正文文本。
+  - empty: 空值不渲染“暂无”，由 Empty 组件在区块级说明。
+  - error: 错误摘要文本使用 type="danger"；字段级错误跟随表单的 field-error 样式。
+  - permission-limited: 无权限字段渲染为 muted 的“无权限查看”占位，不留空白、不显示部分值。
+  - mobile: display 在移动端从 30px 降到 24px，正文保持 14px 不缩小。
+  - dark-mode: 正文与辅助色使用语义令牌自动适配；mono 品牌色提亮一档。
+
+Interaction rules:
+  - ID 与数值用 mono，方便扫描与复制比对。
+  - 截断文本必须提供完整值入口（title 或展开按钮）。
+  - 语义色文本不与同色 Badge 并排重复表达同一状态。
+
+Keyboard:
+  - 不适用：静态文本无键盘行为；复制 ID 通过相邻 IconButton 触发。
+  - 截断展开的入口必须是可聚焦的按钮，不绑定在文本本身。
+
+Accessibility:
+  - 标题使用真实 h1–h4 标签，层级不跳级。
+  - 正文字号不小于 13px，对比度 ≥ 4.5:1。
+  - 状态文本不只依赖颜色，配合措辞或图标。
+
+Responsive:
+  - display 在 <760px 降为 24px。
+  - 长表格单元格文本使用 ellipsis，不换行撑高行。
+
+Content guidelines:
+  - 辅助说明使用 label，句子简短，不以“请”开头。
+  - ID 一律等宽字体，不翻译、不改写大小写。
+  - 错误文本写清对象与后果：任务失败：输入文件缺失。
+
+Do:
+  - 用 variant 表达层级，而不是手写 font-size。
+  - ID、时间、数值使用 mono。
+  - 状态文本用语义色并写清结论。
+
+Don't:
+  - 不要新增字号或颜色表达层级。
+  - 不要整段正文使用语义色。
+  - 不要把长 URL、长 ID 原样撑破布局（用 ellipsis）。
+  - 不要用加粗代替标题层级。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Typography variant="display">示例项目（project-042）</Typography>
+  <Typography variant="heading">基础信息</Typography>
+  <Typography variant="body">本项目用于验证电解液配方的筛选流程。</Typography>
+  <Typography variant="label">最近更新 · 2026-09-18</Typography>
+  <Typography variant="mono">run-28003</Typography>
+  --- variants (variant) 语义文本示例
+  <Typography type="success">计算完成 · 用时 214 秒</Typography>
+  <Typography type="warning">3 个字段待人工复核</Typography>
+  <Typography type="danger">任务失败：输入文件缺失</Typography>
+  <Typography type="violet">以下内容由 Agent 生成</Typography>
+  --- business (business) 真实业务示例
+  <header className="detail-head">
+    <Typography variant="display">NCM811 高温循环实验</Typography>
+    <Typography variant="mono">run-28003</Typography>
+    <Typography variant="label">所属项目 示例项目（project-042）· 数据集 ds-118</Typography>
+  </header>
+
+Related: divider, badge, code-block, empty, card
+
+## dc.divider — Divider 分割线 [stable] v0.1.0 (#/components/divider)
+Category: general
+Purpose: 在内容之间建立分组边界，帮助用户区分不同主题或功能区块。
+Usage: 用于分隔段落、卡片内功能分区、工具栏按钮分组。能用间距（≥24px）表达分组时不加线；列表行之间使用行分隔线，不逐行插 Divider。
+
+Props:
+  - orientation: "horizontal" | "vertical" = "horizontal" — 方向；垂直只用于工具栏与按钮组。
+  - dashed: boolean = false — 虚线样式，用于可折叠或可选区块的弱分隔。
+  - textPosition: "start" | "center" | "end" = "center" — 文字位置；区块标题推荐 start。
+  - children: ReactNode — 分割线文字，写区块名，一句话以内。
+
+States:
+  - default: 1px line 色，上下间距 ≥ 20px，无投影无圆角。
+  - hover [N/A]: 不适用：分割线不接收 hover。
+  - focus-visible [N/A]: 不适用：分割线不接收焦点。
+  - pressed [N/A]: 不适用：分割线无按压态。
+  - disabled [N/A]: 不适用：分割线无禁用态。
+  - loading [N/A]: 不适用：加载中的区块由 Skeleton 占位，不单独渲染分割线。
+  - empty: 空区块连同分割线一起移除，避免出现“两条线夹空白”。
+  - error [N/A]: 不适用：错误由 Alert/Result 表达。
+  - permission-limited [N/A]: 不适用：无权限区块整体替换为权限提示，不保留分割线。
+  - mobile: 间距随断点收缩到 16px，线宽保持 1px。
+  - dark-mode: 使用 line 令牌自动适配，不用纯黑/纯白硬编码。
+
+Interaction rules:
+  - 分割线不可点击、不可聚焦，带文字时文字也不承载链接。
+  - 区块为空时连同分割线一起移除，不保留孤立线条。
+
+Keyboard:
+  - 不适用：分割线不进入 Tab 序列。
+  - 带文字分割线的文字是静态文本，不绑定快捷键。
+
+Accessibility:
+  - 使用 <hr> 或 role="separator"，aria-orientation 与方向一致。
+  - 纯装饰分割线标记 aria-hidden。
+
+Responsive:
+  - 移动端上下间距收缩到 16px。
+  - 垂直分割线在窄屏工具条换行时移除。
+
+Content guidelines:
+  - 分割线文字写区块名：执行记录、参数配置。
+  - 不写句子、不写说明；超过 8 个字应改用区块标题。
+
+Do:
+  - 优先用间距分组，其次才用线。
+  - 区块标题场景使用 textPosition="start"。
+  - 空区块连同分割线一起移除。
+
+Don't:
+  - 不要在列表每一行之间都加 Divider。
+  - 不要用分割线表达层级或状态颜色。
+  - 不要让分割线紧贴文字（间距 < 16px）。
+  - 不要连续使用两条以上分割线。
+
+Examples:
+  --- basic (basic) 基础示例
+  <p>项目基础信息与说明。</p>
+  <Divider />
+  <p>参数配置与执行记录。</p>
+  --- variants (variant) 变体示例
+  <Divider textPosition="start">参数配置</Divider>
+  <Divider orientation="vertical" />
+  <Divider dashed />
+  --- business (business) 真实业务示例
+  <Descriptions items={baseItems} />
+  <Divider textPosition="start">执行记录</Divider>
+  <Timeline items={runEvents} />
+
+Related: typography, card, layout, stack
+
+## dc.badge — Badge 徽标 [stable] v0.1.0 (#/components/badge)
+Category: general
+Purpose: 用语义色加短文案标记对象的状态或数量，是状态语义的最小载体。
+Usage: 用于表格状态列、任务与运行状态、通知计数。分类与属性用 Tag；需要整段说明的状态用 Alert；可点击的筛选条件用 Tag 或 FilterBar。
+
+Props:
+  - status: "success" | "warning" | "danger" | "info" | "violet" | "neutral" = "neutral" — 语义色；与语义一一对应，不允许用颜色区分业务类型。
+  - text: string — 状态文案，2–4 个字。
+  - dot: boolean = false — 点状变体，用于空间极小的行内状态。
+  - count: number — 数字徽标；与 text 互斥，只表达未读/待处理数量。
+  - max: number = 99 — count 超过该值显示为 max+。
+  - pulse: boolean = false — 进行中状态的脉冲动效，仅 status="info" 可用。
+
+States:
+  - default: 圆角胶囊，文案 2–4 字，颜色只按语义取值。
+  - hover [N/A]: 不适用：徽标不可交互；需要交互用 Tag 或 Button。
+  - focus-visible [N/A]: 不适用：徽标不接收焦点。
+  - pressed [N/A]: 不适用：徽标无按压态。
+  - disabled [N/A]: 不适用：徽标无禁用态；对象的禁用由所在行样式表达。
+  - loading: 状态未返回时渲染 neutral「同步中」，不猜颜色、不闪烁切换。
+  - empty: 无状态值时渲染 neutral「未知」，不省略徽标造成列错位。
+  - error: 失败/阻断使用 danger，文案写结论：失败、已撤销。
+  - permission-limited: 无权限查看状态时渲染 neutral「无权查看」，不显示推测状态。
+  - mobile: 尺寸不缩小；空间不足隐藏文案时保留 dot 并提供 title。
+  - dark-mode: 语义色使用令牌自动适配，深浅主题同一语义。
+
+Interaction rules:
+  - 徽标本身不响应点击；点击行或名称跳详情。
+  - 进行中状态用 pulse 动效提示仍在变化，完成后立即替换为终态徽标。
+  - 同一行最多两个徽标：状态 + 数量，不堆叠第三类标记。
+
+Keyboard:
+  - 不适用：徽标不进入 Tab 序列。
+  - count 徽标的入口（如通知中心）由相邻 IconButton 承载键盘行为。
+
+Accessibility:
+  - 状态不只依赖颜色：dot/颜色之外必须有文案或图标。
+  - count 徽标提供 aria-label，如“8 条未读通知”。
+  - pulse 动效遵守 prefers-reduced-motion，降级为静态样式。
+
+Responsive:
+  - 移动端不缩小字号；空间不足时隐藏文案、保留 dot 并提供 title。
+  - 表格状态列保持固定宽度，横向滚动中不被压缩变形。
+
+Content guidelines:
+  - 文案 2–4 字，写结论不写过程：已完成、待复核、失败。
+  - 语义与颜色固定绑定：violet 只用于 Agent/模型，不用于其他“特别”标记。
+  - count 只表达未读/待处理数量，不表达总量。
+
+Do:
+  - 颜色与语义一一对应，全站统一。
+  - 状态未知或未返回时用 neutral 占位。
+  - 进行中用 info + pulse，完成即切终态。
+
+Don't:
+  - 不要用颜色区分业务类型或重要性。
+  - 不要给徽标配点击行为。
+  - 不要在一行里堆叠三个以上徽标。
+  - 不要用徽标代替整段错误说明（用 Alert）。
+
+Examples:
+  --- basic (basic) 语义色示例
+  <Badge status="success" text="已完成" />
+  <Badge status="warning" text="待复核" />
+  <Badge status="danger" text="失败" />
+  <Badge status="info" text="进行中" />
+  <Badge status="violet" text="Agent 建议" />
+  <Badge status="neutral" text="已归档" />
+  --- variants (variant) 变体示例
+  <Badge status="success" dot text="服务正常" />
+  <Badge status="info" dot pulse text="同步中" />
+  <Badge count={8} />
+  <Badge count={128} max={99} />
+  --- business (business) 真实业务示例
+  // synthetic 数据
+  const runs = [
+    { id: "run-28003", name: "NCM811 高温循环", status: "success", statusText: "已完成" },
+    { id: "run-28004", name: "电解液配方筛选", status: "info", statusText: "进行中" },
+    { id: "run-28005", name: "阻抗谱拟合", status: "warning", statusText: "待复核" },
+    { id: "run-28006", name: "热稳定性预测", status: "danger", statusText: "失败" },
+  ];
+
+Related: tag, alert, table, run-status, message
+
+## dc.tag — Tag 标签 [beta] v0.1.0 (#/components/tag)
+Category: general
+Purpose: 标记对象的分类、属性或来源，支持关闭与选择，是属性维度的最小载体。
+Usage: 用于数据集属性、筛选条件的已选值、用户自定义分类。状态（已完成/失败）用 Badge，不用 Tag；大量选项的管理用 Select。
+
+Props:
+  - color: "default" | "info" | "success" | "warning" | "danger" | "violet" = "default" — 语义色，与 Badge 同一套规则，不扩展含义。
+  - closable: boolean = false — 显示关闭按钮，用于已选条件或可移除属性。
+  - onClose: () => void — 关闭回调；关闭即移除条件并触发对应查询。
+  - checkable: boolean = false — 可选择模式，用于多选分类。
+  - checked: boolean — checkable 模式下的选中态，受控。
+  - onChange: (checked: boolean) => void — checkable 模式的选中变化回调。
+  - children (required): ReactNode — 标签内容，推荐「维度：值」格式。
+
+States:
+  - default: 中性灰底；语义色仅在与 Badge 相同的含义上使用。
+  - hover: 可关闭/可选择时 hover 加深背景并显示指针；只读标签无 hover。
+  - focus-visible: 可交互标签有 3px 品牌色外发光；只读标签不接收焦点。
+  - pressed: checkable 点击切换选中，用填充色表达选中，不使用勾选图标。
+  - disabled: 可交互标签禁用时 opacity .45，原因由上下文说明。
+  - loading [N/A]: 不适用：标签内容的加载由所在区块 Skeleton 承担。
+  - empty [N/A]: 不适用：没有标签时不渲染标签区域，由 Empty 说明。
+  - error [N/A]: 不适用：标签不表达错误；错误用 Badge danger 或 Alert。
+  - permission-limited: 无权限修改的属性标签渲染为只读，隐藏关闭按钮。
+  - mobile: 标签组允许换行；单个标签最大宽度 100%，超出截断。
+  - dark-mode: 语义色使用令牌自动适配。
+
+Interaction rules:
+  - closable 关闭即生效：移除条件并刷新查询，不需要二次确认。
+  - checkable 点击切换选中，用于多选分类筛选。
+  - 标签过多时收起为「+N」，展开后逐行展示。
+
+Keyboard:
+  - 可交互标签进入 Tab 序列；Enter / Space 触发选择或关闭。
+  - 关闭按钮不单独设焦点，整个标签是一个交互单元。
+
+Accessibility:
+  - checkable 使用 aria-pressed 表达选中态。
+  - closable 标签的 aria-label 说明关闭对象：移除筛选 状态：进行中。
+  - 选中态不只依赖颜色，配合字重或边框变化。
+
+Responsive:
+  - 标签组换行展示，不横向滚动。
+  - 移动端单个标签内容超长时截断，完整值由 title 提供。
+
+Content guidelines:
+  - 属性标签格式「维度：值」：来源：导入、格式：CSV。
+  - 筛选标签保留维度名，关闭后用户能记住刚才筛了什么。
+  - Agent 生成的标注必须用 violet 并注明来源。
+
+Do:
+  - 状态用 Badge，属性用 Tag，分工不混。
+  - 已选筛选条件用 closable Tag 外露在 FilterBar。
+  - Agent 标注用 violet 并写明来源。
+
+Don't:
+  - 不要用 Tag 表达任务状态（用 Badge）。
+  - 不要用语义色标记普通分类。
+  - 不要让标签承担提交、保存等动作。
+  - 不要堆叠超过一行半的标签，超出的收起。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Tag>电解液</Tag>
+  <Tag color="info">内部数据</Tag>
+  <Tag color="violet">Agent 标注</Tag>
+  <Tag color="warning">待确认来源</Tag>
+  --- variants (variant) 可关闭与可选择
+  <Tag closable onClose={() => removeFilter("project")}>项目：project-042</Tag>
+  <Tag checkable checked={selected} onChange={setSelected}>高温循环</Tag>
+  --- business (business) 真实业务示例
+  <div className="dataset-tags">
+    <Tag>来源：导入</Tag>
+    <Tag>格式：CSV</Tag>
+    <Tag color="violet">Agent 标注：含异常点</Tag>
+  </div>
+  <FilterBar>
+    <Tag closable>状态：进行中</Tag>
+    <Tag closable>项目：project-042</Tag>
+  </FilterBar>
+
+Related: badge, filter-bar, select, dataset-picker
+
+## dc.card — Card 卡片 [stable] v0.1.0 (#/components/card)
+Category: general
+Purpose: 把同一主题的内容与动作聚合为一个可扫描、可复用的容器。
+Usage: 用于信息分组、指标卡、入口卡与列表项。整页只有一个主题时不要套卡；卡片内不嵌套卡片，分区用 Divider。
+
+Props:
+  - title: ReactNode — 卡片标题；无标题卡片用于纯指标或纯媒体。
+  - extra: ReactNode — 右上角辅助区，放链接或状态徽标，不放主按钮。
+  - hoverable: boolean = false — 整卡可点的入口卡样式，必须配合 onClick 使用。
+  - loading: boolean = false — 骨架屏替换内容，卡片框架与尺寸保留。
+  - bordered: boolean = true — 是否显示边框；灰色背景上可关闭边框用投影分层。
+  - onClick: () => void — hoverable 卡片的点击回调；卡内独立动作要阻止冒泡。
+  - children (required): ReactNode — 卡片内容；复杂内容用 Divider 分区，不嵌套卡片。
+
+States:
+  - default: 白底、1px 边框、圆角遵循 radius 令牌，内边距 16px。
+  - hover: hoverable 卡片 hover 时边框提亮并轻微上浮；普通卡片无 hover。
+  - focus-visible: 整卡可点时卡片可聚焦，3px 品牌色外发光。
+  - pressed: 整卡可点时按下回到原位置，不使用缩放。
+  - disabled [N/A]: 不适用：卡片是容器；内部动作的禁用由动作自身表达。
+  - loading: 内容替换为 Skeleton，卡片框架、标题与尺寸保留，不闪烁。
+  - empty: 空内容区块用小尺寸 Empty，卡片框架保留。
+  - error: 加载失败在内容区给出错误与重试，卡片框架保留。
+  - permission-limited: 无权限的卡片内容整体替换为权限提示，不渲染半张卡。
+  - mobile: 卡片网格在 <760px 降为单列；内边距保持 16px。
+  - dark-mode: surface/line/shadow 令牌自动适配，不手写两套色。
+
+Interaction rules:
+  - 整卡可点（hoverable）时，卡内不再放第二个跳转链接；独立动作阻止冒泡。
+  - 一卡一个主题；同类卡片保持相同的信息结构，方便横向扫描。
+  - 加载、空、错误都只替换内容区，框架不动。
+
+Keyboard:
+  - hoverable 卡片进入 Tab 序列，Enter 触发 onClick。
+  - 卡内动作的焦点顺序先内容后操作，与视觉顺序一致。
+
+Accessibility:
+  - 整卡可点使用 <a> 或 role="link" 加 aria-label，不用裸 div onClick。
+  - 标题使用真实标题标签（h3/h4），不跳级。
+  - loading 时设置 aria-busy="true"。
+
+Responsive:
+  - 卡片网格 3 列 → 2 列（<1100px）→ 1 列（<760px）。
+  - 卡片不设固定高度，由内容撑开，同行卡片等高。
+
+Content guidelines:
+  - 标题写名词短语：计算资源、执行记录，不写句子。
+  - 辅助区（extra）放链接或状态徽标，不放第二个按钮。
+  - 同类卡片之间的字段顺序保持一致。
+
+Do:
+  - 一卡一个主题，信息结构统一。
+  - 加载用骨架屏替换内容，保留卡片框架。
+  - 入口卡使用 hoverable 并给出明确反馈。
+
+Don't:
+  - 不要卡片嵌套卡片。
+  - 不要在一张卡里放两个主按钮。
+  - 不要用卡片包裹整页唯一内容。
+  - 不要给普通（非入口）卡片加点击跳转。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Card title="计算资源" extra={<Link href="#/quota">额度明细</Link>}>
+    <p>本月已用 1,280 / 3,000 核时</p>
+    <Button variant="secondary" size="sm">申请扩容</Button>
+  </Card>
+  --- variants (variant) 变体示例
+  <Card hoverable onClick={openProject}>
+    <h4>示例项目（project-042）</h4>
+    <p>12 个数据集 · 34 次运行</p>
+  </Card>
+  <Card title="执行记录" loading />
+  --- business (business) 真实业务示例
+  <Card title="示例电解液项目" extra={<Badge status="info" text="进行中" />}>
+    <p>目标：筛选高温稳定配方</p>
+    <Statistic title="数据集" value={12} />
+    <Statistic title="运行次数" value={34} />
+    <Button size="sm" variant="ghost">查看详情</Button>
+  </Card>
+
+Related: empty, skeleton, statistic, divider, button
+
+## dc.empty — Empty 空状态 [beta] v0.1.0 (#/components/empty)
+Category: general
+Purpose: 在没有内容可展示时告诉用户发生了什么、是否需要操作、下一步做什么。
+Usage: 用于列表无数据、筛选无结果、未选择对象等场景。错误导致的无内容用 Result 或 Alert；加载中用 Skeleton；无权限用 Result（403）。
+
+Props:
+  - title (required): string — 发生了什么；一句话，写对象不写情绪。
+  - description: string — 是否需要操作的补充说明；一句话。
+  - action: ReactNode — 下一步动作；最多一个按钮，不需要动作时省略。
+  - variant: "no-data" | "no-result" = "no-data" — no-data 无数据，no-result 筛选/搜索无结果。
+  - size: "md" | "sm" = "md" — sm 用于表格单元格、卡片内的行内空态，只保留说明文字。
+  - image: ReactNode — 可选插画；默认使用统一空态插画，不替换为彩色图片。
+
+States:
+  - default: 居中：插画 + 标题 + 说明 + 动作，三要素齐全。
+  - hover [N/A]: 不适用：空状态本身不可交互，仅 action 按钮有 hover。
+  - focus-visible [N/A]: 不适用：空状态容器不接收焦点。
+  - pressed [N/A]: 不适用：空状态容器无按压态。
+  - disabled [N/A]: 不适用：空状态无禁用态。
+  - loading [N/A]: 不适用：加载中用 Skeleton，不允许空态与骨架屏来回闪烁。
+  - empty: Empty 本身就是空态的表达；数据到达后原位替换为内容，布局不跳动。
+  - error: 错误不是空态：加载失败用 Result 或 Alert 给出原因与重试。
+  - permission-limited: 无权限不是空态：用 Result（403）说明所需权限与联系人。
+  - mobile: 插画缩小、文案保持完整，动作按钮宽度 100%。
+  - dark-mode: 插画使用单色系，随 muted 令牌适配。
+
+Interaction rules:
+  - action 最多一个；空状态不承担教学任务，不放图文教程。
+  - 数据到达后内容原位替换，空态与内容的高度尽量接近，避免布局跳动。
+  - 筛选无结果时保留筛选栏可见，不清空用户已输入的条件。
+
+Keyboard:
+  - action 按钮正常进入 Tab 序列。
+  - 空状态容器不接收焦点，屏幕阅读器以文本朗读标题与说明。
+
+Accessibility:
+  - 插画 aria-hidden，信息由标题与说明文本承载。
+  - 标题使用描述性文本，不只显示图标或插画。
+
+Responsive:
+  - 移动端插画宽度 ≤ 120px，标题与说明不截断。
+  - action 按钮在窄屏全宽。
+
+Content guidelines:
+  - 三要素齐全：发生了什么、是否需要操作、下一步。
+  - 标题写对象与事实：还没有实验记录、没有符合条件的结果。
+  - 不写“空空如也”这类情绪化文案；不写“数据加载失败”（那是错误态）。
+
+Do:
+  - 区分无数据与筛选无结果，动作不同。
+  - 给得出下一步时提供唯一动作按钮。
+  - 行内小空态用 size="sm"，只保留说明文字。
+
+Don't:
+  - 不要用空状态代替错误提示。
+  - 不要放多个动作按钮或教学长文。
+  - 不要让空态与骨架屏交替闪烁。
+  - 不要在表格单元格里放整版空状态（用 sm）。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Empty
+    title="还没有实验记录"
+    description="创建第一个实验后，数据会展示在这里。"
+    action={<Button variant="primary">新建实验</Button>}
+  />
+  --- variants (variant) 变体示例
+  <Empty
+    variant="no-result"
+    title="没有符合条件的结果"
+    description="尝试调整筛选条件或关键字。"
+    action={<Button variant="secondary">清除筛选</Button>}
+  />
+  <Empty size="sm" description="暂无附件" />
+  --- business (business) 真实业务示例
+  <Empty
+    title="示例项目（project-042）还没有数据集"
+    description="导入或新建数据集后即可开始计算。"
+    action={<Button variant="primary">导入数据集</Button>}
+  />
+  <Empty
+    variant="no-result"
+    title="没有符合「进行中」的数据集"
+    description="当前筛选条件下没有结果。"
+    action={<Button variant="ghost">清除筛选</Button>}
+  />
+
+Related: result, skeleton, button, table, card
+
+## dc.skeleton — Skeleton 骨架屏 [beta] v0.1.0 (#/components/skeleton)
+Category: general
+Purpose: 在数据到达前按真实内容的布局占位，让加载前后结构一致、不闪烁、不跳动。
+Usage: 用于首屏加载与区块级加载（表格、卡片、详情）。超过 10 秒的长任务用 Progress + 日志反馈进度；局部刷新保留旧数据并配合 Spin，不用骨架屏整区替换。
+
+Props:
+  - loading (required): boolean — 为 true 时渲染骨架，false 时原位渲染 children。
+  - variant: "text" | "table" | "card" = "text" — 骨架形态，按真实内容结构选择。
+  - rows: number = 3 — 占位行数，与真实内容行数接近，避免高度差。
+  - avatar: boolean = false — 前置圆形占位，用于带头像/图标的列表项。
+  - active: boolean = true — 呼吸动效；局部频繁刷新场景可关闭减少干扰。
+  - children: ReactNode — 加载完成后原位渲染的真实内容。
+
+States:
+  - default: 浅灰占位条，形状与真实内容对应，使用呼吸动效。
+  - hover [N/A]: 不适用：骨架屏不可交互。
+  - focus-visible [N/A]: 不适用：骨架屏不接收焦点。
+  - pressed [N/A]: 不适用：骨架屏无按压态。
+  - disabled [N/A]: 不适用：骨架屏无禁用态。
+  - loading: 骨架屏即加载态本身：占位高度与真实内容接近，加载完成原位替换，不闪烁。
+  - empty: 加载完成且无数据时切换到 Empty，骨架与空态不叠加出现。
+  - error: 加载失败切换到错误提示与重试，骨架消失而不是停在半加载。
+  - permission-limited: 请求返回无权限时直接渲染权限提示，不先渲染骨架再替换。
+  - mobile: 骨架行数随视口减少，保证首屏一屏内完成占位。
+  - dark-mode: 占位色使用 surface-soft 令牌，深浅主题都有足够对比。
+
+Interaction rules:
+  - 骨架占位的高度、列宽与真实内容一致，替换瞬间布局零位移。
+  - 加载超过 10 秒必须切换为 Progress 或日志反馈，不让骨架无限呼吸。
+  - 局部刷新（如轮询状态列）保留旧数据，用 Spin 或静默更新，不闪骨架。
+  - 骨架屏期间页面上已可用的操作（筛选、导航）保持可用。
+
+Keyboard:
+  - 不适用：骨架屏不进入 Tab 序列；加载完成后焦点位置保持不丢。
+  - 加载过程的焦点管理由所在页面负责，骨架自身不抢焦点。
+
+Accessibility:
+  - 骨架容器设置 aria-busy="true"，并对读屏器隐藏占位条。
+  - 呼吸动效遵守 prefers-reduced-motion，降级为静态占位。
+  - 不用骨架屏代替进度提示：长任务必须可读地反馈进度。
+
+Responsive:
+  - 移动端骨架行数减少，优先保证首屏结构完整。
+  - 表格骨架在窄屏保留首列与状态列，其余列合并为宽条。
+
+Content guidelines:
+  - 骨架条不写文字，不放「加载中…」文案。
+  - 占位行数贴近真实内容，列表按 3–5 行占位。
+  - 同一屏的多个加载区块统一节奏，不各自乱闪。
+
+Do:
+  - 按真实内容结构选择 variant 与行数。
+  - 内容原位替换骨架，保持布局不动。
+  - 长任务超时切换为 Progress 或日志反馈。
+
+Don't:
+  - 不要用全屏 spinner 代替骨架屏。
+  - 不要让骨架与空状态交替闪烁。
+  - 不要在局部轮询刷新时整区重渲骨架。
+  - 不要给骨架条加文字或图标。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Skeleton loading={isLoading} rows={3} avatar>
+    <ProjectSummary projectId="project-042" />
+  </Skeleton>
+  --- variants (variant) 变体示例
+  <Skeleton loading variant="table" rows={4} />
+  <Skeleton loading variant="card" />
+  --- business (business) 真实业务示例
+  function RunList() {
+    const { data, isLoading } = useRuns("project-042"); // synthetic: run-28003 等
+    return (
+      <Skeleton loading={isLoading} variant="table" rows={4}>
+        <Table columns={runColumns} dataSource={data} />
+      </Skeleton>
+    );
+  }
+
+Related: spin, progress, empty, card, table
+
+## dc.result — Result 结果页 [beta] v0.1.0 (#/components/result)
+Category: general
+Purpose: 在流程结束或整页异常时给出明确结论、原因说明与后续动作。
+Usage: 用于提交成功、整页错误、404、403 等页面级结论。局部错误用 Alert 或 Message；无数据用 Empty；流程中的状态用 Badge 或 RunStatus。
+
+Props:
+  - status (required): "success" | "info" | "warning" | "danger" | "404" | "403" — 结论类型；404/403 为预置页面级变体。
+  - title (required): string — 结论文案，一句话说明结果。
+  - description: string — 原因或影响范围的补充说明；失败时写清原因。
+  - actions: ReactNode — 后续动作，最多两个按钮，主按钮指向下一步。
+  - extra: ReactNode — 可选补充信息区，如任务 ID、引用或日志摘要。
+
+States:
+  - default: 居中：语义图标 + 标题 + 说明 + 动作，图标与语义色绑定。
+  - hover [N/A]: 不适用：结果页容器不可交互，仅动作按钮有 hover。
+  - focus-visible [N/A]: 不适用：结果页容器不接收焦点；动作按钮正常聚焦。
+  - pressed [N/A]: 不适用：结果页容器无按压态。
+  - disabled [N/A]: 不适用：结果页无禁用态。
+  - loading: 提交进行中不渲染结果页，用 Button loading 或 Progress；结论确定后立即出现。
+  - empty [N/A]: 不适用：无数据场景用 Empty；结果页必须有明确结论。
+  - error: danger 状态即错误结论：写清失败原因、影响与重试入口。
+  - permission-limited: 403 变体说明所需权限与联系人入口，不只写「无权限」。
+  - mobile: 图标与文案居中，动作按钮纵向排列全宽。
+  - dark-mode: 语义色与图标使用令牌自动适配。
+
+Interaction rules:
+  - 结果页出现后焦点移到标题，读屏器首先朗读结论。
+  - 动作最多两个：下一步（主）+ 返回/关闭（次）。
+  - 失败结果必须给出可重试或人工接管的入口，不做死路页面。
+  - 404/403 使用预置文案与动作，业务不自由改写。
+
+Keyboard:
+  - 动作按钮按视觉顺序进入 Tab 序列。
+  - 页面加载完成焦点落在结果标题（tabindex=-1），Esc 不关闭结果页。
+
+Accessibility:
+  - 图标 aria-hidden，结论由标题文本承载。
+  - 使用 role="status"（成功/提示）或 role="alert"（失败）向读屏器宣告。
+  - 不只用颜色与图标表达结论，标题必须写清结果。
+
+Responsive:
+  - 移动端动作按钮纵向全宽排列。
+  - 标题与说明不截断，图标尺寸缩小一档。
+
+Content guidelines:
+  - 标题写结论：任务已提交、任务失败；说明写原因与影响范围。
+  - 成功结论回显关键 ID（任务 run-28003），方便追踪。
+  - 失败说明写清下一步：重试、修改输入或联系负责人。
+
+Do:
+  - 结论页回显任务 ID 与影响范围。
+  - 失败给出重试或人工接管入口。
+  - 404/403 使用预置变体。
+
+Don't:
+  - 不要用结果页表达局部错误（用 Alert/Message）。
+  - 不要放三个以上动作。
+  - 不要只显示图标不配结论文案。
+  - 不要让成功页缺少返回或继续操作的出口。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Result status="success" title="任务已提交" description="任务 ID：run-28003" />
+  <Result status="info" title="正在排队" />
+  <Result status="warning" title="部分字段待复核" />
+  <Result status="danger" title="任务失败" />
+  --- variants (variant) 页面级异常
+  <Result status="404" />
+  <Result status="403" />
+  --- business (business) 真实业务示例
+  <Result
+    status="success"
+    title="计算任务已提交"
+    description="任务 run-28003 已加入队列，将使用 示例项目（project-042）的额度。"
+    actions={[
+      <Button key="track" variant="primary">查看任务状态</Button>,
+      <Button key="back" variant="secondary">返回任务列表</Button>,
+    ]}
+  />
+
+Related: empty, alert, button, message, progress
+
+## dc.layout — Layout 页面骨架 [stable] v0.1.0 (#/components/layout)
+Category: layout
+Purpose: 定义应用骨架：侧边导航、顶栏与内容区的固定结构，所有页面共享同一副骨架。
+Usage: 用于平台级页面框架，每个页面只出现一次。页面内部的区块排列用 Stack 或 Grid；内容区需要可拖拽分栏时用 Splitter；弹窗、抽屉和卡片内部不要再嵌套一层 Layout。
+
+Props:
+  - sider: ReactNode — 侧边导航区，桌面端固定 264px，移动端折叠为抽屉。
+  - header: ReactNode — 顶栏，高 60px 吸顶，通常放面包屑与全局动作。
+  - contentWidth: "narrow" | "wide" | "full" = "wide" — 内容区最大宽度：880px / 1240px / 全宽。
+  - siderCollapsible: boolean = true — 是否允许用户把侧边栏折叠为窄条；折叠状态跨页面记忆。
+  - children (required): ReactNode — 页面内容，渲染在内容区内。
+
+States:
+  - default: 三区域位置固定；内容区居中并受 contentWidth 约束。
+  - hover [N/A]: 不适用：骨架不响应 hover，交互由内部组件各自处理。
+  - focus-visible [N/A]: 不适用：骨架不接收焦点。
+  - pressed [N/A]: 不适用：骨架不是可按压元素。
+  - disabled [N/A]: 不适用：骨架没有禁用态。
+  - loading: 首屏加载在内容区渲染骨架屏，不做整页白屏替换。
+  - empty [N/A]: 不适用：空数据由内容区的 Empty 组件表达。
+  - error: 页面级错误在内容区用 Result 呈现，骨架与导航保留以便返回。
+  - permission-limited: 无权限的导航入口在 Menu 中禁用，骨架结构不因此改变。
+  - mobile: ≤760px 侧边栏折叠为抽屉，顶栏保留，内容区全宽。
+  - dark-mode: 使用语义令牌自动适配，不为骨架单独配色。
+
+Interaction rules:
+  - 页面切换时骨架保持稳定，只有内容区更新，不整页闪烁。
+  - 侧边栏折叠状态跨页面记忆，重新进入时保持。
+  - 顶栏吸顶，长页面滚动时面包屑与全局动作始终可见。
+
+Keyboard:
+  - 提供跳转主内容的 skip link，键盘用户可跳过整段导航。
+  - 侧边栏抽屉打开时 Esc 关闭，并把焦点归还给触发按钮。
+
+Accessibility:
+  - 使用 <nav>、<header>、<main> 语义标签，每页有且只有一个 <main>。
+  - 侧边栏抽屉的触发按钮设置 aria-expanded，打开后焦点进入抽屉。
+
+Responsive:
+  - ≤1100px 隐藏辅助侧栏，内容区单列。
+  - ≤760px 侧边栏折叠为抽屉，内容区左右内边距收缩到 16px。
+
+Content guidelines:
+  - 顶栏左侧永远放面包屑或页面位置，不放营销文案。
+  - 全局动作（搜索、主题、帮助）固定在顶栏右侧，位置跨页面一致。
+
+Do:
+  - 所有页面共享同一副骨架，区域位置不随页面变化。
+  - 按页面类型选择 contentWidth，避免超宽屏下文字行过长。
+  - 首屏加载用骨架屏占位，保持布局稳定。
+
+Don't:
+  - 不要在页面或弹窗内部再嵌套一层 Layout。
+  - 不要让顶栏动作的位置在不同页面间漂移。
+  - 不要在小屏上把侧边栏强行常驻挤压内容区。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Layout
+    sider={<AppMenu selectedKey="runs" />}
+    header={<TopBar />}
+    contentWidth="wide"
+  >
+    <RunListPage />
+  </Layout>
+  --- content-width (variant) 内容区宽度
+  <Layout contentWidth="narrow">…最大 880px</Layout>
+  <Layout contentWidth="wide">…最大 1240px</Layout>
+  <Layout contentWidth="full">…全宽</Layout>
+  --- business (business) 真实业务示例
+  <Layout
+    sider={<ProjectMenu projectId="project-042" />}
+    header={
+      <TopBar
+        breadcrumb={[
+          { title: "项目", href: "/projects" },
+          { title: "示例项目" },
+        ]}
+      />
+    }
+    contentWidth="wide"
+  >
+    <RunListPage projectId="project-042" />
+  </Layout>
+
+Related: menu, breadcrumb, page-header, stack, grid
+
+## dc.stack — Stack 堆叠布局 [stable] v0.1.0 (#/components/stack)
+Category: layout
+Purpose: 沿一个方向（垂直或水平）排列子元素并统一间距，是使用频率最高的局部布局工具。
+Usage: 用于表单字段、按钮组、卡片列表等一维排列。二维行列关系用 Grid；需要拖拽调整两个区域的比例用 Splitter；整页骨架用 Layout，不要用 Stack 模拟。
+
+Props:
+  - direction: "vertical" | "horizontal" = "vertical" — 排列方向。
+  - gap: number = 12 — 子元素间距，必须取间距令牌值（4 的倍数）。
+  - align: "start" | "center" | "end" | "stretch" = "stretch" — 交叉轴对齐方式。
+  - justify: "start" | "center" | "end" | "space-between" = "start" — 主轴分布方式。
+  - wrap: boolean = true — 水平排列空间不足时是否换行。
+
+States:
+  - default: 子元素间距全部来自 gap，间距单一来源。
+  - hover [N/A]: 不适用：Stack 是布局容器，不响应 hover。
+  - focus-visible [N/A]: 不适用：容器不接收焦点。
+  - pressed [N/A]: 不适用：容器不是可按压元素。
+  - disabled [N/A]: 不适用：禁用由子组件各自表达。
+  - loading [N/A]: 不适用：加载态由子组件（Skeleton、Button）表达。
+  - empty: 无子元素时容器塌缩为 0 高度，不留占位间距。
+  - error [N/A]: 不适用：错误由子组件或 Alert 表达。
+  - permission-limited [N/A]: 不适用：权限由子组件各自处理。
+  - mobile: 水平 Stack 在窄屏自动换行；按钮组允许整组换行且主动作在最前。
+  - dark-mode: 无颜色属性，自动继承主题。
+
+Interaction rules:
+  - 同级元素间距一致，层级亲疏靠 gap 大小表达，不靠新增颜色或分割线。
+  - 不在 Stack 子元素上再写 margin，避免间距出现两个来源。
+
+Keyboard:
+  - 不改变焦点顺序，子元素的 Tab 顺序与 DOM 顺序一致。
+  - 不拦截任何按键，键盘行为完全由子组件决定。
+
+Accessibility:
+  - 纯视觉容器，不添加 aria 角色；有列表语义时用 <ul>/<li> 而不是 Stack 包 <div>。
+  - 不依靠视觉顺序颠倒 DOM 顺序，读屏顺序与视觉顺序保持一致。
+
+Responsive:
+  - 水平 Stack 在窄屏允许换行，换行后间距仍由 gap 提供。
+  - gap 不随断点缩小，密度差异通过更换令牌值表达。
+
+Content guidelines:
+  - 一组之内只放同一层级的内容，不把页脚和标题混在一组。
+  - 间距表达亲疏：同组 8–12，分组之间 16–24。
+
+Do:
+  - 间距只用令牌值，禁止魔法数字。
+  - 按钮组统一 horizontal + gap 8。
+  - 表单字段垂直堆叠，gap 12–16。
+
+Don't:
+  - 不要混用 margin 与 gap 制造双重间距。
+  - 不要用嵌套 Stack 模拟 Grid 的二维对齐。
+  - 不要为单个子元素包一层没有作用的 Stack。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Stack gap={12}>
+    <RunCard runId="run-28003" />
+    <RunCard runId="run-28002" />
+  </Stack>
+  --- variants (variant) 方向与对齐
+  <Stack direction="horizontal" gap={8} align="center">
+    <Button variant="primary">提交任务</Button>
+    <Button variant="secondary">保存草稿</Button>
+  </Stack>
+  <Stack direction="horizontal" justify="space-between">
+    <span>第 3 轮优化</span>
+    <Badge status="success">已完成</Badge>
+  </Stack>
+  --- business (business) 真实业务示例
+  <Stack gap={16}>
+    <Stack gap={4}>
+      <h3>数据校验</h3>
+      <p>对数据集 ds-118 的 3 个必填字段做完整性检查</p>
+    </Stack>
+    <Alert type="warning">2 条记录缺少测试温度</Alert>
+    <Stack direction="horizontal" gap={8}>
+      <Button variant="primary">继续导入</Button>
+      <Button variant="ghost">返回修改</Button>
+    </Stack>
+  </Stack>
+
+Related: grid, layout, divider, button, form
+
+## dc.grid — Grid 栅格 [stable] v0.1.0 (#/components/grid)
+Category: layout
+Purpose: 用 12 列栅格组织二维布局，让卡片与统计块在不同断点下保持对齐。
+Usage: 用于卡片矩阵、仪表盘统计块、多列表单等二维排列。单一方向的排列用 Stack；整页骨架用 Layout；两个区域间需要拖拽调整用 Splitter。
+
+Props:
+  - cols: number = 12 — 总列数，全站统一为 12，不自定义其他列数。
+  - gap: number = 12 — 行列间距，取间距令牌值。
+  - span (required): number | { base?: number; md?: number; lg?: number } — Grid.Cell 占据的列数，可按断点给出。
+
+States:
+  - default: 列宽按 cols 等分，同排单元格高度对齐。
+  - hover [N/A]: 不适用：栅格是布局容器，不响应 hover。
+  - focus-visible [N/A]: 不适用：容器不接收焦点。
+  - pressed [N/A]: 不适用：容器不是可按压元素。
+  - disabled [N/A]: 不适用：禁用由卡片内组件表达。
+  - loading: 用与栅格一致的 Skeleton 卡片占位，行列结构不跳动。
+  - empty: 数据为空时整个栅格区域替换为 Empty，不留半排空卡片。
+  - error: 区域级错误整体替换为 Result + 重试，不在单个格子里报错。
+  - permission-limited: 无权限时整个区域换为权限说明，不渲染残缺的卡片矩阵。
+  - mobile: 列数按断点递减：lg 一行 3–4 个卡片，base 单列堆叠。
+  - dark-mode: 无颜色属性，自动继承主题。
+
+Interaction rules:
+  - 同排单元格高度对齐，内容多少不影响整排基线。
+  - 卡片数量变化时先行后列补齐，不出现错位空洞。
+
+Keyboard:
+  - 容器不参与焦点顺序，卡片内交互元素按先行后列的顺序 Tab。
+  - 不拦截方向键，键盘行为由单元格内组件决定。
+
+Accessibility:
+  - 卡片矩阵有列表语义时容器用 role="list"、单元格用 role="listitem"。
+  - 不用栅格颠倒视觉与读屏顺序，DOM 顺序即阅读顺序。
+
+Responsive:
+  - 断点：lg ≥1100px，md ≥760px，base <760px。
+  - 卡片最小宽度 240px，不足时减列而不是压缩卡片。
+
+Content guidelines:
+  - 同屏卡片表达同一类信息，不混放导航卡片与数据卡片。
+  - 卡片内的数字格式与对齐规则由 Statistic 负责，不在格子里自定义。
+
+Do:
+  - 全站统一 12 列，span 取 12 的约数或按断点给出。
+  - 卡片矩阵配 Skeleton 保持加载前后结构一致。
+  - 统计块、项目卡片这类同质内容优先用 Grid。
+
+Don't:
+  - 不要用 Grid 做一维排列（那是 Stack 的职责）。
+  - 不要自定义 24 列等其他列数体系。
+  - 不要让同一排卡片高度参差不齐。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Grid cols={12} gap={12}>
+    <Grid.Cell span={4}><StatisticCard title="运行中任务" value={3} /></Grid.Cell>
+    <Grid.Cell span={4}><StatisticCard title="本周完成" value={21} /></Grid.Cell>
+    <Grid.Cell span={4}><StatisticCard title="失败待处理" value={1} /></Grid.Cell>
+  </Grid>
+  --- responsive (variant) 响应式列宽
+  <Grid cols={12} gap={12}>
+    <Grid.Cell span={{ base: 12, md: 6, lg: 3 }}><ProjectCard /></Grid.Cell>
+    <Grid.Cell span={{ base: 12, md: 6, lg: 3 }}><ProjectCard /></Grid.Cell>
+  </Grid>
+  --- business (business) 真实业务示例
+  <Grid cols={12} gap={12}>
+    <Grid.Cell span={{ base: 12, md: 6, lg: 4 }}>
+      <ProjectCard name="示例项目" id="project-042" runCount={28} />
+    </Grid.Cell>
+    <Grid.Cell span={{ base: 12, md: 6, lg: 4 }}>
+      <ProjectCard name="电解液筛选" id="project-051" runCount={12} />
+    </Grid.Cell>
+    <Grid.Cell span={{ base: 12, md: 6, lg: 4 }}>
+      <ProjectCard name="正极材料库" id="project-063" runCount={45} />
+    </Grid.Cell>
+  </Grid>
+
+Related: stack, layout, card, statistic, skeleton
+
+## dc.splitter — Splitter 分栏器 [experimental] v0.1.0 (#/components/splitter)
+Category: layout
+Purpose: 把内容区拆成两个可拖拽调整的面板，让用户按任务需要自行分配空间。
+Usage: 用于主从结构的双栏场景：任务列表 + 日志详情、编辑器 + 预览。固定比例的布局用 Grid；只做视觉分隔用 Divider；窄屏不要用 Splitter，回退为上下堆叠或 Tabs。
+
+Props:
+  - defaultSize: number | string = "50%" — 首个面板的初始尺寸，像素或百分比。
+  - min: number — 首个面板的最小像素宽度，到达后阻止继续拖拽。
+  - max: number — 首个面板的最大像素宽度。
+  - collapsible: boolean = false — 是否允许把一侧面板收起为 0。
+  - onResize: (size: number) => void — 拖拽结束回调，用于持久化用户偏好。
+
+States:
+  - default: 分隔条视觉 4px、命中区 ≥12px，把手指示可拖拽。
+  - hover: 分隔条变为品牌色，光标变为 col-resize。
+  - focus-visible: 把手可聚焦，3px 品牌色外发光。
+  - pressed: 拖拽中实时更新面板尺寸，松手后触发 onResize。
+  - disabled: 锁定比例时隐藏把手，禁止拖拽与键盘调整。
+  - loading [N/A]: 不适用：面板内容加载由各自面板内的 Skeleton 表达。
+  - empty: 面板为空时在面板内部放 Empty，面板尺寸保持不塌缩。
+  - error: 单侧面板错误用面板内 Alert + 重试，不影响另一侧。
+  - permission-limited [N/A]: 不适用：权限由面板内组件各自处理。
+  - mobile: ≤760px 回退为上下堆叠或 Tabs，禁用拖拽。
+  - dark-mode: 分隔条与把手使用语义令牌，自动适配。
+
+Interaction rules:
+  - 拖拽实时反馈，不做松手才跳转的盲拖。
+  - 双击把手恢复默认尺寸；调整后的比例按用户记忆。
+  - 两侧必须是主从关系，主面板变化时从面板内容联动更新。
+
+Keyboard:
+  - 把手可聚焦，左右方向键按 10px 步进调整，Shift + 方向键按 50px 步进。
+  - Home 恢复默认尺寸，End 收起至最小。
+
+Accessibility:
+  - 把手使用 role="separator" 并带 aria-orientation。
+  - aria-valuenow 实时报告当前比例，读屏可感知拖拽结果。
+
+Responsive:
+  - ≤760px 禁用拖拽，布局回退为上下堆叠。
+  - min 不小于 240px，保证主面板在任何宽度下可用。
+
+Content guidelines:
+  - 两侧面板必须是主从关系（列表-详情、输入-预览），不拼两个无关模块。
+  - 面板标题说明内容，从面板标题随主面板选中项联动。
+
+Do:
+  - 给主面板设置 min，防止拖到不可用宽度。
+  - 用 onResize 持久化用户调整过的比例。
+  - 窄屏主动回退为堆叠布局。
+
+Don't:
+  - 不要嵌套两层以上 Splitter。
+  - 不要把 Splitter 用在弹窗内部。
+  - 不要在没有 min 约束时允许面板被拖到 0（除非 collapsible）。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Splitter defaultSize="32%" min={240} max={480}>
+    <RunList projectId="project-042" />
+    <RunDetail runId="run-28003" />
+  </Splitter>
+  --- limits (variant) 尺寸限制与收起
+  <Splitter
+    defaultSize={280}
+    min={240}
+    max={560}
+    collapsible
+    onResize={(size) => savePanelSize(size)}
+  >
+    <RunList projectId="project-042" />
+    <RunDetail runId="run-28003" />
+  </Splitter>
+  --- business (business) 真实业务示例
+  <Splitter defaultSize="40%" min={320} onResize={savePanelSize}>
+    <RunList
+      projectId="project-042"
+      selectedRunId={runId}
+      onSelect={setRunId}
+    />
+    <LogViewer runId={runId} follow />
+  </Splitter>
+
+Related: layout, grid, divider, tabs, drawer
+
+## dc.page-header — PageHeader 页头 [stable] v0.1.0 (#/components/page-header)
+Category: navigation
+Purpose: 页面顶部的标题区：标题、说明、状态与页面级动作，告诉用户当前页面是什么、能做什么。
+Usage: 每个内容页使用一次，位于内容区最上方。弹窗与抽屉内的标题不用 PageHeader；跨页位置用 Breadcrumb 表达。页面级主动作最多一个 primary，其余动作降级为 secondary / ghost 或收入 Dropdown。
+
+Props:
+  - title (required): ReactNode — 页面标题，渲染为页面唯一的 h1。
+  - description: ReactNode — 一行说明，告诉用户这个页面能做什么。
+  - breadcrumb: BreadcrumbItem[] — 标题上方的面包屑，两层以上层级时使用。
+  - tags: ReactNode — 标题旁的状态徽章，只放状态不放营销标签。
+  - extra: ReactNode — 右侧动作区；primary 按钮最多一个。
+
+States:
+  - default: 标题为页面唯一 h1，描述一行，动作右对齐。
+  - hover [N/A]: 不适用：标题区无 hover，动作自身处理。
+  - focus-visible: 动作区焦点顺序与视觉顺序一致，焦点环可见。
+  - pressed [N/A]: 不适用：按压反馈由动作区内的 Button 表达。
+  - disabled: 主动作不可用时渲染 disabled，原因写在邻近文案或 Tooltip。
+  - loading: 标题与描述用 Skeleton 文本占位，动作区布局保持不跳动。
+  - empty [N/A]: 不适用：页头必然有标题，空数据由内容区表达。
+  - error: 页面数据加载失败时保留标题与返回路径，内容区显示 Result。
+  - permission-limited: 无权限动作渲染为 disabled 并说明所需权限，不隐藏。
+  - mobile: 动作区折行或收入 Dropdown；描述最多两行，超出省略。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - 动作区按重要性从左到右降级排列，primary 永远只有一个。
+  - 动作影响范围（项目、数量、预算）写在动作邻近的说明里。
+  - 带面包屑时，返回上一级是最明显的逃生路径。
+
+Keyboard:
+  - 动作区 Tab 顺序与视觉顺序一致。
+  - 面包屑链接先于动作区获得焦点，与页面信息顺序一致。
+
+Accessibility:
+  - 每页只有一个 h1，且只能出现在 PageHeader。
+  - 状态徽章不只靠颜色区分，必须有文字。
+
+Responsive:
+  - ≤760px 动作区允许整组换行，主动作保持在最前。
+  - 标题最多两行，超出省略，不挤压动作区。
+
+Content guidelines:
+  - 标题用名词短语（资源名），不用“详情页”“列表页”这类无信息文案。
+  - 描述一句以内，说明这个页面能做什么。
+  - 动作文案以动词开头：新建任务、确认并执行。
+
+Do:
+  - 一页一个 PageHeader，一个 primary。
+  - 资源状态用 Badge 跟在标题旁。
+  - 低频动作收入 Dropdown 的“更多操作”。
+
+Don't:
+  - 不要在动作区放两个 primary 按钮。
+  - 不要把页面标题写成“详情”或“页面”。
+  - 不要在描述里堆叠超过两行的说明。
+
+Examples:
+  --- basic (basic) 基础示例
+  <PageHeader
+    title="计算任务"
+    description="提交、追踪并管理项目下的所有计算任务。"
+    extra={<Button variant="primary">新建任务</Button>}
+  />
+  --- with-breadcrumb (variant) 带面包屑与状态
+  <PageHeader
+    breadcrumb={[
+      { title: "项目", href: "/projects" },
+      { title: "示例项目" },
+    ]}
+    title="示例项目"
+    tags={<Badge status="success">进行中</Badge>}
+    extra={
+      <>
+        <Button variant="secondary">项目设置</Button>
+        <Button variant="primary">新建任务</Button>
+      </>
+    }
+  />
+  --- business (business) 真实业务示例
+  <PageHeader
+    title="电导率优化 · 第 3 轮"
+    description="Agent 推荐 6 个候选配方，确认后将创建 1 个 CPU 任务。"
+    tags={<Badge status="processing">等待确认</Badge>}
+    extra={
+      <>
+        <Button variant="ghost">查看历史</Button>
+        <Dropdown menu={{ items: moreItems }}>
+          <Button variant="secondary">更多操作</Button>
+        </Dropdown>
+        <Button variant="primary">确认并执行</Button>
+      </>
+    }
+  />
+
+Related: breadcrumb, button, dropdown, badge, tabs
+
+## dc.breadcrumb — Breadcrumb 面包屑 [stable] v0.1.0 (#/components/breadcrumb)
+Category: navigation
+Purpose: 展示当前页面在层级中的位置，并提供逐级向上返回的路径。
+Usage: 用于两层以上的层级页面（项目 → 数据集 → 任务详情）。同级内容切换用 Tabs；全局功能入口用 Menu；只有一层时不渲染。当前页永远不可点击。
+
+Props:
+  - items (required): { title: ReactNode; href?: string }[] — 层级数组，最后一项为当前页，不需要 href。
+  - maxItems: number — 最多展示的层级数，超出时折叠中间层为省略号。
+  - separator: ReactNode = "/" — 层级分隔符，保持默认不自定义。
+
+States:
+  - default: 中间层级为链接（muted），当前页加粗纯文本。
+  - hover: 可点击层级变为品牌色。
+  - focus-visible: 链接焦点环，Tab 顺序与层级顺序一致。
+  - pressed [N/A]: 不适用：链接点击即跳转，无独立 pressed 态。
+  - disabled [N/A]: 不适用：层级没有禁用态，无权限时降级为纯文本。
+  - loading [N/A]: 不适用：层级来自路由，即时可得。
+  - empty: 层级少于两层时不渲染组件。
+  - error [N/A]: 不适用：路径解析失败由页面级 Result 处理。
+  - permission-limited: 无权限访问的上级渲染为纯文本并附锁图标，不提供链接。
+  - mobile: 只保留“返回上一级”与当前页，不横向挤压。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - 当前页不可点击，也不响应 hover。
+  - 折叠的中间层点击省略号展开，展开后可直接点击任意层级。
+  - 面包屑不改变浏览器历史之外的状态，点击即跳转。
+
+Keyboard:
+  - Tab 按层级顺序逐个聚焦链接。
+  - 当前页不进入 Tab 序列，用 aria-current 标识。
+
+Accessibility:
+  - 外层用 <nav aria-label="面包屑">，内部用 <ol> 有序列表。
+  - 当前页设置 aria-current="page"，读屏可识别位置。
+
+Responsive:
+  - 移动端折叠为“返回上一级”链接 + 当前页标题。
+  - 层级名称过长时省略中间层，不压缩文字到不可读。
+
+Content guidelines:
+  - 层级名称与目标页面的标题保持一致，不另起别名。
+  - 资源 ID（run-28003）用等宽字体，与名称区分。
+
+Do:
+  - 两层以上层级才使用面包屑。
+  - 深层路径用 maxItems 折叠中间层。
+  - 当前页保持纯文本，明确“你在这里”。
+
+Don't:
+  - 不要把面包屑当 Tab 用做同级切换。
+  - 不要让当前页可点击或带链接样式。
+  - 不要用图标替代文字层级。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Breadcrumb
+    items={[
+      { title: "项目", href: "/projects" },
+      { title: "示例项目", href: "/projects/project-042" },
+      { title: "任务详情" },
+    ]}
+  />
+  --- collapsed (variant) 超长折叠
+  <Breadcrumb
+    maxItems={3}
+    items={[
+      { title: "项目", href: "/projects" },
+      { title: "示例项目", href: "/projects/project-042" },
+      { title: "数据集", href: "/projects/project-042/datasets" },
+      { title: "ds-118", href: "/datasets/ds-118" },
+      { title: "字段映射" },
+    ]}
+  />
+  --- business (business) 真实业务示例
+  <Breadcrumb
+    items={[
+      { title: "项目", href: "/projects" },
+      { title: "示例项目", href: "/projects/project-042" },
+      { title: "计算任务", href: "/projects/project-042/runs" },
+      { title: "run-28003" },
+    ]}
+  />
+
+Related: page-header, menu, link, tabs, dropdown
+
+## dc.menu — Menu 导航菜单 [beta] v0.1.0 (#/components/menu)
+Category: navigation
+Purpose: 应用的侧边导航：组织跨页面的功能入口，并标示当前所在位置。
+Usage: 用于全局或项目级导航，点击后切换整个页面（URL 变化、页面内容整体替换）。同页内的内容切换用 Tabs——Menu 决定“去哪一页”，Tabs 决定“这一页里看哪部分”；少量并列视图的即时切换用 Segmented。层级超过两层时配合分组与折叠。
+
+Props:
+  - items (required): MenuItem[] — 菜单项：key、label、icon?、badge?、disabled?、children?。
+  - selectedKey (required): string — 当前页面对应的菜单项 key，受控。
+  - collapsed: boolean = false — 折叠为纯图标窄条，折叠态跨页面记忆。
+  - onSelect: (key: string) => void — 点击菜单项回调，通常触发路由跳转。
+
+States:
+  - default: 当前项品牌色浅底加粗，其余中性色。
+  - hover: 未选中项浅灰底，不改变布局。
+  - focus-visible: 菜单项焦点环，Tab 顺序自上而下。
+  - pressed: 点击即选中，颜色瞬时反馈（<120ms）。
+  - disabled: 无权限项灰化 + 锁图标，Tooltip 说明原因。
+  - loading [N/A]: 不适用：菜单项为本地配置，即时可得。
+  - empty [N/A]: 不适用：能进入系统就至少有一个可见入口。
+  - error [N/A]: 不适用：菜单不加载远程数据，无错误态。
+  - permission-limited: 无权限项禁用并说明所需权限，不隐藏，避免用户找不到功能。
+  - mobile: 折叠为抽屉，打开时遮罩内容区。
+  - dark-mode: 当前项使用 brand-soft 令牌，自动适配。
+
+Interaction rules:
+  - 选中即跳转，当前项始终保持在可视区域内（超长时自动滚动到位）。
+  - 分组可折叠，折叠状态按用户记忆。
+  - badge 为 0 时不显示数字，避免“0 条”噪音。
+
+Keyboard:
+  - ↑/↓ 在菜单项间移动焦点，Enter 跳转。
+  - ←/→ 折叠或展开当前分组。
+
+Accessibility:
+  - 外层 <nav>，列表 role="menu"，项 role="menuitem"。
+  - 当前项设置 aria-current="page"，不只靠颜色区分。
+
+Responsive:
+  - ≤760px 折叠为抽屉，由顶栏菜单按钮打开。
+  - 抽屉打开时内容区加遮罩，点击遮罩关闭。
+
+Content guidelines:
+  - 项名用 2–6 字名词，与目标页面标题一致。
+  - 徽章只放数量或状态（beta / new），不放营销词。
+
+Do:
+  - 用 selectedKey 明确标示当前位置。
+  - 超过 7 个入口时按业务分组。
+  - 无权限项禁用并说明原因。
+
+Don't:
+  - 不要用 Menu 做同页内容切换（用 Tabs）。
+  - 不要隐藏无权限项让用户找不到功能。
+  - 不要让菜单超过两层嵌套。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Menu
+    selectedKey="runs"
+    onSelect={(key) => navigate(key)}
+    items={[
+      { key: "overview", label: "项目概览", icon: <Home size={16} /> },
+      { key: "datasets", label: "数据集", icon: <Database size={16} /> },
+      { key: "runs", label: "计算任务", icon: <FlaskConical size={16} /> },
+      { key: "reports", label: "分析报告", icon: <FileText size={16} /> },
+    ]}
+  />
+  --- groups (variant) 分组与徽章
+  <Menu
+    selectedKey="runs"
+    items={[
+      {
+        key: "workspace",
+        label: "工作台",
+        children: [
+          { key: "runs", label: "计算任务" },
+          { key: "experiments", label: "实验记录", badge: "beta" },
+        ],
+      },
+      {
+        key: "assets",
+        label: "数据资产",
+        children: [
+          { key: "datasets", label: "数据集", badge: 12 },
+          { key: "reagents", label: "试剂库存" },
+        ],
+      },
+    ]}
+  />
+  --- business (business) 真实业务示例
+  <Menu
+    selectedKey="runs"
+    items={[
+      { key: "overview", label: "项目概览" },
+      { key: "runs", label: "计算任务", badge: 3 },
+      { key: "members", label: "成员与权限" },
+      {
+        key: "audit",
+        label: "审计日志",
+        disabled: true,
+        disabledReason: "需要项目管理员权限",
+      },
+    ]}
+  />
+
+Related: tabs, breadcrumb, layout, badge, dropdown
+
+## dc.tabs — Tabs 标签页 [stable] v0.1.0 (#/components/tabs)
+Category: navigation
+Purpose: 在同一页面内切换同层级的内容区块，切换后上下文与已输入状态不丢失。
+Usage: 用于同一对象的不同方面（任务详情的概览 / 参数 / 日志 / 产物）。跨页面导航用 Menu——Tabs 不换页、URL 可以不变，Menu 整页替换；2–5 个需要即时生效的视图切换可用 Segmented。标签超过一屏时横向滚动，不换行堆叠。
+
+Props:
+  - items (required): { key: string; label: ReactNode; badge?: ReactNode; disabled?: boolean }[] — 标签数组，2–7 个为宜。
+  - activeKey (required): string — 当前激活标签，受控。
+  - onChange: (key: string) => void — 切换回调；需要可分享时同步到 URL hash。
+  - destroyInactive: boolean = false — 是否销毁非活动面板；默认保留，切换不丢状态。
+
+States:
+  - default: 当前标签品牌色下划线 + 加粗，面板即时渲染。
+  - hover: 未选中标签文字变为品牌色。
+  - focus-visible: 标签焦点环，方向键可移动选中。
+  - pressed [N/A]: 不适用：按下即切换，无独立 pressed 态。
+  - disabled: 标签禁用，Tooltip 说明原因（如权限）。
+  - loading: 面板内容加载用 Skeleton，标签条保持稳定不动。
+  - empty: 面板为空时放 Empty，标签保留可切换。
+  - error: 面板加载失败显示 Alert + 重试，对应标签加红点提示。
+  - permission-limited: 无权限标签禁用并说明所需权限，不隐藏。
+  - mobile: 标签条横向滚动，当前标签自动滚入视野。
+  - dark-mode: 下划线与文字使用语义令牌，自动适配。
+
+Interaction rules:
+  - 切换不重新请求已加载过的面板，保留滚动位置与输入状态。
+  - 当前标签同步到 URL hash，刷新或分享后停在同一标签。
+  - 标签超出容器宽度时横向滚动，不换行。
+
+Keyboard:
+  - ←/→ 在标签间移动选中，Home / End 跳到首尾。
+  - Tab 键从标签条进入当前面板。
+
+Accessibility:
+  - 标签条 role="tablist"，标签 role="tab" 并设 aria-selected。
+  - 面板 role="tabpanel"，用 aria-controls 与标签关联。
+
+Responsive:
+  - 窄屏标签条横向滚动，标签文字不省略。
+  - 标签过多（>7）时考虑收敛为 Menu 或重组信息架构。
+
+Content guidelines:
+  - 标签用 2–4 字名词，不用句子。
+  - 计数用徽章表达，不写“日志（128）”这种文字拼接。
+
+Do:
+  - 同一对象的不同方面用 Tabs 组织。
+  - 需要分享当前视图时同步 URL hash。
+  - 运行中的面板用状态点提示有新内容。
+
+Don't:
+  - 不要用 Tabs 做跨页面导航（用 Menu）。
+  - 不要超过 7 个标签还不做收敛。
+  - 不要默认销毁非活动面板导致状态丢失。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Tabs
+    activeKey="overview"
+    onChange={setActiveKey}
+    items={[
+      { key: "overview", label: "概览" },
+      { key: "params", label: "参数" },
+      { key: "logs", label: "日志" },
+      { key: "artifacts", label: "产物" },
+    ]}
+  />
+  --- badges (variant) 带计数徽章
+  <Tabs
+    activeKey={activeKey}
+    onChange={setActiveKey}
+    items={[
+      { key: "all", label: "全部" },
+      { key: "running", label: "运行中", badge: 3 },
+      { key: "queued", label: "排队中", badge: 12 },
+      { key: "done", label: "已完成", badge: 128 },
+    ]}
+  />
+  --- business (business) 真实业务示例
+  <Tabs
+    activeKey={activeKey}
+    onChange={setActiveKey}
+    items={[
+      { key: "overview", label: "运行概览" },
+      { key: "logs", label: "实时日志", badge: <BadgeDot status="processing" /> },
+      { key: "curves", label: "电导率曲线" },
+      {
+        key: "audit",
+        label: "审计记录",
+        disabled: true,
+        disabledReason: "仅项目管理员可见",
+      },
+    ]}
+  />
+
+Related: menu, segmented, page-header, badge, skeleton
+
+## dc.steps — Steps 步骤条 [beta] v0.1.0 (#/components/steps)
+Category: navigation
+Purpose: 把多阶段流程拆成有序步骤，告诉用户流程进行到哪一步、每一步的结果。
+Usage: 用于有明确先后顺序的流程：数据导入、表单向导、任务流水线。并列内容切换用 Tabs；可以乱序访问的入口用 Menu。步骤数 2–7 为宜；每步只有 wait（等待）/ process（进行）/ finish（完成）/ error（失败）四种状态。
+
+Props:
+  - current (required): number — 当前步骤索引（从 0 开始）。
+  - items (required): { title: ReactNode; description?: ReactNode; status?: StepStatus }[] — 步骤数组；status 缺省时按 current 推导。
+  - status: "wait" | "process" | "finish" | "error" — 整体状态覆盖，通常只用于把当前步标记为 error。
+  - onChange: (step: number) => void — 点击已完成步骤回退；未到达的步骤不触发。
+
+States:
+  - default: 未到达的步骤灰色编号，不可点击。
+  - hover: 可回退的已完成步骤 hover 变品牌色；未到达步骤无 hover。
+  - focus-visible: 可点击步骤有焦点环，顺序与步骤顺序一致。
+  - pressed [N/A]: 不适用：步骤点击即跳转，无独立 pressed 态。
+  - disabled: 未到达的步骤不可点击，光标 not-allowed。
+  - loading: process 步骤可附 spinner 或实时百分比，标题保留。
+  - empty [N/A]: 不适用：少于两步时不应使用步骤条。
+  - error: 失败步骤红色叉号 + 具体原因 + 重试入口，流程停在该步。
+  - permission-limited [N/A]: 不适用：权限由流程入口控制，步骤条内不做权限判断。
+  - mobile: 收缩为“当前步骤 + 第 n/m 步”，不挤压换行。
+  - dark-mode: 状态色使用语义令牌，自动适配。
+  - finish: 完成步骤绿色对勾；流程允许时可点击回退。
+  - process: 当前步骤品牌色、标题加粗，是唯一进行中的步骤。
+
+Interaction rules:
+  - 已完成步骤在流程允许时可点击回退，回退不清空已填数据。
+  - 失败步骤必须给出具体原因与重试入口，不只变红。
+  - 同一时刻只有一个 process 步骤。
+
+Keyboard:
+  - 可点击步骤进入 Tab 序列，Enter 跳转。
+  - 未到达步骤不进入 Tab 序列。
+
+Accessibility:
+  - 使用 <ol> 有序列表表达步骤顺序。
+  - 当前步骤 aria-current="step"；失败步骤用 aria-describedby 关联原因文本。
+
+Responsive:
+  - ≤760px 只显示当前步骤名称与“第 n/m 步”。
+  - 描述文字在窄屏省略，完整原因在步骤内容区展示。
+
+Content guidelines:
+  - 步骤名用动词短语：上传文件、校验数据、确认导入。
+  - 失败原因写具体（哪一行、缺哪个字段），不写“出错了”。
+
+Do:
+  - 流程失败后停在失败步，修正后可从该步继续。
+  - 为每个步骤写一行描述说明这一步做什么。
+  - 步骤数控制在 2–7 个。
+
+Don't:
+  - 不要把步骤条当 Tabs 做并列切换。
+  - 不要在失败后自动跳回第一步清空进度。
+  - 不要出现两个 process 步骤。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Steps
+    current={1}
+    items={[
+      { title: "上传文件" },
+      { title: "校验数据" },
+      { title: "确认导入" },
+    ]}
+  />
+  --- states (state) 四种状态
+  <Steps
+    current={2}
+    items={[
+      { title: "解析文件", status: "finish" },
+      { title: "映射字段", status: "finish" },
+      { title: "校验数据", status: "error", description: "2 条记录缺少测试温度" },
+      { title: "写入数据集", status: "wait" },
+    ]}
+  />
+  --- business (business) 真实业务示例
+  <Steps
+    current={1}
+    items={[
+      { title: "上传文件", status: "finish", description: "electrolyte-batch-7.csv" },
+      { title: "校验数据", status: "error", description: "第 18、42 行缺少测试温度" },
+      { title: "确认导入", status: "wait", description: "目标数据集 ds-118" },
+    ]}
+  />
+  <Alert
+    type="error"
+    action={<Button size="sm">下载错误报告</Button>}
+  >
+    校验未通过：2 条记录缺少必填字段，修正后可从当前步骤继续。
+  </Alert>
+
+Related: form, progress, button, alert, result
+
+## dc.pagination — Pagination 分页 [beta] v0.1.0 (#/components/pagination)
+Category: navigation
+Purpose: 把长列表分页，告诉用户总量与当前位置，并允许翻页与调整每页条数。
+Usage: 用于数据量超过一屏的列表与表格。持续增长的流式数据（实时日志）用“加载更多”或虚拟滚动；总数少于两页时不渲染。翻页必须保留筛选与排序条件。
+
+Props:
+  - current (required): number — 当前页码（从 1 开始），受控。
+  - total (required): number — 总条数，用于计算页数与展示总量。
+  - pageSize: number = 20 — 每页条数；可选值 10 / 20 / 50。
+  - showTotal: (total: number) => ReactNode — 总量文案，如“共 128 条”。
+  - onChange: (page: number, pageSize: number) => void — 翻页或改每页条数回调。
+
+States:
+  - default: 当前页品牌色实心，其余页码描边；省略规则 1 … 4 5 6 … 12。
+  - hover: 页码边框与文字变为品牌色。
+  - focus-visible: 页码焦点环，Tab 顺序与视觉顺序一致。
+  - pressed [N/A]: 不适用：点击即翻页，无独立 pressed 态。
+  - disabled: 首页时“上一页”禁用，末页时“下一页”禁用。
+  - loading: 翻页请求期间页码锁定防重复点击，数据区用 Skeleton。
+  - empty: total 为 0 时不渲染分页，列表区显示 Empty。
+  - error: 翻页失败保留当前页码并用 Message 提示，可重试。
+  - permission-limited [N/A]: 不适用：分页不判断权限，权限由数据接口决定。
+  - mobile: 简化为“上一页 / 第 n 页 / 下一页”。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - 翻页保留筛选与排序条件，条件变化时回到第一页。
+  - 改变每页条数后回到第一页。
+  - 快速跳页输入非法页码时夹紧到有效范围。
+
+Keyboard:
+  - Tab 顺序：上一页 → 页码 → 下一页 → 跳页输入框。
+  - 跳页输入框 Enter 确认，Esc 还原。
+
+Accessibility:
+  - 外层 <nav aria-label="分页">。
+  - 当前页设置 aria-current="page"，省略号不进入 Tab 序列。
+
+Responsive:
+  - ≤760px 隐藏页码与跳页，只保留上一页 / 下一页与当前页。
+  - 每页条数选择器在窄屏收入“更多”。
+
+Content guidelines:
+  - 总量文案“共 128 条”，列表场景写“共 128 个任务”更具体。
+  - “暂无数据”由 Empty 表达，分页不承担空态文案。
+
+Do:
+  - 告诉用户总量与当前位置。
+  - 翻页请求期间锁定页码防重复点击。
+  - 筛选条件变化时回到第一页。
+
+Don't:
+  - 不要在少于一页时渲染分页占位。
+  - 不要翻页时丢失筛选条件。
+  - 不要用分页承载实时日志这类流式数据。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Pagination
+    current={3}
+    total={128}
+    pageSize={20}
+    onChange={setPage}
+  />
+  --- full (variant) 完整功能
+  <Pagination
+    current={page}
+    total={128}
+    pageSize={pageSize}
+    showTotal={(total) => `共 ${total} 条`}
+    showSizeChanger
+    showQuickJumper
+    onChange={(nextPage, nextSize) => {
+      setPage(nextPage);
+      setPageSize(nextSize);
+    }}
+  />
+  --- business (business) 真实业务示例
+  <FilterBar value={filters} onChange={setFilters} />
+  <Table dataSource={runs} loading={pageLoading} />
+  <Pagination
+    current={page}
+    total={128}
+    pageSize={20}
+    showTotal={(total) => `共 ${total} 个任务`}
+    onChange={(nextPage) => {
+      setPageLoading(true);
+      fetchRuns({ projectId: "project-042", page: nextPage, filters })
+        .finally(() => setPageLoading(false));
+      setPage(nextPage);
+    }}
+  />
+
+Related: table, filter-bar, empty, skeleton, search-field
+
+## dc.dropdown — Dropdown 下拉菜单 [beta] v0.1.0 (#/components/dropdown)
+Category: navigation
+Purpose: 把一组低频动作收进触发元素背后的浮层菜单，保持界面清爽。
+Usage: 用于“更多操作”、用户菜单、带选项的动作按钮。菜单项是页面导航时用 Menu；需要确认的单个动作用 Popconfirm；从选项里选一个值用 Select。菜单项不超过 9 个，超过时先分组，再考虑换交互。
+
+Props:
+  - menu (required): { items: MenuItem[]; onSelect?: (key: string) => void } — 菜单配置；项支持 icon、danger、disabled、divider。
+  - trigger: ("click" | "hover")[] = ["click"] — 打开方式；动作菜单用 click，hover 只用于纯浏览型菜单。
+  - placement: "bottomLeft" | "bottomRight" | "topLeft" | "topRight" = "bottomLeft" — 浮层相对触发器的位置，边缘自动翻转。
+  - children (required): ReactElement — 触发元素，通常是 Button 或 IconButton。
+
+States:
+  - default: 浮层带阴影贴近触发器，层级高于页面内容。
+  - hover: 菜单项浅灰底；危险项红色浅底。
+  - focus-visible: 打开后焦点进入菜单，菜单项焦点环可见。
+  - pressed [N/A]: 不适用：菜单项点击即执行，无独立 pressed 态。
+  - disabled: 菜单项灰化不可选；触发器禁用时无法打开。
+  - loading: 触发动作执行中触发器进入 loading，禁止重复打开。
+  - empty [N/A]: 不适用：无可用项时隐藏触发器，不渲染空菜单。
+  - error: 动作执行失败由 Message 在页面顶层反馈，菜单保持已关闭状态。
+  - permission-limited: 无权限项 disabled + 锁图标 + Tooltip 说明所需权限。
+  - mobile: 浮层最大宽度 90vw、最大高度 60vh，超出可滚动。
+  - dark-mode: 浮层使用 surface 令牌与阴影，自动适配。
+
+Interaction rules:
+  - 点击外部或 Esc 关闭，选中一项后关闭。
+  - 危险项先经 Popconfirm 二次确认再执行，确认文案回显作用对象。
+  - 打开时浮层不超出视口，边缘自动翻转方向。
+
+Keyboard:
+  - Enter / Space / ↓ 打开菜单，↑/↓ 在项间移动。
+  - Esc 关闭并把焦点归还触发器；Home / End 跳到首末项。
+
+Accessibility:
+  - 触发器设 aria-haspopup="menu"，打开时 aria-expanded="true"。
+  - 菜单 role="menu"、项 role="menuitem"；危险项不只靠红色，配合文案或图标。
+
+Responsive:
+  - 移动端浮层最大宽度 90vw，贴近触发器。
+  - 菜单项点击区域不小于 36px 高。
+
+Content guidelines:
+  - 菜单项以动词开头：查看详情、复制任务 ID。
+  - 危险项写清作用对象：撤销任务 run-28003，而不是“删除”。
+  - 分组之间用分割线，不给分组加标题。
+
+Do:
+  - 低频动作收进“更多操作”。
+  - 危险项放菜单底部并用分割线隔开。
+  - 无权限项禁用并说明原因。
+
+Don't:
+  - 不要在菜单里放超过 9 个项。
+  - 不要用 Dropdown 做表单选择（用 Select）。
+  - 不要让危险项不经确认直接执行。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Dropdown
+    menu={{
+      items: [
+        { key: "detail", label: "查看详情" },
+        { key: "copy", label: "复制任务 ID" },
+        { key: "rerun", label: "重新运行" },
+      ],
+      onSelect: (key) => handleAction(key),
+    }}
+  >
+    <Button variant="secondary">更多操作</Button>
+  </Dropdown>
+  --- danger (variant) 分组与危险项
+  <Dropdown
+    menu={{
+      items: [
+        { key: "detail", label: "查看详情" },
+        { key: "share", label: "分享链接" },
+        { type: "divider" },
+        { key: "revoke", label: "撤销任务", danger: true },
+      ],
+    }}
+  >
+    <IconButton aria-label="更多操作" icon={<MoreHorizontal size={16} />} />
+  </Dropdown>
+  --- business (business) 真实业务示例
+  <Dropdown
+    trigger={["click"]}
+    menu={{
+      items: [
+        { key: "detail", label: "查看详情" },
+        { key: "logs", label: "下载日志" },
+        { key: "clone", label: "以此为模板新建" },
+        {
+          key: "audit",
+          label: "审计记录",
+          disabled: true,
+          disabledReason: "需要项目管理员权限",
+        },
+        { type: "divider" },
+        {
+          key: "revoke",
+          label: "撤销任务 run-28003",
+          danger: true,
+          confirm: "撤销后不可恢复",
+        },
+      ],
+      onSelect: handleRunAction,
+    }}
+  >
+    <Button variant="ghost">更多操作</Button>
+  </Dropdown>
+
+Related: button, icon-button, popconfirm, menu, modal
+
+## dc.segmented — Segmented 分段选择器 [beta] v0.1.0 (#/components/segmented)
+Category: navigation
+Purpose: 少量互斥选项的即时切换器，选中立即生效，像开关一样轻量。
+Usage: 用于 2–5 个互斥选项的即时切换：视图（表格 / 卡片）、时间范围、单位。选项更多或需要确认时用 Select 或 Radio；切换整页内容用 Tabs 或 Menu。Segmented 不产生提交动作，选中即应用。
+
+Props:
+  - options (required): (string | { label: ReactNode; value: string; icon?: ReactNode; disabled?: boolean })[] — 选项数组，2–5 个。
+  - value (required): string — 当前选中值，受控。
+  - onChange: (value: string) => void — 切换回调，选中即生效。
+  - size: "sm" | "md" = "md" — sm 高 28px，md 高 32px。
+
+States:
+  - default: 选中项浮起（surface + 阴影），未选中项中性文字。
+  - hover: 未选中项文字加深，不改变背景。
+  - focus-visible: 整组一个 Tab 位，选中项焦点环可见。
+  - pressed: 选中块滑动过渡 160ms，方向键切换同样过渡。
+  - disabled: 单项灰化不可选；整体禁用 opacity .45。
+  - loading [N/A]: 不适用：切换即时生效，目标区域自行加载。
+  - empty [N/A]: 不适用：至少两个互斥选项才有意义。
+  - error [N/A]: 不适用：切换不产生错误，目标区域的错误由目标组件表达。
+  - permission-limited: 无权限选项 disabled + Tooltip 说明原因。
+  - mobile: 选项等分宽度，文字不省略；放不下时改用 Tabs。
+  - dark-mode: 容器 surface-soft、选中块 surface，自动适配。
+
+Interaction rules:
+  - 点击即生效，不需要确认或提交。
+  - 选中块滑动过渡，方向键切换同样有过渡。
+  - 选项超过 5 个时改用 Select 或 Tabs，不无限横向扩展。
+
+Keyboard:
+  - 整组一个 Tab 位（roving tabindex）。
+  - ←/→ 移动选中，选中即生效。
+
+Accessibility:
+  - 容器 role="radiogroup"，选项 role="radio" 并设 aria-checked。
+  - 纯图标选项必须有 Tooltip 与 aria-label。
+
+Responsive:
+  - 选项在容器内等分宽度，窄屏缩小内边距不换行。
+  - 文字被挤压到不可读时改用 Tabs。
+
+Content guidelines:
+  - 选项用 1–4 字，名词或时间短语。
+  - 不用“选项一 / 选项二”这类无信息文案。
+
+Do:
+  - 视图切换、时间范围这类即时场景优先用 Segmented。
+  - 数据不足的选项禁用并说明原因。
+  - 配合就近的结果区域，切换后立刻看到变化。
+
+Don't:
+  - 不要放超过 5 个选项。
+  - 不要用 Segmented 做需要提交的表单选择。
+  - 不要让切换后没有任何即时反馈。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Segmented
+    value={view}
+    onChange={setView}
+    options={[
+      { label: "表格", value: "table" },
+      { label: "卡片", value: "card" },
+    ]}
+  />
+  --- sizes (size) 尺寸
+  <Segmented size="sm" value="7d" options={["24h", "7 天", "30 天"]} />
+  <Segmented size="md" value="all" options={["全部", "运行中", "已完成"]} />
+  --- business (business) 真实业务示例
+  <Segmented
+    value={range}
+    onChange={(value) => {
+      setRange(value);
+      refetchMetrics({ runId: "run-28003", range: value });
+    }}
+    options={[
+      { label: "24 小时", value: "24h" },
+      { label: "7 天", value: "7d" },
+      { label: "30 天", value: "30d", disabled: true, disabledReason: "任务运行未满 30 天" },
+    ]}
+  />
+
+Related: tabs, radio, select, switch, filter-bar
+
+## dc.input — Input 输入框 [stable] v0.1.0 (#/components/input)
+Category: entry
+Purpose: 收集单行短文本，是表单里最基础的信息录入单元。
+Usage: 用于名称、编号、简短标识等单行文本。多行内容用 Textarea；纯数值用 InputNumber；从有限选项中选值用 Select；即时过滤查找用 SearchField。
+
+Props:
+  - value: string — 受控值；必须配合 onChange 使用，禁止半受控。
+  - placeholder: string — 占位提示，只写格式示例，不替代标签。
+  - maxLength: number — 最大字符数；接近上限时显示计数，超限禁止继续输入。
+  - allowClear: boolean = false — 有值时显示一键清除按钮，清除后焦点回到输入框。
+  - prefix: ReactNode — 前置内容（图标或固定前缀），不参与提交值。
+  - size: "sm" | "md" | "lg" = "md" — sm 用于筛选栏与行内，lg 仅用于页面级录入。
+  - disabled: boolean = false — 禁止编辑；原因必须由邻近文案说明。
+  - onChange: (value: string) => void — 值变化回调；受控使用时必须同步更新 value。
+
+States:
+  - default: 显示当前值或占位文本；占位文本只用浅灰示意格式。
+  - hover: 边框颜色加深或变为品牌色，不改变高度与宽度。
+  - focus-visible: 品牌色边框 + 3px 外发光，Tab 可达，不得用 outline: none 移除。
+  - pressed [N/A]: 不适用：文本输入没有按下态。
+  - disabled: 灰底 + not-allowed 光标；禁用原因就近写在辅助文本里。
+  - loading [N/A]: 不适用：输入框无加载态；提交等待由 Form 的提交按钮承担。
+  - empty: 未填写时显示 placeholder；必填空值在失焦或提交时校验。
+  - error: 红色边框 + aria-invalid="true"，错误文案紧随控件并以 role="alert" 播报。
+  - permission-limited: 无编辑权限时渲染为 disabled 并注明所需角色，而不是隐藏字段。
+  - mobile: 触控高度 ≥40px；按内容类型唤起对应键盘（text / email / number）。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 失焦校验格式类规则（长度、字符集），提交时校验业务规则（重名、权限）。
+  - allowClear 只在有值时出现，点击后焦点回到输入框。
+  - 粘贴内容同样触发校验，不允许绕过 maxLength。
+  - 受控使用时 onChange 必须同步更新 value，禁止半受控。
+
+Keyboard:
+  - Tab 进入 / 离开，焦点顺序与视觉顺序一致。
+  - 方向键移动光标；Enter 在单行输入框内默认触发所在 Form 的提交。
+
+Accessibility:
+  - 必须用 <label htmlFor> 或 aria-label 关联标签，禁止只用 placeholder 当标签。
+  - 错误状态设置 aria-invalid="true"，错误文案 id 通过 aria-describedby 关联。
+  - maxLength 的计数提示通过 aria-describedby 关联。
+  - 纯装饰的前缀图标设 aria-hidden="true"。
+
+Responsive:
+  - 移动端最小高度 40px，整行可点。
+  - 窄屏下输入框占满容器宽度，前后缀不折行。
+
+Content guidelines:
+  - placeholder 写格式示例（例如：run-28003），不写指令（请输入名称）。
+  - 标签用名词短语：项目名称、样本编号。
+  - 错误文案说清怎么改：名称不能包含 / \ : 字符，而不是“输入非法”。
+
+Do:
+  - 始终配可见标签，辅助说明放控件下方。
+  - 校验反馈就近展示在出错字段下方。
+  - 固定前缀（如 SMP-）用 prefix，不让用户手输。
+
+Don't:
+  - 不要用 placeholder 代替标签。
+  - 不要静默截断超长输入而不给计数提示。
+  - 不要用输入框收集多行文本（用 Textarea）。
+  - 不要只变灰禁用而不解释原因。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Input label="项目名称" placeholder="例如：高导电解液筛选" />
+  <Input label="样本编号" prefix="SMP-" placeholder="00042" />
+  --- sizes (size) 尺寸示例
+  <Input size="sm" placeholder="行内筛选" />
+  <Input size="md" placeholder="默认尺寸" />
+  <Input size="lg" placeholder="页面级录入" />
+  --- states (state) 状态示例
+  <Input label="所属项目" value="示例项目（project-042）" disabled />
+  <Input label="任务名称" error="名称不能包含 / \ : 字符。" defaultValue="第 3 轮/优化" />
+  --- business (business) 真实业务示例
+  <div className="field">
+    <label htmlFor="project-name">项目名称</label>
+    <Input id="project-name" defaultValue="示例项目（project-042）" maxLength={40} allowClear />
+    <small>名称用于列表展示与导出文件命名，2–40 个字符，项目内唯一。</small>
+  </div>
+
+Related: textarea, input-number, search-field, form
+
+## dc.input-number — InputNumber 数字输入框 [beta] v0.1.0 (#/components/input-number)
+Category: entry
+Purpose: 录入带范围、步长和精度约束的数值，把非法数字拦在输入阶段。
+Usage: 用于质量、浓度、温度、循环次数等数值字段。展示用数字不要用它（用 Statistic）；编号即使全是数字也用 Input，避免丢失前导零。
+
+Props:
+  - value: number | null — 受控值；null 表示未填写，不强制为 0。
+  - min: number — 下限；越界输入在失焦时收敛到边界并提示。
+  - max: number — 上限；越界输入在失焦时收敛到边界并提示。
+  - step: number = 1 — 步进按钮与方向键的步长。
+  - precision: number — 小数位数，超出自动四舍五入。
+  - unit: string — 单位文本，展示在控件内右侧，不参与值。
+  - disabled: boolean = false — 禁止编辑并隐藏步进按钮。
+  - onChange: (value: number | null) => void — 值变化回调；清空时回传 null。
+
+States:
+  - default: 显示格式化后的值与单位；null 时显示占位。
+  - hover: 边框加深或变为品牌色，步进按钮显现。
+  - focus-visible: 品牌色边框 + 3px 外发光，Tab 可达。
+  - pressed: 步进按钮按下时背景加深一档，时长 < 120ms。
+  - disabled: 灰底 + not-allowed，步进按钮隐藏；原因就近说明。
+  - loading [N/A]: 不适用：数字输入无加载态；提交等待由 Form 承担。
+  - empty: null 显示占位文本；空值不自动补 0，由校验决定是否必填。
+  - error: 越界或格式错误时红色边框 + 就近文案，aria-invalid="true"。
+  - permission-limited: 无权限时只读展示值与单位，不渲染为可编辑控件。
+  - mobile: 唤起数字键盘（inputMode="decimal"）；步进按钮触控区域 ≥32×40px。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 非法字符实时过滤，失焦时按 min / max / precision 收敛并给出提示。
+  - 上下方向键与步进按钮完全等价。
+  - 单位只展示不进值，提交始终是纯数字。
+  - 清空后为 null，不自动补 0；“未填”与“填 0”语义不同。
+
+Keyboard:
+  - Tab 聚焦；↑ / ↓ 按 step 增减。
+  - 输入非法字符被忽略；Esc 放弃本次编辑并还原为进入前的值。
+
+Accessibility:
+  - 使用 role="spinbutton" 语义，同步 aria-valuemin / aria-valuemax / aria-valuenow。
+  - 步进按钮提供 aria-label（增加 / 减少），单位包含在可访问名称或 aria-describedby 中。
+  - 错误时 aria-invalid="true"，错误文案 role="alert" 就近播报。
+
+Responsive:
+  - 移动端唤起数字键盘，输入框全宽。
+  - 窄屏下单位内联显示，不与输入值折行分离。
+
+Content guidelines:
+  - 单位写在 unit 里，不写进标签或占位。
+  - 错误文案给出允许范围：允许 0–500 mg。
+  - 辅助文本写明精度依据：与天平精度一致（0.01 mg）。
+
+Do:
+  - 数值字段用 InputNumber 而不是 Input。
+  - 标明范围与单位，精度与仪器一致。
+  - 用 null 表达“未填”，不用 0 占位。
+
+Don't:
+  - 不要把编号当数字录入（前导零会丢失）。
+  - 不要越界静默收敛而没有任何提示。
+  - 不要把单位拼进提交值。
+  - 不要默认填 0 代替“未填写”。
+
+Examples:
+  --- basic (basic) 基础示例
+  <InputNumber min={0} max={100} step={0.1} defaultValue={1.5} />
+  --- precision-unit (variant) 精度与单位
+  <InputNumber defaultValue={12.4} precision={2} unit="mg" min={0} max={500} />
+  <InputNumber defaultValue={200} precision={0} unit="次" min={1} max={2000} />
+  --- business (business) 真实业务示例
+  <div className="field">
+    <label htmlFor="sample-mass">称量质量</label>
+    <InputNumber id="sample-mass" defaultValue={12.4} precision={2} unit="mg" min={0} max={500} />
+    <small>精度与天平一致（0.01 mg），量程 0–500 mg；留空表示未称量。</small>
+  </div>
+
+Related: input, form, statistic
+
+## dc.textarea — Textarea 多行文本框 [beta] v0.1.0 (#/components/textarea)
+Category: entry
+Purpose: 收集多行、较长的自由文本，如实验备注、失败原因、方法描述。
+Usage: 用于超过一行的描述性内容。单行文本用 Input；结构化字段（日期、数值）用对应控件；代码 / JSON 片段的展示用 CodeBlock。
+
+Props:
+  - value: string — 受控值；配合 onChange 使用。
+  - rows: number = 3 — 初始可视行数。
+  - maxLength: number — 最大字符数；配合 showCount 给出实时计数。
+  - showCount: boolean = false — 显示 已输入/上限 计数，接近上限时变警示色。
+  - autoSize: boolean | { minRows: number; maxRows: number } = false — 随内容自动伸缩，超过 maxRows 出现滚动条。
+  - placeholder: string — 占位提示，引导内容结构，不替代标签。
+  - disabled: boolean = false — 禁止编辑；长文只读场景用只读样式保留全文可读。
+  - onChange: (value: string) => void — 值变化回调。
+
+States:
+  - default: 显示当前内容或占位文本，默认可视三行。
+  - hover: 边框颜色加深或变为品牌色。
+  - focus-visible: 品牌色边框 + 3px 外发光，Tab 可达。
+  - pressed [N/A]: 不适用：多行文本框没有按下态。
+  - disabled: 灰底 + not-allowed；只读审阅场景保持全文可滚动阅读。
+  - loading [N/A]: 不适用：多行文本框无加载态；提交等待由 Form 承担。
+  - empty: 未填写时显示 placeholder，引导内容结构（现象、异常、处理）。
+  - error: 超限或必填未填时红色边框 + 就近文案，aria-invalid="true"。
+  - permission-limited: 无权限时只读展示全文，保留滚动，不渲染为可编辑控件。
+  - mobile: 最小三行可视高度；使用系统默认换行键盘。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - autoSize 在 minRows / maxRows 之间伸缩，超出出现内部滚动条。
+  - 计数接近上限时变为警示色，超限禁止继续输入并红字提示。
+  - 粘贴内容同样受 maxLength 约束，不静默丢弃。
+
+Keyboard:
+  - Enter 换行；Tab 离开控件（不插入制表符）。
+  - 在 Form 中可配置 Cmd / Ctrl + Enter 提交。
+
+Accessibility:
+  - 必须用 <label htmlFor> 或 aria-label 关联标签。
+  - 计数通过 aria-describedby 关联，变化不频繁打断读屏。
+  - 错误时 aria-invalid="true"，错误文案 role="alert" 就近播报。
+
+Responsive:
+  - 宽度跟随容器，不固定像素宽。
+  - 移动端保持三行可视高度，允许纵向扩高。
+
+Content guidelines:
+  - placeholder 引导写什么：记录实验现象、异常与处理。
+  - 需要留痕的备注注明后果：将进入审计记录并随报告导出。
+  - 错误文案给出剩余可输入字符数，而不是只说“超出限制”。
+
+Do:
+  - 超过一行的内容用 Textarea。
+  - 需要留痕的备注在辅助文本里说明会进入审计。
+  - 接近字数上限时给出计数反馈。
+
+Don't:
+  - 不要用单行 Input 收集段落文本。
+  - 不要自动高度无限增高不封顶。
+  - 不要静默丢弃超限的粘贴内容。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Textarea label="实验备注" placeholder="记录实验现象、异常与处理" rows={3} />
+  --- count-autosize (variant) 字数限制与自动高度
+  <Textarea maxLength={500} showCount autoSize={{ minRows: 3, maxRows: 8 }} />
+  --- business (business) 真实业务示例
+  <div className="field">
+    <label htmlFor="run-note">实验备注（run-28003）</label>
+    <Textarea id="run-note" maxLength={500} showCount defaultValue="第 3 轮配方 D，充电末期温升偏高，已降倍率复测。" />
+    <small>备注将进入审计记录，导出报告时一并携带，请客观描述事实。</small>
+  </div>
+
+Related: input, form, code-block
+
+## dc.select — Select 选择器 [stable] v0.1.0 (#/components/select)
+Category: entry
+Purpose: 从一组确定选项中选择单个或多个值，把自由录入变成受控选择。
+Usage: 选项已知且有限时使用（状态、类型、所属项目）。选项量大或允许创建新值用 Combobox；选项 ≤5 且需要一眼看全用 Radio；布尔设置用 Switch。
+
+Props:
+  - value: string | string[] — 受控值；多选时为数组。
+  - options (required): { value: string; label: ReactNode; disabled?: boolean }[] — 选项列表；disabled 选项必须在 label 旁注明原因。
+  - mode: "single" | "multiple" = "single" — 单选或多选；多选已选值以 Tag 回显。
+  - showSearch: boolean = false — 面板内搜索，大小写不敏感；选项超过 8 个时必须开启。
+  - allowClear: boolean = false — 有值时显示一键清空按钮。
+  - placeholder: string — 占位提示，写选择对象（选择状态），不写“请选择”。
+  - loading: boolean = false — 选项异步加载中，面板内显示加载占位。
+  - disabled: boolean = false — 禁止展开面板；原因就近说明。
+  - onChange: (value: string | string[]) => void — 选中变化回调。
+
+States:
+  - default: 显示已选值 label 或占位文本。
+  - hover: 触发器边框变为品牌色。
+  - focus-visible: 触发器 3px 外发光；面板打开时焦点落在搜索框或当前选项。
+  - pressed: 点选瞬间选项背景高亮，时长 < 120ms。
+  - disabled: 灰底 + not-allowed，不展开面板；原因就近说明。
+  - loading: 选项异步加载时，面板内显示“正在加载”占位。
+  - empty: 选项为空或搜索无匹配时显示空态文案与下一步引导。
+  - error: 必选未选在提交时报错，红色边框 + 就近文案，aria-invalid="true"。
+  - permission-limited: 无权限的选项显示但禁用并注明；整个控件无权限时只读。
+  - mobile: 面板高度 ≤60vh，选项触控高度 ≥40px。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 单选点选即确认并关闭面板；多选保持面板打开，已选以 Tag 回显。
+  - 搜索输入即时过滤，大小写不敏感。
+  - 失焦或 Esc 关闭面板，不改变已选值。
+  - 禁用选项不可点，原因前置写在选项上，而不是选中后才报错。
+
+Keyboard:
+  - ↓ 打开面板，↑ / ↓ 移动高亮，Enter 选中。
+  - Esc 关闭面板并保留已选；多选时 Space 切换勾选。
+
+Accessibility:
+  - 触发器使用 role="combobox" 并同步 aria-expanded。
+  - 选项列表 role="listbox"，选项 role="option" 并同步 aria-selected。
+  - 多选已选 Tag 的移除按钮提供 aria-label（移除：运行中）。
+  - 空态文案对读屏可读，不只依赖视觉。
+
+Responsive:
+  - 面板宽度跟随触发器，长 label 省略号截断。
+  - 移动端选项触控高度 ≥40px，面板不超过 60vh。
+
+Content guidelines:
+  - 占位写“选择状态”，不写“请选择”。
+  - 选项用名词短语，不带句号，不超过一行。
+  - 空态区分“暂无数据”与“无匹配结果”。
+
+Do:
+  - 选项有限且确定时用 Select。
+  - 选项超过 8 个时开启搜索。
+  - 多选用 Tag 回显已选，可单个移除。
+
+Don't:
+  - 不要用下拉藏 2–3 个选项（用 Radio 或 Segmented）。
+  - 不要在选项里放长句或说明段落。
+  - 不要等用户选中后才告知选项不可用——禁用时前置说明。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Select
+    placeholder="选择状态"
+    options={[
+      { value: "running", label: "运行中" },
+      { value: "queued", label: "排队中" },
+      { value: "finished", label: "已完成" },
+    ]}
+  />
+  --- multiple (variant) 多选与可清空
+  <Select
+    mode="multiple"
+    allowClear
+    placeholder="选择标签"
+    options={tagOptions}
+    defaultValue={["high-conductivity", "round-3"]}
+  />
+  --- business (business) 真实业务示例
+  <Select
+    showSearch
+    placeholder="搜索数据集名称或编号"
+    options={[
+      { value: "ds-118", label: "电导率筛选第 3 轮（ds-118）" },
+      { value: "ds-120", label: "热稳定性复测（ds-120）" },
+      { value: "ds-121", label: "空白对照组（ds-121）" },
+    ]}
+    emptyText="没有匹配的数据集"
+  />
+
+Related: combobox, radio, dropdown, form, tag
+
+## dc.combobox — Combobox 组合框 [experimental] v0.1.0 (#/components/combobox)
+Category: entry
+Purpose: 在可搜索的选项列表中既可选择已有值，也允许输入并创建新值。
+Usage: 选项量大或允许用户扩展时使用：试剂名称、仪器编号、标签。选项固定且少时用 Select；纯自由文本用 Input。
+
+Props:
+  - value: string — 受控值；选中已有项或创建的新值。
+  - options (required): { value: string; label: ReactNode; hint?: string; disabled?: boolean }[] — 候选列表；hint 放编号、状态等副信息。
+  - allowCreate: boolean = false — 无匹配时展示“创建：输入值”入口。
+  - onCreate: (name: string) => void — 创建回调；创建成功后自动选中新值。
+  - onSearch: (keyword: string) => void — 搜索回调；远程场景防抖 ≥300ms。
+  - loading: boolean = false — 远程搜索中，面板内显示加载占位。
+  - emptyText: ReactNode = "无匹配结果" — 无匹配时的空态文案；allowCreate 时创建入口始终在前。
+  - onChange: (value: string) => void — 选中变化回调。
+
+States:
+  - default: 未选中时为输入态，选中后回显选项 label。
+  - hover: 输入框边框变为品牌色；选项悬停高亮。
+  - focus-visible: 输入框 3px 外发光；面板打开时高亮项清晰可见。
+  - pressed: 点选瞬间选项背景高亮，时长 < 120ms。
+  - disabled: 灰底 + not-allowed，不展开面板。
+  - loading: 远程搜索时面板内显示 spinner 与“正在搜索”占位，输入不锁定。
+  - empty: 无匹配时展示空态；allowCreate 时首项为“创建：输入值”。
+  - error: 搜索服务失败时面板内给出错误与重试，保留已输入关键词。
+  - permission-limited: 创建入口仅对有权限的角色显示；无权限时只能选已有值。
+  - mobile: 面板全宽展示，选项触控高度 ≥40px。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 输入即时过滤，匹配片段高亮；远程搜索防抖 ≥300ms。
+  - 无匹配且 allowCreate 时，首项固定为“创建：输入值”。
+  - 创建前检测重名与相似项并提示，创建成功后自动选中。
+  - 选中后输入框显示选中值，清除后恢复输入态。
+
+Keyboard:
+  - 输入字符即搜索；↓ 进入列表，↑ / ↓ 移动高亮。
+  - Enter 选中高亮项或触发创建；Esc 关闭面板并保留输入。
+
+Accessibility:
+  - 输入框使用 role="combobox"，同步 aria-expanded 与 aria-controls。
+  - aria-activedescendant 指向当前高亮项。
+  - 结果数量变化通过 aria-live="polite" 播报。
+  - 创建入口语义清晰：文案为“创建：输入值”，不只依赖加号图标。
+
+Responsive:
+  - 面板宽度跟随输入框，长文本省略号截断。
+  - 移动端面板全宽，选项触控高度 ≥40px。
+
+Content guidelines:
+  - 创建项文案固定为“创建：{输入值}”。
+  - 选项副信息（编号、状态）用弱化样式，不与主文案混排。
+  - 空态区分“无匹配结果”与“搜索失败，请重试”。
+
+Do:
+  - 大列表必须支持搜索过滤。
+  - 允许创建时给出去重与相似项提示。
+  - 远程搜索防抖 ≥300ms 并显示加载占位。
+
+Don't:
+  - 不要把 Combobox 当普通 Select 用（选项固定时是多此一举）。
+  - 不要创建前不提示重名，制造重复数据。
+  - 不要输入即触发写操作；创建必须经用户明确选择。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Combobox
+    placeholder="搜索试剂名称"
+    options={[
+      { value: "ec", label: "碳酸乙烯酯", hint: "EC" },
+      { value: "dmc", label: "碳酸二甲酯", hint: "DMC" },
+    ]}
+  />
+  --- allow-create (variant) 允许创建新值
+  <Combobox
+    allowCreate
+    placeholder="搜索或输入标签"
+    options={tagOptions}
+    onCreate={(name) => createTag({ projectId: "project-042", name })}
+  />
+  --- business (business) 真实业务示例
+  <Combobox
+    placeholder="搜索仪器名称或编号"
+    options={[
+      { value: "ins-07", label: "恒温箱 07", hint: "可用" },
+      { value: "ins-09", label: "恒温箱 09", hint: "维护中", disabled: true },
+    ]}
+    emptyText="没有匹配的仪器"
+  />
+
+Related: select, input, tag, form
+
+## dc.date-picker — DatePicker 日期选择器 [beta] v0.1.0 (#/components/date-picker)
+Category: entry
+Purpose: 选择单个日期或日期时间，保证格式合法、范围受控。
+Usage: 用于实验日期、截止日、计划开始时间。选择时间段用 DateRangePicker；只按相对时间筛选（最近 7 天）可直接用 FilterBar 的快捷项。
+
+Props:
+  - value: string | null — 受控值，格式 YYYY-MM-DD；null 表示未选择。
+  - showTime: boolean = false — 同时选择时间；开启后面板需点“确定”才确认。
+  - disabledDate: (date: Date) => boolean — 禁用日期函数；被禁日期不可点且弱化显示。
+  - format: string = "YYYY-MM-DD" — 展示格式，全平台统一，不逐页自定义。
+  - placeholder: string — 占位提示，写格式示例（例如：2026-09-22）。
+  - disabled: boolean = false — 禁止打开面板；原因就近说明。
+  - onChange: (value: string | null) => void — 选中变化回调。
+
+States:
+  - default: 显示格式化日期或占位文本，前置日历图标。
+  - hover: 触发器边框变为品牌色。
+  - focus-visible: 触发器 3px 外发光；面板打开后焦点在面板内可循环。
+  - pressed: 面板中日期按下时背景加深一档，时长 < 120ms。
+  - disabled: 灰底 + not-allowed，不展开面板；原因就近说明。
+  - loading [N/A]: 不适用：日期数据本地生成，无加载态。
+  - empty: 未选择时显示占位文本；清除后恢复占位。
+  - error: 必选未选或手动输入非法时红色边框 + 就近文案，aria-invalid="true"。
+  - permission-limited: 无修改权限时只读展示日期文本，不渲染触发器。
+  - mobile: 日期单元触控区域 ≥40px，面板高度适配屏幕。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 点击触发器打开面板，点选日期即确认（无时间部分时）。
+  - disabledDate 命中的日期不可点且弱化显示，规则前置说明。
+  - 支持手动输入，失焦解析；非法输入回退为原值并提示。
+  - showTime 时需点“确定”才提交值，避免半完成状态。
+
+Keyboard:
+  - Tab 聚焦触发器，Enter / ↓ 打开面板。
+  - 方向键移动日期，PageUp / PageDown 切换月份，Enter 选中，Esc 关闭。
+
+Accessibility:
+  - 触发器使用 aria-haspopup="dialog" 并同步 aria-expanded。
+  - 日期网格 role="grid"，日期单元同步 aria-selected，禁用日期 aria-disabled="true"。
+  - 手动输入框必须关联标签（预约日期），不能只靠图标。
+
+Responsive:
+  - 小屏下面板占可用宽度，日期单元 ≥40px。
+  - 触发器全宽显示，已选日期不被截断。
+
+Content guidelines:
+  - 日期格式全局统一为 YYYY-MM-DD，展示可本地化，提交格式不变。
+  - 占位写格式示例：例如：2026-09-22。
+  - 禁用规则前置写在辅助文本：可预约未来 14 天，需提前 2 小时。
+
+Do:
+  - 禁选规则前置说明，并在面板内直接禁用。
+  - 允许手动输入并做容错解析。
+  - 时区与格式全局统一。
+
+Don't:
+  - 不要只给日历面板而不允许手动输入。
+  - 不要等用户选中未来日期后提交时才报错（应在面板内禁选）。
+  - 不要在单个页面自定义一套日期格式。
+
+Examples:
+  --- basic (basic) 基础示例
+  <DatePicker placeholder="选择日期" defaultValue="2026-09-22" />
+  --- disabled-date (variant) 禁用日期
+  <DatePicker
+    placeholder="选择实验日期"
+    disabledDate={(date) => date.isAfter("2026-09-22")}
+  />
+  --- business (business) 真实业务示例
+  <div className="field">
+    <label htmlFor="reserve-date">预约日期</label>
+    <DatePicker id="reserve-date" disabledDate={(d) => d.isAfter("2026-10-06")} />
+    <small>可预约未来 14 天，需提前 2 小时；预约计入 示例项目（project-042）额度。</small>
+  </div>
+
+Related: date-range-picker, form, filter-bar
+
+## dc.date-range-picker — DateRangePicker 日期范围选择器 [beta] v0.1.0 (#/components/date-range-picker)
+Category: entry
+Purpose: 选择一个起止时间段，常用于列表筛选与统计区间。
+Usage: 用于按创建时间筛选任务、导出某区间数据。单日选择用 DatePicker；高频相对区间（最近 7 天）必须提供快捷项，不让用户逐日点选。
+
+Props:
+  - value: [string, string] | null — 受控区间 [开始, 结束]，格式 YYYY-MM-DD；null 表示未选择。
+  - presets: { label: string; value: [string, string] }[] — 快捷区间；命名必须具体（最近 7 天，含今天）。
+  - disabledDate: (date: Date) => boolean — 禁用日期函数，对开始与结束同时生效。
+  - placeholder: [string, string] = ["开始日期", "结束日期"] — 两个输入各自的占位。
+  - disabled: boolean = false — 禁止打开面板；原因就近说明。
+  - onChange: (value: [string, string] | null) => void — 区间确认后回调；中途点选不触发。
+
+States:
+  - default: 显示已选区间（开始 ~ 结束）或两个占位。
+  - hover: 触发器边框变为品牌色；面板内悬停日期预览区间。
+  - focus-visible: 触发器 3px 外发光；面板打开后焦点在面板内可循环。
+  - pressed: 面板中日期按下时背景加深一档，时长 < 120ms。
+  - disabled: 灰底 + not-allowed，不展开面板；原因就近说明。
+  - loading [N/A]: 不适用：日期数据本地生成，无加载态。
+  - empty: 未选择时显示开始 / 结束两个占位；清除后恢复。
+  - error: 手动输入非法或结束早于开始时红色边框 + 就近文案，aria-invalid="true"。
+  - permission-limited: 无权限时只读展示区间文本，不渲染触发器。
+  - mobile: 窄屏面板切换为单月视图，日期单元 ≥40px。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 第一次点击选开始，第二次点击选结束；悬停实时预览区间。
+  - 快捷项一键填充并关闭面板。
+  - 跨月导航不清空已选的开始日期。
+  - 结束早于开始时自动交换并给出提示，不静默互换。
+
+Keyboard:
+  - Tab 在开始 / 结束输入间切换，Enter / ↓ 打开面板。
+  - 面板内方向键移动，Enter 确认，Esc 关闭并保留已选。
+
+Accessibility:
+  - 开始与结束输入各自拥有标签（开始日期 / 结束日期）。
+  - 区间高亮同时用颜色与文字（已选 22 天）表达，不只依赖颜色。
+  - 快捷项为真实按钮，可 Tab 到达。
+
+Responsive:
+  - 窄屏面板切换为单月视图。
+  - 已选区间文本允许换行，不截断开始日期。
+
+Content guidelines:
+  - 快捷项命名具体：最近 7 天（含今天）、本轮次。
+  - 已选回显统一格式：2026-09-01 ~ 2026-09-22。
+  - 说明区间是否含端点：含开始与结束当日。
+
+Do:
+  - 提供常用快捷项，不让用户逐日点选。
+  - 标明区间是否含端点。
+  - 与 FilterBar 组合时作为外露条件之一。
+
+Don't:
+  - 不要让用户心算天数（给出“已选 22 天”）。
+  - 不要选中非法区间后默默互换而不提示。
+  - 不要用范围选择器做单日选择（用 DatePicker）。
+
+Examples:
+  --- basic (basic) 基础示例
+  <DateRangePicker placeholder={["开始日期", "结束日期"]} />
+  --- presets (variant) 快捷选项
+  <DateRangePicker
+    presets={[
+      { label: "最近 7 天", value: ["2026-09-16", "2026-09-22"] },
+      { label: "最近 30 天", value: ["2026-08-24", "2026-09-22"] },
+      { label: "本轮次", value: ["2026-09-01", "2026-09-22"] },
+    ]}
+  />
+  --- business (business) 真实业务示例
+  <DateRangePicker
+    value={["2026-09-01", "2026-09-22"]}
+    onChange={(range) => applyFilter({ projectId: "project-042", createdAt: range })}
+  />
+  <span>已选 22 天 · 命中 18 个任务 · <a>清除筛选</a></span>
+
+Related: date-picker, filter-bar, form
+
+## dc.checkbox — Checkbox 复选框 [stable] v0.1.0 (#/components/checkbox)
+Category: entry
+Purpose: 在一组互不排斥的选项中做多项选择，或确认一个需要显式同意的条款。
+Usage: 用于多选属性、批量选择行、勾选“我已阅读”。勾选只改变待提交状态，随表单或批量动作一起生效；需要即时生效的布尔设置用 Switch，二者不可混用。
+
+Props:
+  - checked: boolean — 是否选中；受控使用。
+  - indeterminate: boolean = false — 半选态，仅用于全选父级，视觉与未选明确区分。
+  - disabled: boolean = false — 禁止切换；原因就近说明。
+  - children: ReactNode — 选项文案，点击文案同样切换。
+  - onChange: (checked: boolean) => void — 切换回调；只更新待提交状态，不产生副作用。
+  - Checkbox.Group value: string[] — 组受控值，选中的 value 数组。
+  - Checkbox.Group options: { value: string; label: ReactNode; disabled?: boolean }[] — 组选项配置。
+
+States:
+  - default: 未选 / 已选 / 半选三种视觉明确区分，不依赖颜色单一通道。
+  - hover: 方框边框变为品牌色。
+  - focus-visible: 方框 3px 外发光，Tab 可达。
+  - pressed: 点击瞬间方框轻微缩放，时长 < 120ms。
+  - disabled: 灰化 + not-allowed；已勾选状态保持可见可读。
+  - loading [N/A]: 不适用：勾选是同步的本地状态；批量动作的等待由对应按钮承担。
+  - empty [N/A]: 不适用：复选框无空态；Group 无选项时不渲染并给出空态说明。
+  - error: 必勾选未勾选（如同意条款）提交时报错，文案就近显示在选项下方。
+  - permission-limited: 无权限选项禁用并注明所需权限，不做隐藏。
+  - mobile: 整行可点，触控高度 ≥40px，命中区域包含文案。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 点击方框或文案都切换选中。
+  - 全选父级随子项状态在半选 / 全选间切换；点击父级统一选中或清空。
+  - 勾选只改变待提交状态，不直接产生写操作；批量动作需显式触发。
+  - 批量选择时同步展示已选计数与可用动作。
+
+Keyboard:
+  - Tab 聚焦，焦点顺序与视觉顺序一致。
+  - Space 切换选中。
+
+Accessibility:
+  - 使用原生 input type="checkbox"，半选态同步 aria-checked="mixed"。
+  - Group 使用 fieldset / legend 或 role="group" + aria-label 表达分组含义。
+  - 必勾选错误时 aria-invalid="true"，错误文案 role="alert" 就近播报。
+
+Responsive:
+  - 移动端整行可点，触控高度 ≥40px。
+  - 窄屏下 Group 选项纵向堆叠，不横向挤压。
+
+Content guidelines:
+  - 文案用肯定句：同时导出原始数据；避免双重否定。
+  - 条款类勾选给出链接：我已阅读《数据使用规范》。
+  - 说明勾选后果：将为 3 个数据集创建导出任务。
+
+Do:
+  - 多选与批量操作用 Checkbox。
+  - 区分生效时机：随表单提交生效用 Checkbox，即时生效用 Switch。
+  - 全选场景给出已选计数与半选态。
+
+Don't:
+  - 不要用 Checkbox 做即时开关（那是 Switch 的职责）。
+  - 不要用一组复选框做互斥单选（用 Radio）。
+  - 不要勾选即悄悄执行写操作；动作必须显式触发。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Checkbox defaultChecked>同时导出原始数据</Checkbox>
+  <Checkbox>包含失败步骤</Checkbox>
+  <Checkbox>仅当前项目（project-042）</Checkbox>
+  --- indeterminate (variant) 全选与半选
+  <Checkbox indeterminate={selected.length > 0 && selected.length < total} checked={selected.length === total}>
+    全选
+  </Checkbox>
+  <Checkbox.Group value={selected} options={datasetOptions} onChange={setSelected} />
+  --- business (business) 真实业务示例
+  <Checkbox.Group value={selected} onChange={setSelected}>
+    <Checkbox value="ds-118">电导率筛选第 3 轮（ds-118）</Checkbox>
+    <Checkbox value="ds-120">热稳定性复测（ds-120）</Checkbox>
+    <Checkbox value="ds-121">空白对照组（ds-121）</Checkbox>
+  </Checkbox.Group>
+  <span>已选 {selected.length} / 3 项</span>
+  <Button variant="secondary" size="sm" disabled={selected.length === 0}>批量导出</Button>
+
+Related: switch, radio, form, table
+
+## dc.radio — Radio 单选框 [stable] v0.1.0 (#/components/radio)
+Category: entry
+Purpose: 在少量互斥选项中选择唯一值，所有选项平铺可见。
+Usage: 用于 2–5 个互斥选项且需要一眼看全的场景：计算模式、精度档位。选项多或需节省空间用 Select；布尔设置用 Switch 或 Checkbox。
+
+Props:
+  - value: string — 组受控值。
+  - options (required): { value: string; label: ReactNode; description?: ReactNode; disabled?: boolean }[] — 选项配置；description 用于卡片样式。
+  - optionType: "default" | "card" = "default" — default 为圆点平铺；card 为带描述的卡片。
+  - defaultValue: string — 默认选中；仅在有安全默认时使用。
+  - disabled: boolean = false — 整组禁用；单个选项禁用用 options.disabled。
+  - onChange: (value: string) => void — 选中变化回调。
+
+States:
+  - default: 当前选中项清晰；无安全默认时不替用户预选。
+  - hover: 圆圈边框变为品牌色；卡片样式整卡边框高亮。
+  - focus-visible: 选中项 3px 外发光；Tab 进入组一次，方向键在组内移动。
+  - pressed: 点击瞬间圆圈轻微缩放，时长 < 120ms。
+  - disabled: 单个选项可禁用并注明原因；整组禁用时灰化。
+  - loading [N/A]: 不适用：单选是同步的本地状态。
+  - empty: 无默认选中时全部未选；提交校验提示必选。
+  - error: 必选未选在提交时报错，错误文案就近显示在组下方。
+  - permission-limited: 无权限的档位禁用并注明所需权限或额度，不隐藏。
+  - mobile: 整行可点，触控高度 ≥40px；卡片样式窄屏单列。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 选中即替换，不能再次点击取消到“无”（除非明确提供清除）。
+  - 切换有副作用的档位前给出影响提示（额度、时长），但不打断选择本身。
+  - 禁用选项不可点，原因前置写在选项描述里。
+
+Keyboard:
+  - Tab 进入组一次，落在当前选中项。
+  - ↑ / ↓ / ← / → 在同组内移动并同时选中。
+
+Accessibility:
+  - 使用 role="radiogroup" 表达分组，选项 role="radio" 并同步 aria-checked。
+  - 卡片样式的描述文本通过 aria-describedby 关联到对应选项。
+  - 禁用原因对读屏可读，不只依赖灰化样式。
+
+Responsive:
+  - 窄屏下选项纵向堆叠。
+  - 卡片样式在窄屏切换为单列，整卡可点。
+
+Content guidelines:
+  - 选项用名词短语：快速筛选、高精度计算。
+  - 有代价的档位写明代价：GPU · 约 300 秒 · 计入额度。
+  - 不用“是 / 否”做两个档位（用 Switch）。
+
+Do:
+  - 选项少且互斥时用 Radio，让选项一眼看全。
+  - 档位有代价时在描述里写明。
+  - 存在安全默认时给出默认选中。
+
+Don't:
+  - 不要 10 个以上选项还用 Radio（用 Select）。
+  - 不要切换选项即执行不可逆动作。
+  - 不要无说明禁用某个档位。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Radio.Group
+    defaultValue="all"
+    options={[
+      { value: "all", label: "全部" },
+      { value: "running", label: "运行中" },
+      { value: "finished", label: "已完成" },
+    ]}
+  />
+  --- card-options (variant) 带描述的卡片样式
+  <Radio.Group
+    optionType="card"
+    defaultValue="fast"
+    options={[
+      { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒" },
+      { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 消耗额度" },
+    ]}
+  />
+  --- business (business) 真实业务示例
+  <Radio.Group
+    optionType="card"
+    value={mode}
+    onChange={setMode}
+    options={[
+      { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒 · 不计额度" },
+      { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 计入 project-042 额度" },
+      { value: "ultra", label: "超高精度", description: "需申请权限", disabled: true },
+    ]}
+  />
+
+Related: select, checkbox, switch, segmented, form
+
+## dc.switch — Switch 开关 [stable] v0.1.0 (#/components/switch)
+Category: entry
+Purpose: 切换一个即时生效的二元设置，开 / 关语义一目了然。
+Usage: 用于通知开关、自动刷新、对团队可见等即时生效的设置。需要随表单提交才生效的选择用 Checkbox：这是两者唯一的分工标准。两个非布尔互斥项用 Radio 或 Segmented。
+
+Props:
+  - checked: boolean — 是否开启；受控使用。
+  - loading: boolean = false — 异步写入中显示 spinner 并锁定，防止反复点击。
+  - disabled: boolean = false — 禁止切换；原因就近说明。
+  - aria-label: string — 控制对象名称；旁边无可见文案时必填。
+  - onChange: (checked: boolean) => void | Promise<void> — 切换回调；返回 Promise 时失败必须回滚到原状态。
+
+States:
+  - default: 开为品牌色、关为中性灰，位置与颜色双重编码。
+  - hover: 颜色加深一档，不改变尺寸。
+  - focus-visible: 3px 品牌色外发光，Tab 可达。
+  - pressed: 按下时拇指轻微加宽，时长 < 120ms。
+  - disabled: 灰化 + not-allowed，不响应点击；原因就近说明。
+  - loading: 异步写入期间显示 spinner 并锁定，成功才切换位置。
+  - empty [N/A]: 不适用：开关是确定的二元状态，无空态。
+  - error: 写入失败回滚到原位置，并用 Message 提示失败原因，不留假态。
+  - permission-limited: 无权限修改时禁用并注明所需权限，不隐藏。
+  - mobile: 触控区域 ≥40px，标签与开关整行可点。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 点击即生效，无需保存按钮；设置立即应用到当前上下文。
+  - 异步设置先进入 loading，写入成功才切换位置，失败回滚并提示。
+  - 开关旁写清控制对象与开启后的行为（每 30 秒自动刷新）。
+  - 高成本动作（开始轮询、开启同步）在辅助文案里前置说明。
+
+Keyboard:
+  - Tab 聚焦。
+  - Space / Enter 切换。
+
+Accessibility:
+  - 使用 role="switch" 并同步 aria-checked。
+  - 必须有可关联标签或 aria-label，说明控制对象。
+  - 状态不只靠颜色：位置与文案双重表达。
+
+Responsive:
+  - 移动端放大触控区域至 ≥40px。
+  - 标签与开关整行可点，窄屏允许文案折行。
+
+Content guidelines:
+  - 标签写控制对象：邮件通知、任务自动刷新；不写“开关”。
+  - 需要时补充开启后果：开启后每 30 秒自动刷新。
+  - 不用疑问句做标签（要开启通知吗？）。
+
+Do:
+  - 即时生效的设置用 Switch。
+  - 异步切换失败必须回滚并提示。
+  - 与 Checkbox 分工：即时生效用 Switch，随提交生效用 Checkbox。
+
+Don't:
+  - 不要用 Switch 收集需随表单提交的值（用 Checkbox）。
+  - 不要开启瞬间悄悄触发高成本动作而不前置说明。
+  - 不要 loading 期间允许反复点击。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Switch defaultChecked aria-label="邮件通知" /> 邮件通知
+  <Switch aria-label="自动保存" /> 自动保存
+  --- states (state) 异步切换与回滚
+  <Switch
+    checked={enabled}
+    loading={pending}
+    onChange={async (next) => {
+      setPending(true);
+      await updateSetting({ autoRefresh: next }); // 失败时抛出，Switch 回滚
+      setPending(false);
+    }}
+  />
+  --- business (business) 真实业务示例
+  <div className="setting-row">
+    <Switch checked={autoRefresh} onChange={setAutoRefresh} aria-label="任务自动刷新" />
+    <div>
+      <strong>任务自动刷新</strong>
+      <p>开启后每 30 秒刷新 run-28003 的状态，关闭即停止。</p>
+    </div>
+  </div>
+
+Related: checkbox, radio, form, message
+
+## dc.form — Form 表单 [stable] v0.1.0 (#/components/form)
+Category: entry
+Purpose: 组织一组字段的标签、辅助说明、校验与提交，把录入错误拦在提交之前。
+Usage: 任何需要用户录入并提交的场景：新建项目、提交计算任务、修改配置。只读展示用 Descriptions；单字段即时设置（如开关）不需要包一层 Form。
+
+Props:
+  - layout: "vertical" | "inline" = "vertical" — 垂直布局是默认；inline 仅用于筛选区等紧凑场景。
+  - validateTrigger: "onBlur" | "onChange" | "onSubmit" = "onBlur" — 失焦校验格式类规则，提交校验业务规则。
+  - onSubmit (required): (values: Record<string, unknown>) => void | Promise<void> — 提交回调；异步期间提交按钮 loading 并禁止重复提交。
+  - Form.Item label (required): ReactNode — 字段标签，必须可见并通过 htmlFor 关联控件。
+  - Form.Item required: boolean = false — 必填标记；视觉星号、aria-required 与校验规则三者配套。
+  - Form.Item help: ReactNode — 辅助说明，常驻显示在控件下方，写约束与影响范围。
+  - Form.Item error: ReactNode — 校验错误文案；出现时控件红边 + aria-invalid="true"。
+
+States:
+  - default: 标签在上、控件居中、辅助文本常驻；必填星号与校验规则配套。
+  - hover [N/A]: 不适用：表单容器无悬停态，各控件自行处理。
+  - focus-visible: 首个控件可 Tab 到达，焦点顺序与视觉顺序一致；控件各自显示外发光。
+  - pressed [N/A]: 不适用：表单容器无按下态，按钮与控件自行处理。
+  - disabled: 整体禁用仅用于只读审阅；与逐字段禁用区分，禁用原因就近说明。
+  - loading: 提交中提交按钮 loading、字段锁定，防止重复提交。
+  - empty: 初始表单给出合理默认值或占位，不预填猜测值。
+  - error: 错误就近显示在出错字段正下方（role="alert"），提交后自动聚焦首个错误字段；错误随修正即时消除。
+  - permission-limited: 无权限字段禁用并注明所需角色，或整表只读并给出申请入口。
+  - mobile: 单列布局，控件全宽且高度 ≥40px，提交按钮保持在可视区域。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 失焦校验格式类规则，提交校验业务规则；错误随输入修正即时消除。
+  - 提交失败保留全部已填内容，不清空表单。
+  - 提交中禁止重复提交；成功后给出结果反馈与下一步入口。
+  - 必填星号、aria-required 与校验规则必须配套，不标假星号。
+
+Keyboard:
+  - Tab 按视觉顺序走字段，不错位不跳过。
+  - Enter 在单行控件内提交表单（多行 Textarea 除外）。
+  - 校验失败后焦点移到首个错误字段。
+
+Accessibility:
+  - 每个控件用 <label htmlFor> 或 aria-labelledby 关联标签。
+  - 出错时控件 aria-invalid="true"，错误文案 role="alert" 并经 aria-describedby 关联。
+  - 必填同时提供视觉星号与 aria-required="true"。
+  - 辅助文本常驻并经 aria-describedby 关联，不塞进 placeholder。
+
+Responsive:
+  - 桌面默认垂直布局；inline 仅用于筛选区。
+  - 移动端单列，控件全宽且高度 ≥40px。
+
+Content guidelines:
+  - 标签用名词短语，句尾不加冒号。
+  - 辅助文本写约束与影响：用于列表与导出命名，2–40 个字符。
+  - 错误文案三段式：哪里错、为什么、怎么改。
+  - 提交按钮写清提交什么：创建计算任务，而不是“提交”。
+
+Do:
+  - 错误就近展示在出错字段下方并即时播报。
+  - 提交失败保留已填内容。
+  - 必填与可选混排时只标必填（或只标“可选”），全表统一。
+  - 有副作用的提交在按钮旁说明范围（项目、预算、数量）。
+
+Don't:
+  - 不要把错误集中到页面顶部而字段旁毫无提示。
+  - 不要用 placeholder 代替标签与辅助文本。
+  - 不要提交成功后停留在无反馈状态。
+  - 不要只禁用提交按钮却不说明原因，让用户猜哪里没填对。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Form layout="vertical" onSubmit={handleSubmit}>
+    <Form.Item label="任务名称" required help="用于列表与导出命名，2–40 个字符。">
+      <Input placeholder="例如：第 3 轮电导率优化" />
+    </Form.Item>
+    <Form.Item label="所属项目" required>
+      <Select options={projectOptions} placeholder="选择项目" />
+    </Form.Item>
+  </Form>
+  --- validation (state) 校验与错误就近
+  <Form.Item
+    label="样本质量"
+    required
+    error="质量需在 0–500 mg 之间，当前为 620 mg。"
+  >
+    <InputNumber unit="mg" min={0} max={500} aria-invalid="true" />
+  </Form.Item>
+  --- business (business) 真实业务示例
+  <Form layout="vertical" onSubmit={submitRun}>
+    <Form.Item label="任务名称" required help="用于列表与导出命名，2–40 个字符。">
+      <Input placeholder="例如：第 3 轮电导率优化" />
+    </Form.Item>
+    <Form.Item label="数据集" required>
+      <Select options={datasetOptions} placeholder="选择数据集" />
+    </Form.Item>
+    <div className="action-with-scope">
+      <Button variant="primary" loading={submitting}>创建计算任务</Button>
+      <span>将使用 示例项目（project-042）· 预计最长 300 秒</span>
+    </div>
+  </Form>
+
+Related: input, select, checkbox, button, alert
+
+## dc.upload — Upload 上传 [beta] v0.1.0 (#/components/upload)
+Category: entry
+Purpose: 把本地文件送入平台，是数据导入流程的入口；原始文件必须完整保留、可追溯。
+Usage: 用于导入仪器原始数据（.csv / .txt / .xlsx）与上传附件。粘贴小段文本用 Textarea；选择平台已有数据用 DatasetPicker。
+
+Props:
+  - accept (required): string — 允许的类型（扩展名 + MIME）；不符在选择时即拒绝。
+  - maxSize (required): number — 单文件字节上限；超限拒绝并在提示中写明上限。
+  - multiple: boolean = false — 允许一次选择多个文件。
+  - keepOriginal: boolean = true — 原始文件不可变保留；解析产物与原始文件分开存储，数据导入场景必须为 true。
+  - onProgress: (file: UploadFile, percent: number) => void — 逐文件进度回调。
+  - onChange: (files: UploadFile[]) => void — 文件状态变化回调（上传中 / 成功 / 失败）。
+  - disabled: boolean = false — 禁止选择文件；上传中或达数量上限时自动禁用。
+
+States:
+  - default: 拖拽区 + 格式与上限说明常驻；点击区域任意位置打开文件选择。
+  - hover: 拖拽文件悬停到区域上方时，边框与底色变为品牌色高亮。
+  - focus-visible: 点击选择区域可 Tab 到达，显示 3px 外发光。
+  - pressed [N/A]: 不适用：上传区无按下沉，反馈体现在拖拽悬停高亮。
+  - disabled: 上传中或达数量上限时禁用，原因写在区域内（正在上传 2 个文件）。
+  - loading: 上传中逐文件显示进度条与百分比，提供取消。
+  - empty: 未选择文件时展示引导与格式示例，可提供示例文件下载（example.com）。
+  - error: 类型 / 大小 / 解析失败逐文件给出具体原因与重试入口，不静默丢弃。
+  - permission-limited: 无项目写入权限时禁用并注明所需权限，不让用户选了才失败。
+  - mobile: 移动端拖拽降级为按钮，点击调起系统文件选择器。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 类型或大小不符在选择时即拒绝，不上传一半再失败。
+  - 上传进度逐文件展示，支持取消与失败单独重试。
+  - 上传完成后进入解析 / 预览步骤；原始文件单独保留、不可变。
+  - 同名文件给出选择：覆盖、保留两者或自动重命名。
+
+Keyboard:
+  - Tab 聚焦上传区，Enter / Space 打开文件选择。
+  - 文件项的操作（重试、删除、取消）均可 Tab 到达并触发。
+
+Accessibility:
+  - 上传区使用按钮语义，并经 aria-describedby 指向格式与上限说明。
+  - 进度条使用 role="progressbar" 并同步 aria-valuenow。
+  - 失败原因 role="alert" 就近播报；文件列表每项可朗读名称、大小与状态。
+
+Responsive:
+  - 移动端拖拽降级为按钮，区域全宽。
+  - 文件项操作收入行内，进度条全宽显示。
+
+Content guidelines:
+  - 写明接受的格式与上限：支持 .csv / .xlsx，单个 ≤ 50 MB。
+  - 提供示例文件链接（example.com 域名）帮助用户准备格式。
+  - 说明保留策略：原始文件不可变保存，重新解析不覆盖原始文件。
+  - 错误文案给具体原因：第 3 列缺少表头，而不是“解析失败”。
+
+Do:
+  - accept 与 maxSize 前置说明，并在选择时即校验。
+  - 原始文件与解析产物分开存储，原始文件不可变保留。
+  - 大文件上传给出进度、取消与超时重试。
+  - 失败文件可单独重试，不影响已成功文件。
+
+Don't:
+  - 不要接受“所有文件”再事后报错。
+  - 不要上传成功即丢弃原始文件——数据导入必须可回溯。
+  - 不要进度卡住无超时、无重试。
+  - 不要用 Upload 让用户粘贴短文本（用 Textarea）。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Upload accept=".csv,.xlsx" maxSize={50 * 1024 * 1024}>
+    拖拽文件到此处，或点击选择
+  </Upload>
+  --- progress (state) 进度与失败重试
+  <Upload.FileList
+    files={[
+      { name: "cycle_data_20260901.csv", size: "18.2 MB", status: "uploading", percent: 72 },
+      { name: "notes_final(2).xlsx", size: "61 MB", status: "error", reason: "超过 50 MB 上限" },
+    ]}
+    onRetry={(file) => retry(file)}
+  />
+  --- business (business) 真实业务示例
+  <Upload
+    accept=".csv,.xlsx"
+    maxSize={50 * 1024 * 1024}
+    keepOriginal
+    onUploaded={(file) => createDataset({ projectId: "project-042", source: file })}
+  >
+    导入仪器原始数据
+  </Upload>
+  <Alert type="info">
+    原始文件将不可变保留，与解析产物分开存储；解析失败可重新解析，不覆盖原始文件。
+  </Alert>
+
+Related: file-list, progress, dataset-picker, form, alert
+
+## dc.search-field — SearchField 搜索框 [beta] v0.1.0 (#/components/search-field)
+Category: entry
+Purpose: 输入关键词即时定位对象，是列表与全局导航的查找入口。
+Usage: 用于按名称 / 编号搜索数据集、任务、项目。枚举条件组合筛选用 FilterBar；精确单字段录入用 Input。
+
+Props:
+  - value: string — 受控关键词。
+  - placeholder: string — 占位提示，写明可搜范围（搜索任务名称或编号）。
+  - debounce: number = 300 — 输入防抖毫秒数；不逐击键发请求。
+  - loading: boolean = false — 搜索中右侧显示 spinner，输入保持可编辑。
+  - allowClear: boolean = true — 有值时显示一键清除按钮。
+  - shortcut: string — 聚焦快捷键，页面级搜索约定为 /。
+  - onSearch (required): (keyword: string) => void — 防抖后或 Enter 时触发。
+
+States:
+  - default: 放大镜图标 + 占位文本，占位写明可搜字段。
+  - hover: 边框变为品牌色。
+  - focus-visible: 品牌色边框 + 3px 外发光；快捷键聚焦后同样显示。
+  - pressed [N/A]: 不适用：搜索框无按下态。
+  - disabled: 数据加载失败导致不可搜索时禁用并说明原因。
+  - loading: 搜索中右侧显示 spinner，输入不锁定，可继续修改关键词。
+  - empty: 无结果时给出空态（没有匹配的任务）与清除动作。
+  - error: 搜索服务失败用 Message / Alert 提示，保留已输入关键词。
+  - permission-limited: 无权限的对象不出现在结果中，也不提示其存在。
+  - mobile: 高度 ≥40px，唤起搜索键盘（enterKeyHint="search"）。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 输入防抖 ≥300ms 后触发；Enter 立即搜索。
+  - 清除按钮一键还原关键词与结果。
+  - 结果随关键词即时更新，命中片段高亮。
+  - 页面级搜索支持 / 快捷键聚焦。
+
+Keyboard:
+  - / 聚焦搜索框（页面级场景）。
+  - Enter 立即搜索；Esc 清空并失焦。
+  - 有建议列表时 ↓ 进入列表，Enter 选中。
+
+Accessibility:
+  - 使用 type="search" 或 role="searchbox"，并提供 aria-label。
+  - 结果数量变化通过 aria-live="polite" 播报。
+  - 清除按钮提供 aria-label（清除搜索）。
+
+Responsive:
+  - 窄屏下搜索框全宽显示。
+  - 图标与清除按钮保留触控区域，不省略为纯图标。
+
+Content guidelines:
+  - 占位写可搜范围：搜索任务名称或编号。
+  - 空态区分“暂无数据”与“没有匹配的结果”。
+  - 结果不高亮与关键词无关的内容。
+
+Do:
+  - 防抖后即时过滤，Enter 立即搜索。
+  - 空结果给出清除动作。
+  - 占位文本标明可搜字段。
+
+Don't:
+  - 不要每击键就发一次请求。
+  - 不要搜索失败时清空用户的关键词。
+  - 不要把枚举条件塞进搜索框（交给 FilterBar）。
+
+Examples:
+  --- basic (basic) 基础示例
+  <SearchField placeholder="搜索数据集名称或编号" onSearch={handleSearch} />
+  --- loading-clear (variant) 搜索中与可清空
+  <SearchField value="ds-118" loading allowClear onSearch={handleSearch} />
+  --- business (business) 真实业务示例
+  <SearchField
+    placeholder="搜索任务名称或编号"
+    debounce={300}
+    onSearch={(kw) => filterRuns({ projectId: "project-042", keyword: kw })}
+    emptyText="没有匹配的任务"
+  />
+
+Related: input, filter-bar, combobox, empty
+
+## dc.filter-bar — FilterBar 筛选栏 [beta] v0.1.0 (#/components/filter-bar)
+Category: entry
+Purpose: 组织列表的筛选条件：常用条件外露，其余收起，已选条件一目了然。
+Usage: 用于任务 / 数据集 / 项目列表顶部。单一关键词查找用 SearchField；筛选只改变查询，不产生任何写操作。
+
+Props:
+  - filters (required): FilterField[] — 条件配置：key / label / type / options；primary 标记常用条件。
+  - value (required): Record<string, unknown> — 当前条件值；受控使用并写入 URL 或页面状态。
+  - visibleCount: number = 3 — 外露的常用条件数量，其余收进“更多筛选”。
+  - onChange (required): (value: Record<string, unknown>) => void — 条件变化即时应用，无“确定 / 查询”按钮。
+  - onReset: () => void — 恢复默认条件；仅在有非默认条件时显示入口。
+
+States:
+  - default: 常用条件外露，其余收进“更多筛选”；有非默认条件时出现重置入口。
+  - hover: 各控件自行处理；“更多筛选”按钮悬停时边框变为品牌色。
+  - focus-visible: Tab 顺序走外露条件 → 更多筛选 → 重置，控件各自外发光。
+  - pressed [N/A]: 不适用：筛选栏容器无按下态，内部控件自行处理。
+  - disabled: 无权限查看列表数据时整体禁用，并注明所需权限。
+  - loading: 应用筛选时表格区域 Skeleton，筛选栏保持可用、不锁定。
+  - empty: 筛选无结果时空态区分“被筛选清空”与“本来无数据”，并给出清除动作。
+  - error: 条件应用失败时保留条件值并提示重试，不回退到默认条件。
+  - permission-limited: 无权限字段对应的筛选项隐藏，或禁用并注明所需权限。
+  - mobile: 外露条件减少至 1 个，其余收进抽屉；已选 Tag 横向滑动。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+
+Interaction rules:
+  - 条件变化即时应用到列表与计数，无需“查询”按钮（重型查询除外）。
+  - 常用条件外露 ≤3 个，其余收进“更多筛选”面板。
+  - 已选条件以 Tag 回显，可单个移除；重置一键恢复默认。
+  - 筛选条件写入 URL 或页面状态，刷新、返回后保留。
+
+Keyboard:
+  - Tab 顺序：外露条件 → 更多筛选 → 重置。
+  - “更多筛选”面板内 Esc 关闭并保留已选条件。
+
+Accessibility:
+  - 区域使用 role="search" 或 aria-label="筛选条件"。
+  - 已选 Tag 的移除按钮提供 aria-label（移除筛选：状态 = 运行中）。
+  - 结果计数变化通过 aria-live="polite" 播报。
+
+Responsive:
+  - 窄屏外露条件减少，其余收进抽屉。
+  - 已选 Tag 横向可滚动，不挤占换行成多行高墙。
+
+Content guidelines:
+  - 条件标签用名词：状态、创建时间、负责人。
+  - 重置文案固定为“重置”。
+  - 空态说清是被筛选清空：没有符合当前筛选的任务。
+  - 不用“高级搜索”这类含义模糊的词。
+
+Do:
+  - 常用条件外露，其余收起。
+  - 条件变化即时反映到列表与计数。
+  - 已选条件可单个移除，并可一键重置。
+  - 与 SearchField 分工：关键词归搜索，枚举条件归筛选。
+
+Don't:
+  - 不要把所有条件平铺两三行。
+  - 不要刷新或返回后丢失筛选条件。
+  - 不要筛选即触发写操作。
+  - 不要隐藏“当前正在被筛选”的事实——计数与已选 Tag 必须可见。
+
+Examples:
+  --- basic (basic) 基础示例
+  <FilterBar
+    filters={[
+      { key: "status", label: "状态", type: "select", options: statusOptions, primary: true },
+      { key: "createdAt", label: "创建时间", type: "date-range", primary: true },
+      { key: "owner", label: "负责人", type: "select", options: memberOptions },
+      { key: "instrument", label: "仪器", type: "select", options: instrumentOptions },
+    ]}
+    value={filters}
+    onChange={setFilters}
+  />
+  --- active-filters (variant) 已选条件回显
+  <FilterBar.ActiveFilters
+    value={{ status: "运行中", createdAt: "最近 7 天", project: "project-042" }}
+    onRemove={(key) => removeFilter(key)}
+    onReset={resetFilters}
+  />
+  --- business (business) 真实业务示例
+  <FilterBar
+    filters={taskFilters}
+    value={filters}
+    onChange={(next) => {
+      setFilters(next);
+      loadRuns({ projectId: "project-042", ...next }); // 即时应用
+    }}
+  />
+  <Table data={runs} />
+  <span>共 3 个任务 · 已按“状态 = 运行中”筛选</span>
+
+Related: search-field, select, date-range-picker, table, tag
+
+## dc.table — Table 表格 [stable] v0.1.0 (#/components/table)
+Category: display
+Purpose: 以行列结构展示结构化数据，是列表页与详情页最核心的数据载体。
+Usage: 用于两条以上、字段结构一致的数据集合。单条记录的字段明细用 Descriptions；单个关键数值用 Statistic；层级数据用 Tree。数据超过一屏必须配合 Pagination 或虚拟滚动，不允许无限长高。
+
+Props:
+  - caption (required): string — 表格标题，说明内容范围（项目、时间、筛选）；视觉上可弱化，读屏必须可达。
+  - rowKey: string = "id" — 行稳定标识，排序保持、批量选择与刷新后的选中还原都依赖它。
+  - scroll: { x?: number | string; y?: number | string } — 达到临界尺寸后进入滚动；窄屏横向滚动由 x 触发。
+  - stickyFirstColumn: boolean = false — 横向滚动时冻结首列，保持行定位。
+  - loading: boolean = false — 骨架行替换数据行，表头与 caption 保留。
+  - empty: ReactNode — 空态内容：说明是无数据还是被筛选清空，并给出下一步动作。
+  - error: { message: string; onRetry?: () => void } — 错误态：原因 + 重试，保留表头与筛选上下文。
+
+States:
+  - default: 首列语义稳定（名称 + ID），数字列右对齐并使用等宽数字。
+  - hover: 整行高亮，不改变行高；可点击行显示 pointer 光标。
+  - focus-visible: 行内按钮与可点击行有 3px 品牌色焦点环，outline 不被表格边框截断。
+  - pressed: 可点击行按下时背景再深一档，时长 < 120ms。
+  - disabled: 行内操作 disabled 时保留显示，原因由 Tooltip 或邻近文案说明。
+  - loading: 骨架行替换数据行，表头、caption 与筛选栏保留，不做整表闪烁替换。
+  - empty: 说明是无数据还是被筛选清空，并给出下一步动作（清除筛选 / 新建）。
+  - error: 错误原因 + 重试按钮，保留表头与已输入的筛选条件。
+  - permission-limited: 无权限字段渲染为“无权限查看”占位，不留空白、不错位。
+  - mobile: 进入横向滚动容器，首列可冻结；不压缩列宽换行。
+  - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
+  - selected: 勾选行使用品牌色浅底，同时出现批量操作栏并写明已选数量。
+
+Interaction rules:
+  - 排序与筛选变化必须给出加载反馈，数据替换不静默进行。
+  - 行内操作最多 3 个，更多操作收入 Dropdown。
+  - 整行可点击时，首列主链接与行点击目标一致；行内按钮点击不触发行跳转。
+  - 批量选择后出现批量操作栏，写明已选数量与影响范围。
+
+Keyboard:
+  - 排序按钮进入 Tab 序列，Enter / Space 切换升序、降序、不排序。
+  - 可点击行聚焦后 Enter 打开详情；行内按钮按视觉顺序逐个到达。
+  - 横向滚动容器可聚焦，方向键左右滚动。
+
+Accessibility:
+  - 使用原生 table 语义：caption 描述表格范围，th 配 scope="col" / "row"。
+  - 排序状态用 aria-sort 标注；加载时容器 aria-busy="true"。
+  - 数字列右对齐、等宽数字，表头与单元格对齐方向一致。
+  - 状态列不只用颜色：Badge 必须同时带文字。
+
+Responsive:
+  - 窄屏进入横向滚动容器，列宽不压缩、文字不挤压换行。
+  - 横向滚动时首列可冻结（stickyFirstColumn），保持行定位。
+  - 移动端次要列可移入行内展开区，但首列与状态列始终可见。
+
+Content guidelines:
+  - 表头是名词短语，单位写进表头（“耗时（秒）”），不逐格重复。
+  - 空值显示 —；数字统一精度与千分位。
+  - 首列展示名称 + 稳定 ID（如 run-28003），不只显示名称。
+
+Do:
+  - caption 写清表格范围（项目、时间、筛选）。
+  - 数字列右对齐、等宽数字、统一精度。
+  - 空、加载、错误、无权限四种状态都有确定样式。
+
+Don't:
+  - 不要用表格做页面布局。
+  - 不要在一行里放超过 3 个行内操作。
+  - 不要隐藏横向滚动：宁可滚动，不压缩列宽。
+  - 不要只显示名称而省略稳定 ID。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Table caption="示例项目（project-042）最近计算任务">
+    <TableHead>
+      <TableRow>
+        <TableHeader scope="col">任务</TableHeader>
+        <TableHeader scope="col">数据集</TableHeader>
+        <TableHeader scope="col" align="right">耗时（秒）</TableHeader>
+        <TableHeader scope="col">状态</TableHeader>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      <TableRow>
+        <TableCell>run-28003</TableCell>
+        <TableCell>ds-118</TableCell>
+        <TableCell align="right">286.4</TableCell>
+        <TableCell><Badge color="success">已完成</Badge></TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
+  --- scroll (variant) 窄屏横向滚动
+  <Table
+    caption="数据集 ds-118 · 全部字段"
+    scroll={{ x: 960 }}
+    stickyFirstColumn
+  >
+    <TableHead>
+      <TableRow>
+        <TableHeader scope="col">任务</TableHeader>
+        <TableHeader scope="col">数据集</TableHeader>
+        <TableHeader scope="col">方法</TableHeader>
+        <TableHeader scope="col" align="right">截断能（eV）</TableHeader>
+        <TableHeader scope="col" align="right">耗时（秒）</TableHeader>
+        <TableHeader scope="col" align="right">费用（元）</TableHeader>
+        <TableHeader scope="col">状态</TableHeader>
+      </TableRow>
+    </TableHead>
+    <TableBody>{rows}</TableBody>
+  </Table>
+  --- states (state) 加载、空与错误
+  <Table caption="任务列表" loading />
+  <Table caption="任务列表" empty={<Empty description="当前筛选条件下没有任务" actionText="清除筛选" />} />
+  <Table caption="任务列表" error={{ message: "任务列表加载失败", onRetry: reload }} />
+  --- business (business) 真实业务示例
+  <Table caption="示例项目（project-042）· 计算任务列表" rowKey="id">
+    <TableHead>
+      <TableRow>
+        <TableHeader scope="col">任务</TableHeader>
+        <TableHeader scope="col">数据集</TableHeader>
+        <TableHeader scope="col" align="right">耗时（秒）</TableHeader>
+        <TableHeader scope="col" align="right">费用（元）</TableHeader>
+        <TableHeader scope="col">状态</TableHeader>
+        <TableHeader scope="col">操作</TableHeader>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {runs.map((run) => (
+        <TableRow key={run.id}>
+          <TableCell>
+            <strong>{run.name}</strong>
+            <span className="table-secondary">{run.id}</span>
+          </TableCell>
+          <TableCell>{run.dataset}</TableCell>
+          <TableCell align="right">{run.seconds}</TableCell>
+          <TableCell align="right">{run.cost}</TableCell>
+          <TableCell><Badge color={run.statusColor}>{run.status}</Badge></TableCell>
+          <TableCell><Button size="sm" variant="ghost">查看日志</Button></TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+
+Related: pagination, filter-bar, badge, empty, skeleton
+
+## dc.descriptions — Descriptions 描述列表 [stable] v0.1.0 (#/components/descriptions)
+Category: display
+Purpose: 以“标签 + 值”的形式成组展示单条记录的字段，是详情页的标准载体。
+Usage: 用于一条记录（任务、数据集、项目）的字段明细。多条记录的对比用 Table；层级数据用 Tree。超过 12 个字段时分组，次要字段收入 Collapse。
+
+Props:
+  - title: ReactNode — 区块标题，说明这组字段属于哪个对象。
+  - column: number | { xs?: number; sm?: number; md?: number } = 3 — 每行字段数，窄屏自动降为 1。
+  - layout: "horizontal" | "vertical" = "horizontal" — horizontal 标签在左，vertical 标签在上。
+  - bordered: boolean = false — 带边框的正式详情样式。
+  - items: Array<{ label: ReactNode; children: ReactNode; span?: number }> — 数据驱动写法，与 Item 子组件二选一；span 用于跨列。
+
+States:
+  - default: 标签 muted、值正文色，同组标签等宽对齐，行距一致。
+  - hover: 仅值内的链接与复制按钮有 hover，普通文本无 hover。
+  - focus-visible: 值内的链接、复制按钮有品牌色焦点环。
+  - pressed [N/A]: 不适用：描述列表本身不可按压，交互由值内的链接或按钮承担。
+  - disabled [N/A]: 不适用：展示型组件无禁用态；不可编辑的字段保持正常文本样式。
+  - loading: 值区域显示骨架条，标签保留，整组不闪烁。
+  - empty: 单个值为空显示 —；整组无数据时不渲染空壳，由页面级 Empty 承担。
+  - error: 取值失败的字段显示“加载失败 + 重试”，不影响其他字段。
+  - permission-limited: 无权限字段显示“无权限查看”，并说明所需权限。
+  - mobile: column 降为 1，标签与值上下排列（vertical）。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - ID 等值可复制，复制成功用 Message 反馈。
+  - 长文本值默认截断并提供展开，不把布局撑乱。
+  - ID、时间、数值使用等宽字体并保证完整显示，不截断。
+
+Keyboard:
+  - 值内的链接与复制按钮进入 Tab 序列。
+  - 截断值展开后可聚焦，便于读屏朗读完整内容。
+
+Accessibility:
+  - 使用 dl / dt / dd 语义，不用 table 或纯 div 拼接。
+  - 标签与值一一对应，屏读顺序与视觉顺序一致。
+
+Responsive:
+  - 列数配置支持断点对象，窄屏降为单列。
+  - 窄屏下标签与值上下排列，标签不再占位等宽列。
+
+Content guidelines:
+  - 标签是名词短语，不带冒号（组件自动处理分隔）。
+  - 空值显示 —；状态字段一律用 Badge，不用纯文字。
+
+Do:
+  - 超过 12 个字段时分组，次要字段收入 Collapse。
+  - 同组标签列宽一致，换行对齐。
+  - 状态类字段使用带文字的 Badge。
+
+Don't:
+  - 不要用 Descriptions 做多条记录对比（用 Table）。
+  - 不要在值里塞超过 1 个操作按钮。
+  - 不要让长文本值撑破布局。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Descriptions title="任务详情">
+    <Descriptions.Item label="任务 ID">run-28003</Descriptions.Item>
+    <Descriptions.Item label="所属项目">示例项目（project-042）</Descriptions.Item>
+    <Descriptions.Item label="状态"><Badge color="success">已完成</Badge></Descriptions.Item>
+    <Descriptions.Item label="耗时">286.4 秒</Descriptions.Item>
+  </Descriptions>
+  --- layout (variant) 布局变体
+  <Descriptions title="数据集信息" column={2} layout="vertical" bordered>
+    <Descriptions.Item label="数据集 ID">ds-118</Descriptions.Item>
+    <Descriptions.Item label="版本">v3 · 2026-09-18 更新</Descriptions.Item>
+    <Descriptions.Item label="数据量">1,000 行 · 12 字段</Descriptions.Item>
+    <Descriptions.Item label="创建方式">UniLab 导入</Descriptions.Item>
+  </Descriptions>
+  --- business (business) 真实业务示例
+  <Descriptions
+    title="数据集 ds-118"
+    column={2}
+    items={[
+      { label: "数据集 ID", children: "ds-118" },
+      { label: "所属项目", children: "示例项目（project-042）" },
+      { label: "版本", children: "v3 · 2026-09-18 更新" },
+      { label: "数据量", children: "1,000 行 · 12 字段" },
+      { label: "质量状态", children: <Badge color="warning">3 行缺少密度字段</Badge>, span: 2 },
+    ]}
+  />
+
+Related: table, card, collapse, tag
+
+## dc.statistic — Statistic 统计数值 [beta] v0.1.0 (#/components/statistic)
+Category: display
+Purpose: 突出展示单个关键数值及其趋势，用于看板与概览区。
+Usage: 用于需要一眼读到的核心指标（任务数、成功率、费用）。成组字段明细用 Descriptions；完整分布用 Table 或图表。一屏统计卡不超过 6 个。
+
+Props:
+  - title (required): ReactNode — 指标名称，写清统计口径（范围、周期）。
+  - value (required): number | string — 数值，大数千分位由组件格式化。
+  - precision: number — 小数位数，同组指标保持一致。
+  - prefix: ReactNode — 前缀，如 ¥。
+  - suffix: ReactNode — 后缀单位，缩小一档展示。
+  - trend: { value: string; direction: "up" | "down" | "flat"; label?: string } — 对比趋势，label 写清对比口径。
+  - loading: boolean = false — 数值骨架条，标题保留。
+
+States:
+  - default: 数值大号字重，标题 muted，单位缩小一档，同组基线对齐。
+  - hover: 可点击的统计卡整体 hover 浮起；纯展示统计无 hover。
+  - focus-visible: 可点击统计卡有品牌色焦点环。
+  - pressed: 可点击统计卡按下轻微下沉；纯展示统计无按压态。
+  - disabled [N/A]: 不适用：统计值没有禁用态；不可点击时即普通展示。
+  - loading: 数值骨架条，标题保留，布局高度不变。
+  - empty: 无数值显示 — 并注明统计周期，不用 0 冒充数据。
+  - error: 显示“数据不可用”并提供重试，不渲染可能过期的数值。
+  - permission-limited: 无权限指标显示“无权限”，不展示模糊值或星号混淆。
+  - mobile: 统计卡组降为单列或两列，数值字号保持可读。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - 可点击统计卡跳转对应列表页，并携带筛选条件。
+  - 趋势区域 hover / 聚焦时显示完整对比口径（周期、样本量）。
+
+Keyboard:
+  - 可点击统计卡进入 Tab 序列，Enter 触发跳转。
+  - 趋势的补充说明可被聚焦，便于读屏朗读。
+
+Accessibility:
+  - 趋势方向不只用颜色：配合 ↑↓ 箭头与文字。
+  - 数值朗读包含单位与统计周期（aria-label 补全）。
+
+Responsive:
+  - 窄屏统计卡组降为单列或两列。
+  - 数值字号不随屏宽大幅缩水，保证一眼可读。
+
+Content guidelines:
+  - 标题写清指标口径（时间范围、统计范围）。
+  - 大数千分位；同组指标精度统一。
+
+Do:
+  - 一屏统计卡不超过 6 个，突出关键指标。
+  - 标注统计周期与口径。
+  - 无数据显示 — 并说明原因。
+
+Don't:
+  - 不要把 Statistic 当表格平铺大量数值。
+  - 不要用 0 代替无数据。
+  - 不要只用红绿色表达涨跌。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Statistic title="本周计算任务" value={128} suffix="个" />
+  <Statistic title="平均成功率" value={86.4} precision={1} suffix="%" />
+  <Statistic title="本周费用" value={1280.4} precision={2} prefix="¥" />
+  --- trend (variant) 趋势变体
+  <Statistic
+    title="平均耗时"
+    value={286.4}
+    precision={1}
+    suffix="秒"
+    trend={{ value: "-12.3%", direction: "down", label: "较上周" }}
+  />
+  <Statistic
+    title="失败任务"
+    value={6}
+    suffix="个"
+    trend={{ value: "+2", direction: "up", label: "较上周" }}
+  />
+  --- business (business) 真实业务示例
+  <div className="stat-grid">
+    <Statistic title="计算任务" value={128} suffix="个" onClick={() => goRuns("project-042")} />
+    <Statistic title="成功率" value={86.4} precision={1} suffix="%" />
+    <Statistic title="费用" value={1280.4} precision={2} prefix="¥" />
+  </div>
+  <p>示例项目（project-042）· 统计周期 2026-09-15 – 2026-09-21</p>
+
+Related: card, table, progress, descriptions
+
+## dc.timeline — Timeline 时间线 [beta] v0.1.0 (#/components/timeline)
+Category: display
+Purpose: 按时间顺序展示事件流，表达“发生了什么、进行到哪、接下来是什么”。
+Usage: 用于任务执行记录、审计事件、版本历史等有明确时间顺序的场景。纯步骤导航用 Steps；层级结构用 Tree；审计场景优先使用 audit-timeline。
+
+Props:
+  - items (required): TimelineItem[] — 节点数组：{ time, title, description?, status?, icon? }。
+  - status: "default" | "success" | "warning" | "error" | "processing" — 节点状态，决定图标与颜色；在单个 item 上设置。
+  - pending: ReactNode | boolean = false — 末尾的进行中占位，表达“未完待续”。
+  - reverse: boolean = false — 最新事件在上，仅用于监控类场景。
+  - mode: "left" | "alternate" = "left" — 节点布局；窄屏强制 left。
+
+States:
+  - default: 节点竖向排列，时间等宽字体，连接线 1px，节点间距一致。
+  - hover: 可展开节点整行 hover 高亮；纯展示节点无 hover。
+  - focus-visible: 节点内的链接与展开按钮有品牌色焦点环。
+  - pressed: 可展开节点按压有短暂反馈，时长 < 120ms。
+  - disabled [N/A]: 不适用：展示型组件无禁用态；不可交互的节点本就不渲染控件。
+  - loading: processing 节点显示旋转指示并实时更新，其余节点不受影响。
+  - empty: 无事件显示 Empty“暂无记录”，不渲染一条空轴线。
+  - error: error 节点红色图标 + 错误摘要 + 查看日志入口。
+  - permission-limited: 无权限事件脱敏为“无权限查看该事件”，时间点保留。
+  - mobile: 统一左对齐单列，时间移到标题上方。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - 节点可展开查看详情（日志摘要、参数快照）。
+  - 进行中的最新节点自动滚动进入视野并实时更新。
+  - 节点内的操作（查看日志）不触发展开/收起。
+
+Keyboard:
+  - 可展开节点 Tab 聚焦，Enter / Space 展开或收起。
+  - 节点内的链接按视觉顺序逐个到达。
+
+Accessibility:
+  - 使用 ol / li 语义表达先后顺序。
+  - 状态不只靠颜色：图标 + 文字同时表达。
+  - 进行中节点 aria-live="polite" 节流播报关进度变化。
+
+Responsive:
+  - 窄屏统一为左对齐单列，时间移到标题上方。
+  - 时间戳允许换行，不截断。
+
+Content guidelines:
+  - 节点标题用完成态动词短语（“任务已创建”）。
+  - 时间精确到分钟；跨年事件补全年份。
+
+Do:
+  - 失败节点必须给出日志入口。
+  - 执行中的节点实时更新。
+  - 默认正序（最早在上），监控场景才倒序。
+
+Don't:
+  - 不要把时间线当步骤导航（用 Steps）。
+  - 不要在节点里塞超过两行描述（详情放展开区）。
+  - 不要展示没有时间属性的数据。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Timeline
+    items={[
+      { time: "09:12", title: "任务创建", description: "run-28003 已提交到队列" },
+      { time: "09:14", title: "开始执行", description: "分配到计算节点 node-07" },
+      { time: "09:19", title: "执行完成", description: "耗时 286.4 秒" },
+    ]}
+  />
+  --- status (variant) 状态节点
+  <Timeline
+    items={[
+      { time: "09:12", title: "任务创建", status: "success" },
+      { time: "09:13", title: "参数校验失败", status: "error", description: "K 点网格与截断能冲突 · 查看日志" },
+      { time: "09:15", title: "修正参数并重新提交", status: "success" },
+      { time: "09:16", title: "重新校验中", status: "processing" },
+    ]}
+  />
+  --- business (business) 真实业务示例
+  <Timeline
+    pending="结果回传中…"
+    items={[
+      { time: "09:12", title: "任务创建", description: "run-28003 · 示例项目（project-042）" },
+      { time: "09:14", title: "开始执行", description: "数据集 ds-118 · 方法 PBE0" },
+      { time: "09:19", title: "计算完成", description: "耗时 286.4 秒 · 查看日志", status: "success" },
+    ]}
+  />
+
+Related: steps, run-status, audit-timeline, badge
+
+## dc.tree — Tree 树 [beta] v0.1.0 (#/components/tree)
+Category: display
+Purpose: 以缩进层级展示父子结构数据，支持展开、选择与定位。
+Usage: 用于项目目录、数据集层级、分类体系。扁平列表用 Table；时间顺序用 Timeline。层级超过 4 层时必须提供搜索定位。
+
+Props:
+  - data (required): TreeNode[] — 节点数组：{ key, title, children?, disabled?, icon? }。
+  - checkable: boolean = false — 复选模式，父子勾选联动。
+  - selectable: boolean = true — 点击标题单选高亮。
+  - defaultExpandedKeys: string[] — 默认展开的节点 key。
+  - onSelect: (keys: string[], node: TreeNode) => void — 单选回调，回传 key 与节点信息。
+  - onCheck: (keys: string[]) => void — 勾选回调，checkable 时可用。
+  - loading: boolean = false — 异步加载子级时显示节点级 spinner。
+
+States:
+  - default: 缩进 16px/级，节点高 32px，展开图标、类型图标与文字对齐。
+  - hover: 节点整行 hover 高亮，不改变缩进。
+  - focus-visible: 节点焦点环可见，方向键导航时焦点位置明确。
+  - pressed: 展开按钮按下即触发，箭头旋转 90°，动画 160ms。
+  - disabled: 禁用节点 opacity .45，不可勾选，原因在 Tooltip 说明。
+  - loading: 异步加载子级时该节点显示 spinner；整树加载用骨架。
+  - empty: 空数据显示 Empty“暂无目录”，不渲染空树。
+  - error: 子级加载失败原地显示“加载失败，点击重试”节点。
+  - permission-limited: 无权限节点显示锁图标与“无权限”，默认脱敏展示而不是隐藏。
+  - mobile: 节点高度 ≥ 40px，缩进减小到 12px/级。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - 点击箭头只展开/收起，点击标题才选中。
+  - 勾选父级联动子级，半选态（部分子级选中）有明确样式。
+  - 异步加载子级失败可原地重试，不丢失已展开状态。
+  - 超过 50 个节点的树必须提供搜索定位。
+
+Keyboard:
+  - ↑↓ 移动焦点，→ 展开 / ← 收起。
+  - Enter / Space 选中或勾选当前节点。
+  - Home / End 跳到首末节点。
+
+Accessibility:
+  - 使用 role="tree" / "treeitem"，aria-expanded / aria-selected / aria-checked 齐全。
+  - 层级用 aria-level 标注。
+  - 无权限节点的锁图标必须配合文字，不只靠图标。
+
+Responsive:
+  - 窄屏节点高度 ≥ 40px，触摸热区足够。
+  - 深层缩进改为横向滚动，不无限右移。
+
+Content guidelines:
+  - 节点标题简短，ID 与数量放次级文本。
+  - 空目录不渲染“暂无子节点”的假节点。
+
+Do:
+  - 默认展开到用户最可能需要的层级。
+  - 勾选变化后显示已选数量。
+  - 节点操作常显，不依赖 hover（移动端可达）。
+
+Don't:
+  - 不要用树展示两列就能放下的扁平数据。
+  - 不要超过 4 层还不提供搜索。
+  - 不要把关键操作藏进 hover 才显示的按钮里。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Tree
+    data={[
+      {
+        key: "project-042",
+        title: "示例项目（project-042）",
+        children: [
+          { key: "ds-118", title: "数据集 ds-118" },
+          { key: "ds-121", title: "数据集 ds-121" },
+        ],
+      },
+    ]}
+    defaultExpandedKeys={["project-042"]}
+  />
+  --- selectable (variant) 勾选模式
+  <Tree
+    checkable
+    defaultExpandedKeys={["project-042"]}
+    defaultCheckedKeys={["ds-118"]}
+    onCheck={(keys) => setDatasetKeys(keys)}
+    data={projectTree}
+  />
+  --- business (business) 真实业务示例
+  <Tree
+    data={[
+      {
+        key: "project-042",
+        title: "示例项目（project-042）",
+        children: [
+          { key: "ds-118", title: "数据集 ds-118 · 1,000 行" },
+          { key: "ds-121", title: "数据集 ds-121 · 320 行" },
+          { key: "ds-130", title: "数据集 ds-130", disabled: true },
+        ],
+      },
+    ]}
+    selectedKeys={selected}
+    onSelect={(keys) => setSelected(keys)}
+  />
+
+Related: table, search-field, checkbox, collapse
+
+## dc.collapse — Collapse 折叠面板 [stable] v0.1.0 (#/components/collapse)
+Category: display
+Purpose: 将次要内容折叠进面板，让页面默认只呈现主线信息。
+Usage: 用于高级参数、详情补充、FAQ 等低频但必要的内容。层级导航用 Tree；单条记录的字段分组用 Descriptions 分组。关键副作用、费用、错误信息不允许折叠。
+
+Props:
+  - accordion: boolean = false — 手风琴模式，展开一个自动收起其他。
+  - defaultActiveKeys: string[] — 默认展开的面板 key。
+  - bordered: boolean = true — false 用于卡片内嵌的无边框变体。
+  - header (required): ReactNode — Panel 的面板头，名词短语并标注数量。
+  - extra: ReactNode — Panel 右侧附加内容（状态徽标），点击不触发展开。
+  - collapsible: "header" | "icon" | "disabled" — Panel 的触发区域；disabled 禁止展开。
+
+States:
+  - default: 面板头高 44px，箭头朝右；展开时箭头朝下。
+  - hover: 面板头整行 hover 背景变化。
+  - focus-visible: 面板头有品牌色焦点环。
+  - pressed: 面板头按下时背景再深一档，时长 < 120ms。
+  - disabled: 禁用面板头 opacity .45，不允许展开，原因在 Tooltip 说明。
+  - loading: 面板内容异步加载时内容区显示骨架，面板头保持可用。
+  - empty [N/A]: 不适用：无内容的面板不应渲染，由业务判断是否提供该面板。
+  - error: 内容加载失败在面板内显示重试，不影响其他面板。
+  - permission-limited: 无权限内容在面板内显示权限说明，面板头保留，结构稳定。
+  - mobile: 面板头高度 ≥ 44px，箭头热区扩大。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - 点击面板头整行展开/收起；extra 区域的点击不触发展开。
+  - 手风琴模式展开一个面板时自动收起其他面板。
+  - 详情页可将展开态写入 URL，分享后定位到同一面板。
+
+Keyboard:
+  - Tab 聚焦面板头，Enter / Space 切换展开。
+  - ↑↓ 在面板头之间移动焦点（Accordion 键盘模式）。
+
+Accessibility:
+  - 面板头使用 button + aria-expanded + aria-controls。
+  - 内容区 role="region" 并与面板头关联。
+
+Responsive:
+  - 窄屏面板头允许换行，extra 移到第二行。
+  - 触摸热区 ≥ 44px。
+
+Content guidelines:
+  - 面板头是名词短语并标注数量（“输入文件（3）”）。
+  - 错误、费用、副作用等关键信息不允许折叠。
+
+Do:
+  - 默认展开用户最常看的一个面板。
+  - 面板头标注内容数量。
+  - extra 放状态徽标，不放操作按钮组。
+
+Don't:
+  - 不要把确认、付款、删除等关键动作藏进折叠面板。
+  - 不要嵌套两层以上的 Collapse。
+  - 不要折叠校验错误信息。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Collapse defaultActiveKeys={["params"]}>
+    <Collapse.Panel key="params" header="计算参数">
+      交换关联泛函 PBE0 · 截断能 520 eV · K 点 4×4×4
+    </Collapse.Panel>
+    <Collapse.Panel key="advanced" header="高级设置">
+      最大迭代步数 200 · 收敛阈值 1e-6
+    </Collapse.Panel>
+  </Collapse>
+  --- business (business) 真实业务示例
+  <Collapse accordion defaultActiveKeys={["input"]}>
+    <Collapse.Panel key="input" header="输入文件（3）" extra={<Badge color="success">已校验</Badge>}>
+      structure.cif · params.json · kpoints.conf
+    </Collapse.Panel>
+    <Collapse.Panel key="result" header="结果文件（2）" extra={<Badge color="neutral">待生成</Badge>}>
+      任务 run-28003 完成后生成
+    </Collapse.Panel>
+  </Collapse>
+
+Related: descriptions, card, tree, badge
+
+## dc.code-block — CodeBlock 代码块 [beta] v0.1.0 (#/components/code-block)
+Category: display
+Purpose: 以等宽字体展示代码与命令，支持语法高亮、行号与一键复制。
+Usage: 用于 API 调用示例、配置文件、命令行片段。结构化 JSON 的浏览用 JsonViewer；超长日志用日志查看器。超过 50 行的文件用文件预览，不用 CodeBlock。
+
+Props:
+  - language (required): string — 高亮语言（bash / json / python …）。
+  - title: string — 代码块标题栏，说明用途或文件名。
+  - showCopy: boolean = false — 右上角复制按钮，复制全文。
+  - lineNumbers: boolean = false — 显示行号，超过 3 行建议开启。
+  - highlightLines: number[] — 需要强调的行号列表。
+  - maxHeight: number — 超过该高度内部纵向滚动，标题栏固定。
+
+States:
+  - default: 等宽字体 12.5px，代码主题随站点浅色/深色切换。
+  - hover: 复制按钮常显于右上角；hover 时代码块边框加强。
+  - focus-visible: 复制按钮有品牌色焦点环。
+  - pressed: 复制按钮按下有按压反馈，成功后图标变为对勾 2 秒。
+  - disabled [N/A]: 不适用：代码块无禁用态。
+  - loading [N/A]: 不适用：代码随页面骨架一起加载，无独立加载态。
+  - empty [N/A]: 不适用：无代码内容不渲染 CodeBlock。
+  - error [N/A]: 不适用：静态展示无错误态；加载失败由页面级错误承担。
+  - permission-limited: 含敏感配置的代码以脱敏占位行显示（apiKey: "***"），不展示真实值。
+  - mobile: 横向滚动保持缩进，不强制换行，字号不降低。
+  - dark-mode: 使用暗色代码主题令牌，高亮对比度 ≥ 4.5:1。
+
+Interaction rules:
+  - 点击复制按钮复制全文，并用 Message 反馈“已复制”。
+  - 超过 maxHeight 内部纵向滚动，标题栏与复制按钮保持可见。
+
+Keyboard:
+  - 复制按钮进入 Tab 序列，Enter / Space 触发复制。
+  - 代码区域可聚焦，方向键滚动长代码。
+
+Accessibility:
+  - 使用 pre / code 语义；复制按钮 aria-label="复制代码"。
+  - 语法高亮对比度 ≥ 4.5:1。
+  - 高亮行不只靠颜色：配合行号文字说明（“第 4 行”）。
+
+Responsive:
+  - 窄屏横向滚动，保持等宽对齐与缩进。
+  - 字号不随屏宽降低。
+
+Content guidelines:
+  - 示例域名一律 example.com，密钥与凭证用 *** 占位。
+  - 命令行片段以 $ 开头表示提示符，复制时不包含提示符。
+
+Do:
+  - 超过 3 行显示行号。
+  - 标注 language 获得正确高亮。
+  - 提供复制按钮并反馈复制结果。
+
+Don't:
+  - 不要截图贴代码。
+  - 不要在示例里放真实密钥或内部域名。
+  - 不要用 CodeBlock 展示超过 50 行的文件。
+
+Examples:
+  --- basic (basic) 基础示例
+  <CodeBlock language="bash" showCopy>
+    $ datacore runs submit --project project-042 --dataset ds-118
+  </CodeBlock>
+  --- highlight (variant) 行号与高亮行
+  <CodeBlock language="json" lineNumbers highlightLines={[4]} showCopy>
+    {
+      "projectId": "project-042",
+      "datasetId": "ds-118",
+      "method": "PBE0",
+      "maxSeconds": 300
+    }
+  </CodeBlock>
+  --- business (business) 真实业务示例
+  <CodeBlock language="bash" title="查询任务状态" showCopy>
+    $ curl https://api.example.com/v1/runs/run-28003 \
+        -H "Authorization: Bearer ***"
+  </CodeBlock>
+
+Related: json-viewer, message, typography, file-list
+
+## dc.json-viewer — JsonViewer JSON 查看器 [experimental] v0.1.0 (#/components/json-viewer)
+Category: display
+Purpose: 以可折叠树展示 JSON 数据，支持按路径展开与复制节点值。
+Usage: 用于调试面板、参数快照、API 响应预览等开发态场景。面向普通用户的结构化信息用 Descriptions 或 Table；纯代码文本用 CodeBlock。
+
+Props:
+  - data (required): unknown — 要展示的 JSON 数据。
+  - defaultExpandDepth: number = 1 — 默认展开层级，大对象不超过 2。
+  - enableCopy: boolean = false — hover 节点显示复制值按钮。
+  - enableCopyPath: boolean = false — 点击键名复制节点路径（如 params.kpoints[2]）。
+  - maxHeight: number — 超过该高度内部纵向滚动。
+
+States:
+  - default: 键紫色、值按类型着色，等宽字体，缩进 14px/级。
+  - hover: 节点行 hover 显示复制按钮；移动端常显。
+  - focus-visible: 展开图标与复制按钮有品牌色焦点环。
+  - pressed: 展开图标按下旋转 90°，时长 < 120ms。
+  - disabled [N/A]: 不适用：查看器无禁用态。
+  - loading [N/A]: 不适用：数据随页面骨架加载，无独立加载态。
+  - empty: 空对象 / 空数组显示 {} / [] 占位，不渲染空节点。
+  - error: 非法 JSON 显示解析错误与出错位置，不白屏。
+  - permission-limited: 敏感字段值显示 ***，键名保留，便于理解结构。
+  - mobile: 横向滚动保持缩进；操作按钮常显，不依赖 hover。
+  - dark-mode: 使用语义令牌，类型着色对比度 ≥ 4.5:1。
+
+Interaction rules:
+  - 点击箭头展开/收起子树；点击键名复制路径。
+  - 超长字符串默认截断 80 字符，点击展开全文。
+  - 大对象（> 1000 节点）开启虚拟滚动或分页加载。
+
+Keyboard:
+  - 展开按钮 Tab 聚焦，Enter / Space 切换。
+  - 树内支持方向键导航（同 Tree 键盘模式）。
+
+Accessibility:
+  - 树结构使用 role="tree" / "treeitem"，aria-expanded 标注。
+  - 类型着色不只靠颜色：null 与错误值同时有文本标记。
+
+Responsive:
+  - 窄屏横向滚动，不压缩缩进层级。
+  - 操作按钮在移动端常显。
+
+Content guidelines:
+  - 键名保持原始 snake_case / camelCase，不做翻译改写。
+  - 敏感值（密钥、凭证）一律 ***。
+
+Do:
+  - 默认只展开 1–2 层。
+  - 提供复制值与复制路径。
+  - 大对象开启虚拟滚动。
+
+Don't:
+  - 不要把 JsonViewer 当正式详情页给普通用户。
+  - 不要展示真实凭证。
+  - 不要默认全展开大对象。
+
+Examples:
+  --- basic (basic) 基础示例
+  <JsonViewer
+    data={{ runId: "run-28003", status: "finished", seconds: 286.4 }}
+    defaultExpandDepth={1}
+  />
+  --- business (business) 真实业务示例
+  <JsonViewer
+    data={{
+      runId: "run-28003",
+      project: { id: "project-042", name: "示例项目" },
+      params: { method: "PBE0", cutoff: 520, kpoints: [4, 4, 4] },
+      dataset: { id: "ds-118", version: 3 },
+      credential: "***",
+    }}
+    defaultExpandDepth={2}
+    enableCopy
+    enableCopyPath
+  />
+
+Related: code-block, descriptions, collapse, message
+
+## dc.file-list — FileList 文件列表 [beta] v0.1.0 (#/components/file-list)
+Category: display
+Purpose: 以列表展示文件及其状态，支持预览、下载、删除与上传进度。
+Usage: 用于数据集附件、任务产物、导入文件清单。大目录浏览用 Tree + Table；上传交互本身用 Upload；轻量删除确认用 Popconfirm。
+
+Props:
+  - files (required): FileItem[] — 文件数组：{ id, name, size, status?, percent?, error? }。
+  - status: "uploading" | "success" | "error" — 单个文件状态，uploading 需配合 percent。
+  - onDownload: (file: FileItem) => void — 下载回调；无权限时不渲染该按钮而显示“无权限”。
+  - onRemove: (file: FileItem) => void — 删除回调，触发前必须经 Popconfirm 确认。
+  - maxVisible: number — 超过该数量折叠为“查看全部（N）”。
+  - emptyText: ReactNode — 空态文案，引导上传。
+
+States:
+  - default: 图标 + 文件名 + 大小 + 操作，行高 40px。
+  - hover: 整行 hover 高亮；操作按钮常显，不依赖 hover 出现。
+  - focus-visible: 下载 / 删除按钮有品牌色焦点环。
+  - pressed: 操作按钮按压反馈，时长 < 120ms。
+  - disabled: 删除被禁用时按钮 disabled，原因在 Tooltip 说明。
+  - loading: 上传中显示进度条与百分比，并提供取消。
+  - empty: 无文件显示 Empty“暂无附件”，引导上传。
+  - error: 失败行红色图标 + 原因 + 重试 / 移除两个出口。
+  - permission-limited: 无下载权限的操作显示“无权限”，文件条目保留可见。
+  - mobile: 行高 ≥ 44px，文件名截断保留扩展名，操作保持可见。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - 点击文件名预览（格式支持时），点击图标不触发任何动作。
+  - 删除前经 Popconfirm 确认；失败后行保留并显示原因。
+  - 上传中可取消，取消后行消失并用 Message 反馈。
+
+Keyboard:
+  - 行内操作按视觉顺序进入 Tab 序列。
+  - 焦点位于上传中行时，Esc 请求取消上传。
+
+Accessibility:
+  - 文件状态有文字表达，不只靠图标颜色。
+  - 上传进度使用 Progress 语义（role="progressbar"）。
+
+Responsive:
+  - 窄屏行高 ≥ 44px。
+  - 文件名超长截断但保留扩展名。
+
+Content guidelines:
+  - 大小统一 KB / MB，保留一位小数。
+  - 错误原因说人话：“格式不支持（仅支持 .cif / .json）”。
+
+Do:
+  - 失败行给出重试与移除两个出口。
+  - 删除前必须确认。
+  - 超过 8 个文件折叠并显示总数。
+
+Don't:
+  - 不要上传失败即静默移除行。
+  - 不要只显示图标不显示文件名。
+  - 不要在 FileList 里做文件夹层级（用 Tree）。
+
+Examples:
+  --- basic (basic) 基础示例
+  <FileList
+    files={[
+      { id: "f-01", name: "structure.cif", size: "48 KB" },
+      { id: "f-02", name: "params.json", size: "2 KB" },
+    ]}
+    onDownload={(file) => download(file.id)}
+    onRemove={(file) => remove(file.id)}
+  />
+  --- states (state) 上传中与失败
+  <FileList
+    files={[
+      { id: "f-03", name: "raw-data.csv", size: "1.2 MB", status: "uploading", percent: 62 },
+      { id: "f-04", name: "notes.pdf", size: "860 KB", status: "error", error: "格式不支持（仅支持 .cif / .json）" },
+    ]}
+    onCancel={(file) => cancelUpload(file.id)}
+    onRetry={(file) => retry(file.id)}
+  />
+  --- business (business) 真实业务示例
+  <FileList
+    files={attachments}
+    maxVisible={3}
+    onDownload={(file) => download(file.id)}
+    onRemove={(file) => confirmRemove(file.id)}
+    emptyText="暂无附件，上传后在此展示"
+  />
+
+Related: upload, popconfirm, progress, empty
+
+## dc.alert — Alert 警告提示 [stable] v0.1.0 (#/components/alert)
+Category: feedback
+Purpose: 在页面或区块内展示需要持续关注的上下文提示，随内容出现，不自动消失。
+Usage: 用于与当前上下文强相关、需要用户看到或处理的信息：数据质量问题、权限提醒、阻断原因。三者分工：操作结果的轻量反馈用 Message（自动消失）；与当前页面弱相关的异步事件用 Notification（可停留）；需要持续关注的上下文信息用 Alert（常驻页面）。
+
+Props:
+  - type (required): "info" | "success" | "warning" | "error" — 语义类型，决定图标与底色。
+  - title (required): ReactNode — 一句话结论，不写“提示”“警告”这类词。
+  - description: ReactNode — 原因与下一步，不给套话。
+  - closable: boolean = false — 可关闭；阻断型 Alert 不提供关闭。
+  - action: ReactNode — 右侧操作（查看、重试），最多 2 个。
+  - icon: ReactNode — 自定义图标，默认按类型给出。
+
+States:
+  - default: 左侧类型图标 + 结论标题，背景为类型色浅底，与页面同宽或随区块。
+  - hover: 仅 action 与关闭按钮有 hover；Alert 本体无 hover。
+  - focus-visible: 关闭与 action 按钮有品牌色焦点环。
+  - pressed [N/A]: 不适用：Alert 本体不可按压，按压反馈由内部按钮承担。
+  - disabled [N/A]: 不适用：Alert 无禁用态。
+  - loading [N/A]: 不适用：加载中的等待用 Spin / Skeleton，不用 Alert。
+  - empty [N/A]: 不适用：无内容不渲染 Alert。
+  - error: type="error" 即错误态本身：结论 + 原因 + 下一步，不只用红色。
+  - permission-limited: 权限类提醒用 type="warning"，并给出申请权限或联系人入口。
+  - mobile: 标题与描述换行展示，action 移到描述下方整行。
+  - dark-mode: 浅底深字使用语义令牌，对比度 ≥ 4.5:1。
+
+Interaction rules:
+  - 阻断型 Alert 不提供关闭；可关闭的 Alert 关闭只是隐藏，问题未解决时会再次出现。
+  - action 跳转后携带当前上下文（项目、筛选、行号）。
+  - 同一时间同一区域最多 2 条，超出合并为摘要。
+
+Keyboard:
+  - 关闭按钮 aria-label="关闭提示"，进入 Tab 序列。
+  - action 按钮按视觉顺序到达。
+
+Accessibility:
+  - 一般提示 role="status"，阻断错误 role="alert"。
+  - 类型不只靠颜色：图标 + 文字同时表达。
+  - 新出现的 Alert 由 aria-live 播报，不抢占焦点。
+
+Responsive:
+  - 窄屏 action 下移整行，不与标题挤压。
+  - 描述允许换行，不截断关键信息。
+
+Content guidelines:
+  - 标题是一句话结论（“数据集校验未通过”）。
+  - description 给原因和下一步，不写“请知悉”这类套话。
+
+Do:
+  - error 必须写清原因与下一步。
+  - 阻断型不提供关闭。
+  - 按语义选类型，不混用。
+
+Don't:
+  - 不要用 Alert 做成功轻反馈（用 Message）。
+  - 不要同一区域堆叠超过 2 条。
+  - 不要给关闭按钮解决不了的问题提供关闭。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Alert type="info" title="计算任务将于今晚 22:00 排队执行" />
+  <Alert type="success" title="数据集 ds-118 校验通过" />
+  <Alert type="warning" title="3 行缺少密度字段" description="缺失行将以项目默认值填充，可在导入预览中逐行修改。" />
+  <Alert type="error" title="任务 run-28002 执行失败" description="K 点网格与截断能设置冲突，请检查参数后重试。" />
+  --- closable (variant) 可关闭与操作
+  <Alert
+    type="warning"
+    title="项目额度剩余 12%"
+    description="示例项目（project-042）本周期额度即将用完。"
+    closable
+    action={<Button size="sm" variant="ghost">查看用量</Button>}
+  />
+  --- business (business) 真实业务示例
+  <Alert
+    type="warning"
+    title="3 行缺少密度字段，无法直接提交"
+    description="第 128、512、907 行缺失。可逐行补全，或以项目默认值 2.50 g/cm³ 填充后继续。"
+    action={
+      <>
+        <Button size="sm" variant="ghost">查看缺失行</Button>
+        <Button size="sm" variant="secondary">以默认值填充</Button>
+      </>
+    }
+  />
+
+Related: message, notification, data-quality-notice, result
+
+## dc.message — Message 全局提示 [beta] v0.1.0 (#/components/message)
+Category: feedback
+Purpose: 操作完成后的轻量全局反馈，自动出现、自动消失，不打断流程。
+Usage: 用于保存成功、复制成功、提交已受理等即时结果反馈。三者分工：Message 是即时轻反馈（自动消失、无需处理）；Alert 是页面内持续提醒（需要看到或处理）；Notification 是异步事件通知（可停留、带操作）。
+
+Props:
+  - type (required): "success" | "error" | "warning" | "info" | "loading" — 类型，决定图标与颜色。
+  - content (required): ReactNode — 一句话结果 + 对象。
+  - duration: number = 3 — 自动关闭秒数；loading 默认 0，需手动关闭或更新。
+  - key: string — 同一 key 的后续调用更新内容而不是堆叠。
+  - maxCount: number = 3 — 同屏最多条数，超出进入队列。
+  - onClose: () => void — 关闭后的回调。
+
+States:
+  - default: 顶部居中浮出，图标 + 一句话，白底阴影。
+  - hover: hover 时暂停自动关闭计时。
+  - focus-visible: 内嵌按钮（如重试）有品牌色焦点环。
+  - pressed [N/A]: 不适用：Message 本体不可按压。
+  - disabled [N/A]: 不适用：Message 无禁用态。
+  - loading: type="loading" 显示 spinner，用同一 key 更新为结果。
+  - empty [N/A]: 不适用：无内容不弹出 Message。
+  - error: type="error"：红色图标 + 原因 + 可选的重试按钮。
+  - permission-limited: 权限失败用 error 类型并说明所需权限与申请入口。
+  - mobile: 宽度适配屏幕（左右各 16px），不遮挡状态栏。
+  - dark-mode: 深色底 + 浅色文字，使用语义令牌。
+
+Interaction rules:
+  - 默认 3 秒自动消失，hover 暂停计时。
+  - 同一 key 的调用更新内容而不是堆叠（提交中 → 提交成功）。
+  - 同屏最多 3 条，超出进入队列。
+
+Keyboard:
+  - 弹出时不抢占焦点。
+  - 内嵌按钮（重试等）可 Tab 到达。
+
+Accessibility:
+  - role="status" 播报；error 用 role="alert"。
+  - 自动消失时间 ≥ 3 秒，重要结果建议 5 秒。
+
+Responsive:
+  - 移动端左右各留 16px，不遮状态栏与底部手势区。
+  - 长文案换行，不撑出屏幕。
+
+Content guidelines:
+  - 一句话结果 + 对象：“已保存到示例项目（project-042）”。
+  - 失败说原因与下一步，不只说“操作失败”。
+
+Do:
+  - 成功后指明作用对象。
+  - 异步动作用同一 key 从 loading 更新为结果。
+  - 失败给出原因。
+
+Don't:
+  - 不要用 Message 展示需要用户处理的信息（用 Alert）。
+  - 不要堆叠超过 3 条。
+  - 不要在 Message 里放多行长文本（用 Notification）。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Button variant="primary" onClick={() => message.success("已保存到示例项目（project-042）")}>
+    保存
+  </Button>
+  <Button variant="secondary" onClick={() => message.error("保存失败：网络异常，请重试")}>
+    演示失败
+  </Button>
+  --- types (variant) 类型变体
+  message.success("已复制任务 ID run-28003")
+  message.warning("项目额度剩余不足 20%")
+  message.error("提交失败：参数校验未通过")
+  message.loading("正在提交…", { duration: 0, key: "submit" })
+  --- business (business) 真实业务示例
+  function handleSave() {
+    message.loading("正在保存到示例项目（project-042）…", { key: "save", duration: 0 });
+    saveDataset()
+      .then(() => message.success("已保存 · 版本 v3", { key: "save" }))
+      .catch(() => message.error("保存失败：网络异常，修改未丢失，请重试", { key: "save" }));
+  }
+
+Related: alert, notification, spin, button
+
+## dc.notification — Notification 通知 [beta] v0.1.0 (#/components/notification)
+Category: feedback
+Purpose: 系统侧的异步事件通知，带标题与操作，可停留等待用户处理。
+Usage: 用于任务完成、审批结果、预约到点等与当前页面上下文弱相关的事件。三者分工：Notification 是异步事件通知（带标题与操作、可停留）；Message 是当前操作的即时轻反馈；Alert 是页面内的持续上下文提醒。
+
+Props:
+  - type (required): "success" | "error" | "warning" | "info" — 类型，决定图标与语义。
+  - title (required): ReactNode — 事件结论。
+  - description (required): ReactNode — 事件详情，包含稳定 ID（如 run-28003）。
+  - actions: Array<{ label: string; href?: string; onClick?: () => void }> — 操作按钮，最多 2 个，第一个为主跳转。
+  - duration: number = 4.5 — 自动关闭秒数；0 表示常驻。
+  - placement: "topRight" | "bottomRight" = "topRight" — 弹出位置。
+
+States:
+  - default: 右上角滑入卡片：类型图标 + 标题 + 描述 + 操作。
+  - hover: hover 暂停自动关闭计时。
+  - focus-visible: 操作与关闭按钮有品牌色焦点环。
+  - pressed [N/A]: 不适用：通知本体不可按压，按压反馈由内部按钮承担。
+  - disabled [N/A]: 不适用：通知无禁用态。
+  - loading [N/A]: 不适用：通知是事件结果；过程进度用 Progress / Message loading。
+  - empty [N/A]: 不适用：无事件不弹出通知。
+  - error: error 类型默认常驻（duration 0），直到用户处理或手动关闭。
+  - permission-limited: 审批被拒等权限事件用 warning 类型，并给出联系人入口。
+  - mobile: 全宽顶部浮层，操作按钮允许换行。
+  - dark-mode: 深色卡片使用语义令牌。
+
+Interaction rules:
+  - 默认 4.5 秒自动消失；error 常驻。
+  - 点击操作跳转后通知自动关闭。
+  - 同一事件的重复通知更新内容，而不是堆叠。
+
+Keyboard:
+  - 出现时不抢占焦点。
+  - 通知内的操作与关闭按钮可 Tab 到达。
+
+Accessibility:
+  - role="status"；error 用 role="alert"。
+  - 常驻通知必须有可见的关闭按钮。
+
+Responsive:
+  - 移动端全宽浮层，左右各留 16px。
+  - 操作按钮允许换行，不溢出。
+
+Content guidelines:
+  - 标题 = 事件结论（“计算任务已完成”）。
+  - 描述必须包含稳定 ID（run-28003），便于追踪。
+
+Do:
+  - 描述带稳定 ID，可追踪。
+  - error 常驻直到处理。
+  - 给出“查看结果”直达链接。
+
+Don't:
+  - 不要用通知做当前操作的即时反馈（用 Message）。
+  - 不要一次弹出多条堆叠。
+  - 不要在通知里放表单。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Button variant="secondary" onClick={() =>
+    notification.open({
+      type: "success",
+      title: "计算任务已完成",
+      description: "run-28003 电导率计算已完成，耗时 286.4 秒。",
+      actions: [{ label: "查看结果", href: "#/runs/run-28003" }],
+    })
+  }>
+    演示通知
+  </Button>
+  --- business (business) 真实业务示例
+  notification.open({
+    type: "error",
+    title: "计算任务执行失败",
+    description: "run-28002 结构优化失败：K 点网格与截断能设置冲突。",
+    duration: 0,
+    actions: [
+      { label: "查看日志", href: "#/runs/run-28002/logs" },
+      { label: "重新提交", onClick: () => retryRun("run-28002") },
+    ],
+  })
+
+Related: alert, message, run-status, badge
+
+## dc.progress — Progress 进度条 [beta] v0.1.0 (#/components/progress)
+Category: feedback
+Purpose: 展示确定性任务的完成比例，让用户知道还要等多久。
+Usage: 用于可量化进度：数据导入、文件上传、批量计算完成度。无法量化进度的等待用 Spin；任务整体状态用 run-status / Steps。
+
+Props:
+  - percent (required): number — 完成百分比，0–100。
+  - status: "active" | "success" | "error" — 状态；缺省时按 percent 推断。
+  - showInfo: boolean = true — 是否显示百分比文字。
+  - size: "default" | "sm" = "default" — sm 用于表格行内等紧凑场景。
+  - format: (percent: number) => ReactNode — 自定义文字，如“导入中断”。
+
+States:
+  - default: 品牌色进度条，右侧等宽百分比。
+  - hover [N/A]: 不适用：进度条为纯展示，无 hover。
+  - focus-visible [N/A]: 不适用：本体不可聚焦；内嵌的取消按钮自带焦点环。
+  - pressed [N/A]: 不适用：进度条不可按压。
+  - disabled [N/A]: 不适用：进度条无禁用态。
+  - loading: status="active" 即进行中，轨道动画表达活跃。
+  - empty [N/A]: 不适用：percent 为 0 即初始态，不是空态。
+  - error: status="error" 红色并停在失败点，邻近文案给出原因。
+  - permission-limited [N/A]: 不适用：无权限时不展示任务本身，由权限提示承担。
+  - mobile: 行内尺寸降为 sm，百分比保留。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - 进行中的任务可配置取消操作，取消后进度条消失并用 Message 反馈。
+  - 完成瞬间从 active 过渡到 success，时长 < 300ms，并给出结果入口。
+
+Keyboard:
+  - 进度条本身不在 Tab 序列。
+  - 内嵌的取消按钮在 Tab 序列中。
+
+Accessibility:
+  - role="progressbar" + aria-valuenow / valuemin / valuemax。
+  - 进度不逐次播报；阶段变化（开始、失败、完成）才播报。
+
+Responsive:
+  - 窄屏压缩轨道长度，百分比始终保留。
+  - 表格行内使用 sm 尺寸。
+
+Content guidelines:
+  - 邻近文案说明“在干什么、到哪了、还要多久”，不只给百分比。
+  - 百分比取整数，不显示小数。
+
+Do:
+  - 给出对象与预计剩余时间。
+  - 失败停在失败点并给原因。
+  - 100% 后给出结果入口。
+
+Don't:
+  - 不要用进度条表示不确定等待（用 Spin）。
+  - 不要百分比到 100% 却没有结果反馈。
+  - 不要在表格行内放超过一个进度条。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Progress percent={62} />
+  <Progress percent={100} status="success" />
+  --- status (variant) 状态变体
+  <Progress percent={80} status="active" />
+  <Progress percent={45} status="error" format={() => "导入中断"} />
+  --- business (business) 真实业务示例
+  <div className="import-progress">
+    <Progress percent={62} status="active" />
+    <span>正在导入 ds-118 · 第 620/1,000 行 · 预计剩余 40 秒</span>
+    <Button size="sm" variant="ghost" onClick={cancelImport}>取消</Button>
+  </div>
+
+Related: spin, message, file-list, run-status
+
+## dc.spin — Spin 加载中 [stable] v0.1.0 (#/components/spin)
+Category: feedback
+Purpose: 表示正在加载但无法量化进度，以内联或遮罩方式表达等待。
+Usage: 用于区块加载、按钮内加载、提交中等待。可量化进度用 Progress；整页首屏骨架用 Skeleton；异步任务的状态跟踪用 run-status。
+
+Props:
+  - spinning: boolean = true — 是否显示加载指示。
+  - size: "sm" | "default" | "lg" = "default" — sm 用于按钮内与行内。
+  - tip: string — 加载文案，说明在做什么。
+  - delay: number = 0 — 延迟显示的毫秒数，避免短暂加载闪烁。
+  - fullscreen: boolean = false — 整页遮罩，仅限提交中等必须阻断的场景。
+
+States:
+  - default: 品牌色旋转指示，默认尺寸 20px。
+  - hover [N/A]: 不适用：加载指示非交互元素。
+  - focus-visible [N/A]: 不适用：非交互元素；遮罩期间内部元素不可聚焦。
+  - pressed [N/A]: 不适用：加载指示不可按压。
+  - disabled [N/A]: 不适用：加载期间内容不可交互由遮罩保证，不是 disabled。
+  - loading: Spin 本身就是加载态：delay < 200ms 防闪烁，超过 5 秒必须给 tip。
+  - empty [N/A]: 不适用：空数据由 Empty 承担。
+  - error [N/A]: 不适用：加载失败后 Spin 停止，错误由 Alert / Message 呈现。
+  - permission-limited [N/A]: 不适用：无权限展示权限提示，而不是无限加载。
+  - mobile: 尺寸不缩水；遮罩覆盖安全区。
+  - dark-mode: 遮罩使用深色半透明令牌。
+
+Interaction rules:
+  - 容器加载时遮罩阻止内部交互；加载不可取消，除非业务显式提供取消按钮。
+  - 超过 10 秒给出“仍在处理”说明或取消入口。
+
+Keyboard:
+  - 容器加载期间，焦点移出被遮罩的内容。
+  - 显式提供的取消按钮在 Tab 序列中。
+
+Accessibility:
+  - role="status" 并朗读 tip；容器 aria-busy="true"。
+  - 不只靠旋转动画：必须有 tip 或 sr-only 文本。
+
+Responsive:
+  - 移动端遮罩覆盖全屏安全区。
+  - 小容器内自动降为 sm 尺寸。
+
+Content guidelines:
+  - tip 说明在做什么：“正在加载任务详情…”。
+  - 不写“加载中”这种无信息量文案。
+
+Do:
+  - 加 delay 避免闪烁。
+  - 长等待给出 tip 与取消入口。
+  - 局部加载只遮局部区域。
+
+Don't:
+  - 不要用整页 Spin 代替首屏骨架（用 Skeleton）。
+  - 不要超过 10 秒没有任何说明。
+  - 不要嵌套多层 Spin。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Spin size="sm" />
+  <Spin />
+  <Spin size="lg" tip="正在加载任务详情…" />
+  --- container (variant) 容器加载
+  <Spin spinning={isLoading} tip="正在重新计算…">
+    <ResultPanel data={data} />
+  </Spin>
+  --- business (business) 真实业务示例
+  <Spin spinning={isRefreshing} delay={200} tip="正在加载任务列表…">
+    <Table caption="示例项目（project-042）· 计算任务列表">{rows}</Table>
+  </Spin>
+
+Related: skeleton, progress, button, message
+
+## dc.modal — Modal 对话框 [stable] v0.1.0 (#/components/modal)
+Category: overlay
+Purpose: 在当前页面之上展示需要专注处理的内容或确认，阻断对背景的交互。
+Usage: 用于需要用户完成一件事才能继续的场景：创建任务、编辑参数、聚焦查看。与 ConfirmPanel 的关系：ConfirmPanel 基于 Modal 实现，额外回显目标、范围、预算与副作用——凡是有外部副作用或不可恢复的确认动作必须用 ConfirmPanel；轻量就地确认用 Popconfirm；大表单与详情用 Drawer。
+
+Props:
+  - open (required): boolean — 受控开关。
+  - title (required): ReactNode — 对话框目的，aria-labelledby 指向它。
+  - onClose (required): () => void — Esc、遮罩、关闭按钮的统一出口。
+  - footer: ReactNode — 动作区，主按钮右置。
+  - width: number = 520 — 内容宽度；超过 640 考虑 Drawer。
+  - maskClosable: boolean = true — 点击遮罩关闭；表单类与提交中必须禁用。
+  - destroyOnClose: boolean = false — 关闭后销毁内容，下次打开重置。
+
+States:
+  - default: role="dialog" aria-modal="true"，居中浮层 + 半透明遮罩，标题即对话框目的。
+  - hover: 关闭按钮与 footer 按钮各自 hover；遮罩无 hover。
+  - focus-visible: 打开后焦点落在第一个可交互元素，焦点环清晰可见。
+  - pressed: 按钮按压反馈；Esc 按下即触发关闭流程。
+  - disabled: 提交中主按钮 disabled + loading，关闭按钮、Esc 与遮罩同时禁用。
+  - loading: 提交中显示 loading，禁止重复提交与意外关闭。
+  - empty: 内容为空时不应打开 Modal（先校验），不存在“空对话框”。
+  - error: 提交失败的错误显示在对话框内顶部（Alert），保留已输入内容，不自动关闭。
+  - permission-limited: 无权限时入口按钮即 disabled 并说明原因，而不是打开后才报错。
+  - mobile: 全宽底部弹出（bottom sheet），最大高度 85vh，主按钮高 ≥ 44px。
+  - dark-mode: 遮罩更深，浮层使用语义令牌。
+
+Interaction rules:
+  - 打开后焦点移入对话框内第一个可交互元素；关闭后焦点还原到触发按钮。
+  - Tab / Shift+Tab 在对话框内循环（焦点陷阱），不允许移到背景。
+  - Esc 关闭；有未保存内容时先二次确认；提交中禁用 Esc 与遮罩关闭。
+  - 背景滚动锁定；表单类对话框禁用遮罩点击关闭。
+
+Keyboard:
+  - Esc 触发 onClose（提交中禁用）。
+  - Tab 循环陷阱：焦点在对话框内首尾循环。
+  - 焦点顺序：关闭按钮 → 内容区 → footer 次动作 → 主动作。
+
+Accessibility:
+  - role="dialog" + aria-modal="true" + aria-labelledby 指向标题。
+  - 打开时背景根节点设为 inert / aria-hidden。
+  - 焦点管理三件套缺一不可：进入聚焦、循环陷阱、退出还原。
+  - 必须有可见关闭按钮，不能只靠遮罩点击。
+
+Responsive:
+  - 窄屏（< 640px）全宽底部弹出，最大高度 85vh。
+  - 内容区超高内部滚动，footer 固定可见。
+
+Content guidelines:
+  - 标题是对话框目的（“重命名数据集”），不是“提示”。
+  - 主按钮写清动作对象；危险动作必须走 ConfirmPanel。
+  - 内容超过一屏说明场景更适合 Drawer。
+
+Do:
+  - 打开聚焦、关闭还原焦点。
+  - 提交中禁用 Esc、遮罩与重复提交。
+  - 错误留在对话框内并保留已输入内容。
+  - 危险或有副作用的确认走 ConfirmPanel。
+
+Don't:
+  - 不要套娃：Modal 上不再开 Modal（用步骤或 Drawer）。
+  - 不要把 Modal 当页面用：内容复杂就用 Drawer 或独立页面。
+  - 不要无标题或无关闭按钮。
+  - 不要在提交中允许遮罩点击关闭。
+
+Examples:
+  --- basic (basic) 基础示例
+  const [open, setOpen] = useState(false);
+  
+  <Button variant="primary" onClick={() => setOpen(true)}>打开对话框</Button>
+  <Modal
+    open={open}
+    title="重命名数据集"
+    onClose={() => setOpen(false)}
+    footer={
+      <>
+        <Button variant="secondary" onClick={() => setOpen(false)}>取消</Button>
+        <Button variant="primary" onClick={handleSave}>保存</Button>
+      </>
+    }
+  >
+    <Input defaultValue="ds-118 电导率实验数据" aria-label="数据集名称" />
+  </Modal>
+  --- business (business) 真实业务示例
+  <Modal
+    open={open}
+    title="创建计算任务"
+    onClose={() => setOpen(false)}
+    footer={
+      <>
+        <Button variant="secondary" onClick={() => setOpen(false)} disabled={submitting}>取消</Button>
+        <Button variant="primary" loading={submitting} onClick={handleSubmit}>确认创建</Button>
+      </>
+    }
+  >
+    <p>将在 示例项目（project-042）下创建电导率计算任务。</p>
+    <p>输入数据集 ds-118 · 方法 PBE0 · 预计最长 300 秒。</p>
+  </Modal>
+
+Related: confirm-panel, drawer, popconfirm, button, form
+
+## dc.drawer — Drawer 抽屉 [beta] v0.1.0 (#/components/drawer)
+Category: overlay
+Purpose: 从屏幕边缘滑出的辅助面板，承载与当前页强相关的详情或操作，不打断页面上下文。
+Usage: 用于任务详情、日志查看、宽表单等需要较大空间但不想离开当前列表的场景。简短确认用 Popconfirm；聚焦单件事用 Modal；有副作用的确认用 ConfirmPanel。
+
+Props:
+  - open (required): boolean — 受控开关。
+  - title (required): ReactNode — 标题带对象 ID（“任务详情 · run-28003”）。
+  - onClose (required): () => void — Esc、遮罩、关闭按钮的统一出口。
+  - placement: "right" | "left" | "top" | "bottom" = "right" — 滑出方向。
+  - width: number = 480 — 左右抽屉的宽度。
+  - maskClosable: boolean = true — 点击遮罩关闭；有未保存内容时禁用。
+  - footer: ReactNode — 固定底部动作区。
+
+States:
+  - default: 右缘滑入 240ms，遮罩半透明，默认宽度 480。
+  - hover: 内部控件各自 hover；遮罩无 hover。
+  - focus-visible: 打开后焦点进入抽屉第一个可交互元素。
+  - pressed: 内部按钮按压反馈；Esc 按下即关闭。
+  - disabled: 提交中 footer 主按钮 disabled，Esc 与遮罩关闭同时禁用。
+  - loading: 内容加载中显示骨架，框架（标题、关闭按钮）先到。
+  - empty: 内容为空显示 Empty，不展示一个空白抽屉。
+  - error: 内容加载失败显示原因 + 重试，不自动关闭。
+  - permission-limited: 无权限内容在抽屉内显示权限说明与申请入口。
+  - mobile: 窄屏强制全宽，placement 视为 right 全屏。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - Esc 与遮罩点击关闭；有未保存内容时先二次确认。
+  - 打开后焦点进入抽屉，关闭后焦点还原（同 Modal）。
+  - 从列表行打开时，关闭后列表滚动位置与选中行保持。
+
+Keyboard:
+  - Esc 关闭（提交中禁用）。
+  - Tab 循环限制在抽屉内。
+
+Accessibility:
+  - role="dialog" aria-modal="true" aria-labelledby 指向标题。
+  - 背景 inert；焦点陷阱与还原同 Modal。
+
+Responsive:
+  - 窄屏（< 640px）全宽展示。
+  - 内容区超高内部滚动，footer 固定。
+
+Content guidelines:
+  - 标题必须带对象 ID（“任务详情 · run-28003”）。
+  - 内容分区用标题或 Tabs，不一屏平铺到底。
+
+Do:
+  - 详情查看优先 Drawer 而非跳转，保留列表上下文。
+  - 宽表单（> 520px）用 Drawer 不用 Modal。
+  - 标题带对象 ID。
+
+Don't:
+  - 不要在抽屉里再开抽屉。
+  - 不要把抽屉当全流程页面（超过两屏考虑独立页面）。
+  - 不要省略标题中的对象 ID。
+
+Examples:
+  --- basic (basic) 基础示例
+  const [open, setOpen] = useState(false);
+  
+  <Button variant="secondary" onClick={() => setOpen(true)}>查看任务详情</Button>
+  <Drawer open={open} title="任务详情 · run-28003" placement="right" width={480} onClose={() => setOpen(false)}>
+    <Descriptions title="基本信息">{items}</Descriptions>
+  </Drawer>
+  --- business (business) 真实业务示例
+  <Drawer
+    open={open}
+    title="任务详情 · run-28003"
+    width={520}
+    onClose={() => setOpen(false)}
+    footer={<Button variant="primary" onClick={goFullPage}>查看完整日志</Button>}
+  >
+    <Descriptions column={1} items={runSummary} />
+    <Collapse defaultActiveKeys={["logs"]}>
+      <Collapse.Panel key="logs" header="日志摘要">…</Collapse.Panel>
+    </Collapse>
+  </Drawer>
+
+Related: modal, descriptions, table, confirm-panel
+
+## dc.popconfirm — Popconfirm 气泡确认 [beta] v0.1.0 (#/components/popconfirm)
+Category: overlay
+Purpose: 在操作元素旁弹出的小型确认气泡，用于轻量、影响范围小的确认。
+Usage: 用于删除一行、移除标签等轻量确认。涉及计算、费用、外部副作用或不可恢复的动作必须用 ConfirmPanel；需要在气泡里放表单或复杂内容时用 Modal。
+
+Props:
+  - title (required): ReactNode — 确认问题，是一个问句（“删除该文件？”）。
+  - description: ReactNode — 影响说明：对象与后果。
+  - okText: string = "确认" — 主按钮文案，写动作本身（“删除”），不写“确定”。
+  - cancelText: string = "取消" — 次按钮文案。
+  - okDanger: boolean = false — 危险动作，主按钮红色。
+  - onConfirm: () => void | Promise<void> — 确认回调；返回 Promise 时主按钮 loading 直到完成。
+  - placement: "top" | "bottom" | "left" | "right" = "top" — 气泡方向，空间不足自动翻转。
+
+States:
+  - default: 气泡宽 240–280px，警告图标 + 问句 + 两个按钮。
+  - hover: 触发元素与气泡内按钮各自 hover。
+  - focus-visible: 打开后焦点落在取消按钮（安全默认），主按钮 Tab 到达。
+  - pressed: 按钮按压反馈，时长 < 120ms。
+  - disabled: 触发元素 disabled 时不弹出，原因在 Tooltip 说明。
+  - loading: 确认后主按钮 loading 直到回调完成，气泡保持打开，禁止重复点击。
+  - empty [N/A]: 不适用：没有需要确认的内容就不应使用 Popconfirm。
+  - error: 确认动作失败后气泡关闭，失败原因由 Message / Alert 呈现。
+  - permission-limited: 无权限时触发元素即 disabled 并说明，不弹气泡。
+  - mobile: 气泡最大宽度适配屏幕，按钮高 ≥ 40px。
+  - dark-mode: 使用语义令牌自动适配。
+
+Interaction rules:
+  - 点击触发元素外部或 Esc 取消，不产生任何副作用。
+  - 确认按钮 loading 期间禁止重复点击。
+  - 危险动作 okDanger + 描述写清影响对象。
+
+Keyboard:
+  - Esc 取消并关闭，焦点回到触发元素。
+  - 打开后焦点默认在取消按钮；Tab 在气泡内循环。
+
+Accessibility:
+  - role="alertdialog" + aria-describedby 指向描述。
+  - 触发元素与气泡之间焦点往返管理。
+
+Responsive:
+  - 空间不足时自动翻转 placement，不超出视口。
+  - 移动端按钮高度 ≥ 40px。
+
+Content guidelines:
+  - title 是一个问句（“删除该文件？”）。
+  - description 写清影响对象（文件名、所属数据集）。
+  - 主按钮文案是动作本身（“删除”），不是“确定”。
+
+Do:
+  - 行内轻量删除用 Popconfirm。
+  - 危险动作使用 okDanger。
+  - 描述写清影响对象与后果。
+
+Don't:
+  - 不要用 Popconfirm 确认不可恢复动作（用 ConfirmPanel）。
+  - 不要在气泡里放表单。
+  - 不要主按钮写“确定”。
+
+Examples:
+  --- basic (basic) 基础示例
+  <Popconfirm
+    title="删除该文件？"
+    description="structure.cif 将从数据集 ds-118 移除，任务产物不受影响。"
+    okText="删除"
+    cancelText="取消"
+    onConfirm={handleDelete}
+  >
+    <Button size="sm" variant="danger">删除</Button>
+  </Popconfirm>
+  --- business (business) 真实业务示例
+  <Popconfirm
+    title="删除该文件？"
+    description="raw-data.csv 将从数据集 ds-118 移除，已完成的 2 个任务产物保留。"
+    okText="删除"
+    cancelText="取消"
+    okDanger
+    onConfirm={() => removeFile("f-03")}
+  >
+    <Button size="sm" variant="ghost">删除</Button>
+  </Popconfirm>
+
+Related: modal, confirm-panel, button, file-list
+
+## dc.citation — Citation 引用角标 [stable] v0.1.0 (#/components/citation)
+Category: datacore
+Purpose: 在正文或 Agent 答复中为关键论断标注来源，并把角标与来源清单联动，让每一条结论都可追溯。
+Usage: 用于 Agent 答复、报告正文与数据结论旁的来源标注。角标必须绑定稳定的 citationId，点击后在来源清单中定位并高亮对应条目。无需追溯的常识不标注；需要展示来源完整信息（发布方、更新时间、可访问性）时配合 SourceCard。
+
+Props:
+  - citationId (required): string — 来源的稳定 ID，由后端分配，跨会话不变，用于角标与清单联动。
+  - index (required): number — 在当前内容中的序号，从 1 开始按出现顺序连续编号。
+  - status: "available" | "unavailable" | "pending" = "available" — 失效时角标置灰但保留序号，仍可定位到清单中的原因说明。
+  - onLocate: (citationId: string) => void — 点击角标触发；默认行为是滚动定位并高亮对应来源项。
+  - source: { id: string; title: string } — hover 时展示的简要来源信息，避免必须点击才能判断来源。
+
+States:
+  - default: 上标数字角标，品牌色，行内渲染且不改变行高。
+  - hover: 显示下划线与来源摘要浮层，不改变布局。
+  - focus-visible: 与链接一致的 3px 焦点环，键盘可达。
+  - pressed: 颜色加深一档，无位移，时长 < 120ms。
+  - disabled [N/A]: 不适用：角标不可禁用；来源失效使用 unavailable 变体并保留可点击定位。
+  - loading [N/A]: 不适用：角标本身无加载态；来源清单加载由 Skeleton 承担。
+  - empty [N/A]: 不适用：无来源时不渲染角标，而不是渲染空角标。
+  - error: 来源解析失败按 unavailable 处理，清单内给出原因与申请入口。
+  - permission-limited: 无权限访问来源时角标保留，清单项标记“需申请权限”，点击引导申请而不是打开空白页。
+  - mobile: 角标点击区域扩展到至少 24×24px（内联 padding），不影响行距。
+  - dark-mode: 使用品牌色语义令牌自动适配，不单独覆盖色值。
+  - located: 被定位的来源项显示 source-highlight 描边约 2 秒后消退，同一时间只有一个高亮项。
+
+Interaction rules:
+  - 点击角标平滑滚动到来源项并高亮；点击其他角标时取消前一个高亮。
+  - 点击来源项的序号可反向定位到第一个引用位置。
+  - 序号按出现顺序自动编号；增删引用后 citationId 保持稳定，序号可重排。
+  - hover 角标展示来源摘要；触屏设备第一次点按展示摘要、第二次触发定位。
+
+Keyboard:
+  - Tab 依序聚焦各角标，顺序与文档阅读顺序一致。
+  - Enter 触发定位与高亮，等价于点击。
+  - 高亮状态下按 Esc 取消高亮，并把焦点移到被高亮的来源项。
+
+Accessibility:
+  - 角标使用 <a> 或 <button>，aria-label 为“来源 {index}：{标题}”，不能只朗读一个数字。
+  - 高亮变化通过 aria-live="polite" 区域通知，不打扰当前朗读。
+  - 不单独依赖颜色区分失效来源，配合图标或“不可访问”文字。
+
+Responsive:
+  - 窄屏下角标保持行内渲染，不允许角标被挤到单独一行。
+  - 来源清单在移动端转为全宽纵向列表，序号列保持对齐。
+
+Content guidelines:
+  - 每条关键结论（数据、建议、外部事实）至少一个引用；常识与流程性描述不标。
+  - 序号样式全站统一为上标数字，不与 [1] 方括号样式混用。
+  - 失效来源的说明写清原因（已下线 / 无权限 / 已删除），不写“加载失败”。
+
+Do:
+  - 关键数据论断后紧跟角标，不隔句。
+  - 角标与来源清单一一对应，编号连续。
+  - 失效来源保留角标并说明原因，维持编号稳定。
+
+Don't:
+  - 不要让角标指向不存在的清单项（空引用）。
+  - 不要在同一句堆叠超过 3 个角标，合并为一条聚合来源。
+  - 不要用角标代替来源清单单独表达出处。
+
+Examples:
+  --- basic (basic) 基础示例
+  <p>
+    第 3 轮优化后电导率达到 8.7 mS/cm
+    <Citation citationId="src-041" index={1} />。
+  </p>
+  <SourceList
+    sources={[{ id: "src-041", index: 1, title: "ds-118 · 第 3 轮实验结果" }]}
+  />
+  --- locate (state) 点击定位与高亮
+  function AnswerWithCitations() {
+    const [locatedId, setLocatedId] = useState<string | null>(null);
+    return (
+      <>
+        <p>
+          建议沿当前方向继续 2 轮探索
+          <Citation citationId="src-042" index={2} onLocate={setLocatedId} />。
+        </p>
+        <SourceList sources={sources} highlightId={locatedId} />
+      </>
+    );
+  }
+  --- unavailable (variant) 失效来源
+  <Citation citationId="src-055" index={3} status="unavailable" />
+  <SourceList
+    sources={[
+      { id: "src-055", index: 3, title: "外部文献（已下线）", status: "unavailable" },
+    ]}
+  />
+  --- business (business) 真实业务示例
+  const answerSources = [
+    { id: "src-041", index: 1, title: "ds-118 · 第 3 轮实验结果" },
+    { id: "src-043", index: 2, title: "run-28003 · 优化策略摘要" },
+  ]; // synthetic
+  // citationId 由后端在生成答复时分配，跨会话稳定，前端不自行编号。
+
+Related: source-card, link, typography, data-quality-notice
+
+## dc.source-card — SourceCard 来源卡片 [beta] v0.1.0 (#/components/source-card)
+Category: datacore
+Purpose: 以卡片形式展示一条来源的完整信息：标题、发布方、更新时间与可访问状态，并提供打开原文的入口。
+Usage: 用于来源清单、引用详情与数据血缘面板。正文中的轻量标注用 Citation；需要展示更新时间与可访问性、支持打开原文时用 SourceCard。
+
+Props:
+  - source (required): SourceInfo — 来源对象：id、title、publisher、updatedAt、accessibility。
+  - onOpen: (id: string) => void — 点击卡片打开来源详情；不可访问时变为申请权限入口。
+  - compact: boolean = false — 紧凑模式省略更新时间与发布方，用于窄栏与侧栏。
+  - highlighted: boolean = false — 被 Citation 定位时展示高亮描边，约 2 秒后消退。
+
+States:
+  - default: 标题一行截断，发布方与更新时间一行，状态徽章在右上或底部动作区。
+  - hover: 边框变为品牌色并轻微上浮，与 Card 的 hover 规则一致。
+  - focus-visible: 整卡为单一焦点目标，3px 品牌色焦点环。
+  - pressed: 下沉回弹，与 Card 点击反馈一致，时长 < 120ms。
+  - disabled [N/A]: 不适用：不可访问用 unavailable 变体表达并保留原因与申请入口，不做禁用。
+  - loading: 元数据加载中显示 Skeleton，骨架尺寸与卡片一致，避免加载后跳动。
+  - empty [N/A]: 不适用：无来源时不渲染卡片，由外层 Empty 承担空态。
+  - error: 元数据加载失败时在卡片位显示错误与重试，不影响同组其他卡片。
+  - permission-limited: restricted 变体：标注“需申请权限”，点击卡片进入申请流程而不是打开原文。
+  - mobile: 网格降为单列，卡片全宽；标题最多两行后截断。
+  - dark-mode: 使用语义令牌自动适配，状态徽章颜色不变。
+  - unavailable: 已失效：标题置灰、状态徽章为 danger 并写明原因（已下线 / 已删除），动作区只保留“查看说明”。
+
+Interaction rules:
+  - 整卡可点击，点击主区域打开来源；状态徽章与动作按钮不触发打开。
+  - 打开来源保留当前上下文（新面板或抽屉），可返回原位置。
+  - 不可访问卡片点击时给出原因与申请入口，不做无反馈点击。
+
+Keyboard:
+  - Tab 聚焦卡片，焦点顺序与视觉顺序一致。
+  - Enter 打开来源，等价于点击。
+
+Accessibility:
+  - 整卡表达为单一链接或按钮语义，内部不嵌套多个可点击元素。
+  - 可访问状态用图标加文字表达，不单独依赖颜色。
+  - aria-label 包含标题与状态：“{标题}，{状态}”。
+
+Responsive:
+  - 桌面网格 2-3 列，窄屏降为单列全宽。
+  - 紧凑模式用于宽度小于 280px 的侧栏。
+
+Content guidelines:
+  - 标题使用来源原始名称，不改写、不翻译。
+  - 更新时间精确到分钟；相对时间（3 天前）只作辅助，不单独使用。
+  - 发布方写全称（DataCore 实验平台），不用缩写或内部代号。
+
+Do:
+  - 更新时间与发布方同时展示，缺一不可。
+  - 不可访问给出原因与申请路径。
+  - 卡片信息层级固定：标题 → 发布方与时间 → 状态。
+
+Don't:
+  - 不要只显示标题而隐藏可访问状态。
+  - 不要对失效来源渲染可点击的假链接。
+  - 不要在卡片内嵌套超过一个动作按钮。
+
+Examples:
+  --- basic (basic) 基础示例
+  <SourceCard
+    source={{
+      id: "src-041",
+      title: "电导率优化第 3 轮实验结果",
+      publisher: "DataCore 实验平台",
+      updatedAt: "2026-09-18 14:32",
+      accessibility: "available",
+    }}
+    onOpen={(id) => openSource(id)}
+  />
+  --- access (variant) 可访问状态变体
+  <SourceCard source={{ ...base, accessibility: "available" }} />
+  <SourceCard source={{ ...base, accessibility: "restricted" }} />
+  <SourceCard source={{ ...base, accessibility: "unavailable" }} />
+  --- business (business) 真实业务示例
+  <div className="source-grid">
+    {answer.sources.map((source) => (
+      <SourceCard key={source.id} source={source} onOpen={openSource} />
+    ))}
+  </div>
+  <span>本答复共引用 {answer.sources.length} 条来源</span>
+
+Related: citation, card, badge, empty
+
+## dc.agent-activity — AgentActivity Agent 活动 [beta] v0.1.0 (#/components/agent-activity)
+Category: datacore
+Purpose: 实时展示 Agent 当前在做什么：所处步骤、正在调用的工具、以及是否在等待用户确认。
+Usage: 用于 Agent 工作区与任务详情页的实时活动流。Agent 语义统一使用紫色；只展示任务的最终状态用 RunStatus，确认动作本身用 ConfirmPanel，单次工具调用的详情用 ToolRunCard。
+
+Props:
+  - steps (required): AgentStep[] — 步骤数组：id、title、status（done / active / waiting / failed / pending）、可选 detail。
+  - currentTool: { name: string; summary: string } — 正在调用的工具名与单行参数摘要，mono 字体展示。
+  - waitingFor: "user-confirmation" | "resource" | null = null — 等待原因；为 user-confirmation 时展示确认入口并暂停推进。
+  - onConfirm: () => void — 等待用户确认时的确认回调，确认后继续执行。
+  - onRetry: (stepId: string) => void — 失败步骤的单步重试回调。
+  - title: string — 活动流标题，通常是 Agent 名称，紫色语义。
+
+States:
+  - default: 步骤纵向排列；当前步骤 spinner + 紫色高亮，已完成步骤绿色对勾，待执行步骤灰色。
+  - hover: 步骤行 hover 显示详情（耗时、工具参数），已折叠的详情可展开。
+  - focus-visible: 确认、重试等可交互元素遵循 Button 焦点环规则。
+  - pressed: 动作按钮按压反馈与 Button 一致。
+  - disabled [N/A]: 不适用：活动流本身不禁用；内部动作按钮遵循各自的 disabled 规则。
+  - loading: 当前步骤显示 spinner；整体加载用 Skeleton 保持高度，避免流式更新时跳动。
+  - empty: 尚无活动时显示“等待任务开始”占位与任务入口，不渲染空白区域。
+  - error: 步骤失败标红，给出原因、单步重试与人工接管入口。
+  - permission-limited: 即将调用的工具超出用户权限时，流程暂停并显示所需权限与申请入口。
+  - mobile: 步骤纵向排列，工具参数摘要单行截断；确认按钮全宽。
+  - dark-mode: 紫色语义令牌自动适配，深浅主题下都读得出 Agent 语义。
+  - waiting: 等待用户确认时当前步骤静止、整体切换为紫色等待卡片，并显示已等待时长。
+
+Interaction rules:
+  - 流式更新只追加新步骤，不重排历史步骤，避免打断阅读。
+  - 等待确认时停止自动推进，确认或修改参数后才继续。
+  - 失败步骤可单步重试，重试不影响已完成步骤的产物。
+  - 每一步可展开查看详情：开始时间、耗时、工具参数与输出摘要。
+
+Keyboard:
+  - 确认、重试按钮 Tab 可达，Enter 触发。
+  - 步骤行可聚焦，Enter 展开或收起详情。
+
+Accessibility:
+  - 当前步骤变化通过 aria-live="polite" 播报，如“正在调用 conductivity-optimize”。
+  - spinner 必须伴随文字“进行中”，不做纯动画。
+  - Agent 语义不只靠紫色表达，配合 Sparkles 图标与文字。
+
+Responsive:
+  - 窄屏下已完成步骤可折叠为“已完成 N 步”，当前步骤始终完整可见。
+  - 工具参数摘要在窄屏单行截断，详情在展开区内换行。
+
+Content guidelines:
+  - 步骤标题用动词短语：读取输入数据、生成推荐配方。
+  - 工具名使用 mono 字体，参数摘要单行写清关键参数。
+  - 等待原因写清楚等谁、等什么：等待用户确认执行范围。
+
+Do:
+  - 当前步骤始终可见且状态明确。
+  - 每一步都有确定状态，不留模糊态。
+  - 等待确认时在原地给出确认入口。
+
+Don't:
+  - 不要让活动流默默卡住：无响应超过阈值要提示超时。
+  - 不要用绿色表达 Agent：紫色是 Agent 语义色。
+  - 不要重排或删除历史步骤，审计上要求可追溯。
+
+Examples:
+  --- basic (basic) 基础示例
+  <AgentActivity
+    steps={[
+      { id: "s1", title: "读取输入数据", status: "done", detail: "ds-118 · v3" },
+      { id: "s2", title: "调用优化工具", status: "active" },
+      { id: "s3", title: "生成推荐配方", status: "pending" },
+    ]}
+    currentTool={{ name: "conductivity-optimize", summary: "round=3 · budget=300s" }}
+  />
+  --- waiting (state) 等待用户确认
+  <AgentActivity
+    steps={steps}
+    waitingFor="user-confirmation"
+    onConfirm={() => confirmPlan()}
+    onEdit={() => editParams()}
+  />
+  --- failed (variant) 步骤失败
+  <AgentActivity
+    steps={[
+      { id: "s1", title: "读取输入数据", status: "done" },
+      {
+        id: "s2",
+        title: "调用外部数据库",
+        status: "failed",
+        detail: "连接超时（10s）",
+      },
+      { id: "s3", title: "生成推荐配方", status: "pending" },
+    ]}
+    onRetry={(stepId) => retryStep(stepId)}
+  />
+  --- business (business) 真实业务示例
+  const optimizeSteps = [
+    { id: "s1", title: "读取输入数据", status: "done", detail: "ds-118 · v3 · 128 条" },
+    { id: "s2", title: "基线模型评估", status: "done", detail: "耗时 42s" },
+    { id: "s3", title: "调用优化工具", status: "active" },
+    { id: "s4", title: "生成推荐配方", status: "pending" },
+    { id: "s5", title: "写入实验记录", status: "pending" },
+  ]; // synthetic
+
+Related: run-status, confirm-panel, tool-run-card, steps, badge
+
+## dc.run-status — RunStatus 运行状态 [stable] v0.1.0 (#/components/run-status)
+Category: datacore
+Purpose: 用一致的徽章与状态行表达任务生命周期：排队、运行中、成功、失败、部分完成、需重试。
+Usage: 用于任务列表、任务详情与批处理结果。六态是封闭集合，不允许新增第七种状态色；需要展示实时进度时配合 Progress，需要展示执行过程时配合 AgentActivity。
+
+Props:
+  - status (required): "queued" | "running" | "succeeded" | "failed" | "partial" | "retry-needed" — 封闭六态集合，映射固定的图标、颜色与文案。
+  - detail: string — 状态说明：失败原因、部分完成数量（12/15）或队列位置。
+  - label: string — 覆盖默认文案；仅在有更强业务语境时使用，不改变颜色语义。
+  - onRetry: () => void — retry-needed 状态下展示的重试动作。
+  - onViewDetail: () => void — partial 状态下展示“查看明细”入口。
+
+States:
+  - default: 徽章形态：图标 + 短文案；六种状态各有固定配色与图标。
+  - hover: 带 detail 时 hover 展示完整说明浮层；纯徽章 hover 无变化。
+  - focus-visible: 可交互状态行（重试、查看明细）内的按钮遵循 Button 焦点规则。
+  - pressed: 动作按钮按压反馈与 Button 一致，徽章本身无按压态。
+  - disabled [N/A]: 不适用：状态是事实展示，不可禁用。
+  - loading: 状态刷新中保留旧值并降低透明度，不闪烁回骨架；首次加载用 Skeleton。
+  - empty [N/A]: 不适用：任务必有确定状态；状态数据缺失时显示 neutral“状态未知”，不猜测。
+  - error: 状态流断连时在徽章旁标注“状态可能延迟”，并提供手动刷新。
+  - permission-limited: 无权限查看的任务显示 neutral 徽章加锁图标，不暴露状态细节。
+  - mobile: 徽章保留图标与短文案，detail 折行展示，不截断失败原因。
+  - dark-mode: 六种状态色均使用语义令牌，深浅主题下对比度一致。
+
+Interaction rules:
+  - 状态变化原地更新，徽章宽度不跳动，列表不闪烁。
+  - retry-needed 给出明确重试入口，重试后回到排队中。
+  - partial 可展开查看成功与失败明细，不只给一个比例。
+  - 状态流转由后端事件驱动，前端订阅更新，不做定时暴力轮询。
+
+Keyboard:
+  - 状态行内的重试、查看明细按钮 Tab 可达，Enter 触发。
+  - 徽章本身只读时可聚焦，焦点态朗读状态与 detail。
+
+Accessibility:
+  - 状态用图标加文字表达，不单独依赖颜色。
+  - 状态变化通过 aria-live="polite" 播报，如“任务 run-28003 已失败”。
+  - 徽章容器使用 role="status" 或语义化文本，读屏可直接读出状态。
+
+Responsive:
+  - 窄屏徽章保持图标加短文案，不换行不截断。
+  - 状态行在窄屏允许 detail 折行，动作按钮换到下一行。
+
+Content guidelines:
+  - 六态固定文案：排队中、运行中、已成功、已失败、部分完成、需重试。
+  - 失败必须给原因（计算资源超时），部分完成必须给数量（12/15 完成）。
+  - 不写“出错啦”这类无信息文案；原因一行说清，细节进日志。
+
+Do:
+  - 全站统一六态集合与配色。
+  - 失败给原因和下一步动作。
+  - 部分完成说明比例并给明细入口。
+
+Don't:
+  - 不要自造第七种状态色或“半成功”这类模糊状态。
+  - 不要把“需重试”渲染成“已失败”而丢掉重试入口。
+  - 不要用一次性 Toast 代替常驻状态徽章。
+
+Examples:
+  --- basic (basic) 基础示例
+  <RunStatus status="queued" />
+  <RunStatus status="running" />
+  <RunStatus status="succeeded" />
+  <RunStatus status="failed" />
+  <RunStatus status="partial" />
+  <RunStatus status="retry-needed" />
+  --- detail (variant) 带说明的状态行
+  <RunStatus status="failed" detail="计算资源超时（exit 124）" onRetry={retry} />
+  <RunStatus status="partial" detail="12/15 完成" onViewDetail={openDetail} />
+  <RunStatus status="queued" detail="队列第 2 位" />
+  --- flow (state) 状态流转
+  const transitions = {
+    queued: "running",
+    running: "succeeded", // 也可能进入 failed / partial
+    failed: "retry-needed",
+    "retry-needed": "queued",
+  }; // synthetic：真实流转由后端事件驱动，前端只订阅更新
+  --- business (business) 真实业务示例
+  <Table
+    columns={[
+      { key: "id", title: "任务" },
+      { key: "project", title: "项目" },
+      {
+        key: "status",
+        title: "状态",
+        render: (row) => <RunStatus status={row.status} detail={row.detail} />,
+      },
+    ]}
+    dataSource={runs}
+  />
+
+Related: badge, progress, alert, agent-activity, tool-run-card
+
+## dc.confirm-panel — ConfirmPanel 确认面板 [stable] v0.1.0 (#/components/confirm-panel)
+Category: datacore
+Purpose: 在执行产生副作用的动作前，回显目标、范围、项目、预算与副作用，让用户在完整知情下明确确认。
+Usage: 用于 Agent 推荐执行、批量操作与危险动作的确认。确认面板之外不允许“顺手执行”。简单的行内二次确认（删除一行）用 Popconfirm；涉及项目、预算或外部副作用的动作必须用 ConfirmPanel。
+
+Props:
+  - title (required): string — 动作名称，动词开头：重新计算电导率、撤销任务。
+  - target (required): string — 作用对象：数据集、任务或资源，带稳定 ID。
+  - scope (required): string — 影响范围：将创建或修改什么，数量化表达。
+  - project (required): { id: string; name: string } — 归属项目，展示名称与 ID，不允许“无项目”动作。
+  - budget: string — 预算或预计消耗：时长、额度、次数，必须带单位。
+  - sideEffects (required): string[] — 副作用清单，逐条列出，不允许折叠到“查看更多”。
+  - danger: boolean = false — 不可逆动作启用 danger 语义：红色副作用区与 danger 确认按钮。
+  - confirmText: string — 确认按钮文案，默认“确认执行”；建议回显范围，如“确认使用 project-042 执行”。
+  - onConfirm (required): () => void | Promise<void> — 确认回调；异步动作期间面板进入 loading 并防止重复提交。
+  - onCancel (required): () => void — 取消回调；取消不产生任何副作用。
+
+States:
+  - default: 五要素依次排列：目标 → 范围 → 项目 → 预算 → 副作用，动作区右下。
+  - hover: 按钮 hover 遵循 Button 规则；信息区无 hover 变化。
+  - focus-visible: 打开后焦点落在取消按钮（安全默认），Tab 在面板内循环。
+  - pressed: 按钮按压反馈与 Button 一致。
+  - disabled: 要素未加载完整前确认按钮禁用，并提示“正在核对执行信息”。
+  - loading: 确认后进入 loading：按钮转圈、面板内容锁定，防止重复提交。
+  - empty [N/A]: 不适用：要素缺失时阻止打开并在触发处提示，不渲染空面板。
+  - error: 提交失败保留面板全部内容与输入，顶部给出错误原因与重试。
+  - permission-limited: 无执行权限时确认按钮禁用，并说明所需权限与申请入口。
+  - mobile: 面板全宽，五要素纵向排列，确认按钮在前并全宽。
+  - dark-mode: 使用语义令牌自动适配；danger 区域在深色下保持可读。
+  - confirmed: 确认成功后展示任务 ID 与状态入口（run-28003 · 排队中），并提供“查看任务”。
+
+Interaction rules:
+  - 确认前完整展示副作用，逐条列出，不折叠、不省略。
+  - 确认按钮建议回显范围（确认使用 project-042 执行），让点击有上下文。
+  - 执行后给出任务 ID 与状态入口，可追踪；业务允许时提供撤销。
+  - 取消、关闭、Esc 都不产生任何副作用。
+
+Keyboard:
+  - 打开后焦点落在取消按钮，避免打开即 Enter 误触发危险动作。
+  - Tab 在面板内循环，不会移出面板的聚焦陷阱。
+  - Esc 取消并关闭，等价于点击取消。
+
+Accessibility:
+  - 使用 role="dialog" 与 aria-modal="true"，标题关联 aria-labelledby。
+  - 副作用清单使用列表语义，读屏可逐条朗读。
+  - danger 不单独依赖红色，配合图标与后果文案。
+
+Responsive:
+  - 窄屏面板全宽，要素纵向排列，动作按钮纵向堆叠。
+  - 副作用清单最多展示 5 条，超出以滚动区域承载，不做折叠隐藏。
+
+Content guidelines:
+  - 标题动词开头：重新计算电导率、撤销任务 run-28003。
+  - 副作用逐条写清后果与可恢复性，不用“等”字收尾。
+  - 预算带单位：300 秒、2 核时、1 次调用。
+
+Do:
+  - 五要素齐全才允许打开面板。
+  - 危险动作使用 danger 变体并写清后果。
+  - 确认后回传可追踪任务 ID 与状态入口。
+
+Don't:
+  - 不要把副作用折叠进“查看更多”或小字附注。
+  - 不要用“确定”“好的”这类无上下文按钮文案。
+  - 不要确认后无反馈：必须有 loading 与结果回传。
+
+Examples:
+  --- basic (basic) 基础示例
+  <ConfirmPanel
+    title="重新计算电导率"
+    target="ds-118 · 第 3 轮推荐配方"
+    scope="创建 1 个 CPU 计算任务"
+    project={{ id: "project-042", name: "示例项目" }}
+    budget="预计最长 300 秒"
+    sideEffects={["占用项目算力额度", "写入一条审计日志"]}
+    onConfirm={submit}
+    onCancel={close}
+  />
+  --- danger (variant) 高危动作
+  <ConfirmPanel
+    danger
+    title="撤销任务 run-28003"
+    target="run-28003 · 电导率计算"
+    scope="任务与其中间产物"
+    project={{ id: "project-042", name: "示例项目" }}
+    sideEffects={["中间结果将被删除，不可恢复", "已占用额度不返还"]}
+    confirmText="确认撤销"
+    onConfirm={revoke}
+    onCancel={close}
+  />
+  --- business (business) 真实业务示例
+  <ConfirmPanel
+    title="提交电导率优化计算"
+    target="ds-118 · v3 · 128 条记录"
+    scope="创建 1 个 GPU 计算任务"
+    project={{ id: "project-042", name: "示例项目" }}
+    budget="预计最长 300 秒"
+    sideEffects={["占用项目算力额度", "写入审计日志", "结果写回 ds-118"]}
+    confirmText="确认使用 project-042 执行"
+    onConfirm={async () => {
+      const run = await submitRun({ datasetId: "ds-118" }); // synthetic
+      showCreated(run.id); // 展示 run-28003 与状态入口
+    }}
+    onCancel={close}
+  />
+
+Related: modal, button, agent-activity, run-status, popconfirm
+
+## dc.project-selector — ProjectSelector 项目选择器 [beta] v0.1.0 (#/components/project-selector)
+Category: datacore
+Purpose: 选择动作归属的项目，同时展示项目 ID、默认项目标记与当前用户在项目内的权限状态。
+Usage: 用于提交任务、创建资源前的项目归属选择。项目是所有计算与数据动作的归属边界，不允许“无项目”提交；只读展示项目信息时用 Descriptions。
+
+Props:
+  - projects (required): ProjectOption[] — 项目选项：id、name、isDefault、permission（viewer / editor / executor / admin）。
+  - value: string — 选中项目 ID；提交类动作默认选中默认项目。
+  - onChange (required): (projectId: string) => void — 选择回调，选中即生效并回显项目名与 ID。
+  - requiredPermission: "viewer" | "editor" | "executor" | "admin" = "viewer" — 动作所需最低权限；达不到的选项禁用并标注缺口。
+  - onRequestAccess: (project: ProjectOption) => void — 权限不足选项上的申请入口。
+  - showId: boolean = true — 始终展示项目 ID，避免同名项目混淆。
+
+States:
+  - default: 触发器回显选中项目名称 + ID + 权限徽章；下拉内默认项目置顶并标记。
+  - hover: 选项行 hover 高亮，禁用选项无 hover 反馈。
+  - focus-visible: 触发器与选项键盘可达，焦点环与 Select 一致。
+  - pressed [N/A]: 不适用：选择器无按压态，选中以勾选与背景表达。
+  - disabled: 项目加载失败或无任何项目时整体禁用，原因写在触发器旁。
+  - loading: 选项加载中显示骨架行，触发器保持可用文案“正在加载项目”。
+  - empty: 无项目时显示空态与“创建项目 / 申请加入”入口，不渲染空下拉。
+  - error: 加载失败显示错误与重试，保留上次成功的选中值。
+  - permission-limited: 权限不足的选项禁用，展示当前权限徽章与所需权限，并提供申请入口。
+  - mobile: 触发器全宽；选项行允许两行展示（名称一行、ID 与徽章一行）。
+  - dark-mode: 使用语义令牌自动适配，权限徽章配色不变。
+
+Interaction rules:
+  - 选择立即生效并回显项目名称、ID 与权限徽章。
+  - 默认项目排在最前并带“默认”标记；同名项目用 ID 区分。
+  - 权限不足的选项可查看但不可选，点击申请入口发起权限申请。
+  - 选中项目变化时，关联动作（提交按钮）即时重新校验权限。
+
+Keyboard:
+  - 触发器 Enter / Space 展开，上下方向键移动选项。
+  - Enter 选中并关闭，Esc 放弃并关闭。
+  - 禁用选项可聚焦朗读原因，但不响应选中。
+
+Accessibility:
+  - 使用 listbox / option 语义，选中项 aria-selected="true"。
+  - 禁用选项的 aria-label 包含原因：“共享数据池，仅可见，需要可执行权限”。
+  - 权限徽章用图标加文字，不单独依赖颜色。
+
+Responsive:
+  - 窄屏触发器全宽，下拉面板宽度跟随触发器。
+  - 选项行在窄屏允许折行为两行，ID 使用 mono 字体保持可扫读。
+
+Content guidelines:
+  - 项目名称与项目 ID 同时展示，ID 使用 mono 字体。
+  - 权限文案固定四级：可见 / 可编辑 / 可执行 / 管理员。
+  - 权限缺口写清“需要可执行权限”，不写“权限不足”即止。
+
+Do:
+  - 默认项目置顶并标记。
+  - 权限不足的选项给出缺口说明与申请入口。
+  - 提交类动作默认选中默认项目。
+
+Don't:
+  - 不要只显示项目名称：同名项目会造成归属错误。
+  - 不要隐藏无权限项目，用户会误以为项目不存在。
+  - 不要允许“不选项目”提交计算或写入动作。
+
+Examples:
+  --- basic (basic) 基础示例
+  <ProjectSelector
+    projects={[
+      { id: "project-042", name: "示例项目", isDefault: true, permission: "admin" },
+      { id: "project-107", name: "电解液筛选", permission: "executor" },
+      { id: "project-209", name: "共享数据池", permission: "viewer" },
+    ]}
+    value={projectId}
+    onChange={setProjectId}
+    requiredPermission="executor"
+  />
+  --- limited (state) 权限不足的项目
+  <ProjectSelector
+    projects={projects}
+    requiredPermission="executor"
+    onRequestAccess={(project) => requestAccess(project.id)}
+  />
+  --- business (business) 真实业务示例
+  const projects = [
+    { id: "project-042", name: "示例项目", isDefault: true, permission: "admin" },
+    { id: "project-107", name: "电解液筛选", permission: "executor" },
+    { id: "project-209", name: "共享数据池", permission: "viewer" },
+  ]; // synthetic
+  // canExecute = 当前选中项目的 permission 满足 requiredPermission
+
+Related: select, combobox, permission-scope, badge, form
+
+## dc.dataset-picker — DatasetPicker 数据集选择器 [beta] v0.1.0 (#/components/dataset-picker)
+Category: datacore
+Purpose: 按数据集、批次、版本与来源选择计算或分析的输入数据，并让版本与来源显式可见。
+Usage: 用于选择训练集、优化输入与分析对象。版本必须显式选择或显式标注默认到最新稳定版，不允许隐式漂移；仅需上传本地文件时用 Upload。
+
+Props:
+  - datasets (required): DatasetOption[] — 数据集选项：id、name、batch、version、source（imported / computed / shared）、records。
+  - value: string | string[] — 选中的数据集 ID；多选时为 ID 数组。
+  - onChange (required): (value: string | string[]) => void — 选择回调，选中后回显数据集摘要。
+  - selectionMode: "single" | "multiple" = "single" — 多选模式用于合并多个批次作为输入。
+  - latestOnly: boolean = false — 只展示每个数据集的最新稳定版本，历史版本收进版本下拉。
+  - emptyAction: { label: string; onClick: () => void } — 空态的动作入口，通常是去导入数据。
+
+States:
+  - default: 选项行依次展示名称、批次、版本、来源徽章与记录数。
+  - hover: 选项行 hover 高亮；归档与被占用选项无 hover 反馈。
+  - focus-visible: 选项键盘可达，焦点环与 Select 选项一致。
+  - pressed [N/A]: 不适用：无按压态，选中以勾选与背景表达。
+  - disabled: 被占用或已归档的数据集禁用并标注原因，可查看不可选。
+  - loading: 选项加载中显示骨架行，数量与真实列表接近。
+  - empty: 无数据集时显示“暂无数据集”与导入入口；筛选为空时提示清除筛选。
+  - error: 加载失败显示错误与重试，保留上次成功的选中值。
+  - permission-limited: 无权限数据集置灰，标注“需申请权限”并提供申请入口。
+  - mobile: 选项行折行为两行：名称一行，批次 / 版本 / 来源一行。
+  - dark-mode: 使用语义令牌自动适配，来源徽章配色不变。
+
+Interaction rules:
+  - 选中后回显摘要：数据集名、批次、版本与记录数。
+  - 同一数据集的多个版本并列或收进版本下拉，切换版本即时生效。
+  - 多选模式给出合计：已选 2 个数据集 · 共 240 条记录。
+  - 选择已归档版本时给出警告，但不阻止（审计场景需要复现）。
+
+Keyboard:
+  - 上下方向键移动选项，单选 Enter 选中。
+  - 多选模式 Space 切换勾选，Enter 确认。
+  - Esc 关闭下拉并保留已选值。
+
+Accessibility:
+  - 单选使用 radio 语义，多选使用 checkbox 语义。
+  - accessible name 包含名称、版本与来源：“电解液电导率数据集，v3，计算产出”。
+  - 禁用选项朗读禁用原因。
+
+Responsive:
+  - 窄屏选项行折行为两行，元信息不截断版本与来源。
+  - 多选合计在窄屏固定在底部一行。
+
+Content guidelines:
+  - 版本格式统一为 v + 数字（v3），批次使用 mono 字体。
+  - 来源固定三类文案：导入 / 计算产出 / 共享。
+  - 记录数必须有，空数据集（0 条）要明示而不是省略。
+
+Do:
+  - 版本显式展示，默认也标注“默认最新稳定版 v3”。
+  - 显示记录数与更新时间，帮助判断数据新鲜度。
+  - 多选给出记录数合计。
+
+Don't:
+  - 不要默认“最新版”而不标明版本号：计算输入必须可复现。
+  - 不要隐藏来源：导入与计算产出影响数据可信度判断。
+  - 不要在选择已归档版本时不给任何提示。
+
+Examples:
+  --- basic (basic) 基础示例
+  <DatasetPicker
+    datasets={[
+      { id: "ds-118", name: "电解液电导率数据集", batch: "batch-07", version: "v3", source: "computed", records: 128 },
+      { id: "ds-092", name: "溶剂化能基准集", batch: "batch-03", version: "v5", source: "imported", records: 342 },
+    ]}
+    value={datasetId}
+    onChange={setDatasetId}
+  />
+  --- multi (variant) 多选批次
+  <DatasetPicker
+    selectionMode="multiple"
+    datasets={datasets}
+    value={selectedIds}
+    onChange={setSelectedIds}
+  />
+  --- empty (state) 空状态
+  <DatasetPicker
+    datasets={[]}
+    emptyAction={{ label: "去导入数据", onClick: goImport }}
+  />
+  --- business (business) 真实业务示例
+  const datasets = [
+    { id: "ds-118", name: "电解液电导率数据集", batch: "batch-07", version: "v3", source: "computed", records: 128 },
+    { id: "ds-118", name: "电解液电导率数据集", batch: "batch-06", version: "v2", source: "imported", records: 120 },
+    { id: "ds-092", name: "溶剂化能基准集", batch: "batch-03", version: "v5", source: "shared", records: 342 },
+  ]; // synthetic：同一数据集的多个版本并列展示，latestOnly 只保留最新稳定版
+
+Related: select, table, tag, data-quality-notice, upload
+
+## dc.permission-scope — PermissionScope 权限范围 [beta] v0.1.0 (#/components/permission-scope)
+Category: datacore
+Purpose: 用固定四级语义表达权限范围：可见、可编辑、可执行、管理员，并说明每一级能做什么、不能做什么。
+Usage: 用于项目成员列表、共享设置与动作前的权限提示。四级是封闭集合；权限判断在服务端执行，前端只做展示与引导，不允许用隐藏按钮代替权限校验。
+
+Props:
+  - scope (required): "viewer" | "editor" | "executor" | "admin" — 封闭四级集合，映射固定图标、配色与文案。
+  - showDescription: boolean = false — 在徽章旁展示该级能力说明（可以……，不能……）。
+  - required: "viewer" | "editor" | "executor" | "admin" — 动作所需级别；当前级别不足时徽章旁给出缺口提示。
+  - onRequestUpgrade: () => void — 权限不足时的申请升级入口。
+
+States:
+  - default: 徽章形态：图标 + 级别文案；四级各有固定配色。
+  - hover: hover 展示能力说明浮层：可以做什么、不能做什么。
+  - focus-visible: 徽章可聚焦查看说明，焦点环与 Badge 一致。
+  - pressed [N/A]: 不适用：权限徽章是只读展示，无按压态。
+  - disabled [N/A]: 不适用：权限徽章不表达禁用；动作禁用由按钮自身承担。
+  - loading: 权限拉取中显示骨架徽章，不猜测级别。
+  - empty [N/A]: 不适用：主体必有确定级别；级别缺失按最低级别处理并提示数据异常。
+  - error: 拉取失败显示 neutral“权限未知”徽章与重试，动作按无权限处理。
+  - permission-limited: 组件本身就是权限表达：级别不足时展示当前级别、所需级别与申请升级入口。
+  - mobile: 徽章保留图标与短文案；能力说明改为点击展开而非 hover。
+  - dark-mode: 四级配色使用语义令牌，深浅主题下对比度一致。
+
+Interaction rules:
+  - hover 或点击徽章展示能力明细：可以做什么、不能做什么。
+  - 权限不足的动作旁展示所需级别与申请入口，点击发起申请。
+  - 级别变更（被升级或降级）后徽章即时更新并给出通知。
+
+Keyboard:
+  - 徽章 Tab 可聚焦，Enter 展开能力说明，Esc 收起。
+  - 申请入口是链接或按钮语义，Enter 触发。
+
+Accessibility:
+  - 级别用图标加文字表达，不单独依赖颜色。
+  - 能力说明浮层与徽章关联 aria-describedby。
+  - 矩阵表使用 scope 表头，读屏可按行列朗读。
+
+Responsive:
+  - 窄屏徽章保持图标加短文案，说明文字折行展示。
+  - 权限矩阵在窄屏横向滚动，首列固定。
+
+Content guidelines:
+  - 四级固定文案：可见 / 可编辑 / 可执行 / 管理员。
+  - 能力说明句式统一：“可以……，不能……”，各一句。
+  - 缺口提示写清所需级别：“需要可执行权限”，不写“权限不足”即止。
+
+Do:
+  - 动作旁标注所需级别，让用户执行前就知道能否操作。
+  - 矩阵只读展示，不承担编辑（编辑走成员管理流程）。
+  - 权限不足给出申请升级入口。
+
+Don't:
+  - 不要自造第五级或“半管理员”这类模糊级别。
+  - 不要只靠颜色区分四级，图标与文字必须同时在场。
+  - 不要用隐藏按钮代替权限判断：禁用并说明，服务端再校验。
+
+Examples:
+  --- basic (basic) 基础示例
+  <PermissionScope scope="viewer" />
+  <PermissionScope scope="editor" />
+  <PermissionScope scope="executor" />
+  <PermissionScope scope="admin" />
+  --- matrix (variant) 权限矩阵
+  <PermissionMatrix
+    scopes={["viewer", "editor", "executor", "admin"]}
+    capabilities={[
+      { action: "查看数据与结果", allow: ["viewer", "editor", "executor", "admin"] },
+      { action: "编辑配置与配方", allow: ["editor", "admin"] },
+      { action: "提交计算任务", allow: ["executor", "admin"] },
+      { action: "管理成员与权限", allow: ["admin"] },
+    ]}
+  />
+  --- business (business) 真实业务示例
+  <MemberList
+    members={[
+      { name: "张示例", scope: "admin" },
+      { name: "李示例", scope: "executor" },
+      { name: "王示例", scope: "viewer" },
+    ]}
+  />
+  <Button disabled={scope === "viewer"}>提交计算任务</Button>
+  {scope === "viewer" && (
+    <span>需要可执行权限 · <a onClick={requestUpgrade}>申请升级</a></span>
+  )}
+
+Related: badge, tag, project-selector, table, button
+
+## dc.audit-timeline — AuditTimeline 审计时间线 [beta] v0.1.0 (#/components/audit-timeline)
+Category: datacore
+Purpose: 按时间顺序记录谁在何时对什么做了什么，让每一次变更可追溯、可问责。
+Usage: 用于项目审计、任务历史与数据版本变更记录。审计记录只增不改；需要展示未来计划或流程进度时用 ExperimentStep 或 Steps。
+
+Props:
+  - events (required): AuditEvent[] — 事件数组：id、actor、action、target、at、可选 level（info / warning / critical）与 detail。
+  - filter: "all" | "critical" = "all" — 按级别过滤；critical 只展示 warning 与 critical 事件。
+  - onFilterChange: (filter: string) => void — 过滤回调，过滤条件体现在 URL 或可分享状态中。
+  - onLoadMore: () => void — 加载更早记录的回调；加载中显示骨架行。
+
+States:
+  - default: 节点圆点 + 内容行：操作者与动作一行，对象与时间一行；新事件在前。
+  - hover: 行 hover 显示完整时间戳（精确到秒）与事件 ID。
+  - focus-visible: 可展开的行键盘可达，焦点环清晰。
+  - pressed [N/A]: 不适用：时间线无按压态，展开以 chevron 变化表达。
+  - disabled [N/A]: 不适用：审计记录只读，不存在禁用。
+  - loading: 加载更多时底部显示骨架行；首屏加载用整块 Skeleton。
+  - empty: 无记录时显示“暂无审计记录”占位，说明记录从何时开始产生。
+  - error: 加载失败显示错误与重试，已加载的记录保留不清空。
+  - permission-limited: 无审计权限时显示锁态与申请入口，不泄露任何条目内容。
+  - mobile: 时间戳折行展示；级别徽章不省略。
+  - dark-mode: 使用语义令牌自动适配，critical 红与 warning 琥珀保持可读。
+
+Interaction rules:
+  - 新事件追加位置按场景固定（审计类新事件在最前），不随刷新重排。
+  - 关键事件可展开查看详情：参数差异、失败原因、事件 ID。
+  - 支持按级别过滤，过滤后仍保持时间顺序。
+  - 点击对象（run-28003）跳转到对应资源详情。
+
+Keyboard:
+  - 可展开行 Tab 可达，Enter 展开或收起详情。
+  - 过滤控件遵循各自组件的键盘规则。
+
+Accessibility:
+  - 使用列表语义；时间使用 <time> 元素并带 datetime 属性。
+  - 级别用图标加文字表达，不单独依赖颜色。
+  - 展开按钮带 aria-expanded 与“查看事件详情”标签。
+
+Responsive:
+  - 窄屏时间戳折行，操作者、动作、对象保持一行可读。
+  - 级别徽章在窄屏保持完整，不退化为纯色点。
+
+Content guidelines:
+  - 句式统一：谁 对 什么 做了 什么（张示例 更新了 ds-118 · v3）。
+  - 时间精确到分钟，hover 显示秒；相对时间只作辅助。
+  - 操作者用显示名；系统与 Agent 动作同样留痕并标明主体。
+
+Do:
+  - 记录只增不改，前端不提供编辑与删除。
+  - 关键操作（执行、删除、权限变更）标级别。
+  - 时间戳使用绝对时间，精确到分钟。
+
+Don't:
+  - 不要允许前端修改或隐藏审计记录。
+  - 不要只用“3 小时前”这类相对时间替代绝对时间。
+  - 不要省略操作者：无主体的记录无法问责。
+
+Examples:
+  --- basic (basic) 基础示例
+  <AuditTimeline
+    events={[
+      { id: "evt-03", actor: "李示例", action: "提交了计算任务", target: "run-28003", at: "2026-09-21 10:24" },
+      { id: "evt-02", actor: "张示例", action: "更新了数据集", target: "ds-118 · v3", at: "2026-09-21 09:58" },
+      { id: "evt-01", actor: "张示例", action: "创建了项目", target: "project-042", at: "2026-09-20 16:02" },
+    ]}
+  />
+  --- incident (variant) 高危与失败事件
+  <AuditTimeline
+    events={[
+      { id: "evt-09", actor: "系统", action: "任务执行失败", target: "run-28003", at: "2026-09-21 10:31", level: "critical", detail: "计算资源超时（exit 124）" },
+      { id: "evt-08", actor: "张示例", action: "修改了成员权限", target: "王示例 → 可执行", at: "2026-09-21 09:12", level: "warning" },
+    ]}
+  />
+  --- business (business) 真实业务示例
+  const runEvents = [
+    { id: "evt-12", actor: "李示例", action: "确认执行", target: "run-28003", at: "2026-09-21 10:24", level: "warning" },
+    { id: "evt-11", actor: "Agent", action: "推荐执行计划", target: "重新计算电导率", at: "2026-09-21 10:23" },
+    { id: "evt-10", actor: "系统", action: "任务创建", target: "run-28003", at: "2026-09-21 10:24" },
+  ]; // synthetic：Agent 也是审计主体，与真人操作同样留痕
+
+Related: timeline, badge, permission-scope, run-status, table
+
+## dc.experiment-step — ExperimentStep 实验步骤 [beta] v0.1.0 (#/components/experiment-step)
+Category: datacore
+Purpose: 把一次实验表达为有序的业务节点流：配置、排队、运行、分析、完成，并标记当前节点与失败节点。
+Usage: 用于实验详情与优化轮次进度。节点是业务语义步骤（不是 UI 分步表单）；表单分步填写用 Steps。任务粒度的状态用 RunStatus。
+
+Props:
+  - steps (required): ExperimentNode[] — 节点数组：id、name、status（done / active / failed / pending）、可选 detail。
+  - current (required): string — 当前节点 ID；同一时刻只有一个 active 节点。
+  - title: string — 流程标题，通常是轮次或实验名称（第 3 轮优化）。
+  - onRetry: (stepId: string) => void — 失败节点的原地重试回调。
+  - onOpenArtifact: (stepId: string) => void — 点击已完成节点查看该节点的产物（日志、结果、报告）。
+
+States:
+  - default: 节点按固定顺序横向排列：完成绿色对勾、当前蓝色 spinner、待执行灰色。
+  - hover: 节点 hover 显示详情：开始时间、耗时与产物入口。
+  - focus-visible: 节点可聚焦，焦点环与 Steps 一致。
+  - pressed [N/A]: 不适用：节点无按压态；重试按钮遵循 Button 规则。
+  - disabled [N/A]: 不适用：节点是状态展示；失败节点的重试按钮各自管理禁用。
+  - loading: 当前节点 spinner；整体加载用 Skeleton 保持节点数量与位置。
+  - empty [N/A]: 不适用：实验必有节点定义；定义缺失属配置错误，按 error 处理。
+  - error: 失败节点标红，给出原因一行与原地重试入口；后续节点保持待执行。
+  - permission-limited: 无权限查看的节点产物显示锁态占位，节点状态本身仍可见。
+  - mobile: 横向可滚动，当前节点自动滚入视野；也可切换为纵向排列。
+  - dark-mode: 使用语义令牌自动适配，节点配色与 RunStatus 六态保持一致。
+
+Interaction rules:
+  - 点击已完成节点查看产物（日志、结果、报告）。
+  - 失败节点原地重试，重试不影响已完成节点的产物。
+  - 节点状态实时更新，当前节点推进时平滑过渡，不重排节点。
+
+Keyboard:
+  - 节点 Tab 可达，Enter 查看详情或产物。
+  - 失败节点内重试按钮 Enter 触发。
+
+Accessibility:
+  - 当前节点标记 aria-current="step"。
+  - 节点状态用图标加文字表达，不单独依赖颜色。
+  - 节点流使用有序列表语义，读屏可读出“第 3 步，共 5 步”。
+
+Responsive:
+  - 窄屏横向滚动并自动定位当前节点，或切换为纵向堆叠。
+  - 节点名在窄屏保持完整，不截断为单字。
+
+Content guidelines:
+  - 节点名用名词短语：参数配置、电导率计算、报告归档。
+  - 失败原因一行说清（计算资源超时），细节进节点详情。
+  - 节点顺序固定，同一类实验的节点定义保持一致。
+
+Do:
+  - 节点顺序固定，当前节点视觉最强。
+  - 失败给原因与原地重试。
+  - 节点 detail 写产物摘要（8 个候选、214s）。
+
+Don't:
+  - 不要重排或增删节点制造“进度假象”。
+  - 不要把失败节点静默置灰，必须标红并给出口。
+  - 不要超过 7 个节点：超出应聚合为阶段，细节进节点详情。
+
+Examples:
+  --- basic (basic) 基础示例
+  <ExperimentStep
+    current="run"
+    steps={[
+      { id: "config", name: "参数配置", status: "done" },
+      { id: "queue", name: "排队等待", status: "done" },
+      { id: "run", name: "计算运行", status: "active" },
+      { id: "analyze", name: "结果分析", status: "pending" },
+      { id: "archive", name: "归档完成", status: "pending" },
+    ]}
+  />
+  --- failed (state) 失败节点
+  <ExperimentStep
+    current="run"
+    steps={[
+      { id: "config", name: "参数配置", status: "done" },
+      { id: "queue", name: "排队等待", status: "done" },
+      { id: "run", name: "计算运行", status: "failed", detail: "计算资源超时（exit 124）" },
+      { id: "analyze", name: "结果分析", status: "pending" },
+      { id: "archive", name: "归档完成", status: "pending" },
+    ]}
+    onRetry={(stepId) => retryStep(stepId)}
+  />
+  --- business (business) 真实业务示例
+  const round = {
+    id: "round-03",
+    current: "analyze",
+    steps: [
+      { id: "config", name: "配方生成", status: "done", detail: "8 个候选" },
+      { id: "validate", name: "数据校验", status: "done", detail: "128 条通过" },
+      { id: "compute", name: "电导率计算", status: "done", detail: "run-28003 · 214s" },
+      { id: "analyze", name: "结果分析", status: "active" },
+      { id: "report", name: "报告归档", status: "pending" },
+    ],
+  }; // synthetic
+
+Related: steps, run-status, progress, agent-activity
+
+## dc.data-quality-notice — DataQualityNotice 数据质量提示 [experimental] v0.1.0 (#/components/data-quality-notice)
+Category: datacore
+Purpose: 在数据进入计算前暴露质量问题：缺失、冲突、来源不可靠、待人工确认，并给出每条问题的处理路径。
+Usage: 用于数据导入报告、数据集详情与计算前检查。问题分提醒与阻断两级：阻断级未处理前不允许提交计算；纯粹的统计概览用 Statistic，单条全局提示用 Alert。
+
+Props:
+  - issues (required): QualityIssue[] — 问题数组：id、type（missing / conflict / unreliable-source / needs-review）、level（warning / blocking）、description、affected。
+  - summary: string — 汇总行：记录总数、问题数与阻断数。
+  - title: string — 报告标题，通常是数据集与批次（ds-118 · batch-07 导入检查）。
+  - onResolve: (issueId: string, action: string) => void — 处理动作回调：去补充、查看冲突、标记已确认等。
+  - onDownloadReport: () => void — 导出完整质量报告（CSV）的回调。
+
+States:
+  - default: 汇总行在前，问题逐条列出：图标 + 类型徽章 + 描述 + 影响范围 + 处理动作。
+  - hover: 问题行 hover 高亮；处理动作按钮遵循 Button 规则。
+  - focus-visible: 每条问题的处理动作键盘可达。
+  - pressed [N/A]: 不适用：提示行无按压态，动作按钮遵循 Button 规则。
+  - disabled [N/A]: 不适用：提示本身不禁用；阻断联动的是提交按钮的禁用。
+  - loading: 检测中显示骨架行与“正在检查数据质量”，不做无反馈等待。
+  - empty: 无问题时显示成功态“质量检查通过”，而不是空白消失。
+  - error: 检查失败显示“质量检查未完成”与重试，不允许按“无问题”放行。
+  - permission-limited: 处理动作需要编辑权限；无权限时问题只读，展示申请入口。
+  - mobile: 问题行纵向堆叠，处理动作换行全宽。
+  - dark-mode: 使用语义令牌自动适配，warning 与 blocking 配色保持区分度。
+  - resolved: 已处理问题收起为“已解决 N 条”，可展开追溯，不直接删除记录。
+
+Interaction rules:
+  - 每条问题给出处理动作：去补充、查看冲突、标记已确认。
+  - 处理后即时更新汇总与阻断状态，联动提交按钮启停。
+  - 阻断级问题在提交按钮旁重复提示，不只出现在报告里。
+  - 处理记录留痕：谁、何时、以什么动作处理了哪条问题。
+
+Keyboard:
+  - 处理动作按钮 Tab 可达，Enter 触发。
+  - 已解决区域可聚焦展开，Enter 展开或收起。
+
+Accessibility:
+  - 级别用图标加文字表达（提醒 / 阻断），不单独依赖颜色。
+  - 提交按钮的 disabled 原因通过 aria-describedby 关联阻断提示。
+  - 问题列表使用列表语义，读屏可逐条朗读。
+
+Responsive:
+  - 窄屏问题行纵向堆叠，描述不截断。
+  - 汇总行在窄屏允许折行，阻断数始终可见。
+
+Content guidelines:
+  - 问题描述写清哪一批次、什么问题、影响什么：12 条记录缺少温度字段。
+  - 动作文案固定：去补充 / 查看冲突 / 标记已确认 / 忽略本次。
+  - 级别文案固定：提醒（可继续）、阻断（需处理）。
+
+Do:
+  - 区分提醒与阻断两级，阻断必须联动提交动作。
+  - 每条问题给出处理路径，不做无动作提示。
+  - 处理后保留记录，可追溯到“已解决”。
+
+Don't:
+  - 不要只提示不给动作，让用户自己猜下一步。
+  - 不要把阻断级降级为黄色提醒以便放行。
+  - 不要在提交后才暴露质量问题：检查必须在计算前。
+
+Examples:
+  --- basic (basic) 基础示例
+  <DataQualityNotice
+    issues={[
+      { id: "q1", type: "missing", level: "warning", description: "12 条记录缺少温度字段", affected: "batch-07" },
+      { id: "q2", type: "conflict", level: "blocking", description: "3 条记录与 v2 版本电导率冲突", affected: "batch-07" },
+      { id: "q3", type: "unreliable-source", level: "warning", description: "外部来源 example.com 近 90 天未更新", affected: "src-055" },
+      { id: "q4", type: "needs-review", level: "warning", description: "8 条 Agent 生成记录待人工确认", affected: "batch-07" },
+    ]}
+  />
+  --- actionable (state) 阻断级问题
+  <DataQualityNotice
+    issues={blockingIssues}
+    onResolve={(id, action) => resolveIssue(id, action)}
+  />
+  <Button variant="primary" disabled>
+    提交计算
+  </Button>
+  <span>存在 1 条阻断级问题，处理后才能提交</span>
+  --- business (business) 真实业务示例
+  const importIssues = [
+    { id: "q1", type: "conflict", level: "blocking", description: "3 条记录与 v2 版本电导率冲突", affected: "batch-07" },
+    { id: "q2", type: "missing", level: "warning", description: "12 条记录缺少温度字段", affected: "batch-07" },
+    { id: "q3", type: "needs-review", level: "warning", description: "8 条 Agent 生成记录待人工确认", affected: "batch-07" },
+  ]; // synthetic
+
+Related: alert, badge, dataset-picker, button, citation
+
+## dc.tool-run-card — ToolRunCard 工具运行卡片 [beta] v0.1.0 (#/components/tool-run-card)
+Category: datacore
+Purpose: 展示一次工具调用的完整留痕：工具名、参数摘要、输入输出、耗时与结果状态。
+Usage: 用于 Agent 活动流、任务日志与调试面板。工具调用必须留痕可查；只展示最终答案不需要 ToolRunCard，过程性步骤用 AgentActivity。
+
+Props:
+  - tool (required): string — 工具名，mono 字体展示，与注册表中的名称一致。
+  - status (required): "running" | "succeeded" | "failed" — 调用状态，映射固定图标与徽章配色。
+  - paramsSummary (required): string — 单行参数摘要，只放关键参数，完整参数进展开区。
+  - duration: number — 耗时（毫秒）；运行中为实时计时，完成后定格。
+  - input: string — 输入摘要：数据集、批次与记录数。
+  - output: string — 输出摘要：产物与关键结果。
+  - error: string — 失败时的错误摘要，一行说清原因。
+  - collapsible: boolean = true — 完整参数与输出默认折叠，点击展开。
+  - onRetry: () => void — 失败时的重试回调。
+
+States:
+  - default: 头部一行：工具图标 + mono 工具名 + 状态徽章 + 耗时；下方输入输出摘要。
+  - hover: 卡片 hover 边框加深；展开按钮 hover 遵循 ghost 按钮规则。
+  - focus-visible: 展开与重试按钮键盘可达，带 aria-expanded。
+  - pressed [N/A]: 不适用：卡片无按压态，内部按钮遵循 Button 规则。
+  - disabled [N/A]: 不适用：调用记录是事实展示，不可禁用。
+  - loading: running 状态：spinner + 实时耗时；其余区域保持布局稳定不跳动。
+  - empty [N/A]: 不适用：无输出的调用展示“无返回内容”，不渲染空卡片。
+  - error: failed 状态：错误摘要一行 + 重试入口；完整堆栈进展开区。
+  - permission-limited: 无权限查看输出时输出区显示锁态占位与申请入口，参数摘要仍可见。
+  - mobile: 头部允许折行，工具名与耗时保持同行；参数摘要截断。
+  - dark-mode: 使用语义令牌自动适配，mono 区域使用 surface-soft 底色。
+
+Interaction rules:
+  - 完整参数与输出默认折叠，点击展开；展开状态不跨卡片同步。
+  - 运行中实时刷新耗时，完成后定格最终值。
+  - 失败给错误摘要与重试入口；重试生成新的调用卡片，不覆盖旧记录。
+  - 点击输入 / 输出摘要跳转到对应数据集或产物。
+
+Keyboard:
+  - 展开按钮 Enter / Space 切换，带 aria-expanded。
+  - 重试按钮 Tab 可达，Enter 触发。
+
+Accessibility:
+  - 状态用图标加文字表达（运行中 / 已完成 / 已失败），不单独依赖颜色。
+  - 运行中状态变化通过 aria-live="polite" 克制播报（完成与失败各一次）。
+  - mono 区域保持可读字号，不低于 11px。
+
+Responsive:
+  - 窄屏头部折行为两行：工具名一行，状态与耗时一行。
+  - 参数摘要单行截断，完整内容进展开区换行展示。
+
+Content guidelines:
+  - 工具名与注册表一致，mono 字体，不改写为自然语言。
+  - 耗时格式化：300ms、1.2s、3m34s，保留一位有效小数。
+  - 参数摘要只放关键参数（round、target、budget），完整参数进展开区。
+
+Do:
+  - 每次工具调用都留痕，包括失败与被取消的调用。
+  - 耗时与状态同时展示，便于发现异常耗时。
+  - 失败给一行错误摘要，细节进展开区。
+
+Don't:
+  - 不要默认展开全部输出：长输出淹没答复正文。
+  - 不要隐藏失败调用，失败是调试的关键信息。
+  - 不要在卡片内再嵌套卡片，层级最多两层。
+
+Examples:
+  --- basic (basic) 基础示例
+  <ToolRunCard
+    tool="conductivity-optimize"
+    status="succeeded"
+    duration={1240}
+    paramsSummary="round=3 · target=9.0 mS/cm · budget=300s"
+    input="ds-118 · v3 · 128 条"
+    output="8 个候选配方 · 最优 8.7 mS/cm"
+  />
+  --- states (state) 运行中与失败
+  <ToolRunCard
+    tool="conductivity-optimize"
+    status="running"
+    paramsSummary="round=4 · target=9.2 mS/cm"
+  />
+  <ToolRunCard
+    tool="fetch-external-data"
+    status="failed"
+    duration={10000}
+    error="连接 example.com 超时（10s）"
+    onRetry={retryTool}
+  />
+  --- business (business) 真实业务示例
+  // 展开区使用 CodeBlock / JsonViewer 渲染完整参数与输出，
+  // 默认折叠避免干扰阅读；展开状态不跨卡片同步。
+
+Related: agent-activity, run-status, code-block, json-viewer, collapse
+
+
+========================================================================
+4. PATTERNS
+========================================================================
+
+## Agent Confirmation Agent 推荐 → 用户确认 → 执行 (#/patterns/agent-confirmation)
+推荐与执行分离：Agent 说明计划，用户确认范围，系统创建可追踪任务。
+### 流程
+Agent 可以分析、推荐和准备参数，但任何产生外部副作用的动作都必须由用户明确确认。确认不是形式：面板必须回显目标、范围、项目、预算和可能的副作用。
+  - Agent 说明计划、输入和预期影响。
+  - 用户选择项目 / 预算并确认。
+  - 系统创建可追踪任务，回传状态和日志。
+### 规则
+确认面板之外不允许“顺手执行”；失败后必须回到可重试、可人工接管的状态。
+  - 确认前展示完整上下文，不允许折叠关键副作用。
+  - 确认动作本身使用 primary 按钮并回显范围。
+  - 执行后给出任务 ID 与状态入口，可追踪、可撤销（如果业务允许）。
+
+## Data Import 数据导入 → 预览 → 校验 → 写入 (#/patterns/data-import)
+数据先进入临时区，经过预览、字段映射与校验后才允许写入正式数据集；原始文件与每次写入的版本全程保留。
+### 四步流程
+导入不是一个动作，而是一条流水线：上传进入临时区、预览并确认字段映射、执行校验、用户确认后写入。任何一步失败都不会污染正式数据集。
+流程的每一步都必须展示当前对象（文件名、行数、目标数据集），让用户始终知道自己在处理什么。
+  - 上传：文件只进入临时区，不触碰正式数据。
+  - 预览：展示样例行，用户确认字段映射与单位。
+  - 校验：标出缺失、越界与冲突行，给出处理建议。
+  - 写入：用户确认后批量写入，生成新版本并保留原始文件。
+### 临时区与字段映射
+临时区是导入的隔离带：解析结果只写入临时区，正式数据集的 schema 差异（新增列、单位变更）必须先映射再写入。
+字段映射逐列确认：来源列、目标字段、数据类型与单位缺一不可；无法自动匹配的列必须显式指定目标或标记为忽略。
+  - 映射表展示“来源列 → 目标字段”的一一对应关系。
+  - 类型不匹配（文本 → 数值）在校验前提示，不静默截断。
+  - 被忽略的列明确列出，避免“看不见的丢失”。
+### 缺失与冲突处理
+校验结果按严重程度分级：阻断项（缺失主键、类型错误）必须处理后重试，警告项（单位存疑、超出常见范围）可以确认后继续。
+冲突行逐条列出与现有数据的差异，用户选择跳过、覆盖或合并；默认动作是最保守的跳过。
+  - 缺失：标出缺失字段与行号，给出补全或跳过该行的选择。
+  - 冲突：展示“临时区值 vs 现有值”的并排对比。
+  - 校验报告可回看，写入后仍能从版本中追溯到本次校验结果。
+### 确认写入与版本保留
+确认写入前回显影响范围：目标数据集、写入行数、覆盖行数与生成的新版本号。写入是事务性的，要么全部成功，要么整体回滚。
+原始上传文件作为版本附件永久保留，任何一行正式数据都能回溯到它来自哪个文件的哪一行。
+  - 确认按钮回显行数与版本号，文案写明“写入 123 行”。
+  - 写入完成后展示新版本号与差异摘要。
+  - 原始文件不可删除，只随版本归档。
+
+## Citation Source 正文引用 → 来源定位 (#/patterns/citation-source)
+事实处挂稳定引用编号，来源清单集中管理标题、链接与抓取时间；点击编号即定位来源，正文不重复粘贴长来源。
+### 稳定的引用编号
+每条可追溯的事实后面紧跟一个引用编号，编号在会话内稳定：同一条来源在不同回答、不同轮次中始终使用同一个编号。
+编号不是装饰：它必须能解析到来源清单中的具体条目；重排、增删来源时，编号与来源的绑定关系不变。
+  - 编号格式统一为 [1]、[2] 这样的上标，视觉上轻量。
+  - 编号由系统分配，业务文案不手写编号。
+  - 删除来源时同步移除对应角标，不允许出现悬空引用。
+### 轻量角标
+角标是正文里最克制的元素：字号小、使用品牌色、可点击，但不打断阅读节奏。
+悬停角标展示来源摘要（标题 + 抓取时间），点击定位到来源清单对应条目并高亮。
+### 来源清单
+来源清单集中在回答或报告底部，每条来源必须包含标题、链接和抓取时间三要素，缺一不可。
+内部来源（数据集、报告、运行记录）使用稳定 ID 链接；外部来源必须记录抓取时间，因为外部内容可能变化。
+  - 标题：来源的真实标题，不用“点击查看”代替。
+  - 链接：稳定 ID 或可公开访问的地址。
+  - 抓取时间：精确到日的获取时间。
+
+## Project Permission 项目与权限边界 (#/patterns/project-permission)
+角色与资源范围决定可见与可操作：无权限的动作禁用并解释原因，前端可见性永远只是提示，授权由后端二次校验兜底。
+### 角色与资源范围
+权限模型围绕两个维度：角色（项目管理员、项目成员、外部访客）与资源范围（项目、数据集、任务、设备）。任何动作在界面前先回答“谁对什么能做什么”。
+界面按当前用户的角色与范围渲染：可见的数据才渲染，可见但不可操作的动作禁用并附原因。
+### 无权限动作的表达
+无权限的动作不隐藏、不假装可用：禁用并在邻近位置说明所需权限与获取路径（联系项目管理员、申请加入项目）。
+数据级差异（只能看部分列、部分行）用明确的标记表达，而不是让数据悄悄消失。
+  - 禁用按钮旁说明原因：“仅项目管理员可删除项目”。
+  - 入口可见但数据不可见时，展示申请入口而非空白。
+  - 权限不足的错误页提供返回与申请两个出口。
+### 后端二次校验
+前端的一切权限表达都只是提示。后端必须对每个请求重新鉴权：伪造一个可用按钮、直接调用接口都必须被拒绝。
+鉴权失败返回结构化的权限错误（所需角色、资源 ID），前端据此渲染一致的解释，而不是通用的 403 页。
+
+## Reservation Scheduling 预约与排程 (#/patterns/reservation-scheduling)
+先选设备再选时段，冲突即时提示并给出替代方案；确认后完整回显预约结果，日历视图按统一语义着色。
+### 预约流程
+预约按固定顺序推进：选择设备 → 选择日期与时段 → 处理冲突 → 确认并回显。顺序不可逆，没有选择设备不允许直接选时段。
+每一步都展示已选内容，确认前用户能看到完整的预约草稿：设备、时段、关联项目与用途说明。
+  - 设备：展示设备状态（可用 / 维护中），维护中的设备不可预约。
+  - 时段：以统一粒度（如 1 小时）展示占用与空闲。
+  - 确认：回显设备、时段与项目，生成预约编号。
+### 冲突提示
+冲突在选择时刻提示，而不是等到提交才报错：被占用时段置灰并标注占用方（任务号或预约人），并提供相邻空闲时段作为替代。
+允许排队的设备明确说明排队规则与预计等待时间，不允许静默排队。
+### 回显确认
+预约成功后的回显是一份确认凭证：预约编号、设备、时段、关联项目与取消入口同时给出。
+回显同时写入审计：谁、在什么时间、预约了哪台设备的哪个时段。
+### 日历语义
+日历视图的颜色只表达语义：品牌色为当前用户的预约，中性色为他人占用，警告色为维护窗口；禁止用颜色区分设备型号等属性。
+跨天与跨周视图不改变时段粒度；“今天”用边框而非底色标记，避免与语义色混淆。
+
+## Run Status & Logs 运行状态与日志 (#/patterns/run-status-logs)
+所有任务共享同一状态机：排队 → 运行 → 成功 / 失败 / 部分完成；日志实时跟随当前状态，失败任务一键回到可重试。
+### 状态机
+状态机是全平台唯一的状态来源：任何页面、任何组件展示同一个任务时，状态文案与语义色完全一致。
+终态有三种：成功、失败、部分完成。部分完成必须说明完成比例与未完成原因，不允许与成功混用。
+  - 排队：已受理、等待资源，展示队列位置或预计等待时间。
+  - 运行：展示进度与已用时长，可查看实时日志。
+  - 成功 / 失败 / 部分完成：终态，给出结果入口或重试入口。
+### 日志跟随
+日志跟随任务状态实时追加，默认定位到最新一行；用户上翻阅读时暂停自动跟随，并给出“回到最新”入口。
+日志带时间戳与级别（info / warning / error），错误级别的行在视觉上可以一眼定位。
+### 失败与重试
+失败状态必须同时回答三件事：为什么失败、数据是否安全、下一步做什么。
+重试保留原参数并生成新的运行实例，原失败记录保留在审计中，不允许覆盖。
+  - 失败原因用结构化信息表达（错误码 + 可读描述）。
+  - 重试入口与失败信息出现在同一屏。
+  - 部分完成支持“仅重试未完成部分”。
+
+## Audit & Versioning 审计与版本 (#/patterns/audit-versioning)
+每一次变更都回答谁、何时、改了什么；版本之间可对比，任何状态可回溯，审计记录只增不改。
+### 谁、何时、改了什么
+审计时间线按时间倒序列出全部变更：操作人（或系统）、时间、动作与变更摘要。摘要是结构化的字段级描述，不是一句“更新了数据”。
+时间精确到分钟；操作人使用稳定账号 ID 对应的显示名，系统动作统一标注为“系统自动”。
+### 版本对比
+任意两个版本可并排对比：新增、删除与修改分别用成功、阻断与警告语义色标记，数值变化给出前后值。
+对比视图默认只展示有差异的字段，完整快照可按需展开。
+### 可回溯
+回溯不是撤销：查看历史版本不改动当前状态；恢复操作是创建一个新版本，原版本依然可查。
+审计记录只增不改，任何“删除”都是新增一条作废记录，保证链条完整。
+
+========================================================================
+5. PAGE TEMPLATES
+========================================================================
+
+## List Page 列表页 (#/templates/list-page)
+筛选栏 + 数据表格 + 分页 + 状态反馈的标准组合，覆盖平台 80% 的列表场景。
+### 结构
+列表页自上而下是：页面标题与主操作、筛选区、数据表格、分页。空数据、加载、无权限都必须有确定的样子，不允许临时拼。
+  - PageHeader：标题、说明、页面级主动作（最多一个 primary）。
+  - FilterBar：常用筛选外露，其余收起；筛选条件变化即时反映到表格。
+  - Table：首列语义稳定，数字右对齐，状态用 Badge。
+  - Pagination：告诉用户总量与当前位置。
+### 整页状态
+列表页的五种状态缺一不可，且都要保留页面骨架，不做整页闪烁替换。
+  - loading：表格区域 Skeleton，筛选栏保持可用。
+  - empty：说明是没有数据还是被筛选清空，并给出下一步动作。
+  - error：错误原因 + 重试按钮，保留已输入的筛选条件。
+  - permission-limited：说明所需权限与联系人入口。
+
+## Detail Page 详情页 (#/templates/detail-page)
+标题与状态、Descriptions 属性区、关联数据区、操作区的标准组合，适用于项目、任务、数据集等一切实体。
+### 页面结构
+详情页自上而下：PageHeader（标题、稳定 ID、状态徽标、页面级操作）、Descriptions（核心属性）、关联数据（任务、文件、引用）、底部操作区。
+首屏必须回答三个问题：这是什么、现在什么状态、我能对它做什么。
+  - PageHeader：标题旁紧跟稳定 ID 与状态 Badge，不打断阅读。
+  - Descriptions：两列布局，标签左、值右，空值显示“未设置”而不是留白。
+  - 关联数据：用 Card 或 Table 承载，数量大时只展示摘要并提供入口。
+### 操作区
+操作区分层：页面级主动作最多一个 primary（启动计算、提交审核），次级动作用 secondary，危险动作（删除、归档）用 danger 并二次确认。
+操作随实体状态变化：运行中的任务展示“取消”而不是“重试”，已归档的项目整体只读。
+### 整页状态
+详情页的状态切换保留页面骨架：加载用 Skeleton，错误保留已加载区域并给出重试，无权限展示所需权限与申请入口。
+实体被删除或已归档时展示 Result 状态页，并提供返回列表的出口。
+
+## Form Wizard 表单向导 (#/templates/form-wizard)
+Steps 把复杂表单拆成有序步骤：每步独立校验、可随时回退，最后一步完整回显所有输入，确认后才真正提交。
+### 分步结构
+向导适用于三步以上、步骤间有依赖的表单：基本信息 → 参数配置 → 确认提交。步骤条始终可见，当前步、已完成步与未到达步一目了然。
+每一步都是独立表单：字段分组内聚，按钮为“上一步 / 下一步”，最后一步变为“确认提交”。
+  - 步骤条使用有语义的步骤名，不写“步骤 1 / 步骤 2”。
+  - 已完成的步骤允许点击返回，返回不丢失已填内容。
+  - 步骤切换保留草稿，刷新页面后可恢复（如业务允许）。
+### 每步校验
+校验发生在每一步的“下一步”时刻：本步字段全部通过才放行，错误字段就地标出并自动聚焦第一个错误。
+跨步骤的校验（如参数组合冲突）在确认页统一标出，并允许一键跳回出错的步骤。
+### 回显确认
+最后一步不再出现可编辑字段：以 Descriptions 形式回显全部输入，用户逐项核对后再提交。
+提交按钮回显影响范围（项目、预算、资源）；提交后进入结果页或任务详情，不允许停留在向导里猜结果。
+
+## Task Workbench 任务工作台 (#/templates/task-workbench)
+左侧任务列表、右侧任务详情的双栏工作台：状态筛选定位任务，单条追踪与批量操作在同一视图完成。
+### 双栏结构
+工作台为高频追踪场景设计：左栏是带状态筛选的任务列表，右栏是选中任务的详情与日志，选中态在左右两栏都清晰可见。
+列表行只承载最小决策信息：任务 ID、状态徽标、所属项目与更新时间；其余信息收进右侧详情。
+  - 左栏：筛选条 + 列表，行高紧凑，当前选中行高亮。
+  - 右栏：状态、关键参数、日志摘要与操作按钮。
+  - 空选中态展示引导：“从左侧选择一个任务查看详情”。
+### 状态筛选
+状态筛选是工作台的第一入口：全部 / 排队 / 运行 / 失败 / 部分完成，选中即过滤，各状态计数同步更新。
+筛选条件保留在地址栏或可分享的视图配置中，刷新后状态不丢。
+### 批量操作
+批量操作只作用于同一状态下的可见任务：勾选后出现批量操作条，标明已选数量与可用动作。
+批量动作逐条返回结果：成功的、失败的分别计数，失败的可单独重试，不允许用一句“操作完成”掩盖部分失败。
+
+## Data Import Page 数据导入页 (#/templates/data-import-page)
+Upload 上传区、预览校验区与确认写入条的完整页面，落地“导入 → 预览 → 校验 → 写入”pattern 的全部约定。
+### 页面结构
+页面自上而下：上传区（拖拽或选择文件）、预览与字段映射表、校验结果区、底部确认写入条。各区域随流程推进依次激活。
+确认写入条常驻底部：目标数据集、写入行数、覆盖行数与确认按钮始终可见，不需要滚回页面顶部寻找动作。
+### 阶段反馈
+解析中：上传区变为进度态，展示文件名与大小，可取消。
+校验完成：结果按阻断与警告分组展示，行号可点击定位到预览表对应行。
+### 写入安全
+确认写入前回显新版本号与影响范围；写入失败整体回滚，临时区数据保留以便修正后重试。
+原始文件随新版本归档保留，页面上提供版本入口，导入后可以立刻核对差异摘要。
+
+## Agent Workspace Agent 工作区 (#/templates/agent-workspace)
+AgentActivity 动态流、ConfirmPanel 确认面板、结果区与引用的完整工作区，承接“推荐 → 确认 → 执行”的闭环。
+### 页面结构
+工作区自上而下：AgentActivity 动态流（分析过程与建议）、ConfirmPanel（待确认动作）、结果区（执行产物与引用）。
+动态流按时间追加；确认面板只在有待确认动作时出现；结果区在执行完成后生成。三者不互相覆盖。
+### 推荐与确认衔接
+每条可执行建议在动态流中都有对应的确认卡片：目标、范围、项目、预算与副作用完整回显，确认按钮使用 primary。
+确认、忽略与修改参数三种出口并存；超时未确认的建议自动失效并说明原因。
+### 结果与引用
+执行结果在结果区沉淀：状态徽标、产物摘要与任务 ID，失败时给出重试入口。
+结果中的事实性陈述必须带引用编号，来源清单附在结果区底部，与“正文引用 → 来源定位”pattern 保持一致。
+
+========================================================================
+6. FORBIDDEN
+========================================================================
+
+  - No real user data, production URLs, credentials, or internal payloads in examples.
+  - No decorative color or icons; no dark-background title icons as decoration.
+  - Do not infer source or project relationships from display names; use stable IDs.
+  - Do not hand-edit this file, llms.txt, or component-registry.json; change src/catalog and run npm run generate.
+  - AI-generated pages still must pass typecheck, build, and a human interaction review.
