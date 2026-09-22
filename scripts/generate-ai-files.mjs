@@ -158,7 +158,7 @@ const llmsTxt = `# DataCore Design
 
 - Full contract: \`llms-full.txt\`
 - Machine-readable registry: \`component-registry.json\`
-- Human site: \`https://dptech-yb.github.io/datacore-design/\`
+- Human site: \`https://design.datacore.dp.cd.mba/\`
 
 ## Product context
 

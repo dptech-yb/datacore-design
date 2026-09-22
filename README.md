@@ -6,7 +6,7 @@ DataCore 主平台的开源设计规范、交互模式和 AI 可读组件契约�
 
 ## 在线站点
 
-- GitHub Pages: <https://dptech-yb.github.io/datacore-design/>
+- GitHub Pages: <https://design.datacore.dp.cd.mba/>
 - AI 导航：[`public/llms.txt`](./public/llms.txt)
 - 完整契约：[`public/llms-full.txt`](./public/llms-full.txt)
 - 组件注册表：[`public/component-registry.json`](./public/component-registry.json)
