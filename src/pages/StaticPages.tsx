@@ -14,9 +14,10 @@ export function StartPage() {
       </header>
       <section className="doc-section">
         <h2>给前端</h2>
+        <p className="doc-paragraph">本站提供设计规范、接口约定与交互示例。代码中的组件名需映射到项目实现，目前没有可直接安装的组件包。</p>
         <ul className="rule-list">
           <li>从左侧导航或 ⌘K 搜索找到组件，打开详情页。</li>
-          <li>在“预览 / 代码 / JSON 契约”之间切换，复制最小代码或完整代码。</li>
+          <li>在“预览 / 代码 / JSON 契约”之间切换，复制最小代码或完整代码，并接入项目中的组件实现。</li>
           <li>对照“状态契约”补齐 loading、empty、error、disabled、permission 状态。</li>
           <li>涉及计算、写入、额度、外部调用的动作，按组件页的规则给出确认与范围说明。</li>
         </ul>

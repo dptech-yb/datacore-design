@@ -1,3 +1,5 @@
+import { DemoMenu } from "../components/DemoMenu";
+import { Modal } from "../components/Modal";
 import {
   AlertTriangle,
   Beaker,
@@ -19,7 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactNode, KeyboardEvent } from "react";
 import type { PreviewFn } from "./types";
 
 /* ---------- shared demo helpers (not exported) ---------- */
@@ -44,7 +46,7 @@ function StepDot({ status, index }: { status: StepStatus; index: number }) {
         placeItems: "center",
         borderRadius: "50%",
         border: "1px solid",
-        fontSize: 11,
+        fontSize: 12,
         fontFamily: '"DM Mono", monospace',
         ...stepDotStyle[status],
       }}
@@ -72,8 +74,8 @@ function StepItem({
       <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
         <StepDot status={status} index={index} />
         <div style={{ minWidth: 0, display: "grid", gap: 1 }}>
-          <strong style={{ fontSize: 12, color: status === "wait" ? "var(--muted)" : "var(--text)", fontWeight: status === "process" ? 700 : 600 }}>{title}</strong>
-          {description && <span style={{ fontSize: 10.5, color: status === "error" ? "var(--red)" : "var(--faint)" }}>{description}</span>}
+          <strong style={{ fontSize: 14, color: status === "wait" ? "var(--muted)" : "var(--text)", fontWeight: status === "process" ? 700 : 600 }}>{title}</strong>
+          {description && <span style={{ fontSize: 12, color: status === "error" ? "var(--red)" : "var(--faint)" }}>{description}</span>}
         </div>
       </div>
       {!last && <div style={{ flex: 1, minWidth: 14, height: 1, background: "var(--line)" }} />}
@@ -108,7 +110,7 @@ function PageButton({
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 8,
-        fontSize: 12,
+        fontSize: 14,
         fontFamily: '"DM Mono", monospace',
         cursor: disabled ? "not-allowed" : "pointer",
         border: active ? "1px solid var(--brand)" : "1px solid var(--line-strong)",
@@ -122,58 +124,12 @@ function PageButton({
   );
 }
 
-const dropdownPanelStyle: CSSProperties = {
-  width: 210,
-  padding: 5,
-  border: "1px solid var(--line)",
-  borderRadius: 10,
-  background: "var(--surface)",
-  boxShadow: "var(--shadow-md)",
-  display: "grid",
-  gap: 1,
-};
-
-function DropdownItem({
-  label,
-  danger,
-  disabled,
-  reason,
-  onClick,
-}: {
-  label: string;
-  danger?: boolean;
-  disabled?: boolean;
-  reason?: string;
-  onClick?: () => void;
-}) {
-  const [hover, setHover] = useState(false);
-  return (
-    <button
-      role="menuitem"
-      disabled={disabled}
-      title={disabled ? reason : undefined}
-      onClick={onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        gap: 7,
-        padding: "7px 10px",
-        borderRadius: 7,
-        background: hover && !disabled ? (danger ? "var(--red-soft)" : "var(--surface-soft)") : "transparent",
-        color: disabled ? "var(--faint)" : danger ? "var(--red)" : "var(--text)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        fontSize: 12,
-        textAlign: "left",
-        opacity: disabled ? 0.7 : 1,
-      }}
-    >
-      {label}
-      {disabled && <Lock size={12} style={{ marginLeft: "auto" }} />}
-    </button>
-  );
+function moveWithinGroup(event: KeyboardEvent<HTMLElement>) {
+  if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End"].includes(event.key))return;
+  const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
+  const current = items.indexOf(document.activeElement as HTMLButtonElement);
+  const next = event.key === "Home" ? 0 : event.key === "End" ? items.length-1 : (current+(["ArrowRight","ArrowDown"].includes(event.key) ? 1 : items.length-1))%items.length;
+  event.preventDefault();items[next]?.focus();items[next]?.click();
 }
 
 function SegmentedControl({
@@ -190,7 +146,7 @@ function SegmentedControl({
   const pad = size === "sm" ? "4px 10px" : "6px 14px";
   return (
     <div
-      role="radiogroup"
+      role="radiogroup" aria-label="分段选项" onKeyDown={moveWithinGroup}
       style={{ display: "inline-flex", padding: 3, gap: 2, borderRadius: 10, background: "var(--surface-soft)", border: "1px solid var(--line)" }}
     >
       {options.map((option) => {
@@ -199,6 +155,7 @@ function SegmentedControl({
           <button
             key={option.value}
             role="radio"
+            tabIndex={active ? 0 : -1}
             aria-checked={active}
             disabled={option.disabled}
             title={option.disabled ? option.reason : undefined}
@@ -242,7 +199,7 @@ function LayoutBasic() {
               style={{
                 padding: "5px 8px",
                 borderRadius: 6,
-                fontSize: 11,
+                fontSize: 12,
                 color: index === 2 ? "var(--brand)" : "var(--muted)",
                 background: index === 2 ? "var(--brand-soft)" : "transparent",
                 fontWeight: index === 2 ? 700 : 400,
@@ -253,7 +210,7 @@ function LayoutBasic() {
           ))}
         </div>
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-          <div style={{ height: 34, flex: "0 0 34px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", gap: 6, padding: "0 12px", fontSize: 11, color: "var(--faint)" }}>
+          <div style={{ height: 34, flex: "0 0 34px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", gap: 6, padding: "0 12px", fontSize: 12, color: "var(--faint)" }}>
             项目 <ChevronRight size={12} /> <strong style={{ color: "var(--text)" }}>示例项目</strong>
           </div>
           <div style={{ flex: 1, padding: 14, background: "var(--page)", display: "grid", alignContent: "center", justifyItems: "center" }}>
@@ -276,7 +233,7 @@ function LayoutContentWidth() {
     <div className="demo-stack" style={{ gap: 16 }}>
       {items.map((item) => (
         <div key={item.label}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 11, color: "var(--muted)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 12, color: "var(--muted)" }}>
             <span className="mono">{item.label}</span>
             <span>{item.note}</span>
           </div>
@@ -302,7 +259,7 @@ function LayoutBusiness() {
             style={{
               padding: "5px 8px",
               borderRadius: 6,
-              fontSize: 11,
+              fontSize: 12,
               color: item.active ? "var(--brand)" : "var(--muted)",
               background: item.active ? "var(--brand-soft)" : "transparent",
               fontWeight: item.active ? 700 : 400,
@@ -311,17 +268,17 @@ function LayoutBusiness() {
             {item.label}
           </div>
         ))}
-        <div style={{ padding: "5px 8px", borderRadius: 6, fontSize: 11, color: "var(--faint)", display: "flex", alignItems: "center", gap: 5, opacity: 0.7 }}>
+        <div style={{ padding: "5px 8px", borderRadius: 6, fontSize: 12, color: "var(--faint)", display: "flex", alignItems: "center", gap: 5, opacity: 0.7 }}>
           审计日志 <Lock size={11} />
         </div>
       </div>
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-        <div style={{ height: 34, flex: "0 0 34px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", gap: 6, padding: "0 12px", fontSize: 11, color: "var(--faint)" }}>
+        <div style={{ height: 34, flex: "0 0 34px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", gap: 6, padding: "0 12px", fontSize: 12, color: "var(--faint)" }}>
           项目 <ChevronRight size={12} /> <strong style={{ color: "var(--text)" }}>示例项目</strong>
         </div>
         <div style={{ flex: 1, padding: 14, background: "var(--page)", display: "grid", gap: 10, alignContent: "start" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <strong style={{ fontSize: 13 }}>计算任务</strong>
+            <strong style={{ fontSize: 14 }}>计算任务</strong>
             <button className="button button-primary button-sm">新建任务</button>
           </div>
           <div className="demo-grid-3">
@@ -331,8 +288,8 @@ function LayoutBusiness() {
               { label: "本周完成", value: "21" },
             ].map((stat) => (
               <div key={stat.label} style={{ padding: "9px 11px", border: "1px solid var(--line)", borderRadius: 9, background: "var(--surface)" }}>
-                <div style={{ fontSize: 10, color: "var(--faint)" }}>{stat.label}</div>
-                <strong style={{ fontSize: 17 }}>{stat.value}</strong>
+                <div style={{ fontSize: 12, color: "var(--faint)" }}>{stat.label}</div>
+                <strong style={{ fontSize: 17.0 }}>{stat.value}</strong>
               </div>
             ))}
           </div>
@@ -373,7 +330,7 @@ function StackVariants() {
         <button className="button button-ghost">取消</button>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", border: "1px solid var(--line)", borderRadius: 10, background: "var(--surface)" }}>
-        <strong style={{ fontSize: 12 }}>第 3 轮优化</strong>
+        <strong style={{ fontSize: 14 }}>第 3 轮优化</strong>
         <span className="status-badge badge-success"><span className="badge-dot" />已完成</span>
       </div>
       <p className="demo-note">horizontal + gap 8 给按钮组；justify=&quot;space-between&quot; 给标题与状态。</p>
@@ -385,7 +342,7 @@ function StackBusiness() {
   return (
     <div className="demo-stack" style={{ maxWidth: 470 }}>
       <div>
-        <strong style={{ fontSize: 13 }}>数据校验</strong>
+        <strong style={{ fontSize: 14 }}>数据校验</strong>
         <p className="demo-note" style={{ marginTop: 3 }}>对数据集 ds-118 的 3 个必填字段做完整性检查</p>
       </div>
       <div className="status-line status-warning">
@@ -416,7 +373,7 @@ function GridBasic() {
         ].map((stat) => (
           <div className="card-demo" key={stat.label}>
             <p>{stat.label}</p>
-            <strong style={{ display: "block", marginTop: 6, fontSize: 22, letterSpacing: "-0.03em" }}>{stat.value}</strong>
+            <strong style={{ display: "block", marginTop: 6, fontSize: 22.0, letterSpacing: "-0.03em" }}>{stat.value}</strong>
           </div>
         ))}
       </div>
@@ -435,7 +392,7 @@ function GridResponsive() {
     <div className="demo-stack" style={{ gap: 14 }}>
       {rows.map((row) => (
         <div key={row.label}>
-          <div className="mono" style={{ marginBottom: 5, fontSize: 10.5, color: "var(--muted)" }}>{row.label}</div>
+          <div className="mono" style={{ marginBottom: 5, fontSize: 12, color: "var(--muted)" }}>{row.label}</div>
           <div style={{ display: "flex", gap: 8 }}>
             {Array.from({ length: row.cells }, (_, index) => (
               <div key={index} style={{ flex: 1, height: 22, borderRadius: 6, background: "var(--brand-soft)", border: "1px solid var(--brand)" }} />
@@ -483,7 +440,7 @@ function SplitterBasic() {
               style={{
                 padding: "5px 7px",
                 borderRadius: 6,
-                fontSize: 10,
+                fontSize: 12,
                 color: index === 0 ? "var(--brand)" : "var(--muted)",
                 background: index === 0 ? "var(--brand-soft)" : "var(--surface-soft)",
               }}
@@ -528,14 +485,14 @@ function SplitterLimits() {
     <div className="demo-stack">
       <div style={{ display: "flex", height: 96, border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" }}>
         <div style={{ width: 240, flex: "0 0 240px", background: "var(--surface)", padding: 12, display: "grid", alignContent: "center", gap: 2 }}>
-          <strong style={{ fontSize: 12 }}>列表面板</strong>
+          <strong style={{ fontSize: 14 }}>列表面板</strong>
           <span className="demo-note">min 240px · 不能再窄</span>
         </div>
         <div style={{ width: 6, flex: "0 0 6px", background: "var(--line)", display: "grid", placeItems: "center" }}>
           <GripVertical size={12} style={{ color: "var(--faint)" }} />
         </div>
         <div style={{ flex: 1, background: "var(--page)", padding: 12, display: "grid", alignContent: "center", gap: 2 }}>
-          <strong style={{ fontSize: 12 }}>详情面板 · 弹性</strong>
+          <strong style={{ fontSize: 14 }}>详情面板 · 弹性</strong>
           <span className="demo-note">左栏 max 560px，双击把手恢复默认 280px</span>
         </div>
       </div>
@@ -565,7 +522,7 @@ function SplitterBusiness() {
                 borderRadius: 6,
                 border: "1px solid",
                 borderColor: runId === id ? "var(--brand)" : "transparent",
-                fontSize: 10.5,
+                fontSize: 12,
                 textAlign: "left",
                 cursor: "pointer",
                 color: runId === id ? "var(--brand)" : "var(--muted)",
@@ -578,9 +535,9 @@ function SplitterBusiness() {
         </div>
         <div style={{ width: 6, flex: "0 0 6px", background: "var(--line)" }} />
         <div style={{ flex: 1, minWidth: 0, padding: 10, background: "var(--page)", display: "grid", gap: 5, alignContent: "start" }}>
-          <span className="mono" style={{ fontSize: 10, color: "var(--faint)" }}>日志 · {runId} · follow</span>
+          <span className="mono" style={{ fontSize: 12, color: "var(--faint)" }}>日志 · {runId} · follow</span>
           {logs[runId].map((line) => (
-            <span key={line} className="mono" style={{ fontSize: 10.5, color: "var(--text)" }}>{line}</span>
+            <span key={line} className="mono" style={{ fontSize: 12, color: "var(--text)" }}>{line}</span>
           ))}
         </div>
       </div>
@@ -596,7 +553,7 @@ function PageHeaderBasic() {
     <div className="demo-stack">
       <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: 20, letterSpacing: "-0.02em" }}>计算任务</h3>
+          <h3 style={{ margin: 0, fontSize: 20.0, letterSpacing: "-0.02em" }}>计算任务</h3>
           <p className="demo-note" style={{ marginTop: 6 }}>提交、追踪并管理项目下的所有计算任务。</p>
         </div>
         <div className="demo-row">
@@ -619,7 +576,7 @@ function PageHeaderWithBreadcrumb() {
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <h3 style={{ margin: 0, fontSize: 20, letterSpacing: "-0.02em" }}>示例项目</h3>
+          <h3 style={{ margin: 0, fontSize: 20.0, letterSpacing: "-0.02em" }}>示例项目</h3>
           <span className="status-badge badge-success"><span className="badge-dot" />进行中</span>
         </div>
         <div className="demo-row">
@@ -637,7 +594,7 @@ function PageHeaderBusiness() {
       <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <h3 style={{ margin: 0, fontSize: 20, letterSpacing: "-0.02em" }}>电导率优化 · 第 3 轮</h3>
+            <h3 style={{ margin: 0, fontSize: 20.0, letterSpacing: "-0.02em" }}>电导率优化 · 第 3 轮</h3>
             <span className="status-badge badge-violet"><span className="badge-dot" />等待确认</span>
           </div>
           <p className="demo-note" style={{ marginTop: 6 }}>Agent 推荐 6 个候选配方，确认后将创建 1 个 CPU 任务。</p>
@@ -658,7 +615,7 @@ function PageHeaderBusiness() {
 function BreadcrumbBasic() {
   return (
     <div className="demo-stack">
-      <div className="breadcrumb" style={{ fontSize: 13 }}>
+      <div className="breadcrumb" style={{ fontSize: 14 }}>
         <a style={{ color: "var(--muted)", cursor: "pointer" }}>项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
         <a style={{ color: "var(--muted)", cursor: "pointer" }}>示例项目</a>
@@ -679,7 +636,7 @@ function BreadcrumbCollapsed() {
   ];
   return (
     <div className="demo-stack">
-      <div className="breadcrumb" style={{ fontSize: 13 }}>
+      <div className="breadcrumb" style={{ fontSize: 14 }}>
         <a style={{ color: "var(--muted)", cursor: "pointer" }}>项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
         {expanded ? (
@@ -711,23 +668,23 @@ function BreadcrumbCollapsed() {
 function BreadcrumbBusiness() {
   return (
     <div className="demo-stack">
-      <div className="breadcrumb" style={{ fontSize: 13 }}>
+      <div className="breadcrumb" style={{ fontSize: 14 }}>
         <a style={{ color: "var(--muted)", cursor: "pointer" }}>项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
         <a style={{ color: "var(--muted)", cursor: "pointer" }}>示例项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
         <a style={{ color: "var(--muted)", cursor: "pointer" }}>计算任务</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
-        <strong className="mono" style={{ fontSize: 12 }}>run-28003</strong>
+        <strong className="mono" style={{ fontSize: 14 }}>run-28003</strong>
       </div>
-      <div className="breadcrumb" style={{ fontSize: 13 }}>
+      <div className="breadcrumb" style={{ fontSize: 14 }}>
         <a style={{ color: "var(--muted)", cursor: "pointer" }}>项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
         <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "var(--faint)" }}>
           内部项目 <Lock size={11} />
         </span>
         <ChevronRight size={13} className="breadcrumb-separator" />
-        <strong className="mono" style={{ fontSize: 12 }}>run-27995</strong>
+        <strong className="mono" style={{ fontSize: 14 }}>run-27995</strong>
       </div>
       <p className="demo-note">第二行演示 permission-limited：无权限的上级渲染为纯文本 + 锁图标，不提供链接。</p>
     </div>
@@ -833,7 +790,7 @@ function tabButtonStyle(active: boolean): CSSProperties {
     padding: "8px 2px",
     background: "none",
     cursor: "pointer",
-    fontSize: 12.5,
+    fontSize: 14,
     fontWeight: active ? 700 : 400,
     color: active ? "var(--brand)" : "var(--muted)",
     borderBottom: active ? "2px solid var(--brand)" : "2px solid transparent",
@@ -854,9 +811,9 @@ function TabsBasic() {
   ];
   return (
     <div className="demo-stack">
-      <div role="tablist" style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--line)" }}>
+      <div role="tablist" aria-label="内容面板" onKeyDown={moveWithinGroup} style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--line)" }}>
         {tabs.map((tab) => (
-          <button key={tab.key} role="tab" aria-selected={active === tab.key} onClick={() => setActive(tab.key)} style={tabButtonStyle(active === tab.key)}>
+          <button key={tab.key} role="tab" tabIndex={active === tab.key ? 0 : -1} aria-selected={active === tab.key} onClick={() => setActive(tab.key)} style={tabButtonStyle(active === tab.key)}>
             {tab.label}
           </button>
         ))}
@@ -876,9 +833,9 @@ function TabsBadges() {
   ];
   return (
     <div className="demo-stack">
-      <div role="tablist" style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--line)", flexWrap: "wrap" }}>
+      <div role="tablist" aria-label="内容面板" onKeyDown={moveWithinGroup} style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--line)", flexWrap: "wrap" }}>
         {tabs.map((tab) => (
-          <button key={tab.key} role="tab" aria-selected={active === tab.key} onClick={() => setActive(tab.key)} style={tabButtonStyle(active === tab.key)}>
+          <button key={tab.key} role="tab" tabIndex={active === tab.key ? 0 : -1} aria-selected={active === tab.key} onClick={() => setActive(tab.key)} style={tabButtonStyle(active === tab.key)}>
             {tab.label}
             {tab.badge !== null && (
               <span className={`status-badge ${active === tab.key ? "badge-info" : "badge-neutral"}`}>{tab.badge}</span>
@@ -901,11 +858,12 @@ function TabsBusiness() {
   ];
   return (
     <div className="demo-stack">
-      <div role="tablist" style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--line)", flexWrap: "wrap" }}>
+      <div role="tablist" aria-label="内容面板" onKeyDown={moveWithinGroup} style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--line)", flexWrap: "wrap" }}>
         {tabs.map((tab) => (
           <button
             key={tab.key}
             role="tab"
+            tabIndex={active === tab.key ? 0 : -1}
             aria-selected={active === tab.key}
             disabled={tab.disabled}
             title={tab.disabled ? "仅项目管理员可见" : undefined}
@@ -930,7 +888,7 @@ function TabsBusiness() {
       {active === "logs" && (
         <div style={{ display: "grid", gap: 4 }}>
           {["10:02:31 输入校验通过 · ds-118", "10:04:02 迭代 120/400 · loss 0.041", "10:04:02 当前电导率均值 12.1 mS/cm"].map((line) => (
-            <span key={line} className="mono" style={{ fontSize: 10.5, color: "var(--muted)" }}>{line}</span>
+            <span key={line} className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>{line}</span>
           ))}
         </div>
       )}
@@ -976,7 +934,7 @@ function StepsStates() {
     <div className="demo-stack">
       <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
         {legend.map((item, index) => (
-          <span key={item.status} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: "var(--muted)" }}>
+          <span key={item.status} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--muted)" }}>
             <StepDot status={item.status} index={index} />
             {item.label}
           </span>
@@ -1074,7 +1032,7 @@ function PaginationFull() {
         </PageButton>
         <select
           className="field-control"
-          style={{ width: "auto", height: 30, fontSize: 11 }}
+          style={{ width: "auto", height: 30, fontSize: 12 }}
           value={pageSize}
           onChange={(event) => {
             setPageSize(Number(event.target.value));
@@ -1130,105 +1088,19 @@ function PaginationBusiness() {
 /* ---------- Dropdown ---------- */
 
 function DropdownBasic() {
-  const [open, setOpen] = useState(false);
-  const [lastAction, setLastAction] = useState<string | null>(null);
-  return (
-    <div className="demo-stack">
-      <div>
-        <button className="button button-secondary" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
-          更多操作 <ChevronDown size={14} />
-        </button>
-      </div>
-      {open && (
-        <div role="menu" style={dropdownPanelStyle}>
-          {["查看详情", "复制任务 ID", "重新运行"].map((label) => (
-            <DropdownItem
-              key={label}
-              label={label}
-              onClick={() => {
-                setLastAction(label);
-                setOpen(false);
-              }}
-            />
-          ))}
-        </div>
-      )}
-      <p className="demo-note">{lastAction ? `已选择：${lastAction}（菜单随之关闭）` : "点击触发器打开菜单；选中、点击外部或 Esc 都会关闭。"}</p>
-    </div>
-  );
+  const [lastAction,setLastAction] = useState("");
+  return <div className="demo-stack"><DemoMenu actions={["查看详情","复制任务 ID","重新运行"].map(label => ({label,onSelect:() => setLastAction(label)}))}/><p className="demo-note" role="status">{lastAction ? `已选择：${lastAction}（演示）` : "方向键选择，Enter 确认，Esc 或点击外部关闭。"}</p></div>;
 }
-
-function DropdownDanger() {
-  return (
-    <div className="demo-stack">
-      <div className="demo-row">
-        <button className="icon-button" aria-label="更多操作" style={{ border: "1px solid var(--line-strong)", background: "var(--surface)" }}>
-          <MoreHorizontal size={16} />
-        </button>
-      </div>
-      <div role="menu" style={dropdownPanelStyle}>
-        <DropdownItem label="查看详情" />
-        <DropdownItem label="分享链接" />
-        <div style={{ height: 1, margin: "4px 2px", background: "var(--line)" }} />
-        <DropdownItem label="撤销任务" danger />
-      </div>
-      <p className="demo-note">危险项放菜单底部、分割线隔开；执行前必须二次确认。</p>
-    </div>
-  );
-}
-
+function DropdownDanger() { return <DropdownBusiness/>; }
 function DropdownBusiness() {
-  const [open, setOpen] = useState(true);
-  const [confirming, setConfirming] = useState(false);
-  const [done, setDone] = useState(false);
-  return (
-    <div className="demo-stack">
-      <div className="demo-row">
-        <button
-          className="button button-ghost"
-          aria-haspopup="menu"
-          aria-expanded={open}
-          onClick={() => {
-            setOpen((value) => !value);
-            setConfirming(false);
-          }}
-        >
-          更多操作 <ChevronDown size={14} />
-        </button>
-        <span className="mono demo-note">run-28003</span>
-      </div>
-      {open && !confirming && (
-        <div role="menu" style={dropdownPanelStyle}>
-          <DropdownItem label="查看详情" onClick={() => setOpen(false)} />
-          <DropdownItem label="下载日志" onClick={() => setOpen(false)} />
-          <DropdownItem label="以此为模板新建" onClick={() => setOpen(false)} />
-          <DropdownItem label="审计记录" disabled reason="需要项目管理员权限" />
-          <div style={{ height: 1, margin: "4px 2px", background: "var(--line)" }} />
-          <DropdownItem label="撤销任务 run-28003" danger onClick={() => setConfirming(true)} />
-        </div>
-      )}
-      {open && confirming && (
-        <div style={{ ...dropdownPanelStyle, padding: 12, display: "grid", gap: 10 }}>
-          <strong style={{ fontSize: 12 }}>撤销任务 run-28003？</strong>
-          <span className="demo-note">撤销后不可恢复，已排队资源立即释放。</span>
-          <div className="demo-row">
-            <button
-              className="button button-danger button-sm"
-              onClick={() => {
-                setDone(true);
-                setConfirming(false);
-                setOpen(false);
-              }}
-            >
-              确认撤销
-            </button>
-            <button className="button button-ghost button-sm" onClick={() => setConfirming(false)}>取消</button>
-          </div>
-        </div>
-      )}
-      <p className="demo-note">{done ? "已撤销（演示）· 危险项先确认再执行。" : "无权限项禁用并说明原因；危险项点击后先出确认。"}</p>
-    </div>
-  );
+  const [confirming,setConfirming] = useState(false);
+  const [result,setResult] = useState("");
+  return <div className="demo-stack"><DemoMenu actions={[
+    {label:"查看详情",onSelect:() => setResult("已选择查看 run-28003 详情（演示）")},
+    {label:"下载日志",onSelect:() => setResult("已选择下载日志（演示）")},
+    {label:"审计记录",disabled:true,reason:"需要项目管理员权限",onSelect:() => {}},
+    {label:"撤销任务 run-28003",danger:true,onSelect:() => setConfirming(true)},
+  ]}/><Modal open={confirming} onClose={() => setConfirming(false)} label="撤销任务确认"><div className="dialog"><h2>撤销任务 run-28003？</h2><p>撤销后不可恢复，已排队资源立即释放。本示例不会执行实际任务。</p><div className="dialog-actions"><button className="button button-secondary" onClick={() => setConfirming(false)}>取消</button><button className="button button-danger" onClick={() => {setConfirming(false);setResult("任务已撤销（演示）");}}>确认撤销</button></div></div></Modal><p className="demo-note" role="status">{result || "无权限项注明原因；危险动作先确认再执行。"}</p></div>;
 }
 
 /* ---------- Segmented ---------- */
@@ -1304,7 +1176,7 @@ function SegmentedBusiness() {
       />
       <div className="status-line" style={{ minHeight: 0 }}>
         <div>
-          <strong className="mono" style={{ fontSize: 12 }}>run-28003</strong>
+          <strong className="mono" style={{ fontSize: 14 }}>run-28003</strong>
           <span>{stats[range]}</span>
         </div>
       </div>

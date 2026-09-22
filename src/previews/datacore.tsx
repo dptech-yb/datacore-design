@@ -75,7 +75,7 @@ function ConfirmRows({ rows }: { rows: [string, string][] }) {
   return (
     <div className="demo-stack" style={{ gap: 6, margin: "10px 0 0" }}>
       {rows.map(([key, value]) => (
-        <div key={key} style={{ display: "flex", gap: 10, fontSize: 12 }}>
+        <div key={key} style={{ display: "flex", gap: 10, fontSize: 14 }}>
           <span style={{ width: 34, flex: "0 0 auto", color: "var(--faint)" }}>{key}</span>
           <span style={{ color: "var(--text)" }}>{value}</span>
         </div>
@@ -87,13 +87,13 @@ function ConfirmRows({ rows }: { rows: [string, string][] }) {
 function SideEffects({ items, danger }: { items: string[]; danger?: boolean }) {
   return (
     <div style={{ borderTop: "1px solid var(--line)", marginTop: 12, paddingTop: 10 }}>
-      <span style={{ fontSize: 11, color: "var(--faint)" }}>副作用</span>
+      <span style={{ fontSize: 12, color: "var(--faint)" }}>副作用</span>
       <ul
         style={{
           margin: "6px 0 0",
           paddingLeft: 16,
           color: danger ? "var(--red)" : "var(--muted)",
-          fontSize: 12,
+          fontSize: 14,
           display: "grid",
           gap: 4,
         }}
@@ -185,7 +185,7 @@ function CitationBusiness() {
     <div className="card-demo" style={{ maxWidth: 560 }}>
       <div className="demo-row" style={{ marginBottom: 10 }}>
         <Sparkles size={15} style={{ color: "var(--violet)" }} />
-        <strong style={{ fontSize: 13 }}>Agent 答复</strong>
+        <strong style={{ fontSize: 14 }}>Agent 答复</strong>
         <span className="status-badge badge-violet">
           <span className="badge-dot" />
           已生成
@@ -281,8 +281,8 @@ function SourceCardAccess() {
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <FileText size={15} style={{ color: item.dim ? "var(--faint)" : "var(--brand)", flex: "0 0 auto" }} />
             <div style={{ flex: 1, minWidth: 0, display: "grid", gap: 1 }}>
-              <strong style={{ fontSize: 12.5 }}>{item.title}</strong>
-              <span style={{ color: "var(--faint)", fontSize: 11 }}>{item.meta}</span>
+              <strong style={{ fontSize: 14 }}>{item.title}</strong>
+              <span style={{ color: "var(--faint)", fontSize: 12 }}>{item.meta}</span>
             </div>
             {item.badge}
             <button className="inline-action" style={{ marginLeft: 0 }}>{item.action}</button>
@@ -306,7 +306,7 @@ function SourceCardBusiness() {
             <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
               <FileText size={16} style={{ color: "var(--brand)", marginTop: 2, flex: "0 0 auto" }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <h4 style={{ fontSize: 12.5 }}>{source.title}</h4>
+                <h4 style={{ fontSize: 14 }}>{source.title}</h4>
                 <p>{source.meta}</p>
                 <div className="demo-row" style={{ marginTop: 10 }}>
                   <span className="status-badge badge-success">
@@ -459,7 +459,7 @@ function AgentActivityBusiness() {
     <div className="demo-stack">
       <div className="demo-row">
         <Sparkles size={15} style={{ color: "var(--violet)" }} />
-        <strong style={{ fontSize: 13 }}>电导率优化 Agent</strong>
+        <strong style={{ fontSize: 14 }}>电导率优化 Agent</strong>
         <span className="status-badge badge-violet">
           <span className="badge-dot" />
           运行中
@@ -772,7 +772,7 @@ function ProjectSelectorBasic() {
             }}
           >
             <div style={{ flex: 1, minWidth: 0, display: "grid", gap: 1 }}>
-              <strong style={{ fontSize: 12.5 }}>{option.name}</strong>
+              <strong style={{ fontSize: 14 }}>{option.name}</strong>
               <span className="mono" style={{ color: "var(--faint)" }}>{option.id}</span>
             </div>
             {option.isDefault && <span className="status-badge badge-info">默认</span>}
@@ -793,7 +793,7 @@ function ProjectSelectorLimited() {
       <div style={panelStyle}>
         <div style={optionRowStyle}>
           <div style={{ flex: 1, minWidth: 0, display: "grid", gap: 1 }}>
-            <strong style={{ fontSize: 12.5 }}>示例项目</strong>
+            <strong style={{ fontSize: 14 }}>示例项目</strong>
             <span className="mono" style={{ color: "var(--faint)" }}>project-042</span>
           </div>
           <span className="status-badge badge-info">默认</span>
@@ -802,7 +802,7 @@ function ProjectSelectorLimited() {
         </div>
         <div style={{ ...optionRowStyle, borderTop: "1px solid var(--line)", opacity: 0.62, cursor: "not-allowed" }}>
           <div style={{ flex: 1, minWidth: 0, display: "grid", gap: 1 }}>
-            <strong style={{ fontSize: 12.5 }}>共享数据池</strong>
+            <strong style={{ fontSize: 14 }}>共享数据池</strong>
             <span className="mono" style={{ color: "var(--faint)" }}>project-209 · 需要可执行权限</span>
           </div>
           {permissionBadge("viewer")}
@@ -889,7 +889,7 @@ function DatasetPickerBasic() {
                 }}
               />
               <div style={{ flex: 1, minWidth: 0, display: "grid", gap: 1 }}>
-                <strong style={{ fontSize: 12.5 }}>{dataset.name}</strong>
+                <strong style={{ fontSize: 14 }}>{dataset.name}</strong>
                 <span className="mono" style={{ color: "var(--faint)" }}>{dataset.id} · {dataset.batch} · {dataset.version}</span>
               </div>
               <span className={`status-badge ${dataset.sourceCls}`}>{dataset.source}</span>
@@ -945,7 +945,7 @@ function DatasetPickerMulti() {
                 {checked && <Check size={10} />}
               </span>
               <div style={{ flex: 1, minWidth: 0, display: "grid", gap: 1 }}>
-                <strong style={{ fontSize: 12.5 }}>{dataset.name}</strong>
+                <strong style={{ fontSize: 14 }}>{dataset.name}</strong>
                 <span className="mono" style={{ color: "var(--faint)" }}>{dataset.id} · {dataset.batch} · {dataset.version}</span>
               </div>
               <span className={`status-badge ${dataset.sourceCls}`}>{dataset.source}</span>
@@ -1010,7 +1010,7 @@ function DatasetPickerBusiness() {
                   }}
                 />
                 <div style={{ flex: 1, minWidth: 0, display: "grid", gap: 1 }}>
-                  <strong style={{ fontSize: 12.5 }}>{option.name}</strong>
+                  <strong style={{ fontSize: 14 }}>{option.name}</strong>
                   <span className="mono" style={{ color: "var(--faint)" }}>{option.meta}</span>
                 </div>
                 {option.archived && (
@@ -1153,11 +1153,11 @@ function AuditRow({
     >
       <span style={{ width: 8, height: 8, borderRadius: "50%", background: dot, marginTop: 6, flex: "0 0 auto" }} />
       <div style={{ flex: 1, minWidth: 0, display: "grid", gap: 1 }}>
-        <span style={{ fontSize: 12.5 }}>
+        <span style={{ fontSize: 14 }}>
           <strong>{actor}</strong> {action} <span className="mono">{target}</span>
         </span>
-        <span style={{ color: "var(--faint)", fontSize: 11 }}>{at}</span>
-        {detail && <span style={{ color: "var(--muted)", fontSize: 11 }}>{detail}</span>}
+        <span style={{ color: "var(--faint)", fontSize: 12 }}>{at}</span>
+        {detail && <span style={{ color: "var(--muted)", fontSize: 12 }}>{detail}</span>}
       </div>
       {badge}
     </div>
@@ -1535,7 +1535,7 @@ function DataQualityBusiness() {
   return (
     <div className="card-demo" style={{ maxWidth: 560 }}>
       <div className="demo-row" style={{ justifyContent: "space-between", marginBottom: 6 }}>
-        <strong style={{ fontSize: 13 }}>ds-118 · batch-07 导入检查</strong>
+        <strong style={{ fontSize: 14 }}>ds-118 · batch-07 导入检查</strong>
         {fixed ? (
           <span className="status-badge badge-success">
             <CircleCheck size={10} />
@@ -1611,7 +1611,7 @@ function ToolRunHeader({
     <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}>
       <span style={{ display: "inline-flex", alignItems: "center", gap: 7, minWidth: 0 }}>
         <Wrench size={14} style={{ color: "var(--muted)", flex: "0 0 auto" }} />
-        <span className="mono" style={{ fontSize: 12, fontWeight: 700 }}>{tool}</span>
+        <span className="mono" style={{ fontSize: 14, fontWeight: 700 }}>{tool}</span>
       </span>
       <span style={{ display: "inline-flex", alignItems: "center", gap: 7, flex: "0 0 auto" }}>
         {badge}
@@ -1634,7 +1634,7 @@ const paramsLineStyle: CSSProperties = {
 
 function ToolIoRows({ input, output }: { input: string; output: string }) {
   return (
-    <div style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 12 }}>
+    <div style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 14 }}>
       <div style={{ display: "flex", gap: 8 }}>
         <span style={{ color: "var(--faint)", width: 30, flex: "0 0 auto" }}>输入</span>
         <span>{input}</span>
@@ -1738,7 +1738,7 @@ function ToolRunCardBusiness() {
             borderRadius: 8,
             background: "var(--surface-soft)",
             color: "var(--text)",
-            fontSize: 11,
+            fontSize: 12,
             lineHeight: 1.7,
             overflowX: "auto",
           }}

@@ -1,133 +1,357 @@
-import { ArrowRight, Boxes, FlaskConical, Layers3, LayoutTemplate, Palette, Search, ShieldCheck, Sparkles, Terminal } from "lucide-react";
-import type { ReactNode } from "react";
-import { componentCategories, componentDocs, foundationDocs, patternDocs, templateDocs } from "../catalog";
-import { navigate } from "../router";
+import {
+  ArrowDown,
+  ArrowRight,
+  ArrowUpRight,
+  Braces,
+  Check,
+  Layers3,
+  Search,
+  Terminal,
+} from "lucide-react";
+import { useState } from "react";
+import {
+  componentDocs,
+  foundationDocs,
+  patternDocs,
+  templateDocs,
+} from "../catalog";
 import { DesignSculpture } from "../components/DesignSculpture";
 
+/** The homepage introduces the system; the directory stays one click away. */
 export function HomePage() {
   return (
-    <>
-      <section className="home-head">
-        <div className="eyebrow"><Sparkles size={15} /> DataCore Design System</div>
-        <h1>面向设计、研发与 AI Agent 的<br />统一界面语言与组件契约。</h1>
-        <p>查找组件、复制示例、核对状态与权限规则——所有示例使用合成数据，所有契约可以从单一数据源自动生成。</p>
-        <div className="home-search-hint">
-          <button className="home-search-trigger" onClick={() => window.dispatchEvent(new CustomEvent("dc:open-search"))}>
-            <Search size={15} /> 搜索 {componentDocs.length} 个组件、{patternDocs.length} 个模式、{templateDocs.length} 个模板… <kbd>⌘K</kbd>
-          </button>
-        </div>
-      </section>
-
-      <section className="home-stats" aria-label="站点内容统计">
-        <Stat value={String(componentDocs.length)} label="组件" />
-        <Stat value={String(foundationDocs.length)} label="基础规范" />
-        <Stat value={String(patternDocs.length)} label="业务模式" />
-        <Stat value={String(templateDocs.length)} label="页面模板" />
-        <Stat value="3" label="AI 契约文件" />
-      </section>
-
-      <section className="section-block">
-        <div className="section-heading">
-          <div><div className="eyebrow">组件 Components</div><h2>按分类查找</h2></div>
-        </div>
-        <div className="category-grid">
-          {componentCategories.map((category) => {
-            const docs = componentDocs.filter((doc) => doc.category === category.id);
-            if (docs.length === 0) return null;
-            return (
-              <button key={category.id} className="category-card" onClick={() => navigate(`/components/${docs[0].id}`)}>
-                <div className="category-card-top">
-                  <span className="category-icon">{categoryIcon(category.id)}</span>
-                  <span className="category-count">{docs.length}</span>
-                </div>
-                <h3>{category.chineseName} <span>{category.name}</span></h3>
-                <p>{category.description}</p>
-                <span className="category-names">{docs.slice(0, 4).map((doc) => doc.name).join(" · ")}{docs.length > 4 ? " …" : ""}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="section-block">
-        <div className="section-heading">
-          <div><div className="eyebrow">差异化</div><h2>DataCore 专属组件</h2></div>
-        </div>
-        <div className="quick-grid quick-grid-3">
-          {componentDocs.filter((doc) => doc.category === "datacore").slice(0, 6).map((doc) => (
-            <QuickCard key={doc.id} title={`${doc.name} ${doc.chineseName}`} text={doc.purpose} onClick={() => navigate(`/components/${doc.id}`)} />
-          ))}
-        </div>
-      </section>
-
-      <section className="section-block">
-        <div className="section-heading">
-          <div><div className="eyebrow">流程与页面</div><h2>业务模式与页面模板</h2></div>
-        </div>
-        <div className="quick-grid quick-grid-2">
-          <QuickCard icon={<FlaskConical />} title="业务模式 Patterns" text={`${patternDocs.length} 个跨组件流程约定：Agent 确认、数据导入、引用定位、权限边界…`} onClick={() => patternDocs[0] && navigate(`/patterns/${patternDocs[0].id}`)} />
-          <QuickCard icon={<LayoutTemplate />} title="页面模板 Templates" text={`${templateDocs.length} 个完整页面组合：列表页、详情页、表单向导、Agent 工作区…`} onClick={() => templateDocs[0] && navigate(`/templates/${templateDocs[0].id}`)} />
-          <QuickCard icon={<Palette />} title="基础 Foundations" text="色彩、排版、间距、图标、动效、响应式与无障碍基线。" onClick={() => foundationDocs[0] && navigate(`/foundations/${foundationDocs[0].id}`)} />
-          <QuickCard icon={<Terminal />} title="AI 可读契约" text="llms.txt、component-registry.json 由 catalog 自动生成，与页面保持一致。" href="./llms.txt" />
-        </div>
-      </section>
-
-      <section className="section-block home-sculpture">
-        <div className="section-heading">
-          <div><div className="eyebrow">视觉研究</div><h2>相同的单元，更多的组合</h2></div>
-        </div>
-        <div className="home-sculpture-grid">
-          <DesignSculpture />
-          <div className="home-sculpture-copy">
-            <p>这件模数雕塑是 DataCore Design 的视觉锚点：规则在组合中保持秩序。它只是视觉研究，不承担导航、状态或任何重要信息。</p>
-            <ul className="rule-list">
-              <li>默认渲染静态海报，点击“探索 3D”后才加载模型。</li>
-              <li>不自动旋转，视角由用户控制并可重置。</li>
-              <li>组件详情页不出现 3D；移动端优先静态图。</li>
-            </ul>
-            <button className="text-link" onClick={() => navigate("/principles")}>阅读设计原则 <ArrowRight size={14} /></button>
+    <div className="home-page">
+      <section className="hero">
+        <div className="hero-copy">
+          <a className="release-link" href="#/start">
+            <span>DataCore Design</span>
+            <span>设计系统 0.1</span>
+            <ArrowUpRight size={14} />
+          </a>
+          <h1>
+            复杂的工作，
+            <br />
+            <span>清晰的界面。</span>
+          </h1>
+          <p>
+            从一个按钮，到完整的研发工作台。
+            <br />
+            为设计、开发与 AI，建立共同的界面语言。
+          </p>
+          <div className="hero-actions">
+            <a href="#/components" className="hero-primary">
+              探索组件 <ArrowRight size={16} />
+            </a>
+            <a href="#/start" className="hero-secondary">
+              开始使用 <ArrowUpRight size={16} />
+            </a>
+          </div>
+          <div className="hero-note">
+            <span>为 DataCore 而设计</span>
+            <span>为每一次协作而打磨</span>
           </div>
         </div>
+        <div className="hero-art">
+          <DesignSculpture />
+          <span className="hero-art-label">FORM / 001</span>
+        </div>
+        <a className="hero-scroll" href="#/components">
+          <ArrowDown size={14} /> 浏览设计系统
+        </a>
       </section>
 
-      <section className="notice-card notice-blue">
-        <div className="notice-icon"><ShieldCheck size={18} /></div>
-        <div>
-          <strong>公开的设计系统参考</strong>
-          <p>本站点是 DataCore 主平台的公开规范镜像：不包含凭据、内部地址、用户数据或实验数据；示例全部为合成数据。</p>
+      <div className="home-metrics" aria-label="设计系统内容">
+        {[
+          [componentDocs.length, "通用与业务组件"],
+          [foundationDocs.length, "基础规范"],
+          [patternDocs.length, "业务模式"],
+          [templateDocs.length, "页面模板"],
+        ].map(([n, label]) => (
+          <a
+            key={label}
+            href={
+              label === "基础规范"
+                ? "#/foundations/color"
+                : label === "业务模式"
+                  ? "#/patterns/agent-confirmation"
+                  : label === "页面模板"
+                    ? "#/templates/list-page"
+                    : "#/components"
+            }
+          >
+            <strong>
+              {n}
+              <span> / </span>
+            </strong>
+            <span>{label}</span>
+          </a>
+        ))}
+      </div>
+
+      <section className="home-section" aria-labelledby="crafted-title">
+        <div className="home-section-heading">
+          <div>
+            <span className="section-index">01 / COMPONENTS</span>
+            <h2 id="crafted-title">细节一致，使用自然。</h2>
+            <p>熟悉的操作方式，明确的状态反馈。直接试一试。</p>
+          </div>
+          <a href="#/components" className="home-text-link">
+            全部 {componentDocs.length} 个组件 <ArrowUpRight size={16} />
+          </a>
+        </div>
+        <ComponentShowcase />
+      </section>
+
+      <section
+        className="home-section home-resources"
+        aria-labelledby="system-title"
+      >
+        <div className="home-section-heading">
+          <div>
+            <span className="section-index">02 / THE SYSTEM</span>
+            <h2 id="system-title">从基础，到完整的体验。</h2>
+          </div>
+        </div>
+        <div className="resource-grid">
+          <a href="#/foundations/color" className="resource-card">
+            <span className="resource-number">01</span>
+            <div className="token-swatches" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+            </div>
+            <h3>
+              基础规范 <span>Foundations</span>
+            </h3>
+            <p>色彩、文字、间距与动效，共同构成界面的秩序。</p>
+            <span className="resource-bottom">
+              {foundationDocs.length} 篇规范 <ArrowUpRight size={17} />
+            </span>
+          </a>
+          <a href="#/patterns/agent-confirmation" className="resource-card">
+            <span className="resource-number">02</span>
+            <div className="resource-symbol">
+              <Layers3 size={38} strokeWidth={1} />
+            </div>
+            <h3>
+              业务模式 <span>Patterns</span>
+            </h3>
+            <p>数据导入、任务执行、权限确认，每一步都有依据。</p>
+            <span className="resource-bottom">
+              {patternDocs.length} 个流程 <ArrowUpRight size={17} />
+            </span>
+          </a>
+          <a href="#/templates/list-page" className="resource-card">
+            <span className="resource-number">03</span>
+            <div className="resource-symbol">
+              <Braces size={38} strokeWidth={1} />
+            </div>
+            <h3>
+              页面模板 <span>Templates</span>
+            </h3>
+            <p>将组件组合成列表、详情与 Agent 工作台。</p>
+            <span className="resource-bottom">
+              {templateDocs.length} 个模板 <ArrowUpRight size={17} />
+            </span>
+          </a>
         </div>
       </section>
-    </>
+
+      <section className="home-ai home-section">
+        <div>
+          <span className="section-index">03 / AI READY</span>
+          <h2>
+            人读得懂。
+            <br />
+            <span>AI 也能理解。</span>
+          </h2>
+          <p>
+            组件、状态与行为来自同一份规范。
+            <br />
+            把明确的设计约束，带进下一次生成。
+          </p>
+          <a href="#/ai/registry" className="home-text-link">
+            查看 AI 契约 <ArrowRight size={16} />
+          </a>
+        </div>
+        <div className="ai-code">
+          <div>
+            <Terminal size={15} />
+            <span>component-registry.json</span>
+            <span>JSON</span>
+          </div>
+          <pre>
+            <code>
+              <span className="code-dim">{"{\n"}</span>
+              {"  "}
+              <span className="code-key">"id"</span>
+              {': "dc.button",\n  '}
+              <span className="code-key">"name"</span>
+              {': "Button",\n  '}
+              <span className="code-key">"status"</span>
+              {': "stable",\n  '}
+              <span className="code-key">"states"</span>
+              {
+                ': [\n    "default", "loading",\n    "disabled", "permission-limited"\n  ]\n'
+              }
+              <span className="code-dim">{"}"}</span>
+            </code>
+          </pre>
+          <a href="./llms.txt">
+            读取 llms.txt <ArrowUpRight size={14} />
+          </a>
+        </div>
+      </section>
+      <footer className="home-footer">
+        <a href="#/" className="brand">
+          <img src="./brand/datacore-logo.png" alt="" />
+          <strong>DataCore</strong>
+          <span>Design</span>
+        </a>
+        <span>公开设计参考 · 示例均为合成数据</span>
+        <a
+          href="https://github.com/dptech-yb/datacore-design"
+          target="_blank"
+          rel="noreferrer"
+        >
+          GitHub ↗
+        </a>
+      </footer>
+    </div>
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
-  return <div className="home-stat"><strong>{value}</strong><span>{label}</span></div>;
-}
-
-function QuickCard({ icon, title, text, onClick, href }: { icon?: ReactNode; title: string; text: string; onClick?: () => void; href?: string }) {
-  const body = (
-    <>
-      {icon && <div className="quick-icon">{icon}</div>}
-      <div><h3>{title}</h3><p>{text}</p></div>
-      <ArrowRight className="quick-arrow" size={16} />
-    </>
+function ComponentShowcase() {
+  const [tab, setTab] = useState("components");
+  const [enabled, setEnabled] = useState(true);
+  const [saved, setSaved] = useState(false);
+  const [query, setQuery] = useState("");
+  return (
+    <div className="component-showcase">
+      <div className="showcase-panel">
+        <span className="showcase-label">BUTTON / 按钮</span>
+        <div className="demo-row">
+          <button
+            className="button button-primary"
+            onClick={() => setSaved(!saved)}
+          >
+            {saved ? <Check size={15} /> : null}
+            {saved ? "已保存" : "保存更改"}
+          </button>
+          <button
+            className="button button-secondary"
+            onClick={() => setSaved(false)}
+          >
+            重置
+          </button>
+          <button
+            className="icon-button bordered"
+            aria-label="查找组件"
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent("dc:open-search"))
+            }
+          >
+            <Search size={17} />
+          </button>
+        </div>
+        <a href="#/components/button">
+          状态清晰，响应及时 <ArrowUpRight size={14} />
+        </a>
+      </div>
+      <div className="showcase-panel">
+        <span className="showcase-label">INPUT / 表单</span>
+        <label className="showcase-field">
+          项目名称
+          <input
+            className="field-control"
+            placeholder="输入项目名称…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </label>
+        <a href="#/components/input">
+          从输入，到有效信息 <ArrowUpRight size={14} />
+        </a>
+      </div>
+      <div className="showcase-panel">
+        <span className="showcase-label">SWITCH / 开关</span>
+        <div className="showcase-setting">
+          <div>
+            <strong>任务完成通知</strong>
+            <span>{enabled ? "运行结束后接收通知" : "已关闭通知"}</span>
+          </div>
+          <button
+            className="ui-switch"
+            role="switch"
+            aria-label="任务完成通知"
+            aria-checked={enabled}
+            onClick={() => setEnabled(!enabled)}
+          >
+            <span />
+          </button>
+        </div>
+        <a href="#/components/switch">
+          每一个选择，都有反馈 <ArrowUpRight size={14} />
+        </a>
+      </div>
+      <div className="showcase-panel">
+        <span className="showcase-label">TABS / 导航</span>
+        <div className="showcase-tabs" role="tablist" aria-label="内容类型">
+          {[
+            ["components", "组件"],
+            ["patterns", "模式"],
+            ["templates", "模板"],
+          ].map(([id, label], i, all) => (
+            <button
+              key={id}
+              role="tab"
+              id={`showcase-tab-${id}`}
+              aria-controls="showcase-tab-panel"
+              aria-selected={tab === id}
+              tabIndex={tab === id ? 0 : -1}
+              onClick={() => setTab(id)}
+              onKeyDown={(e) => {
+                const next =
+                  e.key === "ArrowRight"
+                    ? (i + 1) % all.length
+                    : e.key === "ArrowLeft"
+                      ? (i + all.length - 1) % all.length
+                      : e.key === "Home"
+                        ? 0
+                        : e.key === "End"
+                          ? all.length - 1
+                          : -1;
+                if (next >= 0) {
+                  e.preventDefault();
+                  setTab(all[next][0]);
+                  document
+                    .getElementById(`showcase-tab-${all[next][0]}`)
+                    ?.focus();
+                }
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <span
+          className="showcase-tab-description"
+          id="showcase-tab-panel"
+          role="tabpanel"
+          aria-labelledby={`showcase-tab-${tab}`}
+        >
+          {tab === "components"
+            ? `${componentDocs.length} 个组件，统一的使用约定`
+            : tab === "patterns"
+              ? `${patternDocs.length} 个业务流程，清晰的操作路径`
+              : `${templateDocs.length} 个模板，可直接查看组合方式`}
+        </span>
+        <a href="#/components/tabs">
+          在内容之间，自然切换 <ArrowUpRight size={14} />
+        </a>
+      </div>
+    </div>
   );
-  return href
-    ? <a className="quick-card" href={href}>{body}</a>
-    : <button className="quick-card" onClick={onClick}>{body}</button>;
-}
-
-function categoryIcon(id: string) {
-  const icons: Record<string, ReactNode> = {
-    general: <Boxes size={17} />,
-    layout: <Layers3 size={17} />,
-    navigation: <ArrowRight size={17} />,
-    entry: <Search size={17} />,
-    display: <LayoutTemplate size={17} />,
-    feedback: <Sparkles size={17} />,
-    overlay: <Layers3 size={17} />,
-    datacore: <FlaskConical size={17} />,
-  };
-  return icons[id] ?? <Boxes size={17} />;
 }

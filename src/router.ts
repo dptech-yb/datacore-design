@@ -1,5 +1,6 @@
 export type Route =
   | { kind: "home" }
+  | { kind: "directory" }
   | { kind: "start" }
   | { kind: "principles" }
   | { kind: "component"; id: string }
@@ -19,7 +20,7 @@ export function parseHash(hash: string): Route {
     case "principles":
       return { kind: "principles" };
     case "components":
-      return id ? { kind: "component", id } : { kind: "home" };
+      return id ? { kind: "component", id } : { kind: "directory" };
     case "foundations":
       return id ? { kind: "foundation", id } : { kind: "home" };
     case "patterns":
@@ -37,6 +38,8 @@ export function routeToHash(route: Route): string {
   switch (route.kind) {
     case "home":
       return "#/";
+    case "directory":
+      return "#/components";
     case "start":
       return "#/start";
     case "principles":

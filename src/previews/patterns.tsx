@@ -342,9 +342,9 @@ function AuditVersioningWhoWhat() {
           style={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: 8, padding: "9px 12px", border: "1px solid var(--line)", borderRadius: 10 }}
         >
           <span className="mono" style={{ color: "var(--faint)" }}>{item.time}</span>
-          <span style={{ color: "var(--text)", fontSize: 12, fontWeight: 700 }}>{item.actor}</span>
+          <span style={{ color: "var(--text)", fontSize: 14, fontWeight: 700 }}>{item.actor}</span>
           <span className={`status-badge ${item.badge}`}>{item.action}</span>
-          <span style={{ color: "var(--muted)", fontSize: 12, flex: "1 1 260px" }}>{item.text}</span>
+          <span style={{ color: "var(--muted)", fontSize: 14, flex: "1 1 260px" }}>{item.text}</span>
         </div>
       ))}
       <div className="demo-row">
