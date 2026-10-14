@@ -22,8 +22,23 @@ export const entryComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "标签常驻在控件上方；固定前缀用 prefix，不让用户手输。",
-        code: `<Input label="项目名称" placeholder="例如：高导电解液筛选" />
-<Input label="样本编号" prefix="SMP-" placeholder="00042" />`,
+        code: `import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+<div className="grid gap-1.5">
+  <Label htmlFor="project-name">项目名称</Label>
+  <Input id="project-name" placeholder="例如：高导电解液筛选" />
+</div>
+<div className="grid gap-1.5">
+  <Label htmlFor="sample-no">样本编号</Label>
+  {/* 固定前缀不参与输入值：绝对定位在框内，Input 左侧留出空间 */}
+  <div className="relative">
+    <span aria-hidden="true" className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">
+      SMP-
+    </span>
+    <Input id="sample-no" className="pl-12" placeholder="00042" />
+  </div>
+</div>`,
         preview: "input/basic",
       },
       {
@@ -31,9 +46,12 @@ export const entryComponents: ComponentDoc[] = [
         title: "尺寸示例",
         kind: "size",
         description: "sm 用于筛选栏和表格行内，md 是默认尺寸，lg 仅用于独立录入页。",
-        code: `<Input size="sm" placeholder="行内筛选" />
-<Input size="md" placeholder="默认尺寸" />
-<Input size="lg" placeholder="页面级录入" />`,
+        code: `import { Input } from "@/components/ui/input";
+
+{/* 默认 h-8；sm / lg 用 className 覆盖高度与字号 */}
+<Input className="h-7 text-sm" placeholder="sm · 筛选栏与行内" />
+<Input placeholder="md · 默认尺寸" />
+<Input className="h-10 text-md" placeholder="lg · 页面级录入" />`,
         preview: "input/sizes",
       },
       {
@@ -41,8 +59,27 @@ export const entryComponents: ComponentDoc[] = [
         title: "状态示例",
         kind: "state",
         description: "disabled 必须在上下文中给出原因；error 就近显示在字段下方。",
-        code: `<Input label="所属项目" value="示例项目（project-042）" disabled />
-<Input label="任务名称" error="名称不能包含 / \\ : 字符。" defaultValue="第 3 轮/优化" />`,
+        code: `import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+<div className="grid gap-1.5">
+  <Label htmlFor="owner-project">所属项目</Label>
+  <Input id="owner-project" value="示例项目（project-042）" disabled readOnly aria-describedby="owner-project-help" />
+  <p id="owner-project-help" className="text-xs text-muted-foreground">项目归档后不可修改归属。</p>
+</div>
+<div className="grid gap-1.5">
+  <Label htmlFor="task-name">任务名称</Label>
+  <Input
+    id="task-name"
+    defaultValue="第 3 轮/优化"
+    aria-invalid="true"
+    aria-describedby="task-name-error"
+    className="border-danger focus-visible:border-danger focus-visible:ring-danger/20"
+  />
+  <p id="task-name-error" role="alert" className="text-xs text-danger">
+    名称不能包含 / \\ : 字符。
+  </p>
+</div>`,
         preview: "input/states",
       },
       {
@@ -50,10 +87,24 @@ export const entryComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "项目重命名：辅助文本写清约束与用途，字数接近上限时给出计数。",
-        code: `<div className="field">
-  <label htmlFor="project-name">项目名称</label>
-  <Input id="project-name" defaultValue="示例项目（project-042）" maxLength={40} allowClear />
-  <small>名称用于列表展示与导出文件命名，2–40 个字符，项目内唯一。</small>
+        code: `import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+const [name, setName] = useState("示例项目（project-042）");
+
+<div className="grid gap-1.5">
+  <Label htmlFor="project-name">项目名称</Label>
+  <Input
+    id="project-name"
+    value={name}
+    maxLength={40}
+    onChange={(event) => setName(event.target.value)}
+    aria-describedby="project-name-help"
+  />
+  <p id="project-name-help" className="text-xs text-muted-foreground">
+    名称用于列表展示与导出文件命名，2–40 个字符，项目内唯一。当前 {name.length}/40。
+  </p>
 </div>`,
         preview: "input/business",
       },
@@ -238,7 +289,13 @@ export const entryComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "默认三行可视高度，可拖拽调整；placeholder 引导写什么。",
-        code: `<Textarea label="实验备注" placeholder="记录实验现象、异常与处理" rows={3} />`,
+        code: `import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+<div className="grid gap-1.5">
+  <Label htmlFor="exp-note">实验备注</Label>
+  <Textarea id="exp-note" rows={3} placeholder="记录实验现象、异常与处理" />
+</div>`,
         preview: "textarea/basic",
       },
       {
@@ -246,7 +303,34 @@ export const entryComponents: ComponentDoc[] = [
         title: "字数限制与自动高度",
         kind: "variant",
         description: "maxLength + showCount 给出实时计数；autoSize 在行间自动伸缩、超出封顶。",
-        code: `<Textarea maxLength={500} showCount autoSize={{ minRows: 3, maxRows: 8 }} />`,
+        code: `import { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+
+const [reason, setReason] = useState("");
+const nearLimit = reason.length > 450;
+
+<div className="grid gap-1.5">
+  <Label htmlFor="fail-reason">失败原因说明</Label>
+  <div className="relative">
+    {/* field-sizing: content 随内容伸缩，min/max 高度约等于 3–8 行 */}
+    <Textarea
+      id="fail-reason"
+      maxLength={500}
+      value={reason}
+      onChange={(event) => setReason(event.target.value)}
+      aria-describedby="fail-reason-count"
+      className="max-h-[192px] min-h-[92px] resize-none pb-6 [field-sizing:content]"
+    />
+    <span
+      id="fail-reason-count"
+      className={cn("absolute bottom-1.5 right-2.5 text-xs", nearLimit ? "text-warning" : "text-muted-foreground")}
+    >
+      {reason.length}/500
+    </span>
+  </div>
+</div>`,
         preview: "textarea/count-autosize",
       },
       {
@@ -254,10 +338,31 @@ export const entryComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "任务备注会进入审计记录并随报告导出，辅助文本必须说明这一后果。",
-        code: `<div className="field">
-  <label htmlFor="run-note">实验备注（run-28003）</label>
-  <Textarea id="run-note" maxLength={500} showCount defaultValue="第 3 轮配方 D，充电末期温升偏高，已降倍率复测。" />
-  <small>备注将进入审计记录，导出报告时一并携带，请客观描述事实。</small>
+        code: `import { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+const [note, setNote] = useState("第 3 轮配方 D，充电末期温升偏高，已降倍率复测。");
+
+<div className="grid gap-1.5">
+  <Label htmlFor="run-note">实验备注（run-28003）</Label>
+  <div className="relative">
+    <Textarea
+      id="run-note"
+      rows={3}
+      maxLength={500}
+      value={note}
+      onChange={(event) => setNote(event.target.value)}
+      aria-describedby="run-note-count run-note-help"
+      className="pb-6"
+    />
+    <span id="run-note-count" className="absolute bottom-1.5 right-2.5 text-xs text-muted-foreground">
+      {note.length}/500
+    </span>
+  </div>
+  <p id="run-note-help" className="text-xs text-muted-foreground">
+    备注将进入审计记录，导出报告时一并携带，请客观描述事实。
+  </p>
 </div>`,
         preview: "textarea/business",
       },
@@ -337,14 +442,22 @@ export const entryComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "单选：点选即确认并关闭面板，已选值回显在触发器内。",
-        code: `<Select
-  placeholder="选择状态"
-  options={[
-    { value: "running", label: "运行中" },
-    { value: "queued", label: "排队中" },
-    { value: "finished", label: "已完成" },
-  ]}
-/>`,
+        code: `import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+<div className="grid gap-1.5">
+  <Label htmlFor="task-status">任务状态</Label>
+  <Select defaultValue="running">
+    <SelectTrigger id="task-status">
+      <SelectValue placeholder="选择状态" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="running">运行中</SelectItem>
+      <SelectItem value="queued">排队中</SelectItem>
+      <SelectItem value="finished">已完成</SelectItem>
+    </SelectContent>
+  </Select>
+</div>`,
         preview: "select/basic",
       },
       {
@@ -352,13 +465,51 @@ export const entryComponents: ComponentDoc[] = [
         title: "多选与可清空",
         kind: "variant",
         description: "多选已选值以 Tag 回显，allowClear 一键清空全部选择。",
-        code: `<Select
-  mode="multiple"
-  allowClear
-  placeholder="选择标签"
-  options={tagOptions}
-  defaultValue={["high-conductivity", "round-3"]}
-/>`,
+        code: `import { useState } from "react";
+import { ChevronDown, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+// Select 只支持单选；多选 = Popover + Checkbox 列表，已选值用 Badge 回显。
+const tagOptions = [
+  { value: "high-conductivity", label: "高导配方" },
+  { value: "round-3", label: "第 3 轮" },
+  { value: "to-review", label: "待复核" },
+];
+const [tags, setTags] = useState(["high-conductivity", "round-3"]);
+const toggle = (v: string) => setTags((list) => (list.includes(v) ? list.filter((t) => t !== v) : [...list, v]));
+
+<Label htmlFor="exp-tags">实验标签</Label>
+<Popover>
+  <PopoverTrigger asChild>
+    <Button id="exp-tags" variant="secondary" className="w-full justify-between px-3 text-sm font-normal">
+      {tags.length ? \`已选 \${tags.length} 项\` : "选择标签"}
+      <ChevronDown className="opacity-50" />
+    </Button>
+  </PopoverTrigger>
+  <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-1">
+    {tagOptions.map((option) => (
+      <div key={option.value} className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-accent">
+        <Checkbox id={\`tag-\${option.value}\`} checked={tags.includes(option.value)} onCheckedChange={() => toggle(option.value)} />
+        <Label htmlFor={\`tag-\${option.value}\`} className="flex-1 font-normal">{option.label}</Label>
+      </div>
+    ))}
+  </PopoverContent>
+</Popover>
+<div className="flex flex-wrap items-center gap-1.5">
+  {tags.map((v) => (
+    <Badge key={v} tone="primary" className="pr-0.5">
+      {tagOptions.find((o) => o.value === v)?.label}
+      <Button variant="ghost" size="icon" aria-label="移除标签" onClick={() => toggle(v)} className="size-4 text-primary [&_svg]:size-3">
+        <X />
+      </Button>
+    </Badge>
+  ))}
+  {tags.length > 0 && <Button variant="ghost" size="sm" onClick={() => setTags([])}>清空</Button>}
+</div>`,
         preview: "select/multiple",
       },
       {
@@ -366,16 +517,61 @@ export const entryComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "选择数据集：选项超过 8 个时开启搜索，无匹配时给出空态。",
-        code: `<Select
-  showSearch
-  placeholder="搜索数据集名称或编号"
-  options={[
-    { value: "ds-118", label: "电导率筛选第 3 轮（ds-118）" },
-    { value: "ds-120", label: "热稳定性复测（ds-120）" },
-    { value: "ds-121", label: "空白对照组（ds-121）" },
-  ]}
-  emptyText="没有匹配的数据集"
-/>`,
+        code: `import { useState } from "react";
+import { Check, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+
+// Select 不带搜索；可搜索的单选 = Popover + Input + 选项列表，无匹配给出空态。
+const datasets = [
+  { value: "ds-118", label: "电导率筛选第 3 轮" },
+  { value: "ds-120", label: "热稳定性复测" },
+  { value: "ds-121", label: "空白对照组" },
+];
+const [open, setOpen] = useState(false);
+const [value, setValue] = useState("ds-118");
+const [keyword, setKeyword] = useState("");
+const matched = datasets.filter((d) => d.label.includes(keyword) || d.value.includes(keyword));
+const selected = datasets.find((d) => d.value === value);
+
+<Label htmlFor="dataset">输入数据集</Label>
+<Popover open={open} onOpenChange={setOpen}>
+  <PopoverTrigger asChild>
+    <Button id="dataset" variant="secondary" role="combobox" aria-expanded={open} className="w-full justify-between px-3 text-sm font-normal">
+      {selected ? \`\${selected.label}（\${selected.value}）\` : "选择数据集"}
+      <ChevronDown className="opacity-50" />
+    </Button>
+  </PopoverTrigger>
+  <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-1">
+    <Input aria-label="搜索数据集" placeholder="搜索数据集名称或编号" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="mb-1" />
+    <div role="listbox" aria-label="数据集">
+      {matched.length > 0 ? (
+        matched.map((d) => (
+          <Button
+            key={d.value}
+            role="option"
+            aria-selected={d.value === value}
+            variant="ghost"
+            size="sm"
+            className="w-full justify-between px-2 font-normal"
+            onClick={() => { setValue(d.value); setOpen(false); setKeyword(""); }}
+          >
+            <span className="flex items-center gap-2">
+              <Check className={cn(d.value === value ? "opacity-100" : "opacity-0")} />
+              {d.label}
+            </span>
+            <span className="font-mono text-xs text-muted-foreground">{d.value}</span>
+          </Button>
+        ))
+      ) : (
+        <p className="py-5 text-center text-sm text-muted-foreground">没有匹配的数据集</p>
+      )}
+    </div>
+  </PopoverContent>
+</Popover>`,
         preview: "select/business",
       },
     ],
@@ -778,9 +974,21 @@ export const entryComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "点击方框或文案都切换；文案写清勾选的后果。",
-        code: `<Checkbox defaultChecked>同时导出原始数据</Checkbox>
-<Checkbox>包含失败步骤</Checkbox>
-<Checkbox>仅当前项目（project-042）</Checkbox>`,
+        code: `import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+
+<div className="flex items-center gap-2">
+  <Checkbox id="export-raw" defaultChecked />
+  <Label htmlFor="export-raw" className="font-normal">同时导出原始数据</Label>
+</div>
+<div className="flex items-center gap-2">
+  <Checkbox id="include-failed" />
+  <Label htmlFor="include-failed" className="font-normal">包含失败步骤</Label>
+</div>
+<div className="flex items-center gap-2">
+  <Checkbox id="current-project" />
+  <Label htmlFor="current-project" className="font-normal">仅当前项目（project-042）</Label>
+</div>`,
         preview: "checkbox/basic",
       },
       {
@@ -788,10 +996,34 @@ export const entryComponents: ComponentDoc[] = [
         title: "全选与半选",
         kind: "variant",
         description: "部分子项选中时父级呈半选态，点击父级在全选 / 全不选间切换。",
-        code: `<Checkbox indeterminate={selected.length > 0 && selected.length < total} checked={selected.length === total}>
-  全选
-</Checkbox>
-<Checkbox.Group value={selected} options={datasetOptions} onChange={setSelected} />`,
+        code: `import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+
+// checked 传 "indeterminate" 表示半选；registry Checkbox 默认只画对勾，半选态用 className 画横线。
+const indeterminateCls =
+  "relative data-[state=indeterminate]:bg-primary data-[state=indeterminate]:[&_svg]:hidden " +
+  "data-[state=indeterminate]:after:absolute data-[state=indeterminate]:after:inset-x-[3px] data-[state=indeterminate]:after:top-1/2 " +
+  "data-[state=indeterminate]:after:h-0.5 data-[state=indeterminate]:after:-translate-y-1/2 data-[state=indeterminate]:after:rounded-full " +
+  "data-[state=indeterminate]:after:bg-primary-foreground data-[state=indeterminate]:after:content-['']";
+const parentChecked = selected.length === 0 ? false : selected.length === total ? true : "indeterminate";
+
+<div className="flex items-center gap-2">
+  <Checkbox
+    id="select-all"
+    checked={parentChecked}
+    onCheckedChange={() => setSelected(selected.length === total ? [] : allIds)}
+    className={indeterminateCls}
+  />
+  <Label htmlFor="select-all">全选（已选 {selected.length} / {total}）</Label>
+</div>
+<div className="grid gap-2.5 pl-6">
+  {allIds.map((id) => (
+    <div key={id} className="flex items-center gap-2">
+      <Checkbox id={id} checked={selected.includes(id)} onCheckedChange={() => toggle(id)} />
+      <Label htmlFor={id} className="font-mono font-normal">{id}</Label>
+    </div>
+  ))}
+</div>`,
         preview: "checkbox/indeterminate",
       },
       {
@@ -799,13 +1031,28 @@ export const entryComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "批量选择数据集：已选计数与批量动作随勾选即时更新，动作本身需二次确认。",
-        code: `<Checkbox.Group value={selected} onChange={setSelected}>
-  <Checkbox value="ds-118">电导率筛选第 3 轮（ds-118）</Checkbox>
-  <Checkbox value="ds-120">热稳定性复测（ds-120）</Checkbox>
-  <Checkbox value="ds-121">空白对照组（ds-121）</Checkbox>
-</Checkbox.Group>
-<span>已选 {selected.length} / 3 项</span>
-<Button variant="secondary" size="sm" disabled={selected.length === 0}>批量导出</Button>`,
+        code: `import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+
+{datasets.map((dataset) => (
+  <Label
+    key={dataset.id}
+    htmlFor={dataset.id}
+    className="flex items-center gap-2.5 rounded-lg border px-3 py-2.5 font-normal has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary-soft"
+  >
+    <Checkbox id={dataset.id} checked={selected.includes(dataset.id)} onCheckedChange={() => toggle(dataset.id)} />
+    <span className="grid">
+      <span className="font-semibold">{dataset.name}</span>
+      <span className="font-mono text-xs text-muted-foreground">{dataset.id}</span>
+    </span>
+  </Label>
+))}
+<div className="flex items-center gap-2">
+  <span className="text-sm text-muted-foreground">已选 {selected.length} / 3 项</span>
+  <Button variant="secondary" size="sm" disabled={selected.length === 0}>批量导出</Button>
+  <Button variant="ghost" size="sm" disabled={selected.length === 0} onClick={() => setSelected([])}>清空选择</Button>
+</div>`,
         preview: "checkbox/business",
       },
     ],
@@ -884,14 +1131,23 @@ export const entryComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "选项平铺，选中即替换；方向键在同组内移动。",
-        code: `<Radio.Group
-  defaultValue="all"
-  options={[
-    { value: "all", label: "全部" },
-    { value: "running", label: "运行中" },
-    { value: "finished", label: "已完成" },
-  ]}
-/>`,
+        code: `import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+<RadioGroup defaultValue="all" aria-label="任务状态" className="flex gap-4">
+  <div className="flex items-center gap-2">
+    <RadioGroupItem id="status-all" value="all" />
+    <Label htmlFor="status-all" className="font-normal">全部</Label>
+  </div>
+  <div className="flex items-center gap-2">
+    <RadioGroupItem id="status-running" value="running" />
+    <Label htmlFor="status-running" className="font-normal">运行中</Label>
+  </div>
+  <div className="flex items-center gap-2">
+    <RadioGroupItem id="status-finished" value="finished" />
+    <Label htmlFor="status-finished" className="font-normal">已完成</Label>
+  </div>
+</RadioGroup>`,
         preview: "radio/basic",
       },
       {
@@ -899,14 +1155,30 @@ export const entryComponents: ComponentDoc[] = [
         title: "带描述的卡片样式",
         kind: "variant",
         description: "选项有附加说明时用卡片样式，描述文本跟随选项一并展示。",
-        code: `<Radio.Group
-  optionType="card"
-  defaultValue="fast"
-  options={[
-    { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒" },
-    { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 消耗额度" },
-  ]}
-/>`,
+        code: `import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+// 卡片样式：Label 包住 RadioGroupItem，选中样式用 :has() 跟随子项状态。
+const modes = [
+  { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒" },
+  { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 消耗额度" },
+];
+
+<RadioGroup defaultValue="fast" aria-label="计算模式" className="grid gap-3 sm:grid-cols-2">
+  {modes.map((mode) => (
+    <Label
+      key={mode.value}
+      htmlFor={\`mode-\${mode.value}\`}
+      className="flex items-start gap-2.5 rounded-lg border p-3 font-normal has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary-soft"
+    >
+      <RadioGroupItem id={\`mode-\${mode.value}\`} value={mode.value} className="mt-0.5" />
+      <span className="grid gap-0.5">
+        <span className="font-semibold">{mode.label}</span>
+        <span className="text-xs text-muted-foreground">{mode.description}</span>
+      </span>
+    </Label>
+  ))}
+</RadioGroup>`,
         preview: "radio/card-options",
       },
       {
@@ -914,16 +1186,30 @@ export const entryComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "选择计算模式：有代价的档位标明代价，无权限的档位禁用并注明。",
-        code: `<Radio.Group
-  optionType="card"
-  value={mode}
-  onChange={setMode}
-  options={[
-    { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒 · 不计额度" },
-    { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 计入 project-042 额度" },
-    { value: "ultra", label: "超高精度", description: "需申请权限", disabled: true },
-  ]}
-/>`,
+        code: `import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+const modes = [
+  { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒 · 不计额度" },
+  { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 计入 project-042 额度" },
+  { value: "ultra", label: "超高精度", description: "需申请权限", disabled: true },
+];
+
+<RadioGroup value={mode} onValueChange={setMode} aria-label="计算模式" className="grid gap-3 sm:grid-cols-2">
+  {modes.map((m) => (
+    <Label
+      key={m.value}
+      htmlFor={\`mode-\${m.value}\`}
+      className="flex items-start gap-2.5 rounded-lg border p-3 font-normal has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary-soft has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
+    >
+      <RadioGroupItem id={\`mode-\${m.value}\`} value={m.value} disabled={m.disabled} className="mt-0.5" />
+      <span className="grid gap-0.5">
+        <span className="font-semibold">{m.label}</span>
+        <span className="text-xs text-muted-foreground">{m.description}</span>
+      </span>
+    </Label>
+  ))}
+</RadioGroup>`,
         preview: "radio/business",
       },
     ],
@@ -1000,8 +1286,17 @@ export const entryComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "点击即生效，无需保存按钮；标签写清控制对象。",
-        code: `<Switch defaultChecked aria-label="邮件通知" /> 邮件通知
-<Switch aria-label="自动保存" /> 自动保存`,
+        code: `import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+
+<div className="flex items-center gap-2.5">
+  <Switch id="mail-notify" defaultChecked />
+  <Label htmlFor="mail-notify" className="font-normal">邮件通知</Label>
+</div>
+<div className="flex items-center gap-2.5">
+  <Switch id="auto-save" />
+  <Label htmlFor="auto-save" className="font-normal">自动保存</Label>
+</div>`,
         preview: "switch/basic",
       },
       {
@@ -1009,15 +1304,42 @@ export const entryComponents: ComponentDoc[] = [
         title: "异步切换与回滚",
         kind: "state",
         description: "异步写入期间显示 loading 并锁定，成功才切换位置，失败回滚并提示。",
-        code: `<Switch
-  checked={enabled}
-  loading={pending}
-  onChange={async (next) => {
-    setPending(true);
-    await updateSetting({ autoRefresh: next }); // 失败时抛出，Switch 回滚
-    setPending(false);
-  }}
-/>`,
+        code: `import { AlertCircle, Loader2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+
+// registry Switch 没有 loading：写入期间 disabled + 旁边的 spinner；成功后才更新 checked，失败保持原值并提示。
+<div className="flex items-center gap-2.5">
+  <Switch
+    id="remote-sync"
+    checked={enabled}
+    disabled={pending}
+    aria-busy={pending}
+    onCheckedChange={async (next) => {
+      setPending(true);
+      try {
+        await updateSetting({ remoteSync: next });
+        setEnabled(next);
+      } catch {
+        setFailed(true); // 未改变 checked，即回滚
+      } finally {
+        setPending(false);
+      }
+    }}
+  />
+  <Label htmlFor="remote-sync" className="font-normal">远程同步</Label>
+  {pending && <Loader2 className="size-3 animate-spin text-muted-foreground" aria-label="写入中" />}
+  {failed && (
+    <span role="alert" className="inline-flex items-center gap-1 text-xs text-danger">
+      <AlertCircle className="size-3" aria-hidden="true" />
+      保存失败，已回滚
+    </span>
+  )}
+</div>
+<div className="flex items-center gap-2.5">
+  <Switch id="analytics" checked={false} disabled />
+  <Label htmlFor="analytics" className="font-normal text-muted-foreground">数据分析（需管理员开启）</Label>
+</div>`,
         preview: "switch/states",
       },
       {
@@ -1025,11 +1347,22 @@ export const entryComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "任务自动刷新：开启后立即按 30 秒间隔轮询，关闭即停，无需任何提交动作。",
-        code: `<div className="setting-row">
-  <Switch checked={autoRefresh} onChange={setAutoRefresh} aria-label="任务自动刷新" />
-  <div>
-    <strong>任务自动刷新</strong>
-    <p>开启后每 30 秒刷新 run-28003 的状态，关闭即停止。</p>
+        code: `import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+
+<div className="flex items-start gap-3 rounded-lg border bg-card p-4">
+  <Switch
+    id="auto-refresh"
+    checked={autoRefresh}
+    onCheckedChange={setAutoRefresh}
+    aria-describedby="auto-refresh-desc"
+    className="mt-0.5"
+  />
+  <div className="grid gap-1">
+    <Label htmlFor="auto-refresh" className="text-base font-semibold">任务自动刷新</Label>
+    <p id="auto-refresh-desc" className="text-sm text-muted-foreground">
+      开启后每 30 秒刷新 run-28003 的状态，关闭即停止。
+    </p>
   </div>
 </div>`,
         preview: "switch/business",
@@ -1108,14 +1441,33 @@ export const entryComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "垂直布局是默认：标签在上、控件居中、辅助文本常驻在控件下方。",
-        code: `<Form layout="vertical" onSubmit={handleSubmit}>
-  <Form.Item label="任务名称" required help="用于列表与导出命名，2–40 个字符。">
-    <Input placeholder="例如：第 3 轮电导率优化" />
-  </Form.Item>
-  <Form.Item label="所属项目" required>
-    <Select options={projectOptions} placeholder="选择项目" />
-  </Form.Item>
-</Form>`,
+        code: `import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+<form className="grid gap-4" onSubmit={handleSubmit}>
+  <div className="grid gap-1.5">
+    <Label htmlFor="task-name">
+      任务名称<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+    </Label>
+    <Input id="task-name" required aria-describedby="task-name-help" placeholder="例如：第 3 轮电导率优化" />
+    <p id="task-name-help" className="text-xs text-muted-foreground">用于列表与导出命名，2–40 个字符。</p>
+  </div>
+  <div className="grid gap-1.5">
+    <Label htmlFor="project">
+      所属项目<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+    </Label>
+    <Select required>
+      <SelectTrigger id="project" aria-required="true" className="data-[placeholder]:text-muted-foreground">
+        <SelectValue placeholder="选择项目" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="project-042">示例项目（project-042）</SelectItem>
+        <SelectItem value="project-043">示例项目二（project-043）</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+</form>`,
         preview: "form/basic",
       },
       {
@@ -1123,13 +1475,31 @@ export const entryComponents: ComponentDoc[] = [
         title: "校验与错误就近",
         kind: "state",
         description: "错误显示在出错字段正下方：控件红边 + aria-invalid，错误文案 role=\"alert\" 即时播报。",
-        code: `<Form.Item
-  label="样本质量"
-  required
-  error="质量需在 0–500 mg 之间，当前为 620 mg。"
->
-  <InputNumber unit="mg" min={0} max={500} aria-invalid="true" />
-</Form.Item>`,
+        code: `import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+<div className="grid gap-1.5">
+  <Label htmlFor="sample-mass">
+    样本质量<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+  </Label>
+  <div className="relative">
+    <Input
+      id="sample-mass"
+      required
+      inputMode="decimal"
+      defaultValue="620"
+      aria-invalid="true"
+      aria-describedby="sample-mass-error"
+      className="pr-10 border-danger focus-visible:border-danger focus-visible:ring-danger/20"
+    />
+    <span aria-hidden="true" className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+      mg
+    </span>
+  </div>
+  <p id="sample-mass-error" role="alert" className="text-xs text-danger">
+    质量需在 0–500 mg 之间，当前为 620 mg。
+  </p>
+</div>`,
         preview: "form/validation",
       },
       {
@@ -1137,18 +1507,43 @@ export const entryComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "提交计算任务：影响范围写在按钮旁，提交中按钮 loading，失败保留全部已填内容。",
-        code: `<Form layout="vertical" onSubmit={submitRun}>
-  <Form.Item label="任务名称" required help="用于列表与导出命名，2–40 个字符。">
-    <Input placeholder="例如：第 3 轮电导率优化" />
-  </Form.Item>
-  <Form.Item label="数据集" required>
-    <Select options={datasetOptions} placeholder="选择数据集" />
-  </Form.Item>
-  <div className="action-with-scope">
-    <Button variant="primary" loading={submitting}>创建计算任务</Button>
-    <span>将使用 示例项目（project-042）· 预计最长 300 秒</span>
+        code: `import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+<form className="grid gap-4" onSubmit={submitRun}>
+  <div className="grid gap-1.5">
+    <Label htmlFor="task-name">
+      任务名称<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+    </Label>
+    <Input id="task-name" required defaultValue="第 3 轮电导率优化" aria-describedby="task-name-help" />
+    <p id="task-name-help" className="text-xs text-muted-foreground">用于列表与导出命名，2–40 个字符。</p>
   </div>
-</Form>`,
+  <div className="grid gap-1.5">
+    <Label htmlFor="dataset">
+      数据集<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+    </Label>
+    <Select required defaultValue="ds-118">
+      <SelectTrigger id="dataset" aria-required="true">
+        <SelectValue placeholder="选择数据集" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="ds-118">电导率筛选第 3 轮（ds-118）</SelectItem>
+        <SelectItem value="ds-120">热稳定性复测（ds-120）</SelectItem>
+        <SelectItem value="ds-121">空白对照组（ds-121）</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+  <div className="flex flex-wrap items-center gap-3">
+    <Button type="submit" disabled={submitting}>
+      {submitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+      {submitting ? "正在创建" : "创建计算任务"}
+    </Button>
+    <span className="text-sm text-muted-foreground">将使用 示例项目（project-042）· 预计最长 300 秒</span>
+  </div>
+</form>`,
         preview: "form/business",
       },
     ],

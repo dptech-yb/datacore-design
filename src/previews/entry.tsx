@@ -1,10 +1,22 @@
 import { SelectControl } from "../components/SelectControl";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
   AlertCircle,
   Calendar,
   Check,
   ChevronDown,
   FileText,
+  Loader2,
   Minus,
   Plus,
   RotateCcw,
@@ -12,8 +24,8 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useId, useRef, useEffect, useState } from "react";
-import type { CSSProperties, ReactNode } from "react";
+import { useId, useState } from "react";
+import type { CSSProperties } from "react";
 import type { PreviewFn } from "./types";
 
 /* ---------- 共享演示元件（仅本文件内部使用） ---------- */
@@ -30,7 +42,8 @@ const triggerBase: CSSProperties = {
   fontSize: 14,
 };
 
-function SelectTrigger({ label, placeholder, width, small }: { label: string; placeholder?: boolean; width?: number | string; small?: boolean }) {
+/** 筛选栏里的静态触发器示意（FilterBar 专用，非真实 Select）。 */
+function FilterTrigger({ label, placeholder, width, small }: { label: string; placeholder?: boolean; width?: number | string; small?: boolean }) {
   return (
     <span style={{ ...triggerBase, height: small ? 29 : 37, padding: small ? "0 9px" : "0 10px", width, fontSize: small ? 11.5 : 12 }}>
       <span style={{ color: placeholder ? "var(--faint)" : "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
@@ -48,43 +61,16 @@ const panelStyle: CSSProperties = {
   fontSize: 14,
 };
 
-function CheckboxBox({ state, onChange }: {state:"off"|"on"|"mixed";onChange:()=>void}) {
-  const ref = useRef<HTMLInputElement>(null);
-  useEffect(() => {if(ref.current)ref.current.indeterminate = state === "mixed";}, [state]);
-  return <input ref={ref} type="checkbox" checked={state === "on"} onChange={onChange}/>;
-}
-
-function SwitchTrack({ on, loading, disabled, label, onToggle }: { on: boolean; loading?: boolean; disabled?: boolean; label: string; onToggle?: () => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      disabled={disabled || loading}
-      onClick={onToggle}
-      style={{
-        width: 36,
-        height: 20,
-        borderRadius: 999,
-        border: 0,
-        padding: 2,
-        cursor: disabled ? "not-allowed" : "pointer",
-        background: on ? "var(--brand)" : "var(--line-strong)",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: on ? "flex-end" : "flex-start",
-        opacity: disabled ? 0.45 : 1,
-        transition: "background .16s ease",
-        flex: "0 0 auto",
-      }}
-    >
-      <span style={{ width: 16, height: 16, borderRadius: "50%", background: "white", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-        {loading && <span className="spinner-dark" style={{ width: 10, height: 10, borderWidth: 1.5 }} />}
-      </span>
-    </button>
-  );
-}
+/** 示例说明文字。 */
+const noteCls = "m-0 text-sm text-muted-foreground";
+/** 字段下方辅助文本 / 错误文本。 */
+const helpCls = "m-0 text-xs text-muted-foreground";
+const errorTextCls = "m-0 text-xs text-danger";
+/** 出错控件的红边（registry Input 没有 error 变体，用语义令牌组合）。 */
+const invalidCls = "border-danger focus-visible:border-danger focus-visible:ring-danger/20";
+/** registry Checkbox 的半选态：隐藏对勾，画一条横线。 */
+const indeterminateCls =
+  "relative data-[state=indeterminate]:bg-primary data-[state=indeterminate]:[&_svg]:hidden data-[state=indeterminate]:after:absolute data-[state=indeterminate]:after:inset-x-[3px] data-[state=indeterminate]:after:top-1/2 data-[state=indeterminate]:after:h-0.5 data-[state=indeterminate]:after:-translate-y-1/2 data-[state=indeterminate]:after:rounded-full data-[state=indeterminate]:after:bg-primary-foreground data-[state=indeterminate]:after:content-['']";
 
 function TagChip({ label, onRemove }: { label: string; onRemove?: () => void }) {
   return (
@@ -230,62 +216,69 @@ function RangeTrigger({ start, end, width }: { start?: string; end?: string; wid
 /* ---------- Input ---------- */
 
 function InputBasic() {
+  const id = useId();
   return (
-    <div className="demo-grid-2">
-      <label className="field">
-        项目名称
-        <input className="field-control" style={{ fontWeight: 400 }} placeholder="例如：高导电解液筛选" />
-      </label>
-      <label className="field">
-        样本编号
-        <span style={{ position: "relative", display: "block" }}>
-          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--faint)", fontSize: 14, fontWeight: 400 }}>SMP-</span>
-          <input className="field-control" style={{ paddingLeft: 46, fontWeight: 400 }} placeholder="00042" />
-        </span>
-      </label>
+    <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-name`}>项目名称</Label>
+        <Input id={`${id}-name`} placeholder="例如：高导电解液筛选" />
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-sample`}>样本编号</Label>
+        <div className="relative">
+          <span aria-hidden="true" className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-base text-muted-foreground">
+            SMP-
+          </span>
+          <Input id={`${id}-sample`} className="pl-12" placeholder="00042" />
+        </div>
+      </div>
     </div>
   );
 }
 
 function InputSizes() {
   return (
-    <div className="demo-stack">
-      <div className="demo-row" style={{ alignItems: "center" }}>
-        <input className="field-control" style={{ height: 29, width: 180, fontSize: 12, fontWeight: 400 }} placeholder="sm · 筛选栏与行内" />
-        <input className="field-control" style={{ width: 180, fontWeight: 400 }} placeholder="md · 默认尺寸" />
-        <input className="field-control" style={{ height: 45, width: 180, fontSize: 14, fontWeight: 400 }} placeholder="lg · 页面级录入" />
+    <div className="grid gap-3">
+      <div className="flex flex-wrap items-center gap-2.5">
+        <Input aria-label="sm 尺寸示例" className="h-7 w-[180px] text-sm" placeholder="sm · 筛选栏与行内" />
+        <Input aria-label="默认尺寸示例" className="w-[180px]" placeholder="md · 默认尺寸" />
+        <Input aria-label="lg 尺寸示例" className="h-10 w-[180px] text-md" placeholder="lg · 页面级录入" />
       </div>
-      <p className="demo-note">sm 用于筛选栏和表格行内；lg 仅用于独立录入页。</p>
+      <p className={noteCls}>sm 用于筛选栏和表格行内；lg 仅用于独立录入页。</p>
     </div>
   );
 }
 
 function InputStates() {
+  const id = useId();
   return (
-    <div className="demo-grid-2">
-      <label className="field">
-        所属项目
-        <input className="field-control" style={{ fontWeight: 400 }} value="示例项目（project-042）" disabled readOnly />
-        <small>项目归档后不可修改归属。</small>
-      </label>
-      <label className="field field-error">
-        任务名称
-        <input className="field-control" style={{ fontWeight: 400 }} defaultValue="第 3 轮/优化" aria-invalid="true" />
-        <small role="alert">名称不能包含 / \ : 字符。</small>
-      </label>
+    <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-project`}>所属项目</Label>
+        <Input id={`${id}-project`} value="示例项目（project-042）" disabled readOnly aria-describedby={`${id}-project-help`} />
+        <p id={`${id}-project-help`} className={helpCls}>项目归档后不可修改归属。</p>
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-task`}>任务名称</Label>
+        <Input id={`${id}-task`} defaultValue="第 3 轮/优化" aria-invalid="true" aria-describedby={`${id}-task-error`} className={invalidCls} />
+        <p id={`${id}-task-error`} role="alert" className={errorTextCls}>
+          名称不能包含 / \ : 字符。
+        </p>
+      </div>
     </div>
   );
 }
 
 function InputBusiness() {
+  const id = useId();
   const [value, setValue] = useState("示例项目（project-042）");
   return (
-    <div style={{ maxWidth: 420 }}>
-      <label className="field">
-        项目名称
-        <input className="field-control" style={{ fontWeight: 400 }} id="project-name" value={value} maxLength={40} onChange={(event) => setValue(event.target.value)} />
-        <small>名称用于列表展示与导出文件命名，2–40 个字符，项目内唯一。当前 {value.length}/40。</small>
-      </label>
+    <div className="grid max-w-[420px] gap-1.5">
+      <Label htmlFor={`${id}-name`}>项目名称</Label>
+      <Input id={`${id}-name`} value={value} maxLength={40} onChange={(event) => setValue(event.target.value)} aria-describedby={`${id}-help`} />
+      <p id={`${id}-help`} className={helpCls}>
+        名称用于列表展示与导出文件命名，2–40 个字符，项目内唯一。当前 {value.length}/40。
+      </p>
     </div>
   );
 }
@@ -338,45 +331,63 @@ function InputNumberBusiness() {
 /* ---------- Textarea ---------- */
 
 function TextareaBasic() {
+  const id = useId();
   return (
-    <div style={{ maxWidth: 520 }}>
-      <label className="field">
-        实验备注
-        <textarea className="field-control" style={{ fontWeight: 400 }} rows={3} placeholder="记录实验现象、异常与处理" />
-      </label>
+    <div className="grid max-w-[520px] gap-1.5">
+      <Label htmlFor={`${id}-note`}>实验备注</Label>
+      <Textarea id={`${id}-note`} rows={3} placeholder="记录实验现象、异常与处理" />
     </div>
   );
 }
 
 function TextareaCountAutosize() {
+  const id = useId();
   const [value, setValue] = useState("充电末期温升偏高：第 42 圈峰值 41.2 ℃，已降倍率复测。");
   const nearLimit = value.length > 450;
   return (
-    <div style={{ maxWidth: 520 }}>
-      <label className="field">
-        失败原因说明
-        <span style={{ position: "relative", display: "block" }}>
-          <textarea className="field-control" style={{ fontWeight: 400, paddingBottom: 22 }} rows={3} maxLength={500} value={value} onChange={(event) => setValue(event.target.value)} />
-          <span style={{ position: "absolute", right: 10, bottom: 7, fontSize: 12, fontWeight: 400, color: nearLimit ? "var(--amber)" : "var(--faint)" }}>{value.length}/500</span>
+    <div className="grid max-w-[520px] gap-1.5">
+      <Label htmlFor={`${id}-reason`}>失败原因说明</Label>
+      <div className="relative">
+        <Textarea
+          id={`${id}-reason`}
+          maxLength={500}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          aria-describedby={`${id}-count ${id}-help`}
+          className="max-h-[192px] min-h-[92px] resize-none pb-6 [field-sizing:content]"
+        />
+        <span id={`${id}-count`} className={cn("absolute bottom-1.5 right-2.5 text-xs", nearLimit ? "text-warning" : "text-muted-foreground")}>
+          {value.length}/500
         </span>
-        <small>autoSize 在 3–8 行间伸缩；接近上限时计数变为警示色。</small>
-      </label>
+      </div>
+      <p id={`${id}-help`} className={helpCls}>autoSize 在 3–8 行间伸缩；接近上限时计数变为警示色。</p>
     </div>
   );
 }
 
 function TextareaBusiness() {
+  const id = useId();
   const [value, setValue] = useState("第 3 轮配方 D，充电末期温升偏高，已降倍率复测；复测数据同步至 ds-118。");
   return (
-    <div style={{ maxWidth: 520 }}>
-      <label className="field">
-        实验备注（<span className="mono">run-28003</span>）
-        <span style={{ position: "relative", display: "block" }}>
-          <textarea className="field-control" style={{ fontWeight: 400, paddingBottom: 22 }} rows={3} maxLength={500} value={value} onChange={(event) => setValue(event.target.value)} />
-          <span style={{ position: "absolute", right: 10, bottom: 7, fontSize: 12, fontWeight: 400, color: "var(--faint)" }}>{value.length}/500</span>
+    <div className="grid max-w-[520px] gap-1.5">
+      <Label htmlFor={`${id}-note`}>
+        实验备注（<span className="font-mono">run-28003</span>）
+      </Label>
+      <div className="relative">
+        <Textarea
+          id={`${id}-note`}
+          rows={3}
+          maxLength={500}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          aria-describedby={`${id}-count ${id}-help`}
+          className="pb-6"
+        />
+        <span id={`${id}-count`} className="absolute bottom-1.5 right-2.5 text-xs text-muted-foreground">
+          {value.length}/500
         </span>
-        <small>备注将进入审计记录，导出报告时一并携带，请客观描述事实。</small>
-      </label>
+      </div>
+      <p id={`${id}-help`} className={helpCls}>备注将进入审计记录，导出报告时一并携带，请客观描述事实。</p>
     </div>
   );
 }
@@ -384,16 +395,149 @@ function TextareaBusiness() {
 /* ---------- Select ---------- */
 
 function SelectBasic() {
-  const [value,setValue] = useState(["运行中"]);
-  return <div className="demo-stack" style={{maxWidth:320}}><SelectControl label="任务状态" options={["运行中","排队中","已完成"].map(v=>({value:v,label:v}))} value={value} onChange={setValue}/><p className="demo-note">方向键选择，Enter 确认，Esc 关闭并返回触发器。</p></div>;
+  const id = useId();
+  return (
+    <div className="grid max-w-[320px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-status`}>任务状态</Label>
+        <Select defaultValue="running">
+          <SelectTrigger id={`${id}-status`}>
+            <SelectValue placeholder="选择状态" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="running">运行中</SelectItem>
+            <SelectItem value="queued">排队中</SelectItem>
+            <SelectItem value="finished">已完成</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <p className={noteCls}>方向键选择，Enter 确认，Esc 关闭并返回触发器。</p>
+    </div>
+  );
 }
+
+const tagOptions = [
+  { value: "high-conductivity", label: "高导配方" },
+  { value: "round-3", label: "第 3 轮" },
+  { value: "to-review", label: "待复核" },
+];
+
+/** registry Select 只支持单选：多选用 Popover + Checkbox 组合，已选值以 Badge 回显。 */
 function SelectMultiple() {
-  const [value,setValue] = useState(["高导配方","第 3 轮"]);
-  return <div className="demo-stack" style={{maxWidth:340}}><SelectControl label="实验标签" multiple options={["高导配方","第 3 轮","待复核"].map(v=>({value:v,label:v}))} value={value} onChange={setValue}/><div className="demo-row">{value.map(tag=><TagChip key={tag} label={tag} onRemove={()=>setValue(v=>v.filter(t=>t!==tag))}/>)}</div><p className="demo-note">多选后保持面板打开；标签可逐项移除或清空。</p></div>;
+  const id = useId();
+  const [value, setValue] = useState(["high-conductivity", "round-3"]);
+  const toggle = (item: string) => setValue((list) => (list.includes(item) ? list.filter((v) => v !== item) : [...list, item]));
+  const labelOf = (item: string) => tagOptions.find((option) => option.value === item)?.label ?? item;
+  return (
+    <div className="grid max-w-[340px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-tags`}>实验标签</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button id={`${id}-tags`} variant="secondary" className="w-full justify-between px-3 text-sm font-normal">
+              <span className={cn("truncate", value.length === 0 && "text-muted-foreground")}>{value.length ? `已选 ${value.length} 项` : "选择标签"}</span>
+              <ChevronDown className="opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-1">
+            {tagOptions.map((option) => (
+              <div key={option.value} className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-accent">
+                <Checkbox id={`${id}-${option.value}`} checked={value.includes(option.value)} onCheckedChange={() => toggle(option.value)} />
+                <Label htmlFor={`${id}-${option.value}`} className="flex-1 cursor-pointer font-normal leading-5">
+                  {option.label}
+                </Label>
+              </div>
+            ))}
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {value.map((item) => (
+          <Badge key={item} tone="primary" className="pr-0.5">
+            {labelOf(item)}
+            <Button variant="ghost" size="icon" aria-label={`移除标签：${labelOf(item)}`} onClick={() => toggle(item)} className="size-4 text-primary hover:bg-primary/10 [&_svg]:size-3">
+              <X />
+            </Button>
+          </Badge>
+        ))}
+        {value.length > 0 && (
+          <Button variant="ghost" size="sm" onClick={() => setValue([])}>
+            清空
+          </Button>
+        )}
+      </div>
+      <p className={noteCls}>多选后保持面板打开；标签可逐项移除或清空。</p>
+    </div>
+  );
 }
+
+const datasetOptions = [
+  { value: "ds-118", label: "电导率筛选第 3 轮" },
+  { value: "ds-120", label: "热稳定性复测" },
+  { value: "ds-121", label: "空白对照组" },
+];
+
+/** registry Select 不带搜索：可搜索的单选用 Popover + Input + 选项列表组合，无匹配给出空态。 */
 function SelectBusiness() {
-  const [value,setValue] = useState(["ds-118"]);
-  return <div className="demo-stack" style={{maxWidth:340}}><SelectControl label="输入数据集" searchable options={[{value:"ds-118",label:"电导率筛选第 3 轮",hint:"ds-118"},{value:"ds-120",label:"热稳定性复测",hint:"ds-120"},{value:"ds-121",label:"空白对照组",hint:"ds-121"}]} value={value} onChange={setValue}/><p className="demo-note">可按名称或数据集 ID 搜索，选中后收起面板。</p></div>;
+  const id = useId();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("ds-118");
+  const [keyword, setKeyword] = useState("");
+  const selected = datasetOptions.find((option) => option.value === value);
+  const query = keyword.trim().toLowerCase();
+  const matched = datasetOptions.filter((option) => option.label.toLowerCase().includes(query) || option.value.includes(query));
+  return (
+    <div className="grid max-w-[340px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-dataset`}>输入数据集</Label>
+        <Popover
+          open={open}
+          onOpenChange={(next) => {
+            setOpen(next);
+            if (!next) setKeyword("");
+          }}
+        >
+          <PopoverTrigger asChild>
+            <Button id={`${id}-dataset`} variant="secondary" role="combobox" aria-expanded={open} className="w-full justify-between px-3 text-sm font-normal">
+              <span className="truncate">{selected ? `${selected.label}（${selected.value}）` : "选择数据集"}</span>
+              <ChevronDown className="opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-1">
+            <Input aria-label="搜索数据集" placeholder="搜索数据集名称或编号" value={keyword} onChange={(event) => setKeyword(event.target.value)} className="mb-1" />
+            <div role="listbox" aria-label="数据集" className="grid">
+              {matched.length > 0 ? (
+                matched.map((option) => (
+                  <Button
+                    key={option.value}
+                    role="option"
+                    aria-selected={option.value === value}
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-between px-2 font-normal"
+                    onClick={() => {
+                      setValue(option.value);
+                      setOpen(false);
+                      setKeyword("");
+                    }}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Check className={cn(option.value === value ? "opacity-100" : "opacity-0")} />
+                      {option.label}
+                    </span>
+                    <span className="font-mono text-xs text-muted-foreground">{option.value}</span>
+                  </Button>
+                ))
+              ) : (
+                <p className="m-0 px-2 py-5 text-center text-sm text-muted-foreground">没有匹配的数据集</p>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+      <p className={noteCls}>可按名称或数据集 ID 搜索，选中后收起面板。</p>
+    </div>
+  );
 }
 
 /* ---------- Combobox ---------- */
@@ -472,14 +616,15 @@ function DateRangePickerPresets() {
     <div className="demo-stack" style={{ alignItems: "flex-start" }}>
       <div className="demo-row">
         {rangePresets.map((preset, index) => (
-          <button
+          <Button
             key={preset.label}
-            className="button button-secondary button-sm"
+            variant={index === active ? "soft" : "secondary"}
+            size="sm"
+            aria-pressed={index === active}
             onClick={() => setActive(index)}
-            style={index === active ? { borderColor: "var(--brand)", color: "var(--brand)", background: "var(--brand-soft)" } : undefined}
           >
             {preset.label}
-          </button>
+          </Button>
         ))}
       </div>
       <RangeTrigger start={start} end={end} />
@@ -493,7 +638,7 @@ function DateRangePickerBusiness() {
     <div className="demo-stack">
       <div className="demo-row">
         <RangeTrigger start="2026-09-01" end="2026-09-22" />
-        <button className="button button-ghost button-sm" onClick={() => undefined}>清除筛选</button>
+        <Button variant="ghost" size="sm" onClick={() => undefined}>清除筛选</Button>
       </div>
       <p className="demo-note">已选 22 天 · 命中 18 个任务 · 区间含开始与结束当日 · 应用到 示例项目（project-042）的任务列表。</p>
     </div>
@@ -503,70 +648,102 @@ function DateRangePickerBusiness() {
 /* ---------- Checkbox ---------- */
 
 function CheckboxBasic() {
+  const id = useId();
   const items = ["同时导出原始数据", "包含失败步骤", "仅当前项目（project-042）"];
   const [checked, setChecked] = useState([true, false, false]);
   return (
-    <div className="demo-stack" style={{ gap: 10 }}>
+    <div className="grid gap-2.5">
       {items.map((item, index) => (
-        <label key={item} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
-          <CheckboxBox state={checked[index] ? "on" : "off"} onChange={() => setChecked(list => list.map((value,i) => i === index ? !value : value))} />
-          <span>{item}</span>
-        </label>
+        <div key={item} className="flex items-center gap-2">
+          <Checkbox
+            id={`${id}-${index}`}
+            checked={checked[index]}
+            onCheckedChange={(next) => setChecked((list) => list.map((value, i) => (i === index ? next === true : value)))}
+          />
+          <Label htmlFor={`${id}-${index}`} className="cursor-pointer font-normal">
+            {item}
+          </Label>
+        </div>
       ))}
-      <p className="demo-note">点击方框或文案都切换；勾选只改变待提交状态。</p>
+      <p className={noteCls}>点击方框或文案都切换；勾选只改变待提交状态。</p>
     </div>
   );
 }
 
 function CheckboxIndeterminate() {
+  const id = useId();
   const children = ["ds-118", "ds-120", "ds-121"];
   const [checked, setChecked] = useState([true, false, false]);
   const selectedCount = checked.filter(Boolean).length;
-  const parentState = selectedCount === 0 ? "off" : selectedCount === children.length ? "on" : "mixed";
+  const parentState = selectedCount === 0 ? false : selectedCount === children.length ? true : "indeterminate";
   return (
-    <div className="demo-stack" style={{ gap: 10 }}>
-      <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
-        <CheckboxBox state={parentState} onChange={() => setChecked(checked.map(() => selectedCount !== children.length))} />
-        <span>全选（已选 {selectedCount} / {children.length}）</span>
-      </label>
-      <div style={{ display: "grid", gap: 10, paddingLeft: 23 }}>
+    <div className="grid gap-2.5">
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id={`${id}-all`}
+          checked={parentState}
+          onCheckedChange={() => setChecked(checked.map(() => selectedCount !== children.length))}
+          className={indeterminateCls}
+        />
+        <Label htmlFor={`${id}-all`} className="cursor-pointer font-semibold">
+          全选（已选 {selectedCount} / {children.length}）
+        </Label>
+      </div>
+      <div className="grid gap-2.5 pl-6">
         {children.map((child, index) => (
-          <label key={child} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, cursor: "pointer" }}>
-            <CheckboxBox state={checked[index] ? "on" : "off"} onChange={() => setChecked(list => list.map((value,i) => i === index ? !value : value))} />
-            <span className="mono">{child}</span>
-          </label>
+          <div key={child} className="flex items-center gap-2">
+            <Checkbox
+              id={`${id}-${child}`}
+              checked={checked[index]}
+              onCheckedChange={(next) => setChecked((list) => list.map((value, i) => (i === index ? next === true : value)))}
+            />
+            <Label htmlFor={`${id}-${child}`} className="cursor-pointer font-mono font-normal">
+              {child}
+            </Label>
+          </div>
         ))}
       </div>
-      <p className="demo-note">部分选中时父级呈半选态；点击父级在全选 / 全不选间切换。</p>
+      <p className={noteCls}>部分选中时父级呈半选态；点击父级在全选 / 全不选间切换。</p>
     </div>
   );
 }
 
 function CheckboxBusiness() {
+  const id = useId();
   const datasets = [
     { id: "ds-118", name: "电导率筛选第 3 轮" },
     { id: "ds-120", name: "热稳定性复测" },
     { id: "ds-121", name: "空白对照组" },
   ];
   const [selected, setSelected] = useState<string[]>(["ds-118", "ds-120"]);
-  const toggle = (id: string) => setSelected((list) => (list.includes(id) ? list.filter((item) => item !== id) : [...list, id]));
+  const toggle = (item: string) => setSelected((list) => (list.includes(item) ? list.filter((value) => value !== item) : [...list, item]));
   return (
-    <div className="demo-stack" style={{ maxWidth: 420 }}>
-      {datasets.map((dataset) => (
-        <label key={dataset.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", border: "1px solid var(--line)", borderRadius: 10, cursor: "pointer", fontSize: 14 }}>
-          <CheckboxBox state={selected.includes(dataset.id) ? "on" : "off"} onChange={() => toggle(dataset.id)} />
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <strong style={{ display: "block", fontSize: 14 }}>{dataset.name}</strong>
-            <span className="mono" style={{ color: "var(--faint)" }}>{dataset.id}</span>
-          </span>
-        </label>
-      ))}
-      <div className="demo-row">
-        <span className="demo-note">已选 {selected.length} / 3 项</span>
-        <button className="button button-secondary button-sm" disabled={selected.length === 0}>批量导出</button>
-        <button className="button button-ghost button-sm" disabled={selected.length === 0} onClick={() => setSelected([])}>清空选择</button>
+    <div className="grid max-w-[420px] gap-3">
+      <div className="grid gap-2">
+        {datasets.map((dataset) => (
+          <Label
+            key={dataset.id}
+            htmlFor={`${id}-${dataset.id}`}
+            className="flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2.5 font-normal leading-normal has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary-soft"
+          >
+            <Checkbox id={`${id}-${dataset.id}`} checked={selected.includes(dataset.id)} onCheckedChange={() => toggle(dataset.id)} />
+            <span className="grid min-w-0 flex-1">
+              <span className="text-base font-semibold">{dataset.name}</span>
+              <span className="font-mono text-xs text-muted-foreground">{dataset.id}</span>
+            </span>
+          </Label>
+        ))}
       </div>
-      <p className="demo-note">勾选只更新待提交状态；批量动作需显式触发并二次确认。</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-muted-foreground">已选 {selected.length} / 3 项</span>
+        <Button variant="secondary" size="sm" disabled={selected.length === 0}>
+          批量导出
+        </Button>
+        <Button variant="ghost" size="sm" disabled={selected.length === 0} onClick={() => setSelected([])}>
+          清空选择
+        </Button>
+      </div>
+      <p className={noteCls}>勾选只更新待提交状态；批量动作需显式触发并二次确认。</p>
     </div>
   );
 }
@@ -574,84 +751,73 @@ function CheckboxBusiness() {
 /* ---------- Radio ---------- */
 
 function RadioBasic() {
-  const options = ["全部", "运行中", "已完成"];
-  const [value, setValue] = useState("all");
-  const keys = ["all", "running", "finished"];
-  const groupName = useId();
+  const id = useId();
+  const options = [
+    { value: "all", label: "全部" },
+    { value: "running", label: "运行中" },
+    { value: "finished", label: "已完成" },
+  ];
   return (
-    <div className="demo-stack" style={{ gap: 10 }}>
-      <div role="radiogroup" aria-label="任务状态" className="demo-row">
-        {options.map((option, index) => (
-          <label key={option} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, cursor: "pointer" }}>
-            <input type="radio" name={groupName} value={keys[index]} checked={value === keys[index]} onChange={() => setValue(keys[index])} />
-            <span>{option}</span>
-          </label>
+    <div className="grid gap-2.5">
+      <RadioGroup defaultValue="all" aria-label="任务状态" className="flex flex-wrap gap-4">
+        {options.map((option) => (
+          <div key={option.value} className="flex items-center gap-2">
+            <RadioGroupItem id={`${id}-${option.value}`} value={option.value} />
+            <Label htmlFor={`${id}-${option.value}`} className="cursor-pointer font-normal">
+              {option.label}
+            </Label>
+          </div>
         ))}
-      </div>
-      <p className="demo-note">选项平铺一眼看全；方向键在同组内移动并选中。</p>
+      </RadioGroup>
+      <p className={noteCls}>选项平铺一眼看全；方向键在同组内移动并选中。</p>
     </div>
   );
 }
 
-const modeCards = [
+type ModeOption = { value: string; label: string; description: string; disabled?: boolean };
+
+const modeCards: ModeOption[] = [
   { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒" },
   { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 消耗额度" },
 ];
 
-function RadioCard({ option, selected, disabled, onSelect, name }: {name:string; option: { value: string; label: string; description: string }; selected: boolean; disabled?: boolean; onSelect?: () => void }) {
+/** 卡片样式单选：Label 包住 RadioGroupItem，选中 / 禁用样式由 :has() 跟随子项状态。 */
+const radioCardCls =
+  "flex cursor-pointer items-start gap-2.5 rounded-lg border bg-background p-3 font-normal leading-normal has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary-soft has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60";
+
+function RadioCards({ options, value, onValueChange }: { options: ModeOption[]; value: string; onValueChange: (next: string) => void }) {
+  const id = useId();
   return (
-    <label
-      style={{
-        display: "flex",
-        gap: 10,
-        alignItems: "flex-start",
-        padding: "11px 12px",
-        border: selected ? "1.5px solid var(--brand)" : "1px solid var(--line)",
-        borderRadius: 10,
-        background: selected ? "var(--brand-soft)" : "var(--surface)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.55 : 1,
-      }}
-    >
-      <input type="radio" name={name} value={option.value} checked={selected} disabled={disabled} onChange={onSelect}/>
-      <span style={{ minWidth: 0 }}>
-        <strong style={{ display: "block", fontSize: 14 }}>{option.label}</strong>
-        <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{option.description}</span>
-      </span>
-    </label>
+    <RadioGroup value={value} onValueChange={onValueChange} aria-label="计算模式" className="grid gap-3 sm:grid-cols-2">
+      {options.map((option) => (
+        <Label key={option.value} htmlFor={`${id}-${option.value}`} className={radioCardCls}>
+          <RadioGroupItem id={`${id}-${option.value}`} value={option.value} disabled={option.disabled} className="mt-0.5" />
+          <span className="grid gap-0.5">
+            <span className="text-base font-semibold">{option.label}</span>
+            <span className="text-xs text-muted-foreground">{option.description}</span>
+          </span>
+        </Label>
+      ))}
+    </RadioGroup>
   );
 }
 
 function RadioCardOptions() {
-  const groupName = useId();
   const [value, setValue] = useState("fast");
-  return (
-    <div className="demo-grid-2" role="radiogroup" aria-label="计算模式">
-      {modeCards.map((option) => (
-        <RadioCard name={groupName} key={option.value} option={option} selected={value === option.value} onSelect={() => setValue(option.value)} />
-      ))}
-    </div>
-  );
+  return <RadioCards options={modeCards} value={value} onValueChange={setValue} />;
 }
 
 function RadioBusiness() {
-  const groupName = useId();
-  const options = [
-    ...modeCards.map((option) => ({
-      ...option,
-      description: option.value === "fast" ? "CPU · 约 30 秒 · 不计额度" : "GPU · 约 300 秒 · 计入 project-042 额度",
-    })),
-    { value: "ultra", label: "超高精度", description: "需申请权限" },
+  const options: ModeOption[] = [
+    { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒 · 不计额度" },
+    { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 计入 project-042 额度" },
+    { value: "ultra", label: "超高精度", description: "需申请权限", disabled: true },
   ];
   const [value, setValue] = useState("precise");
   return (
-    <div className="demo-stack">
-      <div className="demo-grid-2" role="radiogroup" aria-label="计算模式">
-        {options.map((option) => (
-          <RadioCard name={groupName} key={option.value} option={option} selected={value === option.value} disabled={option.value === "ultra"} onSelect={() => setValue(option.value)} />
-        ))}
-      </div>
-      <p className="demo-note">有代价的档位写明代价；无权限档位禁用并注明，不隐藏。</p>
+    <div className="grid gap-3">
+      <RadioCards options={options} value={value} onValueChange={setValue} />
+      <p className={noteCls}>有代价的档位写明代价；无权限档位禁用并注明，不隐藏。</p>
     </div>
   );
 }
@@ -659,27 +825,32 @@ function RadioBusiness() {
 /* ---------- Switch ---------- */
 
 function SwitchBasic() {
+  const id = useId();
   const [mail, setMail] = useState(true);
   const [autoSave, setAutoSave] = useState(false);
   return (
-    <div className="demo-stack" style={{ gap: 12 }}>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, cursor: "pointer" }}>
-        <SwitchTrack on={mail} label="邮件通知" onToggle={() => setMail((value) => !value)} />
-        <span>邮件通知</span>
-      </label>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, cursor: "pointer" }}>
-        <SwitchTrack on={autoSave} label="自动保存" onToggle={() => setAutoSave((value) => !value)} />
-        <span>自动保存</span>
-      </label>
-      <p className="demo-note">点击即生效，无需保存按钮；标签写清控制对象。</p>
+    <div className="grid gap-3">
+      <div className="flex items-center gap-2.5">
+        <Switch id={`${id}-mail`} checked={mail} onCheckedChange={setMail} />
+        <Label htmlFor={`${id}-mail`} className="cursor-pointer font-normal">
+          邮件通知
+        </Label>
+      </div>
+      <div className="flex items-center gap-2.5">
+        <Switch id={`${id}-autosave`} checked={autoSave} onCheckedChange={setAutoSave} />
+        <Label htmlFor={`${id}-autosave`} className="cursor-pointer font-normal">
+          自动保存
+        </Label>
+      </div>
+      <p className={noteCls}>点击即生效，无需保存按钮；标签写清控制对象。</p>
     </div>
   );
 }
 
 function SwitchStates() {
+  const id = useId();
   const [syncOn, setSyncOn] = useState(false);
   const [syncPending, setSyncPending] = useState(false);
-  const [shareOn, setShareOn] = useState(false);
   const [sharePending, setSharePending] = useState(false);
   const [failed, setFailed] = useState(false);
   const toggleSync = () => {
@@ -699,42 +870,61 @@ function SwitchStates() {
     }, 900);
   };
   return (
-    <div className="demo-stack" style={{ gap: 12 }}>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
-        <SwitchTrack on={syncOn} loading={syncPending} label="远程同步" onToggle={toggleSync} />
-        <span>远程同步{syncPending && <span style={{ color: "var(--text-muted)" }}>（写入中…）</span>}</span>
-      </label>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
-        <SwitchTrack on={shareOn} loading={sharePending} label="团队共享" onToggle={toggleShare} />
-        <span>团队共享（演示失败回滚）</span>
+    <div className="grid gap-3">
+      <div className="flex items-center gap-2.5">
+        {/* 写入成功前不改变 checked；pending 期间禁用防止反复点击 */}
+        <Switch id={`${id}-sync`} checked={syncOn} disabled={syncPending} aria-busy={syncPending} onCheckedChange={toggleSync} />
+        <Label htmlFor={`${id}-sync`} className="font-normal">
+          远程同步
+        </Label>
+        {syncPending && (
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <Loader2 className="size-3 animate-spin" aria-hidden="true" />
+            写入中…
+          </span>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-2.5">
+        <Switch id={`${id}-share`} checked={false} disabled={sharePending} aria-busy={sharePending} onCheckedChange={toggleShare} />
+        <Label htmlFor={`${id}-share`} className="font-normal">
+          团队共享（演示失败回滚）
+        </Label>
+        {sharePending && <Loader2 className="size-3 animate-spin text-muted-foreground" aria-label="写入中" />}
         {failed && (
-          <span role="alert" style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--red)", fontSize: 12 }}>
-            <AlertCircle size={12} />
+          <span role="alert" className="inline-flex items-center gap-1 text-xs text-danger">
+            <AlertCircle className="size-3" aria-hidden="true" />
             保存失败，已回滚
           </span>
         )}
-      </label>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--text-muted)" }}>
-        <SwitchTrack on={false} disabled label="数据分析" />
-        <span>数据分析（需管理员开启）</span>
-      </label>
-      <p className="demo-note">异步写入成功才切换位置；失败回滚到原位置并提示，不留假态。</p>
+      </div>
+      <div className="flex items-center gap-2.5">
+        <Switch id={`${id}-analytics`} checked={false} disabled />
+        <Label htmlFor={`${id}-analytics`} className="font-normal text-muted-foreground">
+          数据分析（需管理员开启）
+        </Label>
+      </div>
+      <p className={noteCls}>异步写入成功才切换位置；失败回滚到原位置并提示，不留假态。</p>
     </div>
   );
 }
 
 function SwitchBusiness() {
+  const id = useId();
   const [on, setOn] = useState(true);
   return (
-    <div className="demo-stack" style={{ maxWidth: 460 }}>
-      <div className="card-demo" style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-        <SwitchTrack on={on} label="任务自动刷新" onToggle={() => setOn((value) => !value)} />
-        <div style={{ minWidth: 0 }}>
-          <strong style={{ fontSize: 14 }}>任务自动刷新</strong>
-          <p>开启后每 30 秒刷新 <span className="mono">run-28003</span> 的状态，关闭即停止，无需任何提交动作。</p>
+    <div className="grid max-w-[460px] gap-3">
+      <div className="flex items-start gap-3 rounded-lg border bg-card p-4 text-card-foreground">
+        <Switch id={`${id}-refresh`} checked={on} onCheckedChange={setOn} aria-describedby={`${id}-refresh-desc`} className="mt-0.5" />
+        <div className="grid min-w-0 gap-1">
+          <Label htmlFor={`${id}-refresh`} className="cursor-pointer text-base font-semibold">
+            任务自动刷新
+          </Label>
+          <p id={`${id}-refresh-desc`} className="m-0 text-sm text-muted-foreground">
+            开启后每 30 秒刷新 <span className="font-mono">run-28003</span> 的状态，关闭即停止，无需任何提交动作。
+          </p>
         </div>
       </div>
-      <p className="demo-note" style={{ color: on ? "var(--green)" : "var(--text-muted)" }}>
+      <p role="status" className={cn("m-0 text-sm", on ? "text-success" : "text-muted-foreground")}>
         {on ? "已开启 · 状态每 30 秒自动更新" : "已关闭 · 状态需手动刷新"}
       </p>
     </div>
@@ -743,54 +933,90 @@ function SwitchBusiness() {
 
 /* ---------- Form ---------- */
 
-function FormBasic() {
+function RequiredMark() {
   return (
-    <div className="demo-stack" style={{ maxWidth: 420, gap: 14 }}>
-      <label className="field">
-        任务名称 <em>*</em>
-        <input className="field-control" style={{ fontWeight: 400 }} placeholder="例如：第 3 轮电导率优化" />
-        <small>用于列表与导出命名，2–40 个字符。</small>
-      </label>
-      <label className="field">
-        所属项目 <em>*</em>
-        <SelectTrigger label="选择项目" placeholder width="100%" />
-      </label>
-      <p className="demo-note">垂直布局是默认：标签在上、辅助文本常驻在控件下方；必填星号与校验规则配套。</p>
-    </div>
+    <span aria-hidden="true" className="ml-0.5 text-danger">
+      *
+    </span>
+  );
+}
+
+function FormBasic() {
+  const id = useId();
+  return (
+    <form className="grid max-w-[420px] gap-4" onSubmit={(event) => event.preventDefault()}>
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-name`}>
+          任务名称
+          <RequiredMark />
+        </Label>
+        <Input id={`${id}-name`} required aria-describedby={`${id}-name-help`} placeholder="例如：第 3 轮电导率优化" />
+        <p id={`${id}-name-help`} className={helpCls}>用于列表与导出命名，2–40 个字符。</p>
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-project`}>
+          所属项目
+          <RequiredMark />
+        </Label>
+        <Select required>
+          <SelectTrigger id={`${id}-project`} aria-required="true" className="data-[placeholder]:text-muted-foreground">
+            <SelectValue placeholder="选择项目" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="project-042">示例项目（project-042）</SelectItem>
+            <SelectItem value="project-043">示例项目二（project-043）</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <p className={noteCls}>垂直布局是默认：标签在上、辅助文本常驻在控件下方；必填星号与校验规则配套。</p>
+    </form>
   );
 }
 
 function FormValidation() {
+  const id = useId();
   const [value, setValue] = useState("620");
   const num = Number(value);
   const invalid = value.trim() === "" || Number.isNaN(num) || num < 0 || num > 500;
   return (
-    <div className="demo-stack" style={{ maxWidth: 420, gap: 14 }}>
-      <label className={invalid ? "field field-error" : "field"}>
-        样本质量 <em>*</em>
-        <span style={{ position: "relative", display: "block" }}>
-          <input
-            className="field-control"
-            style={{ fontWeight: 400, paddingRight: 40 }}
+    <div className="grid max-w-[420px] gap-4">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-mass`}>
+          样本质量
+          <RequiredMark />
+        </Label>
+        <div className="relative">
+          <Input
+            id={`${id}-mass`}
+            required
             value={value}
-            aria-invalid={invalid}
             inputMode="decimal"
+            aria-invalid={invalid}
+            aria-describedby={`${id}-mass-msg`}
             onChange={(event) => setValue(event.target.value)}
+            className={cn("pr-10", invalid && invalidCls)}
           />
-          <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "var(--faint)", fontSize: 12, fontWeight: 400 }}>mg</span>
-        </span>
+          <span aria-hidden="true" className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+            mg
+          </span>
+        </div>
         {invalid ? (
-          <small role="alert">质量需在 0–500 mg 之间{value.trim() !== "" && !Number.isNaN(num) ? `，当前为 ${value} mg` : ""}。</small>
+          <p id={`${id}-mass-msg`} role="alert" className={errorTextCls}>
+            质量需在 0–500 mg 之间{value.trim() !== "" && !Number.isNaN(num) ? `，当前为 ${value} mg` : ""}。
+          </p>
         ) : (
-          <small style={{ color: "var(--green)" }}>在允许范围内，可以提交。</small>
+          <p id={`${id}-mass-msg`} className="m-0 text-xs text-success">
+            在允许范围内，可以提交。
+          </p>
         )}
-      </label>
-      <p className="demo-note">错误就近显示在字段正下方：控件红边 + aria-invalid=&quot;true&quot;，文案 role=&quot;alert&quot; 即时播报；提交失败后焦点移到首个错误字段。</p>
+      </div>
+      <p className={noteCls}>错误就近显示在字段正下方：控件红边 + aria-invalid=&quot;true&quot;，文案 role=&quot;alert&quot; 即时播报；提交失败后焦点移到首个错误字段。</p>
     </div>
   );
 }
 
 function FormBusiness() {
+  const id = useId();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const submit = () => {
@@ -802,33 +1028,56 @@ function FormBusiness() {
     }, 1500);
   };
   return (
-    <div className="demo-stack" style={{ maxWidth: 460, gap: 14 }}>
-      <label className="field">
-        任务名称 <em>*</em>
-        <input className="field-control" style={{ fontWeight: 400 }} defaultValue="第 3 轮电导率优化" />
-        <small>用于列表与导出命名，2–40 个字符。</small>
-      </label>
-      <label className="field">
-        数据集 <em>*</em>
-        <SelectTrigger label="电导率筛选第 3 轮（ds-118）" width="100%" />
-      </label>
-      <div className="demo-row">
-        <button className="button button-primary" disabled={submitting} onClick={submit}>
-          {submitting && <span className="spinner" aria-hidden="true" />}
+    <form
+      className="grid max-w-[460px] gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        submit();
+      }}
+    >
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-name`}>
+          任务名称
+          <RequiredMark />
+        </Label>
+        <Input id={`${id}-name`} required defaultValue="第 3 轮电导率优化" aria-describedby={`${id}-name-help`} />
+        <p id={`${id}-name-help`} className={helpCls}>用于列表与导出命名，2–40 个字符。</p>
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-dataset`}>
+          数据集
+          <RequiredMark />
+        </Label>
+        <Select required defaultValue="ds-118">
+          <SelectTrigger id={`${id}-dataset`} aria-required="true">
+            <SelectValue placeholder="选择数据集" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ds-118">电导率筛选第 3 轮（ds-118）</SelectItem>
+            <SelectItem value="ds-120">热稳定性复测（ds-120）</SelectItem>
+            <SelectItem value="ds-121">空白对照组（ds-121）</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" disabled={submitting}>
+          {submitting && <Loader2 className="animate-spin" aria-hidden="true" />}
           {submitting ? "正在创建" : "创建计算任务"}
-        </button>
-        <span className="demo-note">将使用 示例项目（<span className="mono">project-042</span>）· 预计最长 300 秒</span>
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          将使用 示例项目（<span className="font-mono">project-042</span>）· 预计最长 300 秒
+        </span>
       </div>
       {done && (
-        <div className="status-line status-success">
-          <Check size={16} />
-          <div>
-            <strong>任务 run-28004 已创建</strong>
-            <span>可在任务列表查看进度；若提交失败，全部已填内容会被保留。</span>
+        <div role="status" className="flex items-start gap-2.5 rounded-lg border border-success/30 bg-success-soft p-3 text-sm">
+          <Check className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+          <div className="grid gap-0.5">
+            <strong className="font-semibold text-foreground">任务 run-28004 已创建</strong>
+            <span className="text-muted-foreground">可在任务列表查看进度；若提交失败，全部已填内容会被保留。</span>
           </div>
         </div>
       )}
-    </div>
+    </form>
   );
 }
 
@@ -876,7 +1125,7 @@ function UploadProgress() {
             <span className="mono" style={{ color: "var(--text-muted)" }}>72%</span>
           </span>
         </span>
-        <button className="inline-action">取消</button>
+        <Button variant="link" size="sm">取消</Button>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "1px solid color-mix(in srgb, var(--red) 30%, var(--line))", borderRadius: 10, fontSize: 14 }}>
         <FileText size={15} style={{ color: "var(--red)", flex: "0 0 auto" }} />
@@ -884,7 +1133,7 @@ function UploadProgress() {
           <strong style={{ display: "block", fontSize: 14 }}>notes_final(2).xlsx</strong>
           <span role="alert" style={{ color: "var(--red)", fontSize: 12 }}>超过 50 MB 上限（61 MB），未开始上传。</span>
         </span>
-        <button className="inline-action">重试</button>
+        <Button variant="link" size="sm">重试</Button>
       </div>
       <p className="demo-note">逐文件展示进度与百分比；失败给出具体原因并可单独重试，不静默丢弃。</p>
     </div>
@@ -975,7 +1224,7 @@ function SearchFieldBusiness() {
       ) : (
         <div className="empty-line">
           <span>没有匹配「{keyword}」的任务</span>
-          <button className="inline-action" onClick={() => setKeyword("")}>清除关键词</button>
+          <Button variant="link" size="sm" onClick={() => setKeyword("")}>清除关键词</Button>
         </div>
       )}
       <p className="demo-note">防抖 300ms 即时过滤；空结果给出清除动作。</p>
@@ -989,17 +1238,17 @@ function FilterBarBasic() {
   return (
     <div className="demo-stack">
       <div className="demo-row" role="search" aria-label="筛选条件">
-        <SelectTrigger small label="状态：全部" />
-        <SelectTrigger small label="创建时间：最近 30 天" />
-        <SelectTrigger small label="负责人：全部" />
-        <button className="button button-secondary button-sm">
+        <FilterTrigger small label="状态：全部" />
+        <FilterTrigger small label="创建时间：最近 30 天" />
+        <FilterTrigger small label="负责人：全部" />
+        <Button variant="secondary" size="sm">
           更多筛选
-          <ChevronDown size={12} />
-        </button>
-        <button className="button button-ghost button-sm">
-          <RotateCcw size={12} />
+          <ChevronDown />
+        </Button>
+        <Button variant="ghost" size="sm">
+          <RotateCcw />
           重置
-        </button>
+        </Button>
       </div>
       <p className="demo-note">常用条件外露不超过 3 个，其余收进“更多筛选”；有非默认条件时出现重置入口。</p>
     </div>
@@ -1016,10 +1265,10 @@ function FilterBarActiveFilters() {
         {active.map((filter) => (
           <TagChip key={filter} label={filter} onRemove={() => setActive((list) => list.filter((item) => item !== filter))} />
         ))}
-        <button className="button button-ghost button-sm" onClick={() => setActive(defaultActiveFilters)}>
-          <RotateCcw size={12} />
+        <Button variant="ghost" size="sm" onClick={() => setActive(defaultActiveFilters)}>
+          <RotateCcw />
           重置
-        </button>
+        </Button>
       </div>
       <p className="demo-note">面板收起后已选条件以 Tag 回显，可单个移除；重置一键恢复默认（演示中恢复全部标签）。</p>
     </div>
@@ -1030,12 +1279,12 @@ function FilterBarBusiness() {
   return (
     <div className="demo-stack">
       <div className="demo-row" role="search" aria-label="筛选条件">
-        <SelectTrigger small label="状态：运行中" />
-        <SelectTrigger small label="创建时间：最近 7 天" />
-        <button className="button button-secondary button-sm">
+        <FilterTrigger small label="状态：运行中" />
+        <FilterTrigger small label="创建时间：最近 7 天" />
+        <Button variant="secondary" size="sm">
           更多筛选
-          <ChevronDown size={12} />
-        </button>
+          <ChevronDown />
+        </Button>
         <TagChip label="状态 = 运行中" onRemove={() => undefined} />
       </div>
       <div className="table-wrap">
