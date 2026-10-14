@@ -81,7 +81,7 @@ export const ExperimentStep = React.forwardRef<HTMLDivElement, ExperimentStepPro
           aria-label={title ? `${title} 节点` : "实验节点"}
           className={cn(
             "m-0 flex list-none p-0",
-            vertical ? "flex-col gap-1" : "items-start gap-1 overflow-x-auto pb-1",
+            vertical ? "flex-col gap-1" : "relative items-start gap-1 overflow-x-auto pb-1",
           )}
         >
           {steps.map((step, index) => {

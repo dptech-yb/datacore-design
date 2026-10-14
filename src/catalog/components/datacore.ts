@@ -187,7 +187,7 @@ const { locatedId, locate } = useCitationLocator();
     name: "SourceCard",
     chineseName: "来源卡片",
     category: "datacore",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "以卡片形式展示一条来源的完整信息：标题、发布方、更新时间与可访问状态，并提供打开原文的入口。",
     usage:
@@ -314,7 +314,7 @@ const { locatedId, locate } = useCitationLocator();
     name: "AgentActivity",
     chineseName: "Agent 活动",
     category: "datacore",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "实时展示 Agent 当前在做什么：所处步骤、正在调用的工具、以及是否在等待用户确认。",
     usage:
@@ -787,7 +787,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
     name: "ProjectSelector",
     chineseName: "项目选择器",
     category: "datacore",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "选择动作归属的项目，同时展示项目 ID、默认项目标记与当前用户在项目内的权限状态。",
     usage:
@@ -923,7 +923,7 @@ const canExecute = hasPermission(current?.permission, "executor");
     name: "DatasetPicker",
     chineseName: "数据集选择器",
     category: "datacore",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "按数据集、批次、版本与来源选择计算或分析的输入数据，并让版本与来源显式可见。",
     usage:
@@ -1063,7 +1063,7 @@ import { DatasetPicker } from "@/components/ui/dataset-picker";
     name: "PermissionScope",
     chineseName: "权限范围",
     category: "datacore",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "用固定四级语义表达权限范围：可见、可编辑、可执行、管理员，并说明每一级能做什么、不能做什么。",
     usage:
@@ -1190,7 +1190,7 @@ import { hasPermission, PermissionScope } from "@/components/ui/permission-scope
     name: "AuditTimeline",
     chineseName: "审计时间线",
     category: "datacore",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "按时间顺序记录谁在何时对什么做了什么，让每一次变更可追溯、可问责。",
     usage:
@@ -1315,7 +1315,7 @@ import { hasPermission, PermissionScope } from "@/components/ui/permission-scope
     name: "ExperimentStep",
     chineseName: "实验步骤",
     category: "datacore",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "把一次实验表达为有序的业务节点流：配置、排队、运行、分析、完成，并标记当前节点与失败节点。",
     usage:
@@ -1580,7 +1580,7 @@ const blocked = hasBlockingIssues(issues);
     name: "ToolRunCard",
     chineseName: "工具运行卡片",
     category: "datacore",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "展示一次工具调用的完整留痕：工具名、参数摘要、输入输出、耗时与结果状态。",
     usage:

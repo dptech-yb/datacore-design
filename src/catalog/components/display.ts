@@ -404,7 +404,7 @@ import { Badge } from "@/components/ui/badge";
     name: "Statistic",
     chineseName: "统计数值",
     category: "display",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "突出展示单个关键数值及其趋势，用于看板与概览区。",
     usage:
@@ -538,7 +538,7 @@ const link =
     name: "Timeline",
     chineseName: "时间线",
     category: "display",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "按时间顺序展示事件流，表达“发生了什么、进行到哪、接下来是什么”。",
     usage:
@@ -665,7 +665,7 @@ import { Button } from "@/components/ui/button";
     name: "Tree",
     chineseName: "树",
     category: "display",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "以缩进层级展示父子结构数据，支持展开、选择与定位。",
     usage:
@@ -945,7 +945,7 @@ import { Badge } from "@/components/ui/badge";
     name: "CodeBlock",
     chineseName: "代码块",
     category: "display",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "以等宽字体展示代码与命令，支持语言标签、行号、高亮行、换行切换与一键复制。",
     usage:
@@ -1189,7 +1189,7 @@ import { toast } from "@/components/ui/sonner";
     name: "FileList",
     chineseName: "文件列表",
     category: "display",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "以列表展示文件及其状态，支持预览、下载、删除与上传进度。",
     usage:
@@ -1492,7 +1492,7 @@ import { Button } from "@/components/ui/button";
     name: "Message",
     chineseName: "全局提示",
     category: "feedback",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "操作完成后的轻量全局反馈，自动出现、自动消失，不打断流程。",
     usage:
@@ -1628,7 +1628,7 @@ function SaveDatasetButton() {
     name: "Notification",
     chineseName: "通知",
     category: "feedback",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "系统侧的异步事件通知，带标题与操作，可停留等待用户处理。",
     usage:
@@ -1760,7 +1760,7 @@ toast.error("计算任务执行失败", {
     name: "Progress",
     chineseName: "进度条",
     category: "feedback",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "展示确定性任务的完成比例，让用户知道还要等多久。",
     usage:
@@ -2179,7 +2179,7 @@ import { Button } from "@/components/ui/button";
     name: "Drawer",
     chineseName: "抽屉",
     category: "overlay",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "从屏幕边缘滑出的辅助面板，承载与当前页强相关的详情或操作，不打断页面上下文。",
     usage:
@@ -2324,7 +2324,7 @@ const [open, setOpen] = useState(false);
     name: "Popconfirm",
     chineseName: "气泡确认",
     category: "overlay",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "在操作元素旁弹出的小型确认气泡，用于轻量、影响范围小的确认。",
     usage:

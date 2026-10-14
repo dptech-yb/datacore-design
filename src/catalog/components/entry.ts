@@ -177,7 +177,7 @@ const [name, setName] = useState("示例项目（project-042）");
     name: "NumberInput",
     chineseName: "数字输入框",
     category: "entry",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "录入带范围、步长和精度约束的数值，把非法数字拦在输入阶段。",
     usage:
@@ -323,7 +323,7 @@ const missing = mass === null;
     name: "Textarea",
     chineseName: "多行文本框",
     category: "entry",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "收集多行、较长的自由文本，如实验备注、失败原因、方法描述。",
     usage:
@@ -843,7 +843,7 @@ const [value, setValue] = useState<string[]>(["round-3"]);
     name: "DatePicker",
     chineseName: "日期选择器",
     category: "entry",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "选择单个日期或日期时间，保证格式合法、范围受控。",
     usage:
@@ -968,7 +968,7 @@ import { Label } from "@/components/ui/label";
     name: "DateRangePicker",
     chineseName: "日期范围选择器",
     category: "entry",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "选择一个起止时间段，常用于列表筛选与统计区间。",
     usage:
@@ -1767,7 +1767,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
     name: "Upload",
     chineseName: "上传",
     category: "entry",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "把本地文件送入平台，是数据导入流程的入口；原始文件必须完整保留、可追溯。",
     usage:
@@ -1914,7 +1914,7 @@ import { Upload, UploadFileList } from "@/components/ui/upload";
     name: "SearchField",
     chineseName: "搜索框",
     category: "entry",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "输入关键词即时定位对象，是列表与全局导航的查找入口。",
     usage:
@@ -2029,7 +2029,7 @@ import { Upload, UploadFileList } from "@/components/ui/upload";
     name: "FilterBar",
     chineseName: "筛选栏",
     category: "entry",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "组织列表的筛选条件：常用条件外露，其余收起，已选条件一目了然。",
     usage:

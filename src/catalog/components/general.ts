@@ -858,7 +858,7 @@ function RunStatusTable() {
     name: "Tag",
     chineseName: "标签",
     category: "general",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "标记对象的分类、属性或来源，支持移除与选择，是属性维度的最小载体。",
     usage:
@@ -1149,7 +1149,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
     name: "Empty",
     chineseName: "空状态",
     category: "general",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "在没有内容可展示时告诉用户发生了什么、是否需要操作、下一步做什么。",
     usage:
@@ -1280,7 +1280,7 @@ import { Empty } from "@/components/ui/empty";
     name: "Skeleton",
     chineseName: "骨架屏",
     category: "general",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "在数据到达前按真实内容的布局占位，让加载前后结构一致、不闪烁、不跳动。",
     usage:
@@ -1445,7 +1445,7 @@ function RunList() {
     name: "Result",
     chineseName: "结果页",
     category: "general",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "在流程结束或整页异常时给出明确结论、原因说明与后续动作。",
     usage:

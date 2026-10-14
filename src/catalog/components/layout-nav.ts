@@ -964,7 +964,7 @@ import { Lock } from "lucide-react";
     name: "Menu",
     chineseName: "导航菜单",
     category: "navigation",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "应用的侧边导航：组织跨页面的功能入口，并标示当前所在位置。",
     usage:
@@ -1274,7 +1274,7 @@ import { Lock } from "lucide-react";
     name: "Steps",
     chineseName: "步骤条",
     category: "navigation",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "把多阶段流程拆成有序步骤，告诉用户流程进行到哪一步、每一步的结果。",
     usage:
@@ -1412,7 +1412,7 @@ import { XCircle } from "lucide-react";
     name: "Pagination",
     chineseName: "分页",
     category: "navigation",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "把长列表分页，告诉用户总量与当前位置，并允许翻页与调整每页条数。",
     usage:
@@ -1626,7 +1626,7 @@ const goTo = (nextPage: number) => (event: React.MouseEvent) => {
     name: "Dropdown",
     chineseName: "下拉菜单",
     category: "navigation",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "把一组低频动作收进触发元素背后的浮层菜单，保持界面清爽。",
     usage:
@@ -1823,7 +1823,7 @@ import { ChevronDown, Lock } from "lucide-react";
     name: "Segmented",
     chineseName: "分段选择器",
     category: "navigation",
-    status: "beta",
+    status: "stable",
     version: "0.1.0",
     purpose: "少量互斥选项的即时切换器，选中立即生效，像开关一样轻量。",
     usage:
