@@ -7,6 +7,13 @@
 - Full contract: `llms-full.txt`
 - Machine-readable registry: `component-registry.json`
 - Human site: `https://design.datacore.dp.cd.mba/`
+- Installable source components (shadcn registry format): `https://design.datacore.dp.cd.mba/r/registry.json`
+
+## Install components (React 18 + Tailwind 3 + TS, alias `@/` → `src/`)
+
+1. Theme first: `npx shadcn@2.3.0 add https://design.datacore.dp.cd.mba/r/theme.json`, then in tailwind.config `import preset from "./datacore.preset.js"` and set `presets: [preset]` and import `datacore-tokens.css` in the entry CSS.
+2. Then components: `npx shadcn@2.3.0 add https://design.datacore.dp.cd.mba/r/<name>.json` (dependencies are pulled automatically). Offline: `node add.mjs https://design.datacore.dp.cd.mba/r <names...>` (download `/r/add.mjs`).
+3. Use only semantic token classes (bg-primary, text-muted-foreground, bg-success-soft…), never raw palette colors or hex. Dark mode: `data-theme="dark"` on <html> or a `dark` class on a container.
 
 ## Product context
 
@@ -38,15 +45,15 @@ DataCore is a data-governance and intelligent-collaboration platform for project
 - Typography (排版, stable): 用固定的字号、字重与语义色层级表达信息结构，保证全站文字可读、可扫、一致。
 - Divider (分割线, stable): 在内容之间建立分组边界，帮助用户区分不同主题或功能区块。
 - Badge (徽标, stable): 用语义色加短文案标记对象的状态或数量，是状态语义的最小载体。
-- Tag (标签, beta): 标记对象的分类、属性或来源，支持关闭与选择，是属性维度的最小载体。
+- Tag (标签, beta): 标记对象的分类、属性或来源，支持移除与选择，是属性维度的最小载体。
 - Card (卡片, stable): 把同一主题的内容与动作聚合为一个可扫描、可复用的容器。
 - Empty (空状态, beta): 在没有内容可展示时告诉用户发生了什么、是否需要操作、下一步做什么。
 - Skeleton (骨架屏, beta): 在数据到达前按真实内容的布局占位，让加载前后结构一致、不闪烁、不跳动。
 - Result (结果页, beta): 在流程结束或整页异常时给出明确结论、原因说明与后续动作。
 - Layout (页面骨架, stable): 定义应用骨架：侧边导航、顶栏与内容区的固定结构，所有页面共享同一副骨架。
-- Stack (堆叠布局, stable): 沿一个方向（垂直或水平）排列子元素并统一间距，是使用频率最高的局部布局工具。
-- Grid (栅格, stable): 用 12 列栅格组织二维布局，让卡片与统计块在不同断点下保持对齐。
-- Splitter (分栏器, experimental): 把内容区拆成两个可拖拽调整的面板，让用户按任务需要自行分配空间。
+- Stack (堆叠布局, stable): 沿一个方向（垂直或水平）排列子元素并统一间距，是使用频率最高的局部布局写法。
+- Grid (栅格, stable): 用 CSS Grid 组织二维布局，让卡片与统计块在不同断点下保持对齐。
+- Splitter (分栏器, experimental): 把内容区拆成可拖拽调整的面板，让用户按任务需要自行分配空间。
 - PageHeader (页头, stable): 页面顶部的标题区：标题、说明、状态与页面级动作，告诉用户当前页面是什么、能做什么。
 - Breadcrumb (面包屑, stable): 展示当前页面在层级中的位置，并提供逐级向上返回的路径。
 - Menu (导航菜单, beta): 应用的侧边导航：组织跨页面的功能入口，并标示当前所在位置。
@@ -56,7 +63,7 @@ DataCore is a data-governance and intelligent-collaboration platform for project
 - Dropdown (下拉菜单, beta): 把一组低频动作收进触发元素背后的浮层菜单，保持界面清爽。
 - Segmented (分段选择器, beta): 少量互斥选项的即时切换器，选中立即生效，像开关一样轻量。
 - Input (输入框, stable): 收集单行短文本，是表单里最基础的信息录入单元。
-- InputNumber (数字输入框, beta): 录入带范围、步长和精度约束的数值，把非法数字拦在输入阶段。
+- NumberInput (数字输入框, beta): 录入带范围、步长和精度约束的数值，把非法数字拦在输入阶段。
 - Textarea (多行文本框, beta): 收集多行、较长的自由文本，如实验备注、失败原因、方法描述。
 - Select (选择器, stable): 从一组确定选项中选择单个或多个值，把自由录入变成受控选择。
 - Combobox (组合框, experimental): 在可搜索的选项列表中既可选择已有值，也允许输入并创建新值。
@@ -75,7 +82,7 @@ DataCore is a data-governance and intelligent-collaboration platform for project
 - Timeline (时间线, beta): 按时间顺序展示事件流，表达“发生了什么、进行到哪、接下来是什么”。
 - Tree (树, beta): 以缩进层级展示父子结构数据，支持展开、选择与定位。
 - Collapse (折叠面板, stable): 将次要内容折叠进面板，让页面默认只呈现主线信息。
-- CodeBlock (代码块, beta): 以等宽字体展示代码与命令，支持语法高亮、行号与一键复制。
+- CodeBlock (代码块, beta): 以等宽字体展示代码与命令，支持语言标签、行号、高亮行、换行切换与一键复制。
 - JsonViewer (JSON 查看器, experimental): 以可折叠树展示 JSON 数据，支持按路径展开与复制节点值。
 - FileList (文件列表, beta): 以列表展示文件及其状态，支持预览、下载、删除与上传进度。
 - Alert (警告提示, stable): 在页面或区块内展示需要持续关注的上下文提示，随内容出现，不自动消失。

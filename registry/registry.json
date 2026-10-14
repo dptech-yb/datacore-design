@@ -969,6 +969,246 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "citation",
+      "type": "registry:ui",
+      "title": "Citation 引用角标",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "badge",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "ui/citation.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "source-card",
+      "type": "registry:ui",
+      "title": "SourceCard 来源卡片",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "badge",
+        "skeleton"
+      ],
+      "files": [
+        {
+          "path": "ui/source-card.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "agent-activity",
+      "type": "registry:ui",
+      "title": "AgentActivity Agent 活动",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "badge",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "ui/agent-activity.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "run-status",
+      "type": "registry:ui",
+      "title": "RunStatus 运行状态",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "badge",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "ui/run-status.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "confirm-panel",
+      "type": "registry:ui",
+      "title": "ConfirmPanel 确认面板",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "ui/confirm-panel.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "project-selector",
+      "type": "registry:ui",
+      "title": "ProjectSelector 项目选择器",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "badge",
+        "button",
+        "command",
+        "popover",
+        "skeleton",
+        "permission-scope"
+      ],
+      "files": [
+        {
+          "path": "ui/project-selector.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "dataset-picker",
+      "type": "registry:ui",
+      "title": "DatasetPicker 数据集选择器",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "badge",
+        "button",
+        "command",
+        "popover",
+        "skeleton"
+      ],
+      "files": [
+        {
+          "path": "ui/dataset-picker.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "permission-scope",
+      "type": "registry:ui",
+      "title": "PermissionScope 权限范围",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "badge",
+        "button",
+        "skeleton",
+        "table",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "ui/permission-scope.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "audit-timeline",
+      "type": "registry:ui",
+      "title": "AuditTimeline 审计时间线",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "badge",
+        "button",
+        "skeleton",
+        "tabs"
+      ],
+      "files": [
+        {
+          "path": "ui/audit-timeline.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "experiment-step",
+      "type": "registry:ui",
+      "title": "ExperimentStep 实验步骤",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "ui/experiment-step.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "data-quality-notice",
+      "type": "registry:ui",
+      "title": "DataQualityNotice 数据质量提示",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "badge",
+        "button",
+        "collapsible"
+      ],
+      "files": [
+        {
+          "path": "ui/data-quality-notice.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "tool-run-card",
+      "type": "registry:ui",
+      "title": "ToolRunCard 工具运行卡片",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "badge",
+        "button",
+        "collapsible"
+      ],
+      "files": [
+        {
+          "path": "ui/tool-run-card.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

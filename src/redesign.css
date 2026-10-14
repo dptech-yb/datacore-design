@@ -32,7 +32,7 @@ textarea {
   touch-action: manipulation;
 }
 /* Radix 菜单/列表项用高亮背景表示焦点，不再叠加站点的焦点外框 */
-:where(button, a, input, textarea, select, summary, [tabindex]):not([role="option"], [role^="menuitem"]):focus-visible {
+:where(button, a, input, textarea, select, summary, [tabindex]):not([role="option"], [role^="menuitem"], [cmdk-input], [data-no-site-focus]):focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 4px;
 }
