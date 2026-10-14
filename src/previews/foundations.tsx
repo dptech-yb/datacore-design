@@ -1,39 +1,71 @@
 import { AlertTriangle, Bot, CheckCircle2, Database, Download, FlaskConical, Plus, Search, XCircle } from "lucide-react";
 import { useState } from "react";
 import type { PreviewFn } from "./types";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
+const SEMANTIC = [
+  ["primary", "Primary / 动作、链接、选中"],
+  ["success", "Success / 完成、通过"],
+  ["warning", "Warning / 待确认、需处理"],
+  ["danger", "Danger / 失败、阻断、删除"],
+  ["agent", "Agent / AI 产出与建议"],
+] as const;
+const SCALE = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900"];
+
+/** 直接读取组件源令牌（registry/styles/tokens.css），与组件用的是同一份值。 */
 function ColorSemantic() {
   return (
-    <div className="swatch-grid">
-      <div className="swatch"><div className="swatch-color" style={{ background: "#2664e8" }}><span>#2664e8</span></div><div className="swatch-label">Brand / 动作与链接</div></div>
-      <div className="swatch"><div className="swatch-color" style={{ background: "#058764" }}><span>#058764</span></div><div className="swatch-label">Success / 完成</div></div>
-      <div className="swatch"><div className="swatch-color" style={{ background: "#b87308" }}><span>#b87308</span></div><div className="swatch-label">Warning / 待确认</div></div>
-      <div className="swatch"><div className="swatch-color" style={{ background: "#c33636" }}><span>#c33636</span></div><div className="swatch-label">Danger / 阻断</div></div>
-      <div className="swatch"><div className="swatch-color" style={{ background: "#7253c7" }}><span>#7253c7</span></div><div className="swatch-label">Violet / Agent</div></div>
-      <div className="swatch"><div className="swatch-color" style={{ background: "#ffffff" }}><span className="swatch-light-label">#ffffff</span></div><div className="swatch-label">Surface / 页面背景</div></div>
+    <div className="grid w-full gap-5">
+      <div className="grid gap-2">
+        {SEMANTIC.map(([key, label]) => (
+          <div key={key} className="flex items-center gap-3">
+            <span className="size-8 rounded-md" style={{ background: `hsl(var(--${key}))` }} />
+            <span className="size-8 rounded-md border" style={{ background: `hsl(var(--${key}-soft))` }} />
+            <code className="w-20 font-mono text-sm text-foreground">{key}</code>
+            <span className="text-sm text-muted-foreground">{label}</span>
+          </div>
+        ))}
+      </div>
+      <div>
+        <div className="mb-1.5 text-xs text-muted-foreground">DataCore Blue 色阶（600 = 主色 #2563EB）</div>
+        <div className="grid grid-cols-10 gap-1">
+          {SCALE.map((k) => (
+            <div key={k} className="grid gap-1">
+              <span className="h-8 rounded" style={{ background: `hsl(var(--blue-${k}))` }} />
+              <span className={`text-center text-[11px] ${k === "600" ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{k}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <div className="mb-1.5 text-xs text-muted-foreground">图表分类色（只用于数据分组，不表达好坏）</div>
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5, 6].map((i) => <span key={i} className="h-6 flex-1 rounded" style={{ background: `hsl(var(--chart-${i}))` }} />)}
+        </div>
+      </div>
     </div>
   );
 }
 
 function TypographyHierarchy() {
+  const rows = [
+    ["text-3xl font-semibold", "30 / 38 · 页面大标题", "电解液配方优化"],
+    ["text-2xl font-semibold", "24 / 32 · 页标题", "低温电解液"],
+    ["text-xl font-semibold", "20 / 28 · 详情标题", "LiFSI 浓度梯度"],
+    ["text-md font-semibold", "16 / 24 · 卡片标题", "容量保持率"],
+    ["text-base", "14 / 22 · 正文（产品基准）", "按电解液自动分组，导出对比图。"],
+    ["text-sm text-muted-foreground", "13 / 20 · 辅助", "6 颗 · 1 颗异常"],
+    ["text-xs text-muted-foreground", "12 / 18 · 注释", "更新于 12 分钟前"],
+  ];
   return (
-    <div className="type-samples">
-      <div>
-        <span className="type-label">Display 36/600 · 页面标题</span>
-        <div className="type-display">电导率优化看板</div>
-      </div>
-      <div>
-        <span className="type-label">Heading 20/600 · 区块标题</span>
-        <div className="type-heading">第 3 轮推荐配方</div>
-      </div>
-      <div>
-        <span className="type-label">Body 16/400 · 正文</span>
-        <div className="type-body">示例项目 project-042 的第 3 轮优化已完成，推荐配方在 25 °C 下的预测电导率为 10.12 mS/cm，请复核后提交实测。</div>
-      </div>
-      <div>
-        <span className="type-label">Mono 13 · ID 与数字</span>
-        <div className="type-mono">run-28003 · ds-118 · 10.12 mS/cm</div>
-      </div>
+    <div className="grid w-full gap-2.5">
+      {rows.map(([cls, meta, sample]) => (
+        <div key={meta} className="flex items-baseline gap-4">
+          <span className="w-44 shrink-0 text-xs text-subtle">{meta}</span>
+          <span className={`${cls} text-foreground`}>{sample}</span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -69,21 +101,15 @@ function TypographyNumbers() {
 }
 
 function SpacingScale() {
-  const items = [
-    { px: 4, use: "图标与文字" },
-    { px: 8, use: "组件内部" },
-    { px: 12, use: "紧凑分组" },
-    { px: 16, use: "卡片间距" },
-    { px: 24, use: "区块之间" },
-    { px: 32, use: "页面级" },
-  ];
+  const scale = [[4, "gap-1", "图标与文字、徽标内边距"], [8, "gap-2", "组件内部、行内操作"], [12, "gap-3", "表单字段之间"], [16, "gap-4 / p-4", "卡片内边距、卡片之间"], [24, "gap-6", "区块之间"], [32, "gap-8", "页面级分隔"]] as const;
   return (
-    <div className="spacing-row">
-      {items.map((item) => (
-        <div key={item.px} className="spacing-item">
-          <div className="spacing-bar" style={{ width: item.px * 2, minWidth: 0 }} />
-          <strong>{item.px}</strong>
-          <span>{item.use}</span>
+    <div className="grid w-full gap-2">
+      {scale.map(([px, cls, use]) => (
+        <div key={px} className="flex items-center gap-3">
+          <span className="w-10 text-right font-mono text-xs text-muted-foreground">{px}</span>
+          <span className="h-3 rounded-sm bg-primary/70" style={{ width: px * 4 }} />
+          <code className="w-24 font-mono text-xs text-foreground">{cls}</code>
+          <span className="text-sm text-muted-foreground">{use}</span>
         </div>
       ))}
     </div>
@@ -123,43 +149,43 @@ function SpacingRhythm() {
 }
 
 function RadiusSamples() {
+  const items = [["rounded-sm", "4 · 徽标、标签"], ["rounded-md", "6 · 按钮、输入框、菜单项"], ["rounded-lg", "8 · 卡片、浮层"], ["rounded-xl", "12 · 对话框、大容器"]];
   return (
-    <div className="radius-row">
-      <div className="radius-sample radius-sm">4–6<span>徽标 / 标签</span></div>
-      <div className="radius-sample radius-md">8–10<span>按钮 / 输入</span></div>
-      <div className="radius-sample radius-lg">16<span>卡片 / 对话框</span></div>
+    <div className="flex flex-wrap gap-4">
+      {items.map(([cls, label]) => (
+        <div key={cls} className="grid justify-items-center gap-2">
+          <span className={`size-20 border-2 border-primary/50 bg-primary-soft ${cls}`} />
+          <code className="font-mono text-xs text-foreground">{cls}</code>
+          <span className="text-xs text-muted-foreground">{label}</span>
+        </div>
+      ))}
     </div>
   );
 }
 
 function ElevationSamples() {
+  const items = [["shadow-xs", "按钮、输入框（轻微立体）"], ["shadow-sm", "需要强调的静止卡片（少用）"], ["shadow-md", "下拉、气泡、提示等浮层"], ["shadow-lg", "对话框、抽屉"]];
   return (
-    <div className="demo-row" style={{ alignItems: "stretch" }}>
-      <div className="card-demo" style={{ width: 210, boxShadow: "var(--shadow-sm)" }}>
-        <h4>shadow-sm</h4>
-        <p>静止卡片：边框界定容器，阴影几乎不可察觉。</p>
-      </div>
-      <div className="card-demo" style={{ width: 210, boxShadow: "var(--shadow-md)" }}>
-        <h4>shadow-md</h4>
-        <p>浮层与悬停：下拉、对话框、抽屉，没有第三档。</p>
-      </div>
+    <div className="flex flex-wrap gap-5">
+      {items.map(([cls, label]) => (
+        <div key={cls} className={`grid h-24 w-44 content-center gap-1 rounded-lg border bg-card p-4 ${cls}`}>
+          <code className="font-mono text-sm text-foreground">{cls}</code>
+          <span className="text-xs text-muted-foreground">{label}</span>
+        </div>
+      ))}
     </div>
   );
 }
 
 function IconSizes() {
-  const items = [
-    { size: 16, icon: <FlaskConical size={16} />, use: "行内 / 按钮" },
-    { size: 18, icon: <Database size={18} />, use: "导航 / 入口" },
-    { size: 20, icon: <Search size={20} />, use: "空状态 / 页面级" },
-  ];
+  const items = [[14, "size-3.5", "紧凑按钮、徽标内"], [16, "size-4", "按钮、表格行、状态文字（默认）"], [20, "size-5", "导航、空状态、结果页"]] as const;
   return (
-    <div className="demo-row" style={{ gap: 30 }}>
-      {items.map((item) => (
-        <div key={item.size} style={{ display: "grid", justifyItems: "center", gap: 6, color: "var(--text)" }}>
-          <span style={{ width: 40, height: 40, display: "grid", placeItems: "center", border: "1px dashed var(--line-strong)", borderRadius: 8 }}>{item.icon}</span>
-          <strong className="mono" style={{ fontSize: 12 }}>{item.size}</strong>
-          <span className="demo-note">{item.use}</span>
+    <div className="flex flex-wrap gap-8">
+      {items.map(([px, cls, use]) => (
+        <div key={px} className="grid justify-items-center gap-2 text-foreground">
+          <span className="grid size-10 place-items-center rounded-lg border border-dashed"><FlaskConical size={px} /></span>
+          <code className="font-mono text-xs">{px}px · {cls}</code>
+          <span className="text-xs text-muted-foreground">{use}</span>
         </div>
       ))}
     </div>
@@ -168,25 +194,20 @@ function IconSizes() {
 
 function IconSemantic() {
   const states = [
-    { icon: <CheckCircle2 size={16} />, label: "已完成", color: "var(--green)", bg: "var(--green-soft)" },
-    { icon: <AlertTriangle size={16} />, label: "待复核", color: "var(--amber)", bg: "var(--amber-soft)" },
-    { icon: <XCircle size={16} />, label: "失败", color: "var(--red)", bg: "var(--red-soft)" },
-    { icon: <Bot size={16} />, label: "Agent 建议", color: "var(--violet)", bg: "var(--violet-soft)" },
+    { icon: <CheckCircle2 size={16} />, label: "已完成", cls: "bg-success-soft text-success" },
+    { icon: <AlertTriangle size={16} />, label: "待复核", cls: "bg-warning-soft text-warning" },
+    { icon: <XCircle size={16} />, label: "失败", cls: "bg-danger-soft text-danger" },
+    { icon: <Bot size={16} />, label: "Agent 建议", cls: "bg-agent-soft text-agent" },
+    { icon: <Database size={16} />, label: "数据集", cls: "bg-secondary text-muted-foreground" },
   ];
   return (
-    <div className="demo-stack">
-      <div className="demo-row" style={{ gap: 18 }}>
-        {states.map((state) => (
-          <span key={state.label} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "var(--text)" }}>
-            <span style={{ width: 28, height: 28, display: "grid", placeItems: "center", borderRadius: 8, color: state.color, background: state.bg }}>{state.icon}</span>
-            {state.label}
-          </span>
-        ))}
-      </div>
-      <div className="card-demo">
-        <h4>第 3 轮推荐配方</h4>
-        <p>卡片标题靠文字表达，不在标题前放图标；图标只出现在有语义的状态与入口上。</p>
-      </div>
+    <div className="flex flex-wrap gap-5">
+      {states.map((state) => (
+        <span key={state.label} className="inline-flex items-center gap-2 text-base text-foreground">
+          <span className={`grid size-8 place-items-center rounded-md ${state.cls}`}>{state.icon}</span>
+          {state.label}
+        </span>
+      ))}
     </div>
   );
 }
@@ -233,31 +254,26 @@ function MotionDuration() {
 }
 
 function MotionSkeleton() {
-  const [loaded, setLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
   return (
-    <div className="demo-stack">
-      {loaded ? (
-        <div className="status-line status-success">
-          <CheckCircle2 size={16} />
-          <div>
-            <strong>run-28003 · 计算完成</strong>
-            <span>耗时 214 秒 · 结果已写入 示例项目（project-042）</span>
+    <div className="grid w-full max-w-md gap-3">
+      <div className="rounded-lg border bg-card p-4">
+        {loading ? (
+          <div className="grid gap-2.5">
+            <Skeleton className="h-4 w-2/5" />
+            <Skeleton className="h-3 w-4/5" />
+            <Skeleton className="h-3 w-3/5" />
           </div>
-          <span className="status-badge badge-success"><span className="badge-dot" />已完成</span>
-        </div>
-      ) : (
-        <div className="card-demo" style={{ display: "grid", gap: 10 }} aria-hidden="true">
-          <div style={{ height: 12, width: "42%", borderRadius: 6, background: "var(--surface-soft)", border: "1px solid var(--line)" }} />
-          <div style={{ height: 10, width: "78%", borderRadius: 6, background: "var(--surface-soft)" }} />
-          <div style={{ height: 10, width: "64%", borderRadius: 6, background: "var(--surface-soft)" }} />
-        </div>
-      )}
-      <div className="demo-row">
-        <button className="button button-secondary button-sm" onClick={() => setLoaded((value) => !value)}>
-          {loaded ? "重新加载" : "模拟加载完成"}
-        </button>
-        <span className="demo-note">骨架结构与真实内容一一对应，原位替换不抖动。</span>
+        ) : (
+          <div className="grid gap-1">
+            <div className="text-md font-semibold text-foreground">电导率计算 · run-28003</div>
+            <div className="text-sm text-muted-foreground">数据集 ds-118 · 耗时 286.4 秒 · 已完成</div>
+          </div>
+        )}
       </div>
+      <Button variant="secondary" size="sm" className="justify-self-start" onClick={() => setLoading((v) => !v)}>
+        {loading ? "模拟加载完成" : "重新加载"}
+      </Button>
     </div>
   );
 }
