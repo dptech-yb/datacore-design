@@ -1851,10 +1851,10 @@ import { Upload, UploadFileList } from "@/components/ui/upload";
       { name: "multiple", type: "boolean", default: "false", description: "Upload：允许一次选择 / 拖入多个文件；false 时只取第一个。" },
       { name: "onFilesSelected", type: "(files: File[]) => void", description: "Upload：通过校验的文件。组件不发网络请求，由父组件上传并维护 UploadFileItem 状态。" },
       { name: "onFilesRejected", type: "(rejections: { file: File; reason: string }[]) => void", description: "Upload：未通过校验的文件与可直接展示的中文原因。" },
-      { name: "title / description", type: "ReactNode", default: '"拖拽文件到此处，或点击选择" / 按 accept、maxSize 生成', description: "Upload：主文案与说明；说明经 aria-describedby 关联到上传区。" },
+      { name: "title / description", type: "ReactNode", description: "Upload：主文案（默认“拖拽文件到此处，或点击选择”）与说明（默认按 accept、maxSize 生成）；说明经 aria-describedby 关联到上传区。" },
       { name: "layout", type: '"default" | "inline"', default: '"default"', description: "Upload：default 为居中大区域；inline 为单行紧凑区，用于表单或侧栏。" },
       { name: "disabled", type: "boolean", default: "false", description: "Upload：禁止选择与拖入（上传中、达数量上限或无写入权限时），原因写在 description。" },
-      { name: "files", type: "{ id; name; size?; status: \"uploading\" | \"success\" | \"error\"; progress?; error? }[]", required: true, description: "UploadFileList：文件状态，uploading 显示 Progress 与百分比，error 显示原因。" },
+      { name: "files", type: "UploadFileItem[]", required: true, description: "UploadFileList：{ id, name, size?, status: \"uploading\" | \"success\" | \"error\", progress?, error? }；uploading 显示 Progress 与百分比，error 显示原因。" },
       { name: "onRetry / onRemove", type: "(file: UploadFileItem) => void", description: "UploadFileList：失败重试；移除（上传中时为“取消上传”）。" },
     ],
     states: [
