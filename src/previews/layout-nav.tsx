@@ -822,6 +822,97 @@ function MenuBusiness() {
   );
 }
 
+/* ---------- Tabs ---------- */
+
+function TabsBasic() {
+  const [active, setActive] = useState("overview");
+  const tabs = [
+    { key: "overview", label: "概览" },
+    { key: "params", label: "参数" },
+    { key: "logs", label: "日志" },
+    { key: "artifacts", label: "产物" },
+  ];
+  return (
+    <div className="demo-stack">
+      <Tabs value={active} onValueChange={setActive}>
+        <TabsList aria-label="任务详情">
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.key} value={tab.key}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+      <p className="demo-note">当前面板：{tabs.find((tab) => tab.key === active)?.label} · 切换不丢失面板内已输入的状态。</p>
+    </div>
+  );
+}
+
+function TabsBadges() {
+  const [active, setActive] = useState("running");
+  const tabs = [
+    { key: "all", label: "全部", badge: null as number | null },
+    { key: "running", label: "运行中", badge: 3 },
+    { key: "queued", label: "排队中", badge: 12 },
+    { key: "done", label: "已完成", badge: 128 },
+  ];
+  return (
+    <div className="demo-stack">
+      <Tabs value={active} onValueChange={setActive}>
+        <TabsList aria-label="任务状态">
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.key} value={tab.key}>
+              {tab.label}
+              {tab.badge !== null && <Badge tone={active === tab.key ? "primary" : "neutral"}>{tab.badge}</Badge>}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+      <p className="demo-note">计数放徽章里，不写“已完成（128）”；为 0 时不显示。</p>
+    </div>
+  );
+}
+
+function TabsBusiness() {
+  const [active, setActive] = useState("overview");
+  return (
+    <Tabs value={active} onValueChange={setActive} className="demo-stack">
+      <TabsList aria-label="run-28003 详情">
+        <TabsTrigger value="overview">运行概览</TabsTrigger>
+        <TabsTrigger value="logs">
+          实时日志
+          <span className="size-1.5 rounded-full bg-success" aria-label="运行中" />
+        </TabsTrigger>
+        <TabsTrigger value="curves">电导率曲线</TabsTrigger>
+        <TabsTrigger value="audit" disabled title="仅项目管理员可见" className="disabled:cursor-not-allowed disabled:opacity-50">
+          审计记录
+          <Lock className="!size-3" aria-hidden />
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="overview" className="mt-0">
+        <div className="flex items-start gap-2.5 rounded-lg border border-primary/30 bg-primary-soft px-3 py-2.5 text-sm">
+          <RefreshCw className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+          <div className="grid gap-0.5">
+            <strong className="text-foreground">run-28003 运行中 · 迭代 120/400</strong>
+            <span className="text-muted-foreground">项目 project-042 · 已运行 38 分钟 · 预计剩余 96 分钟</span>
+          </div>
+        </div>
+      </TabsContent>
+      <TabsContent value="logs" className="mt-0">
+        <div className="grid gap-1 font-mono text-xs text-muted-foreground">
+          {["10:02:31 输入校验通过 · ds-118", "10:04:02 迭代 120/400 · loss 0.041", "10:04:02 当前电导率均值 12.1 mS/cm"].map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+        </div>
+      </TabsContent>
+      <TabsContent value="curves" className="mt-0">
+        <p className="demo-note">电导率曲线面板（略）· 面板切换不重新请求已加载数据。</p>
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+
 /* ---------- Steps ---------- */
 
 function StepsBasic() {
