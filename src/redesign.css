@@ -1969,3 +1969,7 @@ input:disabled {
 .search-result-main { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 2px; }
 .search-result-desc { overflow: hidden; color: var(--text-muted); font-size: 0.75rem; text-overflow: ellipsis; white-space: nowrap; }
 .search-result-title mark { background: var(--brand-soft); color: var(--brand-strong); border-radius: 2px; padding: 0 1px; }
+
+/* 参数表：属性/默认值不折行，类型列限宽可折行 */
+.props-table td:nth-child(1), .props-table td:nth-child(3), .props-table th { white-space: nowrap; }
+.props-table td:nth-child(2) { max-width: 260px; }

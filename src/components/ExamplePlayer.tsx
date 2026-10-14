@@ -61,7 +61,10 @@ export function ExamplePlayer({
     }
   };
   const [resetKey, setResetKey] = useState(0);
-  const [darkPreview, setDarkPreview] = useState(false);
+  // 预览默认跟随站点主题；按钮只切换“与站点相反”的预览
+  const siteDark = useSiteDark();
+  const [invert, setInvert] = useState(false);
+  const darkPreview = invert ? !siteDark : siteDark;
   const [showFull, setShowFull] = useState(false);
 
   const Preview = getPreview(example.preview);
@@ -161,8 +164,8 @@ export function ExamplePlayer({
                 <RotateCcw size={13} /> 重置示例
               </button>
               <button
-                onClick={() => setDarkPreview((value) => !value)}
-                aria-pressed={darkPreview}
+                onClick={() => setInvert((value) => !value)}
+                aria-pressed={invert}
               >
                 {darkPreview ? <Sun size={13} /> : <Moon size={13} />}{" "}
                 {darkPreview ? "浅色预览" : "深色预览"}
@@ -223,4 +226,15 @@ function kindLabel(kind: ExampleDoc["kind"]) {
     size: "尺寸",
     business: "业务",
   }[kind];
+}
+
+function useSiteDark() {
+  const read = () => document.documentElement.dataset.theme === "dark";
+  const [dark, setDark] = useState(read);
+  useEffect(() => {
+    const observer = new MutationObserver(() => setDark(read()));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
+  return dark;
 }
