@@ -144,6 +144,13 @@ const REGISTRY_ALIAS: Record<string, string> = {
   message: "sonner",
   notification: "sonner",
   segmented: "tabs",
+  collapse: "accordion",
+  spin: "spinner",
+  drawer: "sheet",
+  splitter: "resizable",
+  menu: "nav-menu",
+  "input-number": "number-input",
+  "date-range-picker": "date-picker",
 };
 
 /** 组件已进入组件源时，给出一行可复制的安装命令；还没进的不显示，避免误导。 */
