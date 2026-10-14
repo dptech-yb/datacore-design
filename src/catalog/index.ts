@@ -37,6 +37,8 @@ export function categoryOf(id: string) {
 export interface SearchEntry {
   title: string;
   subtitle: string;
+  /** 结果里显示的一句话说明 */
+  description?: string;
   path: string;
   kind: DocKind | "page";
   keywords: string;
@@ -60,6 +62,7 @@ export function buildSearchIndex(): SearchEntry[] {
     entries.push({
       title: `${doc.name} ${doc.chineseName}`,
       subtitle: `组件 / ${category?.chineseName ?? doc.category}`,
+      description: doc.purpose,
       path: `/components/${doc.id}`,
       kind: "component",
       keywords: [doc.id, doc.name, doc.chineseName, doc.purpose, ...(doc.keywords ?? [])].join(" "),
@@ -75,6 +78,7 @@ export function buildSearchIndex(): SearchEntry[] {
       entries.push({
         title: `${doc.name} ${doc.chineseName}`,
         subtitle: label,
+        description: doc.summary,
         path: `/${kind === "foundation" ? "foundations" : kind === "pattern" ? "patterns" : "templates"}/${doc.id}`,
         kind,
         keywords: [doc.id, doc.name, doc.chineseName, doc.summary, ...(doc.keywords ?? [])].join(" "),

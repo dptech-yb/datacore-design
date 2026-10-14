@@ -5,7 +5,7 @@
  * registryDependencies 里的短名会被展开成本站完整 URL，使 CLI 能递归拉取。
  * 同时校验：每个文件存在、组件之间依赖可解析、组件源码只用语义色（不出现 Tailwind 原色）。
  */
-import { mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
@@ -41,6 +41,8 @@ for (const item of manifest.items) {
   writeFileSync(path.join(out, `${item.name}.json`), JSON.stringify(full, null, 2) + "\n");
 }
 writeFileSync(path.join(out, "registry.json"), JSON.stringify({ ...manifest, items: manifest.items.map(({ files, ...rest }) => ({ ...rest, files: files.map(({ path: p, type, target }) => ({ path: p, type, target })) })) }, null, 2) + "\n");
+
+copyFileSync(path.join(root, "scripts", "dc-ui-add.mjs"), path.join(out, "add.mjs"));
 
 if (errors.length) {
   console.error("registry 校验失败：\n- " + errors.join("\n- "));

@@ -8,7 +8,7 @@ import {
   Terminal,
   X,
 } from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   buildNavModel,
   categoryOf,
@@ -256,15 +256,13 @@ export default function App() {
             >
               <Code2 size={19} />
             </a>
-            {!isHome && (
-              <button
-                className="icon-button"
-                onClick={() => setDark(!dark)}
-                aria-label={dark ? "切换亮色主题" : "切换暗色主题"}
-              >
-                {dark ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-            )}
+            <button
+              className="icon-button"
+              onClick={() => setDark(!dark)}
+              aria-label={dark ? "切换亮色主题" : "切换暗色主题"}
+            >
+              {dark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
             <button
               className="icon-button mobile-menu"
               onClick={() => setMobileOpen(true)}
@@ -373,10 +371,24 @@ function NavSection({
   activePath: string;
 }) {
   const containsActive = group.items.some((item) => item.path === activePath);
-  const [open, setOpen] = useState(!group.collapsible || containsActive);
+  // 只展开当前所在分组；不可折叠的“开始/基础”在组件页也收起，减少侧栏长度。
+  const [open, setOpen] = useState(
+    containsActive || (!group.collapsible && !activePath.startsWith("/components/")),
+  );
+  const activeRef = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
     if (containsActive) setOpen(true);
   }, [containsActive]);
+  useEffect(() => {
+    // 深链接或抽屉打开时，把当前项滚到侧栏可见区域
+    // 只滚侧栏自己的容器，不能用 scrollIntoView（会连带滚动整页）
+    const node = activeRef.current;
+    const box = node?.closest<HTMLElement>(".sidebar, .navigation-dialog, .mobile-navigation");
+    if (node && box) {
+      const top = node.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
+      box.scrollTop = Math.max(0, top - box.clientHeight / 2);
+    }
+  }, [activePath, open]);
   return (
     <div className="nav-group">
       <button
@@ -392,6 +404,7 @@ function NavSection({
           <a
             key={item.path}
             href={`#${item.path}`}
+            ref={activePath === item.path ? activeRef : undefined}
             className={`nav-item ${activePath === item.path ? "nav-item-active" : ""}`}
             aria-current={activePath === item.path ? "page" : undefined}
           >

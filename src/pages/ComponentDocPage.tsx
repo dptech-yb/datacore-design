@@ -1,4 +1,6 @@
-import { CircleCheck, CircleX, FileJson, Terminal } from "lucide-react";
+import { Check, CircleCheck, CircleX, Clipboard, FileJson, Package, Terminal } from "lucide-react";
+import { useState } from "react";
+import registry from "../../registry/registry.json";
 import type { ComponentDoc } from "../catalog/types";
 import { categoryOf, getComponent } from "../catalog";
 import { navigate } from "../router";
@@ -10,28 +12,26 @@ export function ComponentDocPage({ doc }: { doc: ComponentDoc }) {
   const category = categoryOf(doc.category);
   return (
     <article className="doc-page">
-      <header className="doc-header">
+      <header className="doc-header doc-header-compact">
         <div className="doc-header-main">
           <span className="component-meta">{category?.name} / {doc.name}</span>
           <h1>{doc.name} <span className="doc-cn">{doc.chineseName}</span></h1>
           <p className="doc-purpose">{doc.purpose}</p>
-        </div>
-        <div className="doc-badges">
-          <span className={`status-chip chip-${doc.status}`}>{statusLabel(doc.status)}</span>
-          <span className="version-chip">v{doc.version}</span>
-          <a className="version-chip chip-link" href="./component-registry.json" target="_blank" rel="noreferrer">
-            <FileJson size={12} /> 注册表
-          </a>
-          <a className="version-chip chip-link" href="./llms-full.txt" target="_blank" rel="noreferrer">
-            <Terminal size={12} /> AI 契约
-          </a>
+          <p className="doc-lead"><strong>何时使用</strong>{doc.usage}</p>
+          <div className="doc-badges doc-badges-inline">
+            <span className={`status-chip chip-${doc.status}`}>{statusLabel(doc.status)}</span>
+            <span className="version-chip">v{doc.version}</span>
+            <a className="version-chip chip-link" href="./component-registry.json" target="_blank" rel="noreferrer">
+              <FileJson size={12} /> 注册表
+            </a>
+            <a className="version-chip chip-link" href="./llms-full.txt" target="_blank" rel="noreferrer">
+              <Terminal size={12} /> AI 契约
+            </a>
+          </div>
         </div>
       </header>
 
-      <section className="doc-usage">
-        <h2>何时使用</h2>
-        <p>{doc.usage}</p>
-      </section>
+      <InstallBlock id={REGISTRY_ALIAS[doc.id] ?? doc.id} />
 
       {EXAMPLE_GROUPS.map((group) => {
         const examples = doc.examples.filter((example) => example.kind === group.kind);
@@ -130,4 +130,42 @@ function RuleSection({ id, title, items }: { id: string; title: string; items: s
 
 function statusLabel(status: ComponentDoc["status"]) {
   return { stable: "Stable", beta: "Beta", experimental: "Experimental" }[status];
+}
+
+const REGISTRY_BASE = "https://design.datacore.dp.cd.mba/r";
+const REGISTRY_NAMES = new Set(registry.items.map((item) => item.name));
+/** 文档 id 与组件源名称不一致时在这里对齐。 */
+const REGISTRY_ALIAS: Record<string, string> = { divider: "separator" };
+
+/** 组件已进入组件源时，给出一行可复制的安装命令；还没进的不显示，避免误导。 */
+function InstallBlock({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+  if (!REGISTRY_NAMES.has(id)) return null;
+  const command = `npx shadcn@2.3.0 add ${REGISTRY_BASE}/${id}.json`;
+  const offline = `node add.mjs ${REGISTRY_BASE} ${id}`;
+  return (
+    <section className="install-block" aria-label="安装">
+      <div className="install-title"><Package size={15} /> 安装到项目</div>
+      <div className="install-row">
+        <code>{command}</code>
+        <button
+          className="install-copy"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(command);
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 1600);
+            } catch {
+              /* 复制被拒时用户可手动选中 */
+            }
+          }}
+          aria-label="复制安装命令"
+        >
+          {copied ? <Check size={14} /> : <Clipboard size={14} />}
+          {copied ? "已复制" : "复制"}
+        </button>
+      </div>
+      <p className="install-note">内网无法访问 shadcn 官方站时，用离线脚本：<code>{offline}</code>（<a href="./r/add.mjs">下载 add.mjs</a>）</p>
+    </section>
+  );
 }

@@ -17,6 +17,9 @@ export function SearchModal({
   const index = useMemo(buildSearchIndex, []);
   const results = useMemo(() => {
     const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    // 标题命中排在说明/关键词命中之前
+    const score = (entry: (typeof index)[number]) =>
+      terms.reduce((sum, term) => sum + (entry.title.toLowerCase().includes(term) ? 2 : 0), 0);
     return index
       .filter((entry) =>
         terms.every((term) =>
@@ -25,6 +28,7 @@ export function SearchModal({
             .includes(term),
         ),
       )
+      .sort((a, b) => score(b) - score(a))
       .slice(0, terms.length ? 20 : 8);
   }, [index, query]);
   useEffect(() => {
@@ -117,7 +121,10 @@ export function SearchModal({
               onMouseEnter={() => setActive(i)}
               onClick={() => choose(entry.path)}
             >
-              <span className="search-result-title">{entry.title}</span>
+              <span className="search-result-main">
+                <span className="search-result-title">{highlight(entry.title, query)}</span>
+                {entry.description && <span className="search-result-desc">{entry.description}</span>}
+              </span>
               <span className="search-result-sub">{entry.subtitle}</span>
               {active === i && <CornerDownLeft size={14} />}
             </li>
@@ -136,5 +143,19 @@ export function SearchModal({
         </span>
       </div>
     </Modal>
+  );
+}
+
+function highlight(text: string, query: string) {
+  const term = query.trim().split(/\s+/)[0];
+  if (!term) return text;
+  const i = text.toLowerCase().indexOf(term.toLowerCase());
+  if (i < 0) return text;
+  return (
+    <>
+      {text.slice(0, i)}
+      <mark>{text.slice(i, i + term.length)}</mark>
+      {text.slice(i + term.length)}
+    </>
   );
 }

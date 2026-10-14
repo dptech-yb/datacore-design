@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "DataCore Design",
   "version": "0.1.0",
-  "generated": "2026-09-22",
+  "generated": "2026-10-14",
   "purpose": "Machine-readable UI contracts for the DataCore main platform and AION-compatible surfaces. Synthetic examples only.",
   "source": "Generated from src/catalog — do not edit by hand.",
   "categories": [
