@@ -55,7 +55,9 @@ html { scroll-behavior: smooth; }
 body { margin: 0; min-width: 320px; background: var(--page); color: var(--text); font-family: Manrope, "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif; font-size: 1rem; line-height: 1.6; }
 button, input { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
-button { border: 0; }
+/* 不再用 border: 0（会把 border-style 置 none，组件源的 border 类就画不出来）；只清宽度，默认背景透明。 */
+button { border-width: 0; border-style: solid; background-color: transparent; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
 a { color: inherit; }
 code { font-family: "DM Mono", monospace; font-size: .92em; }
 kbd { padding: 2px 6px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 5px; background: var(--surface); color: var(--text-muted); font-family: "DM Mono", monospace; font-size: 0.75rem; }

@@ -10,6 +10,7 @@ import {
   FileQuestion,
   Inbox,
   Info,
+  Loader2,
   Lock,
   MoreHorizontal,
   Pencil,
@@ -21,16 +22,23 @@ import {
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import type { PreviewFn } from "./types";
 
 function ButtonBasic() {
   return (
     <div className="demo-row">
-      <button className="button button-primary">开始计算 <ArrowRight size={15} /></button>
-      <button className="button button-secondary">保存草稿</button>
-      <button className="button button-ghost">查看详情</button>
-      <button className="button button-danger">撤销任务</button>
+      <Button>开始计算 <ArrowRight /></Button>
+      <Button variant="secondary">保存草稿</Button>
+      <Button variant="ghost">查看详情</Button>
+      <Button variant="danger">撤销任务</Button>
     </div>
   );
 }
@@ -40,11 +48,11 @@ function ButtonStates() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <button className="button button-primary" disabled={loading} onClick={() => { setLoading(true); window.setTimeout(() => setLoading(false), 1200); }}>
-          {loading && <span className="spinner" aria-hidden="true" />}
+        <Button disabled={loading} onClick={() => { setLoading(true); window.setTimeout(() => setLoading(false), 1200); }}>
+          {loading && <Loader2 className="animate-spin" aria-hidden="true" />}
           {loading ? "正在提交" : "点击演示加载态"}
-        </button>
-        <button className="button button-primary" disabled>不可用（无权限）</button>
+        </Button>
+        <Button disabled>不可用（无权限）</Button>
       </div>
       <p className="demo-note">loading 期间按钮宽度不变；disabled 的原因写在邻近文案里。</p>
     </div>
@@ -54,9 +62,9 @@ function ButtonStates() {
 function ButtonSizes() {
   return (
     <div className="demo-row" style={{ alignItems: "center" }}>
-      <button className="button button-secondary button-sm">行内操作</button>
-      <button className="button button-primary">默认尺寸</button>
-      <button className="button button-primary button-lg">页面主动作</button>
+      <Button variant="secondary" size="sm">行内操作</Button>
+      <Button>默认尺寸</Button>
+      <Button size="lg">页面主动作</Button>
     </div>
   );
 }
@@ -66,10 +74,10 @@ function ButtonBusiness() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <button className="button button-primary" disabled={loading} onClick={() => { setLoading(true); window.setTimeout(() => setLoading(false), 1500); }}>
-          {loading && <span className="spinner" aria-hidden="true" />}
+        <Button disabled={loading} onClick={() => { setLoading(true); window.setTimeout(() => setLoading(false), 1500); }}>
+          {loading && <Loader2 className="animate-spin" aria-hidden="true" />}
           {loading ? "正在提交" : "提交计算任务"}
-        </button>
+        </Button>
         <span className="demo-note">将使用 示例项目（<span className="mono">project-042</span>）· 预计最长 300 秒</span>
       </div>
     </div>
@@ -103,8 +111,24 @@ function iconCircle(color: string, bg: string, size = 44): CSSProperties {
   };
 }
 
-function SkeletonBar({ width = "100%", height = 10 }: { width?: string; height?: number }) {
-  return <span aria-hidden="true" style={{ display: "block", height, width, borderRadius: 4, background: "var(--surface-soft)" }} />;
+/** 带 Tooltip 的图标按钮：动作名称同时用于 aria-label 与 Tooltip。 */
+function IconAction({ label, tip, children, className, onClick }: {
+  label: string;
+  tip?: string;
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={label} className={className} onClick={onClick}>
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{tip ?? label}</TooltipContent>
+    </Tooltip>
+  );
 }
 
 /* ---------- IconButton ---------- */
@@ -112,10 +136,10 @@ function IconButtonBasic() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <button className="icon-button" aria-label="关闭面板" title="关闭面板"><X size={16} /></button>
-        <button className="icon-button" aria-label="复制任务 ID" title="复制任务 ID"><Copy size={16} /></button>
-        <button className="icon-button" aria-label="刷新列表" title="刷新列表"><RefreshCw size={16} /></button>
-        <button className="icon-button" aria-label="更多操作" title="更多操作"><MoreHorizontal size={16} /></button>
+        <IconAction label="关闭面板"><X /></IconAction>
+        <IconAction label="复制任务 ID"><Copy /></IconAction>
+        <IconAction label="刷新列表"><RefreshCw /></IconAction>
+        <IconAction label="更多操作"><MoreHorizontal /></IconAction>
       </div>
       <p className="demo-note">图标语义必须无需解释；动作名称通过 Tooltip 与 aria-label 提供。</p>
     </div>
@@ -127,23 +151,26 @@ function IconButtonStates() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <button
-          className="icon-button"
-          aria-label="复制任务 ID"
-          title="复制任务 ID"
-          onClick={() => { setCopied(true); window.setTimeout(() => setCopied(false), 1200); }}
-        >
-          {copied ? <Check size={16} style={{ color: "var(--green)" }} /> : <Copy size={16} />}
-        </button>
-        <button className="icon-button" aria-label="删除数据集 ds-118" title="删除数据集 ds-118" style={{ color: "var(--red)" }}>
-          <Trash2 size={16} />
-        </button>
-        <button className="icon-button" aria-label="分享（需要项目编辑权限）" title="分享（需要项目编辑权限）" disabled style={{ opacity: .45, cursor: "not-allowed" }}>
-          <Share2 size={16} />
-        </button>
-        <button className="icon-button" aria-label="正在刷新" title="正在刷新">
-          <span className="spinner spinner-dark" aria-hidden="true" />
-        </button>
+        <IconAction label="复制任务 ID" tip={copied ? "已复制" : "复制任务 ID"} onClick={() => { setCopied(true); window.setTimeout(() => setCopied(false), 1200); }}>
+          {copied ? <Check className="text-success" /> : <Copy />}
+        </IconAction>
+        <IconAction label="删除数据集 ds-118" className="text-danger hover:bg-danger-soft">
+          <Trash2 />
+        </IconAction>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {/* disabled 按钮不触发指针事件，用可聚焦的外层承载 Tooltip */}
+            <span tabIndex={0} className="inline-flex rounded-md">
+              <Button variant="ghost" size="icon" aria-label="分享（需要项目编辑权限）" disabled>
+                <Share2 />
+              </Button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>需要项目编辑权限</TooltipContent>
+        </Tooltip>
+        <Button variant="ghost" size="icon" aria-label="正在刷新" disabled>
+          <Loader2 className="animate-spin text-primary" />
+        </Button>
       </div>
       <p className="demo-note">点击复制演示即时反馈；disabled 的原因写在 Tooltip 里；loading 时图标位替换为 spinner、尺寸不变。</p>
     </div>
@@ -153,16 +180,18 @@ function IconButtonStates() {
 function IconButtonSizes() {
   return (
     <div className="demo-row" style={{ alignItems: "center" }}>
-      <button className="icon-button" aria-label="编辑（sm）" title="编辑" style={{ width: 32, height: 32, borderRadius: 7 }}>
-        <Pencil size={14} />
-      </button>
-      <button className="icon-button" aria-label="编辑（md）" title="编辑"><Pencil size={16} /></button>
-      <span className="demo-note">sm 32px 用于表格行内；md 36px 为默认尺寸。</span>
+      <IconAction label="编辑（sm）" tip="编辑" className="size-7 [&_svg]:size-3.5"><Pencil /></IconAction>
+      <IconAction label="编辑（默认）" tip="编辑"><Pencil /></IconAction>
+      <span className="demo-note">sm 28px 用于表格行内；默认 32px。</span>
     </div>
   );
 }
 
 function IconButtonBusiness() {
+  const runs = [
+    { id: "run-28003", name: "NCM811 高温循环", badge: <Badge tone="success" dot>已完成</Badge> },
+    { id: "run-28004", name: "电解液配方筛选", badge: <Badge tone="primary" dot>进行中</Badge> },
+  ];
   return (
     <div className="demo-stack">
       <div className="table-wrap">
@@ -171,28 +200,19 @@ function IconButtonBusiness() {
             <tr><th>任务</th><th>状态</th><th style={{ textAlign: "right" }}>操作</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td><strong>NCM811 高温循环</strong><span className="table-secondary">run-28003</span></td>
-              <td><span className="status-badge badge-success"><span className="badge-dot" />已完成</span></td>
-              <td>
-                <div className="demo-row" style={{ justifyContent: "flex-end", gap: 2 }}>
-                  <button className="icon-button" aria-label="查看 run-28003 详情" title="查看详情"><Eye size={15} /></button>
-                  <button className="icon-button" aria-label="复制任务 ID" title="复制任务 ID"><Copy size={15} /></button>
-                  <button className="icon-button" aria-label="更多操作" title="更多操作"><MoreHorizontal size={15} /></button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td><strong>电解液配方筛选</strong><span className="table-secondary">run-28004</span></td>
-              <td><span className="status-badge badge-info"><span className="badge-dot" />进行中</span></td>
-              <td>
-                <div className="demo-row" style={{ justifyContent: "flex-end", gap: 2 }}>
-                  <button className="icon-button" aria-label="查看 run-28004 详情" title="查看详情"><Eye size={15} /></button>
-                  <button className="icon-button" aria-label="复制任务 ID" title="复制任务 ID"><Copy size={15} /></button>
-                  <button className="icon-button" aria-label="更多操作" title="更多操作"><MoreHorizontal size={15} /></button>
-                </div>
-              </td>
-            </tr>
+            {runs.map((run) => (
+              <tr key={run.id}>
+                <td><strong>{run.name}</strong><span className="table-secondary">{run.id}</span></td>
+                <td>{run.badge}</td>
+                <td>
+                  <div className="flex items-center justify-end gap-0.5">
+                    <IconAction label={`查看 ${run.id} 详情`} tip="查看详情"><Eye /></IconAction>
+                    <IconAction label="复制任务 ID"><Copy /></IconAction>
+                    <IconAction label="更多操作"><MoreHorizontal /></IconAction>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -320,9 +340,9 @@ function TypographyBusiness() {
 function DividerBasic() {
   return (
     <div>
-      <p style={{ margin: 0, fontSize: 14 }}>项目基础信息与说明，包含名称、负责人与创建时间。</p>
-      <div role="separator" style={{ borderTop: "1px solid var(--line)", margin: "20px 0" }} />
-      <p style={{ margin: 0, fontSize: 14 }}>参数配置与执行记录，按时间倒序排列。</p>
+      <p className="m-0 text-base">项目基础信息与说明，包含名称、负责人与创建时间。</p>
+      <Separator className="my-5" />
+      <p className="m-0 text-base">参数配置与执行记录，按时间倒序排列。</p>
     </div>
   );
 }
@@ -330,18 +350,18 @@ function DividerBasic() {
 function DividerVariants() {
   return (
     <div className="demo-stack">
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontSize: 14, fontWeight: 700 }}>参数配置</span>
-        <span style={{ flex: 1, borderTop: "1px solid var(--line)" }} />
+      <div className="flex items-center gap-2.5">
+        <span className="text-base font-semibold">参数配置</span>
+        <Separator className="w-auto flex-1" />
       </div>
-      <div className="demo-row" style={{ gap: 12 }}>
-        <button className="button button-ghost button-sm">查看</button>
-        <span role="separator" aria-orientation="vertical" style={{ width: 1, height: 16, background: "var(--line-strong)" }} />
-        <button className="button button-ghost button-sm">编辑</button>
-        <span role="separator" aria-orientation="vertical" style={{ width: 1, height: 16, background: "var(--line-strong)" }} />
-        <button className="button button-ghost button-sm">复制</button>
+      <div className="flex h-5 items-center gap-3">
+        <Button variant="ghost" size="sm">查看</Button>
+        <Separator orientation="vertical" className="h-4" />
+        <Button variant="ghost" size="sm">编辑</Button>
+        <Separator orientation="vertical" className="h-4" />
+        <Button variant="ghost" size="sm">复制</Button>
       </div>
-      <div style={{ borderTop: "1px dashed var(--line-strong)" }} />
+      <Separator className="h-0 border-t border-dashed bg-transparent" />
       <p className="demo-note">带文字分割线标记区块起点；垂直分割线只用于工具栏分组；虚线用于弱分隔。</p>
     </div>
   );
@@ -353,16 +373,16 @@ function DividerBusiness() {
       <div className="demo-grid-2" style={{ gap: 8 }}>
         <div>
           <span className="type-label">项目名称</span>
-          <div style={{ fontSize: 14 }}>示例电解液项目</div>
+          <div className="text-base">示例电解液项目</div>
         </div>
         <div>
           <span className="type-label">项目 ID</span>
           <div className="mono">project-042</div>
         </div>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "10px 0 2px" }}>
-        <span style={{ fontSize: 14, fontWeight: 700 }}>执行记录</span>
-        <span style={{ flex: 1, borderTop: "1px solid var(--line)" }} />
+      <div className="mb-0.5 mt-2.5 flex items-center gap-2.5">
+        <span className="text-base font-semibold">执行记录</span>
+        <Separator className="w-auto flex-1" />
       </div>
       <span className="demo-note">2026-09-18 · 提交计算任务 run-28003</span>
       <span className="demo-note">2026-09-15 · 导入数据集 ds-118</span>
@@ -375,43 +395,29 @@ function BadgeBasic() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <span className="status-badge badge-success"><span className="badge-dot" />已完成</span>
-        <span className="status-badge badge-warning"><span className="badge-dot" />待复核</span>
-        <span className="status-badge badge-danger"><span className="badge-dot" />失败</span>
-        <span className="status-badge badge-info"><span className="badge-dot" />进行中</span>
-        <span className="status-badge badge-violet"><span className="badge-dot" />Agent 建议</span>
-        <span className="status-badge badge-neutral"><span className="badge-dot" />已归档</span>
+        <Badge tone="success" dot>已完成</Badge>
+        <Badge tone="warning" dot>待复核</Badge>
+        <Badge tone="danger" dot>失败</Badge>
+        <Badge tone="primary" dot>进行中</Badge>
+        <Badge tone="agent" dot>Agent 建议</Badge>
+        <Badge tone="neutral" dot>已归档</Badge>
       </div>
-      <p className="demo-note">颜色与语义一一对应：success 完成 / warning 待复核 / danger 失败 / info 进行中 / violet Agent / neutral 默认。</p>
+      <p className="demo-note">颜色与语义一一对应：success 完成 / warning 待复核 / danger 失败 / primary 进行中 / agent Agent / neutral 默认。</p>
     </div>
   );
 }
 
 function CountBadge({ value }: { value: string }) {
   return (
-    <span style={{ position: "relative", display: "inline-flex" }}>
-      <span className="icon-button" style={{ cursor: "default" }}><Bell size={16} /></span>
-      <span
-        aria-label={`${value} 条未读通知`}
-        style={{
-          position: "absolute",
-          top: -4,
-          right: -6,
-          minWidth: 16,
-          height: 16,
-          padding: "0 4px",
-          borderRadius: 999,
-          background: "var(--red)",
-          color: "#fff",
-          fontSize: 12,
-          fontWeight: 700,
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+    <span className="relative inline-flex">
+      <Button variant="ghost" size="icon" aria-label={`通知（${value} 条未读）`}><Bell /></Button>
+      <Badge
+        tone="danger"
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-1.5 -top-1 h-4 min-w-4 justify-center rounded-full bg-danger px-1 font-semibold leading-none text-danger-foreground"
       >
         {value}
-      </span>
+      </Badge>
     </span>
   );
 }
@@ -420,10 +426,8 @@ function BadgeVariants() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <span className="status-badge badge-success"><span className="badge-dot" />服务正常</span>
-        <span className="status-badge badge-info">
-          <span className="spinner spinner-dark" style={{ width: 9, height: 9, borderWidth: 1.5 }} aria-hidden="true" />同步中
-        </span>
+        <Badge tone="success" dot>服务正常</Badge>
+        <Badge tone="primary"><Loader2 className="size-2.5 animate-spin" aria-hidden="true" />同步中</Badge>
       </div>
       <div className="demo-row" style={{ alignItems: "center" }}>
         <CountBadge value="8" />
@@ -434,7 +438,20 @@ function BadgeVariants() {
   );
 }
 
+const statusBadges = {
+  success: <Badge tone="success" dot>已完成</Badge>,
+  info: <Badge tone="primary" dot>进行中</Badge>,
+  warning: <Badge tone="warning" dot>待复核</Badge>,
+  danger: <Badge tone="danger" dot>失败</Badge>,
+};
+
 function BadgeBusiness() {
+  const runs = [
+    { id: "run-28003", name: "NCM811 高温循环", status: "success" as const },
+    { id: "run-28004", name: "电解液配方筛选", status: "info" as const },
+    { id: "run-28005", name: "阻抗谱拟合", status: "warning" as const },
+    { id: "run-28006", name: "热稳定性预测", status: "danger" as const },
+  ];
   return (
     <div className="demo-stack">
       <div className="table-wrap">
@@ -443,26 +460,13 @@ function BadgeBusiness() {
             <tr><th>任务</th><th>项目</th><th>状态</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td><strong>NCM811 高温循环</strong><span className="table-secondary">run-28003</span></td>
-              <td><span className="mono">project-042</span></td>
-              <td><span className="status-badge badge-success"><span className="badge-dot" />已完成</span></td>
-            </tr>
-            <tr>
-              <td><strong>电解液配方筛选</strong><span className="table-secondary">run-28004</span></td>
-              <td><span className="mono">project-042</span></td>
-              <td><span className="status-badge badge-info"><span className="badge-dot" />进行中</span></td>
-            </tr>
-            <tr>
-              <td><strong>阻抗谱拟合</strong><span className="table-secondary">run-28005</span></td>
-              <td><span className="mono">project-042</span></td>
-              <td><span className="status-badge badge-warning"><span className="badge-dot" />待复核</span></td>
-            </tr>
-            <tr>
-              <td><strong>热稳定性预测</strong><span className="table-secondary">run-28006</span></td>
-              <td><span className="mono">project-042</span></td>
-              <td><span className="status-badge badge-danger"><span className="badge-dot" />失败</span></td>
-            </tr>
+            {runs.map((run) => (
+              <tr key={run.id}>
+                <td><strong>{run.name}</strong><span className="table-secondary">{run.id}</span></td>
+                <td><span className="mono">project-042</span></td>
+                <td>{statusBadges[run.status]}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -554,16 +558,18 @@ function TagBusiness() {
 /* ---------- Card ---------- */
 function CardBasic() {
   return (
-    <div className="card-demo" style={{ maxWidth: 420 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-        <h4 style={{ margin: 0 }}>计算资源</h4>
-        <a className="text-link" href="#/components/card" onClick={stopNav}>额度明细</a>
-      </div>
-      <p>本月已用 1,280 / 3,000 核时</p>
-      <div style={{ marginTop: 12 }}>
-        <button className="button button-secondary button-sm">申请扩容</button>
-      </div>
-    </div>
+    <Card className="max-w-[420px]">
+      <CardHeader>
+        <CardTitle className="m-0">计算资源</CardTitle>
+        <Button variant="link" size="sm" asChild>
+          <a href="#/components/card" onClick={stopNav}>额度明细</a>
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="m-0 text-sm text-muted-foreground">本月已用 1,280 / 3,000 核时</p>
+        <Button variant="secondary" size="sm">申请扩容</Button>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -571,47 +577,55 @@ function CardVariants() {
   const [active, setActive] = useState(false);
   return (
     <div className="demo-grid-2">
-      <button
-        className="card-demo"
+      <Card
+        role="button"
+        tabIndex={0}
+        aria-pressed={active}
         onClick={() => setActive(!active)}
-        style={{
-          textAlign: "left",
-          cursor: "pointer",
-          width: "100%",
-          font: "inherit",
-          border: active ? "1px solid var(--brand)" : "1px solid var(--line)",
-        }}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActive(!active); } }}
+        className={cn(
+          "cursor-pointer transition-colors duration-fast hover:border-primary/50 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          active && "border-primary",
+        )}
       >
-        <h4>示例项目（project-042）</h4>
-        <p>12 个数据集 · 34 次运行</p>
-        <span className="demo-note">{active ? "已选中（点击演示）" : "hoverable 入口卡，整卡可点"}</span>
-      </button>
-      <div className="card-demo" aria-busy="true">
-        <h4>执行记录</h4>
-        <div className="demo-stack" style={{ gap: 8, marginTop: 10 }}>
-          <SkeletonBar />
-          <SkeletonBar />
-          <SkeletonBar width="60%" />
-        </div>
-      </div>
+        <CardHeader className="flex-col gap-1">
+          <CardTitle className="m-0">示例项目（project-042）</CardTitle>
+          <CardDescription className="m-0">12 个数据集 · 34 次运行</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <span className="demo-note">{active ? "已选中（点击演示）" : "hoverable 入口卡，整卡可点"}</span>
+        </CardContent>
+      </Card>
+      <Card aria-busy="true">
+        <CardHeader>
+          <CardTitle className="m-0">执行记录</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Skeleton className="h-2.5 w-full" />
+          <Skeleton className="h-2.5 w-full" />
+          <Skeleton className="h-2.5 w-3/5" />
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
 function CardBusiness() {
   return (
-    <div className="card-demo" style={{ maxWidth: 420 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-        <h4 style={{ margin: 0 }}>示例电解液项目</h4>
-        <span className="status-badge badge-info"><span className="badge-dot" />进行中</span>
-      </div>
-      <p>目标：筛选高温稳定配方，覆盖 3 种溶剂体系。</p>
-      <div className="demo-row" style={{ gap: 24, margin: "12px 0" }}>
-        <span><strong style={{ fontSize: 18.0 }}>12</strong> <span className="demo-note">数据集</span></span>
-        <span><strong style={{ fontSize: 18.0 }}>34</strong> <span className="demo-note">运行次数</span></span>
-      </div>
-      <button className="button button-ghost button-sm" style={{ paddingLeft: 0 }}>查看详情</button>
-    </div>
+    <Card className="max-w-[420px]">
+      <CardHeader>
+        <CardTitle className="m-0">示例电解液项目</CardTitle>
+        <Badge tone="primary" dot>进行中</Badge>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="m-0 text-sm text-muted-foreground">目标：筛选高温稳定配方，覆盖 3 种溶剂体系。</p>
+        <div className="flex gap-6">
+          <span><strong className="text-lg">12</strong> <span className="text-xs text-muted-foreground">数据集</span></span>
+          <span><strong className="text-lg">34</strong> <span className="text-xs text-muted-foreground">运行次数</span></span>
+        </div>
+        <Button variant="ghost" size="sm" className="-ml-2.5">查看详情</Button>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -622,7 +636,7 @@ function EmptyBasic() {
       <span style={{ ...iconCircle("var(--faint)", "var(--surface-soft)"), borderRadius: 12 }}><Inbox size={20} /></span>
       <strong style={{ fontSize: 14 }}>还没有实验记录</strong>
       <span className="demo-note">创建第一个实验后，数据会展示在这里。</span>
-      <button className="button button-primary button-sm">新建实验</button>
+      <Button size="sm">新建实验</Button>
     </div>
   );
 }
@@ -634,7 +648,7 @@ function EmptyVariants() {
         <span style={{ ...iconCircle("var(--faint)", "var(--surface-soft)"), borderRadius: 12 }}><SearchX size={20} /></span>
         <strong style={{ fontSize: 14 }}>没有符合条件的结果</strong>
         <span className="demo-note">尝试调整筛选条件或关键字。</span>
-        <button className="button button-secondary button-sm">清除筛选</button>
+        <Button variant="secondary" size="sm">清除筛选</Button>
       </div>
       <div className="empty-line"><span>暂无附件（行内 sm 空态，只保留说明文字）</span></div>
     </div>
@@ -645,16 +659,16 @@ function EmptyBusiness() {
   return (
     <div className="demo-stack">
       <div className="demo-grid-2">
-        <div className="card-demo demo-stack" style={{ justifyItems: "center", textAlign: "center" }}>
+        <Card className="demo-stack p-4" style={{ justifyItems: "center", textAlign: "center" }}>
           <strong style={{ fontSize: 14 }}>示例项目（project-042）还没有数据集</strong>
           <span className="demo-note">导入或新建数据集后即可开始计算。</span>
-          <button className="button button-primary button-sm">导入数据集</button>
-        </div>
-        <div className="card-demo demo-stack" style={{ justifyItems: "center", textAlign: "center" }}>
+          <Button size="sm">导入数据集</Button>
+        </Card>
+        <Card className="demo-stack p-4" style={{ justifyItems: "center", textAlign: "center" }}>
           <strong style={{ fontSize: 14 }}>没有符合「进行中」的数据集</strong>
           <span className="demo-note">当前筛选条件下没有结果。</span>
-          <button className="button button-ghost button-sm">清除筛选</button>
-        </div>
+          <Button variant="ghost" size="sm">清除筛选</Button>
+        </Card>
       </div>
       <p className="demo-note">「没有数据」给创建入口，「筛选无结果」给清除筛选 —— 两种空态的文案与动作不同。</p>
     </div>
@@ -665,16 +679,16 @@ function EmptyBusiness() {
 function SkeletonBasic() {
   return (
     <div className="demo-stack" aria-busy="true">
-      <div className="demo-row" style={{ flexWrap: "nowrap" }}>
-        <span aria-hidden="true" style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--surface-soft)", flex: "0 0 auto" }} />
-        <div className="demo-stack" style={{ gap: 6, flex: 1 }}>
-          <SkeletonBar width="40%" height={12} />
-          <SkeletonBar width="70%" height={9} />
+      <div className="flex items-center gap-3">
+        <Skeleton className="size-8 shrink-0 rounded-full" />
+        <div className="flex-1 space-y-1.5">
+          <Skeleton className="h-3 w-2/5" />
+          <Skeleton className="h-2.5 w-[70%]" />
         </div>
       </div>
-      <SkeletonBar />
-      <SkeletonBar />
-      <SkeletonBar width="60%" />
+      <Skeleton className="h-2.5 w-full" />
+      <Skeleton className="h-2.5 w-full" />
+      <Skeleton className="h-2.5 w-3/5" />
       <p className="demo-note">骨架形状与真实内容一一对应；行数贴近真实内容，替换时不跳动。</p>
     </div>
   );
@@ -690,9 +704,9 @@ function SkeletonTable() {
         <tbody>
           {[0, 1, 2, 3].map((row) => (
             <tr key={row}>
-              <td><SkeletonBar width="80%" /></td>
-              <td><SkeletonBar width="56%" /></td>
-              <td><SkeletonBar width="40%" /></td>
+              <td><Skeleton className="h-2.5 w-4/5" /></td>
+              <td><Skeleton className="h-2.5 w-[56%]" /></td>
+              <td><Skeleton className="h-2.5 w-2/5" /></td>
             </tr>
           ))}
         </tbody>
@@ -703,9 +717,9 @@ function SkeletonTable() {
 
 function RunTable() {
   const rows = [
-    { id: "run-28003", name: "NCM811 高温循环", badge: <span className="status-badge badge-success"><span className="badge-dot" />已完成</span>, time: "214 秒" },
-    { id: "run-28004", name: "电解液配方筛选", badge: <span className="status-badge badge-info"><span className="badge-dot" />进行中</span>, time: "—" },
-    { id: "run-28005", name: "阻抗谱拟合", badge: <span className="status-badge badge-warning"><span className="badge-dot" />待复核</span>, time: "188 秒" },
+    { id: "run-28003", name: "NCM811 高温循环", badge: <Badge tone="success" dot>已完成</Badge>, time: "214 秒" },
+    { id: "run-28004", name: "电解液配方筛选", badge: <Badge tone="primary" dot>进行中</Badge>, time: "—" },
+    { id: "run-28005", name: "阻抗谱拟合", badge: <Badge tone="warning" dot>待复核</Badge>, time: "188 秒" },
   ];
   return (
     <div className="table-wrap">
@@ -730,21 +744,21 @@ function RunTable() {
 function SkeletonVariants() {
   return (
     <div className="demo-grid-2">
-      <div className="card-demo">
+      <Card className="p-4">
         <span className="type-label">表格骨架 · 保留表头与列结构</span>
-        <div style={{ marginTop: 8 }}>
+        <div className="mt-2">
           <SkeletonTable />
         </div>
-      </div>
-      <div className="card-demo" aria-busy="true">
+      </Card>
+      <Card className="p-4" aria-busy="true">
         <span className="type-label">卡片骨架 · 保留卡片框架</span>
-        <div className="demo-stack" style={{ gap: 8, marginTop: 12 }}>
-          <SkeletonBar width="45%" height={13} />
-          <SkeletonBar />
-          <SkeletonBar />
-          <SkeletonBar width="60%" />
+        <div className="mt-3 space-y-2">
+          <Skeleton className="h-3 w-[45%]" />
+          <Skeleton className="h-2.5 w-full" />
+          <Skeleton className="h-2.5 w-full" />
+          <Skeleton className="h-2.5 w-3/5" />
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -755,13 +769,14 @@ function SkeletonBusiness() {
     <div className="demo-stack">
       {loading ? <SkeletonTable /> : <RunTable />}
       <div className="demo-row">
-        <button
-          className="button button-secondary button-sm"
+        <Button
+          variant="secondary"
+          size="sm"
           disabled={loading}
           onClick={() => { setLoading(true); window.setTimeout(() => setLoading(false), 1500); }}
         >
           模拟重新加载
-        </button>
+        </Button>
         <span className="demo-note">加载完成后内容原位替换骨架：表头与列位置不动，视线无需重新定位。</span>
       </div>
     </div>
@@ -791,18 +806,18 @@ function ResultBasic() {
 function ResultVariants() {
   return (
     <div className="demo-grid-2">
-      <div className="card-demo demo-stack" style={{ justifyItems: "center", textAlign: "center" }}>
+      <Card className="demo-stack p-4" style={{ justifyItems: "center", textAlign: "center" }}>
         <span style={iconCircle("var(--faint)", "var(--surface-soft)", 40)}><FileQuestion size={20} /></span>
         <strong style={{ fontSize: 14 }}>404 · 页面不存在</strong>
         <span className="demo-note">页面可能已被移动或删除。</span>
-        <button className="button button-secondary button-sm">返回首页</button>
-      </div>
-      <div className="card-demo demo-stack" style={{ justifyItems: "center", textAlign: "center" }}>
+        <Button variant="secondary" size="sm">返回首页</Button>
+      </Card>
+      <Card className="demo-stack p-4" style={{ justifyItems: "center", textAlign: "center" }}>
         <span style={iconCircle("var(--amber)", "var(--amber-soft)", 40)}><Lock size={20} /></span>
         <strong style={{ fontSize: 14 }}>403 · 无访问权限</strong>
         <span className="demo-note">需要项目 project-042 的查看权限，请联系项目管理员。</span>
-        <button className="button button-secondary button-sm">申请权限</button>
-      </div>
+        <Button variant="secondary" size="sm">申请权限</Button>
+      </Card>
     </div>
   );
 }
@@ -816,8 +831,8 @@ function ResultBusiness() {
         任务 <span className="mono">run-28003</span> 已加入队列，将使用 示例项目（project-042）的额度。
       </span>
       <div className="demo-row" style={{ justifyContent: "center" }}>
-        <button className="button button-primary button-sm">查看任务状态</button>
-        <button className="button button-secondary button-sm">返回任务列表</button>
+        <Button size="sm">查看任务状态</Button>
+        <Button variant="secondary" size="sm">返回任务列表</Button>
       </div>
     </div>
   );

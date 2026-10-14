@@ -21,7 +21,10 @@ export const generalComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "四个变体覆盖主动作、次动作、低强调动作和危险动作。",
-        code: `<Button variant="primary">开始计算</Button>
+        code: `import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+<Button>开始计算 <ArrowRight /></Button>
 <Button variant="secondary">保存草稿</Button>
 <Button variant="ghost">查看详情</Button>
 <Button variant="danger">撤销任务</Button>`,
@@ -32,8 +35,14 @@ export const generalComponents: ComponentDoc[] = [
         title: "状态示例",
         kind: "state",
         description: "loading 期间保留按钮宽度与文案位置，disabled 必须能在上下文中找到原因。",
-        code: `<Button variant="primary" loading>正在提交</Button>
-<Button variant="primary" disabled>不可用</Button>`,
+        code: `import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+<Button disabled={isSubmitting}>
+  {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+  {isSubmitting ? "正在提交" : "提交"}
+</Button>
+<Button disabled>不可用（无权限）</Button>`,
         preview: "button/states",
       },
       {
@@ -41,9 +50,11 @@ export const generalComponents: ComponentDoc[] = [
         title: "尺寸示例",
         kind: "size",
         description: "sm 用于表格行内和紧凑工具条，md 是默认尺寸，lg 只用于页面级主动作。",
-        code: `<Button size="sm" variant="secondary">行内操作</Button>
-<Button size="md" variant="primary">默认尺寸</Button>
-<Button size="lg" variant="primary">页面主动作</Button>`,
+        code: `import { Button } from "@/components/ui/button";
+
+<Button variant="secondary" size="sm">行内操作</Button>
+<Button>默认尺寸</Button>
+<Button size="lg">页面主动作</Button>`,
         preview: "button/sizes",
       },
       {
@@ -51,26 +62,36 @@ export const generalComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "涉及计算、写入、额度或外部调用的动作，按钮旁必须给出影响范围说明。",
-        code: `<div className="action-with-scope">
-  <Button variant="primary" loading={isSubmitting}>提交计算任务</Button>
-  <span>将使用 示例项目（project-042）· 预计最长 300 秒</span>
+        code: `import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+<div className="flex items-center gap-2">
+  <Button disabled={isSubmitting} onClick={submit}>
+    {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+    {isSubmitting ? "正在提交" : "提交计算任务"}
+  </Button>
+  <span className="text-xs text-muted-foreground">将使用 示例项目（project-042）· 预计最长 300 秒</span>
 </div>`,
-        fullCode: `function SubmitRunAction() {
+        fullCode: `import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+function SubmitRunAction() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   return (
-    <div className="action-with-scope">
+    <div className="flex items-center gap-2">
       <Button
-        variant="primary"
-        loading={isSubmitting}
+        disabled={isSubmitting}
         onClick={async () => {
           setIsSubmitting(true);
           await submitRun({ projectId: "project-042" }); // synthetic
           setIsSubmitting(false);
         }}
       >
-        提交计算任务
+        {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+        {isSubmitting ? "正在提交" : "提交计算任务"}
       </Button>
-      <span>将使用 示例项目（project-042）· 预计最长 300 秒</span>
+      <span className="text-xs text-muted-foreground">将使用 示例项目（project-042）· 预计最长 300 秒</span>
     </div>
   );
 }`,
@@ -156,10 +177,20 @@ export const generalComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "图标语义必须无需解释：关闭、复制、刷新、更多。",
-        code: `<IconButton icon={<X size={16} />} label="关闭面板" />
-<IconButton icon={<Copy size={16} />} label="复制任务 ID" />
-<IconButton icon={<RefreshCw size={16} />} label="刷新列表" />
-<IconButton icon={<MoreHorizontal size={16} />} label="更多操作" />`,
+        code: `import { Copy, MoreHorizontal, RefreshCw, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+{/* 每个图标按钮都配 Tooltip，文案与 aria-label 相同（以下省略 Tooltip 包裹） */}
+<Tooltip>
+  <TooltipTrigger asChild>
+    <Button variant="ghost" size="icon" aria-label="关闭面板"><X /></Button>
+  </TooltipTrigger>
+  <TooltipContent>关闭面板</TooltipContent>
+</Tooltip>
+<Button variant="ghost" size="icon" aria-label="复制任务 ID"><Copy /></Button>
+<Button variant="ghost" size="icon" aria-label="刷新列表"><RefreshCw /></Button>
+<Button variant="ghost" size="icon" aria-label="更多操作"><MoreHorizontal /></Button>`,
         preview: "icon-button/basic",
       },
       {
@@ -167,8 +198,29 @@ export const generalComponents: ComponentDoc[] = [
         title: "状态示例",
         kind: "state",
         description: "danger 变体用于不可逆动作；disabled 必须在 Tooltip 或邻近文案中说明原因。",
-        code: `<IconButton icon={<Trash2 size={16} />} label="删除数据集 ds-118" variant="danger" />
-<IconButton icon={<Share2 size={16} />} label="分享（需要项目编辑权限）" disabled />`,
+        code: `import { Loader2, Share2, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+<Button variant="ghost" size="icon" aria-label="删除数据集 ds-118" className="text-danger hover:bg-danger-soft">
+  <Trash2 />
+</Button>
+
+{/* disabled 按钮不触发指针事件：用可聚焦的外层承载 Tooltip，写明原因 */}
+<Tooltip>
+  <TooltipTrigger asChild>
+    <span tabIndex={0} className="inline-flex rounded-md">
+      <Button variant="ghost" size="icon" aria-label="分享（需要项目编辑权限）" disabled>
+        <Share2 />
+      </Button>
+    </span>
+  </TooltipTrigger>
+  <TooltipContent>需要项目编辑权限</TooltipContent>
+</Tooltip>
+
+<Button variant="ghost" size="icon" aria-label="正在刷新" disabled>
+  <Loader2 className="animate-spin text-primary" />
+</Button>`,
         preview: "icon-button/states",
       },
       {
@@ -176,8 +228,13 @@ export const generalComponents: ComponentDoc[] = [
         title: "尺寸示例",
         kind: "size",
         description: "sm 用于表格行内和紧凑工具条，md 是默认尺寸；图标保持 14–16px。",
-        code: `<IconButton size="sm" icon={<Pencil size={14} />} label="编辑" />
-<IconButton size="md" icon={<Pencil size={16} />} label="编辑" />`,
+        code: `import { Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+{/* sm：28px，图标 14px，用于表格行内 */}
+<Button variant="ghost" size="icon" aria-label="编辑" className="size-7 [&_svg]:size-3.5"><Pencil /></Button>
+{/* 默认：32px，图标 16px */}
+<Button variant="ghost" size="icon" aria-label="编辑"><Pencil /></Button>`,
         preview: "icon-button/sizes",
       },
       {
@@ -185,10 +242,29 @@ export const generalComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "表格行内只放高频动作（不超过 3 个）；删除等危险动作收入「更多操作」并配确认。",
-        code: `<div className="row-actions">
-  <IconButton icon={<Eye size={15} />} label="查看 run-28003 详情" onClick={openDetail} />
-  <IconButton icon={<Copy size={15} />} label="复制任务 ID" onClick={copyRunId} />
-  <IconButton icon={<MoreHorizontal size={15} />} label="更多操作" onClick={openMenu} />
+        code: `import { Copy, Eye, MoreHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+<div className="flex items-center justify-end gap-0.5">
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button variant="ghost" size="icon" aria-label="查看 run-28003 详情" onClick={openDetail}><Eye /></Button>
+    </TooltipTrigger>
+    <TooltipContent>查看详情</TooltipContent>
+  </Tooltip>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button variant="ghost" size="icon" aria-label="复制任务 ID" onClick={copyRunId}><Copy /></Button>
+    </TooltipTrigger>
+    <TooltipContent>复制任务 ID</TooltipContent>
+  </Tooltip>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button variant="ghost" size="icon" aria-label="更多操作" onClick={openMenu}><MoreHorizontal /></Button>
+    </TooltipTrigger>
+    <TooltipContent>更多操作</TooltipContent>
+  </Tooltip>
 </div>`,
         preview: "icon-button/business",
       },
@@ -474,8 +550,10 @@ export const generalComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "水平分割线上下各保留 20px 间距，线本身不承载颜色语义。",
-        code: `<p>项目基础信息与说明。</p>
-<Divider />
+        code: `import { Separator } from "@/components/ui/separator";
+
+<p>项目基础信息与说明。</p>
+<Separator className="my-5" />
 <p>参数配置与执行记录。</p>`,
         preview: "divider/basic",
       },
@@ -484,9 +562,24 @@ export const generalComponents: ComponentDoc[] = [
         title: "变体示例",
         kind: "variant",
         description: "带文字的分割线用于标记区块起点；垂直分割线只用于工具栏按钮分组；虚线用于弱分隔。",
-        code: `<Divider textPosition="start">参数配置</Divider>
-<Divider orientation="vertical" />
-<Divider dashed />`,
+        code: `import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+
+{/* 带文字：标记区块起点 */}
+<div className="flex items-center gap-2.5">
+  <span className="text-base font-semibold">参数配置</span>
+  <Separator className="w-auto flex-1" />
+</div>
+
+{/* 垂直：只用于工具栏按钮分组 */}
+<div className="flex h-5 items-center gap-3">
+  <Button variant="ghost" size="sm">查看</Button>
+  <Separator orientation="vertical" className="h-4" />
+  <Button variant="ghost" size="sm">编辑</Button>
+</div>
+
+{/* 虚线：弱分隔 */}
+<Separator className="h-0 border-t border-dashed bg-transparent" />`,
         preview: "divider/variants",
       },
       {
@@ -494,8 +587,13 @@ export const generalComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "详情页在「基础信息」与「执行记录」之间用带文字分割线分区，不再重复加粗区块标题。",
-        code: `<Descriptions items={baseItems} />
-<Divider textPosition="start">执行记录</Divider>
+        code: `import { Separator } from "@/components/ui/separator";
+
+<Descriptions items={baseItems} />
+<div className="flex items-center gap-2.5">
+  <span className="text-base font-semibold">执行记录</span>
+  <Separator className="w-auto flex-1" />
+</div>
 <Timeline items={runEvents} />`,
         preview: "divider/business",
       },
@@ -569,12 +667,14 @@ export const generalComponents: ComponentDoc[] = [
         title: "语义色示例",
         kind: "basic",
         description: "六种语义色各归其位：success 完成、warning 待复核、danger 失败、info 进行中、violet Agent、neutral 默认。",
-        code: `<Badge status="success" text="已完成" />
-<Badge status="warning" text="待复核" />
-<Badge status="danger" text="失败" />
-<Badge status="info" text="进行中" />
-<Badge status="violet" text="Agent 建议" />
-<Badge status="neutral" text="已归档" />`,
+        code: `import { Badge } from "@/components/ui/badge";
+
+<Badge tone="success" dot>已完成</Badge>
+<Badge tone="warning" dot>待复核</Badge>
+<Badge tone="danger" dot>失败</Badge>
+<Badge tone="primary" dot>进行中</Badge>
+<Badge tone="agent" dot>Agent 建议</Badge>
+<Badge tone="neutral" dot>已归档</Badge>`,
         preview: "badge/basic",
       },
       {
@@ -582,10 +682,26 @@ export const generalComponents: ComponentDoc[] = [
         title: "变体示例",
         kind: "variant",
         description: "dot 只表达状态不表达数量；count 用于未读数，超过 max 显示 99+；进行中的状态带动效提示仍在变化。",
-        code: `<Badge status="success" dot text="服务正常" />
-<Badge status="info" dot pulse text="同步中" />
-<Badge count={8} />
-<Badge count={128} max={99} />`,
+        code: `import { Bell, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+<Badge tone="success" dot>服务正常</Badge>
+<Badge tone="primary">
+  <Loader2 className="size-2.5 animate-spin" aria-hidden="true" />同步中
+</Badge>
+
+{/* 计数徽标：Badge 叠在图标按钮右上角，超过 99 显示 99+ */}
+<span className="relative inline-flex">
+  <Button variant="ghost" size="icon" aria-label="通知（8 条未读）"><Bell /></Button>
+  <Badge
+    tone="danger"
+    aria-hidden="true"
+    className="absolute -right-1.5 -top-1 h-4 min-w-4 justify-center rounded-full bg-danger px-1 text-danger-foreground"
+  >
+    {count > 99 ? "99+" : count}
+  </Badge>
+</span>`,
         preview: "badge/variants",
       },
       {
@@ -593,18 +709,51 @@ export const generalComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "运行列表的状态列：同一列只出现状态徽标，颜色与文案一一对应，不用颜色区分业务类型。",
-        code: `<Table
-  columns={runColumns}
-  dataSource={runs} // synthetic: run-28003 等
-  renderStatus={(run) => <Badge status={run.status} text={run.statusText} />}
-/>`,
-        fullCode: `// synthetic 数据
+        code: `import { Badge } from "@/components/ui/badge";
+
+const statusBadge = {
+  success: <Badge tone="success" dot>已完成</Badge>,
+  info: <Badge tone="primary" dot>进行中</Badge>,
+  warning: <Badge tone="warning" dot>待复核</Badge>,
+  danger: <Badge tone="danger" dot>失败</Badge>,
+};
+
+<td>{statusBadge[run.status]}</td>`,
+        fullCode: `import { Badge } from "@/components/ui/badge";
+
+// synthetic 数据
 const runs = [
-  { id: "run-28003", name: "NCM811 高温循环", status: "success", statusText: "已完成" },
-  { id: "run-28004", name: "电解液配方筛选", status: "info", statusText: "进行中" },
-  { id: "run-28005", name: "阻抗谱拟合", status: "warning", statusText: "待复核" },
-  { id: "run-28006", name: "热稳定性预测", status: "danger", statusText: "失败" },
-];`,
+  { id: "run-28003", name: "NCM811 高温循环", status: "success" },
+  { id: "run-28004", name: "电解液配方筛选", status: "info" },
+  { id: "run-28005", name: "阻抗谱拟合", status: "warning" },
+  { id: "run-28006", name: "热稳定性预测", status: "danger" },
+] as const;
+
+const statusBadge = {
+  success: <Badge tone="success" dot>已完成</Badge>,
+  info: <Badge tone="primary" dot>进行中</Badge>,
+  warning: <Badge tone="warning" dot>待复核</Badge>,
+  danger: <Badge tone="danger" dot>失败</Badge>,
+};
+
+function RunStatusTable() {
+  return (
+    <table>
+      <thead>
+        <tr><th>任务</th><th>项目</th><th>状态</th></tr>
+      </thead>
+      <tbody>
+        {runs.map((run) => (
+          <tr key={run.id}>
+            <td><strong>{run.name}</strong> <span className="font-mono">{run.id}</span></td>
+            <td className="font-mono">project-042</td>
+            <td>{statusBadge[run.status]}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}`,
         preview: "badge/business",
       },
     ],
@@ -789,9 +938,20 @@ const runs = [
         title: "基础示例",
         kind: "basic",
         description: "标准结构：标题 + 内容 + 右上角辅助区；一卡最多一个主按钮。",
-        code: `<Card title="计算资源" extra={<Link href="#/quota">额度明细</Link>}>
-  <p>本月已用 1,280 / 3,000 核时</p>
-  <Button variant="secondary" size="sm">申请扩容</Button>
+        code: `import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+<Card className="max-w-[420px]">
+  <CardHeader>
+    <CardTitle>计算资源</CardTitle>
+    <Button variant="link" size="sm" asChild>
+      <a href="#/quota">额度明细</a>
+    </Button>
+  </CardHeader>
+  <CardContent className="space-y-3">
+    <p className="text-sm text-muted-foreground">本月已用 1,280 / 3,000 核时</p>
+    <Button variant="secondary" size="sm">申请扩容</Button>
+  </CardContent>
 </Card>`,
         preview: "card/basic",
       },
@@ -800,11 +960,38 @@ const runs = [
         title: "变体示例",
         kind: "variant",
         description: "hoverable 用于整卡可点的入口卡；loading 用骨架屏替换内容但保留卡片框架。",
-        code: `<Card hoverable onClick={openProject}>
-  <h4>示例项目（project-042）</h4>
-  <p>12 个数据集 · 34 次运行</p>
+        code: `import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+
+{/* hoverable 入口卡：整卡可点，需可聚焦、可键盘触发 */}
+<Card
+  role="button"
+  tabIndex={0}
+  onClick={openProject}
+  onKeyDown={(e) => e.key === "Enter" && openProject()}
+  className={cn(
+    "cursor-pointer transition-colors hover:border-primary/50 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring",
+    selected && "border-primary",
+  )}
+>
+  <CardHeader className="flex-col gap-1">
+    <CardTitle>示例项目（project-042）</CardTitle>
+    <CardDescription>12 个数据集 · 34 次运行</CardDescription>
+  </CardHeader>
 </Card>
-<Card title="执行记录" loading />`,
+
+{/* loading：保留卡片框架与标题，只把内容区换成骨架 */}
+<Card aria-busy="true">
+  <CardHeader>
+    <CardTitle>执行记录</CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-2">
+    <Skeleton className="h-2.5 w-full" />
+    <Skeleton className="h-2.5 w-full" />
+    <Skeleton className="h-2.5 w-3/5" />
+  </CardContent>
+</Card>`,
         preview: "card/variants",
       },
       {
@@ -812,11 +999,23 @@ const runs = [
         title: "真实业务示例",
         kind: "business",
         description: "项目卡：名称 + 状态徽标 + 关键统计 + 行内操作；同类卡片信息结构保持一致，方便横向扫描。",
-        code: `<Card title="示例电解液项目" extra={<Badge status="info" text="进行中" />}>
-  <p>目标：筛选高温稳定配方</p>
-  <Statistic title="数据集" value={12} />
-  <Statistic title="运行次数" value={34} />
-  <Button size="sm" variant="ghost">查看详情</Button>
+        code: `import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+<Card className="max-w-[420px]">
+  <CardHeader>
+    <CardTitle>示例电解液项目</CardTitle>
+    <Badge tone="primary" dot>进行中</Badge>
+  </CardHeader>
+  <CardContent className="space-y-3">
+    <p className="text-sm text-muted-foreground">目标：筛选高温稳定配方，覆盖 3 种溶剂体系。</p>
+    <div className="flex gap-6">
+      <span><strong className="text-lg">12</strong> <span className="text-xs text-muted-foreground">数据集</span></span>
+      <span><strong className="text-lg">34</strong> <span className="text-xs text-muted-foreground">运行次数</span></span>
+    </div>
+    <Button variant="ghost" size="sm" className="-ml-2.5">查看详情</Button>
+  </CardContent>
 </Card>`,
         preview: "card/business",
       },
@@ -1009,9 +1208,24 @@ const runs = [
         title: "基础示例",
         kind: "basic",
         description: "骨架形状与真实内容一一对应：标题条、正文行、按钮位；行数与真实内容接近。",
-        code: `<Skeleton loading={isLoading} rows={3} avatar>
+        code: `import { Skeleton } from "@/components/ui/skeleton";
+
+{isLoading ? (
+  <div className="space-y-3" aria-busy="true">
+    <div className="flex items-center gap-3">
+      <Skeleton className="size-8 shrink-0 rounded-full" />
+      <div className="flex-1 space-y-1.5">
+        <Skeleton className="h-3 w-2/5" />
+        <Skeleton className="h-2.5 w-[70%]" />
+      </div>
+    </div>
+    <Skeleton className="h-2.5 w-full" />
+    <Skeleton className="h-2.5 w-full" />
+    <Skeleton className="h-2.5 w-3/5" />
+  </div>
+) : (
   <ProjectSummary projectId="project-042" />
-</Skeleton>`,
+)}`,
         preview: "skeleton/basic",
       },
       {
@@ -1019,8 +1233,32 @@ const runs = [
         title: "变体示例",
         kind: "variant",
         description: "表格骨架保留表头与列结构；卡片骨架保留卡片框架，只替换内容区。",
-        code: `<Skeleton loading variant="table" rows={4} />
-<Skeleton loading variant="card" />`,
+        code: `import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+{/* 表格骨架：保留表头与列结构，只替换单元格内容 */}
+<table aria-busy="true">
+  <thead>
+    <tr><th>任务</th><th>状态</th><th>用时</th></tr>
+  </thead>
+  <tbody>
+    {[0, 1, 2, 3].map((row) => (
+      <tr key={row}>
+        <td><Skeleton className="h-2.5 w-4/5" /></td>
+        <td><Skeleton className="h-2.5 w-[56%]" /></td>
+        <td><Skeleton className="h-2.5 w-2/5" /></td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+{/* 卡片骨架：保留卡片框架 */}
+<Card className="space-y-2 p-4" aria-busy="true">
+  <Skeleton className="h-3 w-[45%]" />
+  <Skeleton className="h-2.5 w-full" />
+  <Skeleton className="h-2.5 w-full" />
+  <Skeleton className="h-2.5 w-3/5" />
+</Card>`,
         preview: "skeleton/variants",
       },
       {
@@ -1028,16 +1266,34 @@ const runs = [
         title: "真实业务示例",
         kind: "business",
         description: "加载完成后内容原位替换骨架：标题、统计、状态列位置不动，用户视线不需要重新定位。",
-        code: `<Skeleton loading={isLoading} variant="table" rows={4}>
-  <Table columns={runColumns} dataSource={runs} />
-</Skeleton>`,
-        fullCode: `function RunList() {
-  const { data, isLoading } = useRuns("project-042"); // synthetic: run-28003 等
+        code: `import { Skeleton } from "@/components/ui/skeleton";
+
+{isLoading ? <RunTableSkeleton rows={4} /> : <RunTable runs={runs} />}
+{/* RunTableSkeleton 与 RunTable 共用同一表头与列宽，单元格内放 <Skeleton className="h-2.5 w-4/5" /> */}`,
+        fullCode: `import { Skeleton } from "@/components/ui/skeleton";
+
+function RunTableSkeleton({ rows = 4 }: { rows?: number }) {
   return (
-    <Skeleton loading={isLoading} variant="table" rows={4}>
-      <Table columns={runColumns} dataSource={data} />
-    </Skeleton>
+    <table aria-busy="true">
+      <thead>
+        <tr><th>任务</th><th>状态</th><th>用时</th></tr>
+      </thead>
+      <tbody>
+        {Array.from({ length: rows }, (_, row) => (
+          <tr key={row}>
+            <td><Skeleton className="h-2.5 w-4/5" /></td>
+            <td><Skeleton className="h-2.5 w-[56%]" /></td>
+            <td><Skeleton className="h-2.5 w-2/5" /></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
+}
+
+function RunList() {
+  const { data, isLoading } = useRuns("project-042"); // synthetic: run-28003 等
+  return isLoading ? <RunTableSkeleton rows={4} /> : <RunTable runs={data} />;
 }`,
         preview: "skeleton/business",
       },
