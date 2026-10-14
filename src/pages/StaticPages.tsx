@@ -18,7 +18,7 @@ export function StartPage() {
         <h2>给前端</h2>
         <p className="doc-paragraph">组件以源码形式分发（shadcn/ui 的 registry 格式）：装进项目后代码就在你自己的 <code>src/components/ui/</code> 里，可读可改。要求 React 18 + Tailwind 3 + TypeScript，路径别名 <code>@/</code> 指向 <code>src/</code>。</p>
         <ol className="rule-list">
-          <li>先装主题（令牌 CSS + Tailwind 预设）：<code>npx shadcn@2.3.0 add {REGISTRY}/theme.json</code>，然后在 <code>tailwind.config.js</code> 里 <code>presets: [require("./datacore.preset.js")]</code>，在入口 CSS 顶部引入 <code>datacore-tokens.css</code>。</li>
+          <li>先装主题（令牌 CSS + Tailwind 预设）：<code>npx shadcn@2.3.0 add {REGISTRY}/theme.json</code>，然后在 <code>tailwind.config.js</code> 里 <code>import preset from "./datacore.preset.js"</code> 并加入 <code>presets: [preset]</code>，在入口 CSS 顶部引入 <code>datacore-tokens.css</code>。</li>
           <li>再按需装组件：<code>npx shadcn@2.3.0 add {REGISTRY}/button.json</code>。每个组件页顶部都有可复制的安装命令，依赖会自动一并安装。</li>
           <li>内网访问不了 ui.shadcn.com 时，用离线脚本：下载 <a href="./r/add.mjs">add.mjs</a>，<code>node add.mjs {REGISTRY} theme button select</code>；它默认不覆盖已有文件，升级时加 <code>--force</code> 再看 git diff。</li>
           <li>示例的“代码”标签就是可直接粘贴的写法；对照“状态契约”补齐 loading、empty、error、disabled、permission 状态。</li>
