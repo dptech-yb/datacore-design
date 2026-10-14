@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "page-header",
+  "type": "registry:ui",
+  "title": "PageHeader 页头",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/page-header.tsx",
+      "type": "registry:ui",
+      "content": "// 页头：页面顶部的标题区，组合面包屑、返回链接、标题、状态徽章、说明与页面级动作，窄屏时动作区换到标题下方。\nimport * as React from \"react\";\nimport { ChevronLeft } from \"lucide-react\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface PageHeaderProps extends Omit<React.HTMLAttributes<HTMLElement>, \"title\"> {\n  /** 页面标题，默认渲染为 h1。 */\n  title: React.ReactNode;\n  /** 一行说明：这个页面能做什么、影响范围。 */\n  description?: React.ReactNode;\n  /** 标题上方的面包屑插槽，通常放 <Breadcrumb>。 */\n  breadcrumb?: React.ReactNode;\n  /** 标题右侧的状态插槽，通常放 <Badge>。 */\n  status?: React.ReactNode;\n  /** 动作区插槽；宽屏右对齐，窄屏换到标题下方。 */\n  actions?: React.ReactNode;\n  /** 返回链接地址；与 onBack 任一存在时显示返回入口。 */\n  backHref?: string;\n  /** 返回入口的点击回调；只给 onBack 时渲染为按钮。 */\n  onBack?: (event: React.MouseEvent<HTMLElement>) => void;\n  /** 返回入口文案。 */\n  backLabel?: React.ReactNode;\n  /** 标题标签，页面内嵌区块可改为 h2。 */\n  titleAs?: \"h1\" | \"h2\";\n}\n\nconst backClass =\n  \"inline-flex w-fit items-center gap-1 rounded-sm bg-transparent p-0 text-sm text-muted-foreground no-underline transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer [&_svg]:size-4\";\n\nexport const PageHeader = React.forwardRef<HTMLElement, PageHeaderProps>(\n  (\n    { className, title, description, breadcrumb, status, actions, backHref, onBack, backLabel = \"返回\", titleAs: Title = \"h1\", ...props },\n    ref,\n  ) => {\n    const back =\n      backHref !== undefined ? (\n        <a href={backHref} onClick={onBack} className={backClass}>\n          <ChevronLeft aria-hidden />\n          {backLabel}\n        </a>\n      ) : onBack ? (\n        <button type=\"button\" onClick={onBack} className={backClass}>\n          <ChevronLeft aria-hidden />\n          {backLabel}\n        </button>\n      ) : null;\n\n    return (\n      <header ref={ref} className={cn(\"flex flex-col gap-2\", className)} {...props}>\n        {breadcrumb}\n        {back}\n        <div className=\"flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6\">\n          <div className=\"grid min-w-0 flex-1 gap-1\">\n            <div className=\"flex flex-wrap items-center gap-x-2.5 gap-y-1\">\n              <Title className=\"m-0 line-clamp-2 text-xl font-semibold tracking-tight text-foreground\">{title}</Title>\n              {status}\n            </div>\n            {description && <p className=\"m-0 line-clamp-2 text-base text-muted-foreground\">{description}</p>}\n          </div>\n          {actions && <div className=\"flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end\">{actions}</div>}\n        </div>\n      </header>\n    );\n  },\n);\nPageHeader.displayName = \"PageHeader\";\n"
+    }
+  ]
+}

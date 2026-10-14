@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "link",
+  "type": "registry:ui",
+  "title": "Link 链接",
+  "dependencies": [
+    "@radix-ui/react-slot",
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/link.tsx",
+      "type": "registry:ui",
+      "content": "// 链接：只负责跳转的 <a>，品牌色、hover 下划线，支持外链（新标签页 + 图标）、muted/danger 变体、禁用与 asChild（路由链接）。\nimport * as React from \"react\";\nimport { Slot, Slottable } from \"@radix-ui/react-slot\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport { ArrowUpRight } from \"lucide-react\";\nimport { cn } from \"@/lib/utils\";\n\nexport const linkVariants = cva(\n  \"inline-flex items-center gap-0.5 rounded-sm font-medium underline-offset-4 transition-colors duration-fast ease-standard cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 [&_svg]:size-3.5 [&_svg]:shrink-0\",\n  {\n    variants: {\n      variant: {\n        default: \"text-primary hover:text-primary-hover\",\n        muted: \"text-muted-foreground hover:text-foreground\",\n        danger: \"text-danger hover:text-danger/80\",\n      },\n    },\n    defaultVariants: { variant: \"default\" },\n  },\n);\n\nexport interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement>, VariantProps<typeof linkVariants> {\n  /** 外链：新标签页打开，附加 rel 与外链图标。 */\n  external?: boolean;\n  /** 禁用：去掉 href，渲染为不可跳转的 muted 文本（aria-disabled）。 */\n  disabled?: boolean;\n  /** 把样式与行为交给子元素，例如路由库的 <RouterLink>。 */\n  asChild?: boolean;\n}\n\nexport const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(\n  ({ className, variant, external, disabled, asChild, href, target, rel, children, onClick, ...props }, ref) => {\n    const Comp = asChild ? Slot : \"a\";\n    if (disabled) {\n      return (\n        <Comp\n          ref={ref}\n          role=\"link\"\n          aria-disabled=\"true\"\n          className={cn(linkVariants({ variant: \"muted\" }), \"cursor-not-allowed opacity-60 hover:no-underline hover:text-muted-foreground\", className)}\n          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => e.preventDefault()}\n          {...props}\n        >\n          <Slottable>{children}</Slottable>\n        </Comp>\n      );\n    }\n    return (\n      <Comp\n        ref={ref}\n        href={href}\n        target={external ? (target ?? \"_blank\") : target}\n        rel={external ? (rel ?? \"noopener noreferrer\") : rel}\n        className={cn(linkVariants({ variant }), className)}\n        onClick={onClick}\n        {...props}\n      >\n        <Slottable>{children}</Slottable>\n        {external && (\n          <>\n            <ArrowUpRight aria-hidden=\"true\" />\n            <span className=\"sr-only\">（在新标签页打开）</span>\n          </>\n        )}\n      </Comp>\n    );\n  },\n);\nLink.displayName = \"Link\";\n"
+    }
+  ]
+}

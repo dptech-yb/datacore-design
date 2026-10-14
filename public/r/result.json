@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "result",
+  "type": "registry:ui",
+  "title": "Result 结果页",
+  "dependencies": [
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/result.tsx",
+      "type": "registry:ui",
+      "content": "// 结果页：流程结束或整页异常时的结论区块，按 status 绑定图标与语义色（含 403/404 预置文案），附说明、动作与详情。\nimport * as React from \"react\";\nimport { cva } from \"class-variance-authority\";\nimport { AlertTriangle, CheckCircle2, FileQuestion, Info, Lock, XCircle } from \"lucide-react\";\nimport { cn } from \"@/lib/utils\";\n\nexport type ResultStatus = \"success\" | \"warning\" | \"danger\" | \"info\" | \"forbidden\" | \"not-found\";\n\nconst iconVariants = cva(\"inline-flex size-12 items-center justify-center rounded-full [&_svg]:size-6\", {\n  variants: {\n    status: {\n      success: \"bg-success-soft text-success\",\n      warning: \"bg-warning-soft text-warning\",\n      danger: \"bg-danger-soft text-danger\",\n      info: \"bg-primary-soft text-primary\",\n      forbidden: \"bg-warning-soft text-warning\",\n      \"not-found\": \"bg-muted text-subtle\",\n    },\n  },\n});\n\nconst PRESETS: Record<ResultStatus, { icon: React.ReactNode; title?: string; description?: string }> = {\n  success: { icon: <CheckCircle2 /> },\n  warning: { icon: <AlertTriangle /> },\n  danger: { icon: <XCircle /> },\n  info: { icon: <Info /> },\n  forbidden: { icon: <Lock />, title: \"无访问权限\", description: \"你没有查看此页面的权限，请联系项目管理员开通。\" },\n  \"not-found\": { icon: <FileQuestion />, title: \"页面不存在\", description: \"页面可能已被移动或删除，请检查链接是否正确。\" },\n};\n\nexport interface ResultProps extends Omit<React.HTMLAttributes<HTMLDivElement>, \"title\"> {\n  status: ResultStatus;\n  /** 结论文案；forbidden / not-found 有预置默认值。 */\n  title?: React.ReactNode;\n  /** 原因或影响范围；forbidden / not-found 有预置默认值。 */\n  description?: React.ReactNode;\n  /** 覆盖默认图标。 */\n  icon?: React.ReactNode;\n  /** 后续动作，最多两个 Button：主动作在前。 */\n  actions?: React.ReactNode;\n  /** 挂载后把焦点移到标题，读屏器先朗读结论（整页结果时使用）。 */\n  autoFocus?: boolean;\n}\n\nexport const Result = React.forwardRef<HTMLDivElement, ResultProps>(\n  ({ className, status, title, description, icon, actions, autoFocus, children, ...props }, ref) => {\n    const preset = PRESETS[status];\n    const headingRef = React.useRef<HTMLHeadingElement>(null);\n    React.useEffect(() => {\n      if (autoFocus) headingRef.current?.focus();\n    }, [autoFocus]);\n    return (\n      <div\n        ref={ref}\n        role={status === \"danger\" ? \"alert\" : \"status\"}\n        className={cn(\"flex flex-col items-center gap-2 px-6 py-8 text-center\", className)}\n        {...props}\n      >\n        <span aria-hidden=\"true\" className={cn(iconVariants({ status }), \"mb-1\")}>{icon ?? preset.icon}</span>\n        <h2 ref={headingRef} tabIndex={-1} className=\"m-0 text-lg font-semibold text-foreground focus:outline-none\">\n          {title ?? preset.title}\n        </h2>\n        {(description ?? preset.description) && (\n          <p className=\"m-0 max-w-md text-sm text-muted-foreground\">{description ?? preset.description}</p>\n        )}\n        {children && <div className=\"mt-2 w-full max-w-md rounded-lg border bg-muted/50 px-4 py-3 text-left text-sm\">{children}</div>}\n        {actions && <div className=\"mt-3 flex w-full flex-col items-stretch justify-center gap-2 sm:w-auto sm:flex-row sm:items-center\">{actions}</div>}\n      </div>\n    );\n  },\n);\nResult.displayName = \"Result\";\n"
+    }
+  ]
+}

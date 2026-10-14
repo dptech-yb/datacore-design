@@ -158,7 +158,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>((props, ref)
         <Command shouldFilter={shouldFilter}>
           <CommandInput
             placeholder={searchPlaceholder}
-            className="focus-visible:outline-none"
+            className="focus-visible:!outline-none"
             value={search}
             onValueChange={(next) => {
               setSearch(next);

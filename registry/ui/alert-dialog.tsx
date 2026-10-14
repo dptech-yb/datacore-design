@@ -1,4 +1,4 @@
-// 源自 shadcn/ui（MIT，shadcn@2.3.0 new-york），已套 DataCore 令牌。改动：按钮引用改为本库 button，取消按钮 outline→secondary。
+// 源自 shadcn/ui（MIT，shadcn@2.3.0 new-york），已套 DataCore 令牌。改动：按钮引用改为本库 button，取消按钮 outline→secondary。（默认文案已中文化、遮罩改语义色）
 import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
@@ -17,7 +17,7 @@ const AlertDialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-foreground/60 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "empty",
+  "type": "registry:ui",
+  "title": "Empty 空状态",
+  "dependencies": [
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/empty.tsx",
+      "type": "registry:ui",
+      "content": "// 空状态：说明发生了什么、是否需要操作、下一步做什么；图标 + 标题 + 说明 + 动作，size 支持 default 与 compact（行内）。\nimport * as React from \"react\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport { Inbox } from \"lucide-react\";\nimport { cn } from \"@/lib/utils\";\n\nconst emptyVariants = cva(\"flex flex-col items-center justify-center text-center\", {\n  variants: {\n    size: {\n      default: \"gap-2 px-6 py-10\",\n      compact: \"gap-1 px-3 py-4\",\n    },\n  },\n  defaultVariants: { size: \"default\" },\n});\n\nexport interface EmptyProps extends Omit<React.HTMLAttributes<HTMLDivElement>, \"title\">, VariantProps<typeof emptyVariants> {\n  /** 图标；默认 Inbox，传 null 隐藏（compact 行内空态常用）。 */\n  icon?: React.ReactNode;\n  /** 发生了什么：还没有实验记录。 */\n  title?: React.ReactNode;\n  /** 是否需要操作的一句补充说明。 */\n  description?: React.ReactNode;\n  /** 下一步动作，通常是一个 Button。 */\n  actions?: React.ReactNode;\n}\n\nexport const Empty = React.forwardRef<HTMLDivElement, EmptyProps>(\n  ({ className, size, icon = <Inbox />, title, description, actions, children, ...props }, ref) => {\n    const compact = size === \"compact\";\n    return (\n      <div ref={ref} className={cn(emptyVariants({ size }), className)} {...props}>\n        {icon && (\n          <span\n            aria-hidden=\"true\"\n            className={cn(\n              \"mb-1 inline-flex items-center justify-center rounded-xl bg-muted text-subtle\",\n              compact ? \"size-8 [&_svg]:size-4\" : \"size-11 [&_svg]:size-5\",\n            )}\n          >\n            {icon}\n          </span>\n        )}\n        {title && <p className={cn(\"m-0 font-medium text-foreground\", compact ? \"text-sm\" : \"text-base\")}>{title}</p>}\n        {description && <p className={cn(\"m-0 max-w-sm text-muted-foreground\", compact ? \"text-xs\" : \"text-sm\")}>{description}</p>}\n        {children}\n        {actions && <div className=\"mt-2 flex flex-wrap items-center justify-center gap-2\">{actions}</div>}\n      </div>\n    );\n  },\n);\nEmpty.displayName = \"Empty\";\n"
+    }
+  ]
+}

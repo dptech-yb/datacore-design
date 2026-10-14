@@ -153,7 +153,7 @@ const SearchField = React.forwardRef<HTMLInputElement, SearchFieldProps>(
             }
           }}
           className={cn(
-            "h-full min-w-0 flex-1 bg-transparent outline-none focus-visible:outline-none placeholder:text-subtle disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
+            "h-full min-w-0 flex-1 bg-transparent outline-none focus-visible:!outline-none placeholder:text-subtle disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
             className,
           )}
           {...props}
@@ -169,7 +169,7 @@ const SearchField = React.forwardRef<HTMLInputElement, SearchFieldProps>(
             type="button"
             aria-label="清除搜索"
             onClick={clear}
-            className="flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 [&_svg]:!size-3.5"
+            className="flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:!outline-none focus-visible:ring-2 focus-visible:ring-ring/40 [&_svg]:!size-3.5"
           >
             <X />
           </button>

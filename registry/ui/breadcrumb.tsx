@@ -1,4 +1,4 @@
-// 源自 shadcn/ui（MIT，shadcn@2.3.0 new-york），已套 DataCore 令牌。
+// 源自 shadcn/ui（MIT，shadcn@2.3.0 new-york），已套 DataCore 令牌。（默认文案已中文化、遮罩改语义色）
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { ChevronRight, MoreHorizontal } from "lucide-react"
@@ -10,7 +10,7 @@ const Breadcrumb = React.forwardRef<
   React.ComponentPropsWithoutRef<"nav"> & {
     separator?: React.ReactNode
   }
->(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />)
+>(({ ...props }, ref) => <nav ref={ref} aria-label="面包屑" {...props} />)
 Breadcrumb.displayName = "Breadcrumb"
 
 const BreadcrumbList = React.forwardRef<
@@ -100,7 +100,7 @@ const BreadcrumbEllipsis = ({
     {...props}
   >
     <MoreHorizontal className="h-4 w-4" />
-    <span className="sr-only">More</span>
+    <span className="sr-only">更多层级</span>
   </span>
 )
 BreadcrumbEllipsis.displayName = "BreadcrumbElipssis"

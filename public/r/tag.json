@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "tag",
+  "type": "registry:ui",
+  "title": "Tag 标签",
+  "dependencies": [
+    "@radix-ui/react-slot",
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/tag.tsx",
+      "type": "registry:ui",
+      "content": "// 标签：表达对象分类、属性或已选筛选的小型标签（区别于状态 Badge），支持语义色、尺寸、图标、移除按钮与 TagGroup 换行列表。\nimport * as React from \"react\";\nimport { Slot, Slottable } from \"@radix-ui/react-slot\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport { X } from \"lucide-react\";\nimport { cn } from \"@/lib/utils\";\n\nexport const tagVariants = cva(\n  \"inline-flex max-w-full items-center gap-1 border font-sans font-medium whitespace-nowrap transition-colors duration-fast ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 enabled:cursor-pointer enabled:hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:shrink-0\",\n  {\n    variants: {\n      tone: {\n        neutral: \"border-border bg-secondary text-secondary-foreground\",\n        primary: \"border-primary/25 bg-primary-soft text-primary\",\n        success: \"border-success/25 bg-success-soft text-success\",\n        warning: \"border-warning/30 bg-warning-soft text-warning\",\n        danger: \"border-danger/25 bg-danger-soft text-danger\",\n        agent: \"border-agent/25 bg-agent-soft text-agent\",\n        outline: \"border-border bg-transparent text-muted-foreground\",\n      },\n      size: {\n        sm: \"h-5 rounded-sm px-1.5 text-xs [&_svg]:size-3\",\n        default: \"h-6 rounded-md px-2 text-xs [&_svg]:size-3.5\",\n      },\n    },\n    defaultVariants: { tone: \"neutral\", size: \"default\" },\n  },\n);\n\nexport interface TagProps extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof tagVariants> {\n  /** 前置图标（装饰性，自动 aria-hidden）。 */\n  icon?: React.ReactNode;\n  /** 传入后显示移除按钮；点击即移除，无需二次确认。 */\n  onRemove?: () => void;\n  /** 移除按钮的无障碍名称，默认“移除 {文本}”。 */\n  removeLabel?: string;\n  /** 把样式交给子元素，例如可选择的 <button aria-pressed>。 */\n  asChild?: boolean;\n}\n\nexport const Tag = React.forwardRef<HTMLSpanElement, TagProps>(\n  ({ className, tone, size, icon, onRemove, removeLabel, asChild, children, title, ...props }, ref) => {\n    const Comp = asChild ? Slot : \"span\";\n    const text = typeof children === \"string\" ? children : undefined;\n    return (\n      <Comp ref={ref} className={cn(tagVariants({ tone, size }), className)} title={title ?? text} {...props}>\n        {icon && <span aria-hidden=\"true\" className=\"inline-flex\">{icon}</span>}\n        {asChild ? <Slottable>{children}</Slottable> : <span className=\"truncate\">{children}</span>}\n        {onRemove && (\n          <button\n            type=\"button\"\n            aria-label={removeLabel ?? `移除 ${text ?? \"\"}`.trim()}\n            onClick={onRemove}\n            className=\"-mr-0.5 inline-flex size-4 cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent p-0 text-current opacity-60 hover:bg-foreground/10 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40\"\n          >\n            <X className=\"size-3\" aria-hidden=\"true\" />\n          </button>\n        )}\n      </Comp>\n    );\n  },\n);\nTag.displayName = \"Tag\";\n\n/** 标签组：换行排列；传 aria-label 时作为一组朗读。 */\nexport const TagGroup = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (\n  <div ref={ref} role={props[\"aria-label\"] ? \"group\" : undefined} className={cn(\"flex flex-wrap items-center gap-1.5\", className)} {...props} />\n));\nTagGroup.displayName = \"TagGroup\";\n"
+    }
+  ]
+}

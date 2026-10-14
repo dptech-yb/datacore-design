@@ -1,4 +1,4 @@
-// 源自 shadcn/ui（MIT，shadcn@2.3.0 new-york），已套 DataCore 令牌。改动：当前页 outline→secondary。
+// 源自 shadcn/ui（MIT，shadcn@2.3.0 new-york），已套 DataCore 令牌。改动：当前页 outline→secondary。（默认文案已中文化、遮罩改语义色）
 import * as React from "react"
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
 
@@ -8,7 +8,7 @@ import { ButtonProps, buttonVariants } from "@/components/ui/button"
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
     role="navigation"
-    aria-label="pagination"
+    aria-label="分页"
     className={cn("mx-auto flex w-full justify-center", className)}
     {...props}
   />
@@ -65,13 +65,13 @@ const PaginationPrevious = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to previous page"
+    aria-label="上一页"
     size="default"
     className={cn("gap-1 pl-2.5", className)}
     {...props}
   >
     <ChevronLeft className="h-4 w-4" />
-    <span>Previous</span>
+    <span>上一页</span>
   </PaginationLink>
 )
 PaginationPrevious.displayName = "PaginationPrevious"
@@ -81,12 +81,12 @@ const PaginationNext = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to next page"
+    aria-label="下一页"
     size="default"
     className={cn("gap-1 pr-2.5", className)}
     {...props}
   >
-    <span>Next</span>
+    <span>下一页</span>
     <ChevronRight className="h-4 w-4" />
   </PaginationLink>
 )
@@ -102,7 +102,7 @@ const PaginationEllipsis = ({
     {...props}
   >
     <MoreHorizontal className="h-4 w-4" />
-    <span className="sr-only">More pages</span>
+    <span className="sr-only">更多页</span>
   </span>
 )
 PaginationEllipsis.displayName = "PaginationEllipsis"

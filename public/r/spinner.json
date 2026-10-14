@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "spinner",
+  "type": "registry:ui",
+  "title": "Spinner 加载指示",
+  "dependencies": [
+    "lucide-react",
+    "class-variance-authority"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/spinner.tsx",
+      "type": "registry:ui",
+      "content": "// Spinner 加载指示：不确定进度的旋转指示（role=\"status\" + 读屏文案），以及覆盖局部区域的 LoadingOverlay。\nimport * as React from \"react\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport { Loader2 } from \"lucide-react\";\n\nimport { cn } from \"@/lib/utils\";\n\nconst spinnerVariants = cva(\"shrink-0 animate-spin text-primary\", {\n  variants: {\n    size: { sm: \"size-3.5\", default: \"size-5\", lg: \"size-7\" },\n  },\n  defaultVariants: { size: \"default\" },\n});\n\nexport interface SpinnerProps extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof spinnerVariants> {\n  /** 说明在做什么；默认只给读屏，showLabel 时可见。 */\n  label?: string;\n  /** 在指示器旁显示 label 文字。 */\n  showLabel?: boolean;\n}\n\nconst Spinner = React.forwardRef<HTMLSpanElement, SpinnerProps>(({ size, label = \"正在加载\", showLabel = false, className, ...props }, ref) => (\n  <span ref={ref} role=\"status\" className={cn(\"inline-flex items-center gap-2 text-sm text-muted-foreground\", className)} {...props}>\n    <Loader2 className={spinnerVariants({ size })} aria-hidden />\n    <span className={cn(!showLabel && \"sr-only\")}>{label}</span>\n  </span>\n));\nSpinner.displayName = \"Spinner\";\n\nexport interface LoadingOverlayProps extends React.HTMLAttributes<HTMLDivElement> {\n  /** 是否显示遮罩。 */\n  loading: boolean;\n  /** 遮罩上的说明文字。 */\n  label?: string;\n  /** 延迟显示的毫秒数，避免短暂加载闪烁。 */\n  delay?: number;\n  /** 指示器尺寸。 */\n  size?: VariantProps<typeof spinnerVariants>[\"size\"];\n}\n\n/** 包裹一块区域：加载时半透明遮罩覆盖该区域，内部内容 inert（不可点击、不可聚焦）。 */\nconst LoadingOverlay = React.forwardRef<HTMLDivElement, LoadingOverlayProps>(\n  ({ loading, label = \"正在加载\", delay = 0, size, className, children, ...props }, ref) => {\n    const [visible, setVisible] = React.useState(loading && delay === 0);\n    const contentRef = React.useRef<HTMLDivElement>(null);\n\n    React.useEffect(() => {\n      if (!loading) {\n        setVisible(false);\n        return;\n      }\n      if (delay === 0) {\n        setVisible(true);\n        return;\n      }\n      const timer = window.setTimeout(() => setVisible(true), delay);\n      return () => window.clearTimeout(timer);\n    }, [loading, delay]);\n\n    // React 18 不识别 inert 属性，直接写 DOM\n    React.useEffect(() => {\n      const el = contentRef.current as (HTMLDivElement & { inert?: boolean }) | null;\n      if (el) el.inert = visible;\n    }, [visible]);\n\n    return (\n      <div ref={ref} className={cn(\"relative\", className)} aria-busy={loading || undefined} {...props}>\n        <div ref={contentRef}>{children}</div>\n        {visible && (\n          <div className=\"absolute inset-0 z-10 grid place-items-center rounded-[inherit] bg-background/75 animate-in fade-in-0\">\n            <Spinner size={size} label={label} showLabel className=\"flex-col gap-2\" />\n          </div>\n        )}\n      </div>\n    );\n  },\n);\nLoadingOverlay.displayName = \"LoadingOverlay\";\n\nexport { Spinner, LoadingOverlay, spinnerVariants };\n"
+    }
+  ]
+}
