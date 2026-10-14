@@ -212,7 +212,7 @@ function MotionDuration() {
                 border: "1px solid var(--line-strong)",
                 borderRadius: 12,
                 background: on ? "var(--brand-soft)" : "var(--surface)",
-                color: "var(--muted)",
+                color: "var(--text-muted)",
                 fontSize: 12,
                 transform: on ? "translateY(-6px)" : "translateY(0)",
                 transition: `all ${box.ms}ms ease-out`,

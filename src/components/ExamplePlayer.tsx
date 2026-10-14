@@ -145,7 +145,7 @@ export function ExamplePlayer({
         {tab === "preview" && (
           <>
             <div
-              className={`example-stage ${darkPreview ? "theme-dark" : "theme-light"}`}
+              className={`example-stage ${darkPreview ? "theme-dark dark" : "theme-light light"}`}
               key={resetKey}
             >
               {Preview ? (

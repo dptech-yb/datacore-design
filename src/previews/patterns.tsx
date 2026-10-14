@@ -292,14 +292,14 @@ function RunStatusLogsMachine() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <span className="mono" style={{ color: "var(--muted)" }}>run-28003</span>
+        <span className="mono" style={{ color: "var(--text-muted)" }}>run-28003</span>
         {badge[phase]}
         {phase === 1 && <span className="demo-note">已运行 1 分 45 秒 · 日志跟随中</span>}
         {phase === 3 && <span className="demo-note">已写入数据安全 · 可保留参数重试</span>}
       </div>
       <div style={{ display: "grid", gap: 4, padding: "10px 12px", border: "1px solid var(--line)", borderRadius: 10, background: "var(--surface-soft)" }}>
         {logsByPhase[phase].map((line) => (
-          <span key={line} className="mono" style={{ color: line.includes("[error]") ? "var(--red)" : "var(--muted)" }}>{line}</span>
+          <span key={line} className="mono" style={{ color: line.includes("[error]") ? "var(--red)" : "var(--text-muted)" }}>{line}</span>
         ))}
       </div>
       <div className="demo-row">
@@ -333,7 +333,7 @@ function AuditVersioningWhoWhat() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <History size={14} style={{ color: "var(--muted)" }} />
+        <History size={14} style={{ color: "var(--text-muted)" }} />
         <span className="demo-note">审计时间线 · 数据集 ds-118 · 倒序</span>
       </div>
       {events.map((item) => (
@@ -344,7 +344,7 @@ function AuditVersioningWhoWhat() {
           <span className="mono" style={{ color: "var(--faint)" }}>{item.time}</span>
           <span style={{ color: "var(--text)", fontSize: 14, fontWeight: 700 }}>{item.actor}</span>
           <span className={`status-badge ${item.badge}`}>{item.action}</span>
-          <span style={{ color: "var(--muted)", fontSize: 14, flex: "1 1 260px" }}>{item.text}</span>
+          <span style={{ color: "var(--text-muted)", fontSize: 14, flex: "1 1 260px" }}>{item.text}</span>
         </div>
       ))}
       <div className="demo-row">
@@ -356,11 +356,11 @@ function AuditVersioningWhoWhat() {
         <div className="card-demo">
           <h4>ds-118 · v2 → v3 差异（仅展示变更字段）</h4>
           <div style={{ display: "grid", gap: 6 }}>
-            <span className="mono" style={{ color: "var(--muted)" }}>
+            <span className="mono" style={{ color: "var(--text-muted)" }}>
               conductivity[57]：<s style={{ color: "var(--red)" }}>9.8</s> → <strong style={{ color: "var(--green)" }}>10.1</strong>（修改）
             </span>
             <span className="mono" style={{ color: "var(--green)" }}>+ 新增 3 行（sample_id S-1124 – S-1126）</span>
-            <span className="mono" style={{ color: "var(--muted)" }}>− 删除 0 行</span>
+            <span className="mono" style={{ color: "var(--text-muted)" }}>− 删除 0 行</span>
           </div>
         </div>
       )}

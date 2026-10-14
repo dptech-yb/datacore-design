@@ -117,7 +117,7 @@ const stepButton: CSSProperties = {
   width: 30,
   border: 0,
   background: "var(--surface-soft)",
-  color: "var(--muted)",
+  color: "var(--text-muted)",
   cursor: "pointer",
   display: "inline-flex",
   alignItems: "center",
@@ -616,7 +616,7 @@ function RadioCard({ option, selected, disabled, onSelect, name }: {name:string;
       <input type="radio" name={name} value={option.value} checked={selected} disabled={disabled} onChange={onSelect}/>
       <span style={{ minWidth: 0 }}>
         <strong style={{ display: "block", fontSize: 14 }}>{option.label}</strong>
-        <span style={{ color: "var(--muted)", fontSize: 12 }}>{option.description}</span>
+        <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{option.description}</span>
       </span>
     </label>
   );
@@ -702,7 +702,7 @@ function SwitchStates() {
     <div className="demo-stack" style={{ gap: 12 }}>
       <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
         <SwitchTrack on={syncOn} loading={syncPending} label="远程同步" onToggle={toggleSync} />
-        <span>远程同步{syncPending && <span style={{ color: "var(--muted)" }}>（写入中…）</span>}</span>
+        <span>远程同步{syncPending && <span style={{ color: "var(--text-muted)" }}>（写入中…）</span>}</span>
       </label>
       <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
         <SwitchTrack on={shareOn} loading={sharePending} label="团队共享" onToggle={toggleShare} />
@@ -714,7 +714,7 @@ function SwitchStates() {
           </span>
         )}
       </label>
-      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--muted)" }}>
+      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--text-muted)" }}>
         <SwitchTrack on={false} disabled label="数据分析" />
         <span>数据分析（需管理员开启）</span>
       </label>
@@ -734,7 +734,7 @@ function SwitchBusiness() {
           <p>开启后每 30 秒刷新 <span className="mono">run-28003</span> 的状态，关闭即停止，无需任何提交动作。</p>
         </div>
       </div>
-      <p className="demo-note" style={{ color: on ? "var(--green)" : "var(--muted)" }}>
+      <p className="demo-note" style={{ color: on ? "var(--green)" : "var(--text-muted)" }}>
         {on ? "已开启 · 状态每 30 秒自动更新" : "已关闭 · 状态需手动刷新"}
       </p>
     </div>
@@ -855,7 +855,7 @@ function UploadBasic() {
       >
         <Upload size={18} style={{ color: "var(--brand)" }} />
         <strong style={{ fontSize: 14 }}>拖拽文件到此处，或点击选择</strong>
-        <span style={{ color: "var(--muted)", fontSize: 12 }}>支持 .csv / .xlsx，单个 ≤ 50 MB · 示例文件：example.com/templates/battery.csv</span>
+        <span style={{ color: "var(--text-muted)", fontSize: 12 }}>支持 .csv / .xlsx，单个 ≤ 50 MB · 示例文件：example.com/templates/battery.csv</span>
       </div>
       <p className="demo-note">接受的格式与大小上限前置写在区域内；不符在选择时即拒绝。</p>
     </div>
@@ -873,7 +873,7 @@ function UploadProgress() {
             <span style={{ flex: 1, height: 5, borderRadius: 999, background: "var(--surface-soft)", overflow: "hidden" }}>
               <span role="progressbar" aria-valuenow={72} style={{ display: "block", width: "72%", height: "100%", borderRadius: 999, background: "var(--brand)" }} />
             </span>
-            <span className="mono" style={{ color: "var(--muted)" }}>72%</span>
+            <span className="mono" style={{ color: "var(--text-muted)" }}>72%</span>
           </span>
         </span>
         <button className="inline-action">取消</button>
@@ -912,7 +912,7 @@ function UploadBusiness() {
       >
         <Upload size={16} style={{ color: "var(--brand)" }} />
         <strong>导入仪器原始数据</strong>
-        <span style={{ color: "var(--muted)", fontSize: 12 }}>.csv / .xlsx · ≤ 50 MB</span>
+        <span style={{ color: "var(--text-muted)", fontSize: 12 }}>.csv / .xlsx · ≤ 50 MB</span>
       </div>
       <div className="notice-card notice-green" style={{ marginTop: 0 }}>
         <div className="notice-icon"><FileText size={16} /></div>

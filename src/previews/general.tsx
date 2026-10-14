@@ -87,7 +87,7 @@ const tagStyle: CSSProperties = {
   fontWeight: 600,
   border: "1px solid var(--line)",
   background: "var(--surface-soft)",
-  color: "var(--muted)",
+  color: "var(--text-muted)",
 };
 
 function iconCircle(color: string, bg: string, size = 44): CSSProperties {
@@ -207,7 +207,7 @@ const stopNav = (e: { preventDefault: () => void }) => e.preventDefault();
 function LinkBasic() {
   return (
     <div className="demo-stack">
-      <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.7 }}>
+      <p style={{ margin: 0, color: "var(--text-muted)", fontSize: 14, lineHeight: 1.7 }}>
         数据集 <span className="mono">ds-118</span> 已同步到{" "}
         <a className="text-link" href="#/components/link" onClick={stopNav}>示例项目（project-042）</a>
         ，可在项目内直接引用。
@@ -224,7 +224,7 @@ function LinkVariants() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <a className="text-link" style={{ color: "var(--muted)" }} href="#/components/link" onClick={stopNav}>返回数据集列表</a>
+        <a className="text-link" style={{ color: "var(--text-muted)" }} href="#/components/link" onClick={stopNav}>返回数据集列表</a>
         <a className="text-link" style={{ color: "var(--red)" }} href="#/components/link" onClick={stopNav}>放弃本次编辑并离开</a>
       </div>
       <p className="demo-note">muted 用于次级导航；danger 链接只允许「离开/放弃」类导航，破坏性动作用 Button + 确认。</p>
@@ -283,7 +283,7 @@ function TypographyBasic() {
       </div>
       <div>
         <span className="type-label">Label · 辅助说明</span>
-        <span style={{ color: "var(--muted)", fontSize: 14 }}>最近更新 · 2026-09-18</span>
+        <span style={{ color: "var(--text-muted)", fontSize: 14 }}>最近更新 · 2026-09-18</span>
       </div>
       <div>
         <span className="type-label">Mono · ID 与数值</span>
@@ -310,7 +310,7 @@ function TypographyBusiness() {
     <div className="demo-stack" style={{ gap: 6 }}>
       <span className="type-display" style={{ fontSize: 24.0 }}>NCM811 高温循环实验</span>
       <span className="type-mono">run-28003</span>
-      <span style={{ color: "var(--muted)", fontSize: 14 }}>所属项目 示例项目（project-042）· 数据集 ds-118</span>
+      <span style={{ color: "var(--text-muted)", fontSize: 14 }}>所属项目 示例项目（project-042）· 数据集 ds-118</span>
       <p className="demo-note" style={{ marginTop: 8 }}>名称用 display，ID 用 mono 紧随名称，归属信息用 label —— 层级一眼可扫。</p>
     </div>
   );
@@ -516,7 +516,7 @@ function TagVariants() {
             ...tagStyle,
             cursor: "pointer",
             background: checked ? "var(--brand-soft)" : "var(--surface-soft)",
-            color: checked ? "var(--brand)" : "var(--muted)",
+            color: checked ? "var(--brand)" : "var(--text-muted)",
             borderColor: checked ? "color-mix(in srgb, var(--brand) 40%, var(--line))" : "var(--line)",
           }}
         >

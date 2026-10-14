@@ -12,7 +12,3 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
   />
 ));
 Input.displayName = "Input";
-
-export function Label({ className, ...p }: React.LabelHTMLAttributes<HTMLLabelElement>) {
-  return <label className={cn("text-sm font-medium text-foreground", className)} {...p} />;
-}

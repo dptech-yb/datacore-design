@@ -1,0 +1,13 @@
+@import "../registry/styles/tokens.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 关闭 preflight 后，组件依赖的最小基础：边框默认实线、默认色取语义令牌。 */
+*,
+::before,
+::after {
+  border-width: 0;
+  border-style: solid;
+  border-color: hsl(var(--border));
+}

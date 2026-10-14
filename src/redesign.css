@@ -88,7 +88,7 @@ button:disabled {
   font-weight: 700;
 }
 .brand > span {
-  color: var(--muted);
+  color: var(--text-muted);
   padding-left: 12px;
   border-left: 1px solid var(--line-strong);
   font-size: 0.875rem;
@@ -101,7 +101,7 @@ button:disabled {
 .primary-nav a {
   text-decoration: none;
   font-size: 0.875rem;
-  color: var(--muted);
+  color: var(--text-muted);
   transition: color 0.15s;
 }
 .primary-nav a:hover,
@@ -122,7 +122,7 @@ button:disabled {
   padding: 0 10px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  color: var(--muted);
+  color: var(--text-muted);
   background: var(--surface-soft);
   font-size: 0.875rem;
   cursor: pointer;
@@ -191,7 +191,7 @@ kbd {
   font-size: 0.875rem;
 }
 .nav-directory span {
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 0.75rem;
 }
 .doc-breadcrumb {
@@ -199,7 +199,7 @@ kbd {
   gap: 12px;
   padding: 24px 40px 0;
   font-size: 0.8125rem;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 .doc-breadcrumb a {
   text-decoration: none;
@@ -243,7 +243,7 @@ kbd {
 }
 .component-meta {
   font-size: 0.75rem;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 .doc-section {
   padding-top: 32px;
@@ -283,7 +283,7 @@ kbd {
 }
 .page-loading {
   min-height: 400px;
-  color: var(--muted);
+  color: var(--text-muted);
   padding: 40px;
 }
 .button {
@@ -410,7 +410,7 @@ input:disabled {
 .copy-status {
   align-self: center;
   font-size: 0.75rem;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 .props-table th,
 .props-table td {
@@ -422,7 +422,7 @@ input:disabled {
 }
 .props-table th {
   font-weight: 500;
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 0.75rem;
 }
 .state-card {
@@ -516,7 +516,7 @@ input:disabled {
 .search-footer {
   border-top: 1px solid var(--line);
   padding: 12px 18px;
-  color: var(--muted);
+  color: var(--text-muted);
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -557,7 +557,7 @@ input:disabled {
 .directory-toolbar > span {
   white-space: nowrap;
   font-size: 0.8125rem;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 .directory-search {
   display: flex;
@@ -592,7 +592,7 @@ input:disabled {
   padding: 7px 12px;
   border-radius: 6px;
   background: transparent;
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 0.8125rem;
   cursor: pointer;
 }
@@ -632,12 +632,12 @@ input:disabled {
   font-weight: 600;
 }
 .directory-card > div svg {
-  color: var(--muted);
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 .directory-card h2 {
   font-size: 0.875rem;
-  color: var(--muted);
+  color: var(--text-muted);
   margin: 6px 0 16px;
   font-weight: 400;
 }
@@ -645,7 +645,7 @@ input:disabled {
   margin: 0 0 20px;
   font-size: 0.875rem;
   line-height: 1.7;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 .directory-status {
   align-self: start;
@@ -657,7 +657,7 @@ input:disabled {
 .directory-empty {
   text-align: center;
   padding: 72px 20px;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 .directory-empty h2 {
   color: var(--text);
@@ -726,7 +726,7 @@ input:disabled {
   --line: #24262c;
   --line-strong: #3a3d46;
   --text: #f5f5f7;
-  --muted: #a1a3ac;
+  --text-muted: #a1a3ac;
   --faint: #858a96;
   --brand: #8eb4ff;
   --brand-soft: #1a2a49;
@@ -1027,7 +1027,7 @@ input:disabled {
   align-items: baseline;
   justify-content: center;
   gap: 14px;
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 0.8125rem;
   text-decoration: none;
   border-right: 1px solid var(--line);
@@ -1751,7 +1751,7 @@ input:disabled {
 }
 .choice-fieldset legend {
   padding: 0 6px;
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 .choice-label {
@@ -1807,7 +1807,7 @@ input:disabled {
   background: var(--surface-soft);
 }
 .demo-menu-panel > button:disabled {
-  color: var(--muted);
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 .demo-menu-panel > button > span {
@@ -1862,7 +1862,7 @@ input:disabled {
 }
 .select-trigger svg {
   flex-shrink: 0;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 .select-panel {
   border: 1px solid var(--line);
@@ -1877,7 +1877,7 @@ input:disabled {
   align-items: center;
   border-bottom: 1px solid var(--line);
   padding: 8px 12px;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 .select-search input {
   width: 100%;
@@ -1910,13 +1910,13 @@ input:disabled {
   background: var(--surface-soft);
 }
 .select-panel li[aria-disabled="true"] {
-  color: var(--muted);
+  color: var(--text-muted);
   opacity: 0.6;
   cursor: not-allowed;
 }
 .select-panel li small {
   display: block;
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 0.75rem;
   margin-top: 3px;
 }
@@ -1925,7 +1925,7 @@ input:disabled {
   flex-shrink: 0;
 }
 .select-empty {
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 0.875rem;
   padding: 12px;
 }
@@ -1937,7 +1937,7 @@ input:disabled {
 /* —— 组件页：首屏即示例 —— */
 .doc-header-compact { padding-bottom: 14px; border-bottom: 0; }
 .doc-header-compact h1 { margin: 4px 0 6px; }
-.doc-lead { margin-top: 8px; max-width: 760px; font-size: 0.875rem; line-height: 1.7; color: var(--muted); }
+.doc-lead { margin-top: 8px; max-width: 760px; font-size: 0.875rem; line-height: 1.7; color: var(--text-muted); }
 .doc-lead strong { color: var(--text); font-weight: 600; margin-right: 8px; }
 .doc-badges-inline { max-width: none; margin-top: 12px; justify-content: flex-start; }
 .install-block {
@@ -1958,7 +1958,7 @@ input:disabled {
   border: 1px solid var(--line); background: var(--surface); color: var(--text); font-size: 0.78rem; cursor: pointer;
 }
 .install-copy:hover { border-color: var(--line-strong); }
-.install-note { flex-basis: 100%; font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+.install-note { flex-basis: 100%; font-size: 0.72rem; color: var(--text-muted); line-height: 1.5; }
 .install-note code { font-family: "JetBrains Mono", ui-monospace, monospace; }
 .install-note a { color: var(--brand); }
 .doc-header-compact ~ .doc-section:first-of-type,
@@ -1966,5 +1966,5 @@ input:disabled {
 
 /* —— 搜索结果：标题 + 一句说明 —— */
 .search-result-main { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 2px; }
-.search-result-desc { overflow: hidden; color: var(--muted); font-size: 0.75rem; text-overflow: ellipsis; white-space: nowrap; }
+.search-result-desc { overflow: hidden; color: var(--text-muted); font-size: 0.75rem; text-overflow: ellipsis; white-space: nowrap; }
 .search-result-title mark { background: var(--brand-soft); color: var(--brand-strong); border-radius: 2px; padding: 0 1px; }

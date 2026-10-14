@@ -32,7 +32,7 @@ const stepDotStyle: Record<StepStatus, CSSProperties> = {
   finish: { background: "var(--green)", color: "#fff", borderColor: "var(--green)" },
   process: { background: "var(--brand)", color: "#fff", borderColor: "var(--brand)" },
   error: { background: "var(--red)", color: "#fff", borderColor: "var(--red)" },
-  wait: { background: "var(--surface-soft)", color: "var(--muted)", borderColor: "var(--line)" },
+  wait: { background: "var(--surface-soft)", color: "var(--text-muted)", borderColor: "var(--line)" },
 };
 
 function StepDot({ status, index }: { status: StepStatus; index: number }) {
@@ -74,7 +74,7 @@ function StepItem({
       <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
         <StepDot status={status} index={index} />
         <div style={{ minWidth: 0, display: "grid", gap: 1 }}>
-          <strong style={{ fontSize: 14, color: status === "wait" ? "var(--muted)" : "var(--text)", fontWeight: status === "process" ? 700 : 600 }}>{title}</strong>
+          <strong style={{ fontSize: 14, color: status === "wait" ? "var(--text-muted)" : "var(--text)", fontWeight: status === "process" ? 700 : 600 }}>{title}</strong>
           {description && <span style={{ fontSize: 12, color: status === "error" ? "var(--red)" : "var(--faint)" }}>{description}</span>}
         </div>
       </div>
@@ -169,7 +169,7 @@ function SegmentedControl({
               fontSize: size === "sm" ? 11 : 12,
               cursor: option.disabled ? "not-allowed" : "pointer",
               background: active ? "var(--surface)" : "transparent",
-              color: option.disabled ? "var(--faint)" : active ? "var(--text)" : "var(--muted)",
+              color: option.disabled ? "var(--faint)" : active ? "var(--text)" : "var(--text-muted)",
               fontWeight: active ? 700 : 400,
               boxShadow: active ? "var(--shadow-sm)" : "none",
               border: active ? "1px solid var(--line)" : "1px solid transparent",
@@ -200,7 +200,7 @@ function LayoutBasic() {
                 padding: "5px 8px",
                 borderRadius: 6,
                 fontSize: 12,
-                color: index === 2 ? "var(--brand)" : "var(--muted)",
+                color: index === 2 ? "var(--brand)" : "var(--text-muted)",
                 background: index === 2 ? "var(--brand-soft)" : "transparent",
                 fontWeight: index === 2 ? 700 : 400,
               }}
@@ -233,7 +233,7 @@ function LayoutContentWidth() {
     <div className="demo-stack" style={{ gap: 16 }}>
       {items.map((item) => (
         <div key={item.label}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 12, color: "var(--muted)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 12, color: "var(--text-muted)" }}>
             <span className="mono">{item.label}</span>
             <span>{item.note}</span>
           </div>
@@ -260,7 +260,7 @@ function LayoutBusiness() {
               padding: "5px 8px",
               borderRadius: 6,
               fontSize: 12,
-              color: item.active ? "var(--brand)" : "var(--muted)",
+              color: item.active ? "var(--brand)" : "var(--text-muted)",
               background: item.active ? "var(--brand-soft)" : "transparent",
               fontWeight: item.active ? 700 : 400,
             }}
@@ -392,7 +392,7 @@ function GridResponsive() {
     <div className="demo-stack" style={{ gap: 14 }}>
       {rows.map((row) => (
         <div key={row.label}>
-          <div className="mono" style={{ marginBottom: 5, fontSize: 12, color: "var(--muted)" }}>{row.label}</div>
+          <div className="mono" style={{ marginBottom: 5, fontSize: 12, color: "var(--text-muted)" }}>{row.label}</div>
           <div style={{ display: "flex", gap: 8 }}>
             {Array.from({ length: row.cells }, (_, index) => (
               <div key={index} style={{ flex: 1, height: 22, borderRadius: 6, background: "var(--brand-soft)", border: "1px solid var(--brand)" }} />
@@ -441,7 +441,7 @@ function SplitterBasic() {
                 padding: "5px 7px",
                 borderRadius: 6,
                 fontSize: 12,
-                color: index === 0 ? "var(--brand)" : "var(--muted)",
+                color: index === 0 ? "var(--brand)" : "var(--text-muted)",
                 background: index === 0 ? "var(--brand-soft)" : "var(--surface-soft)",
               }}
             >
@@ -525,7 +525,7 @@ function SplitterBusiness() {
                 fontSize: 12,
                 textAlign: "left",
                 cursor: "pointer",
-                color: runId === id ? "var(--brand)" : "var(--muted)",
+                color: runId === id ? "var(--brand)" : "var(--text-muted)",
                 background: runId === id ? "var(--brand-soft)" : "var(--surface-soft)",
               }}
             >
@@ -570,7 +570,7 @@ function PageHeaderWithBreadcrumb() {
   return (
     <div className="demo-stack">
       <div className="breadcrumb">
-        <a style={{ color: "var(--muted)", cursor: "pointer" }}>项目</a>
+        <a style={{ color: "var(--text-muted)", cursor: "pointer" }}>项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
         <strong>示例项目</strong>
       </div>
@@ -616,9 +616,9 @@ function BreadcrumbBasic() {
   return (
     <div className="demo-stack">
       <div className="breadcrumb" style={{ fontSize: 14 }}>
-        <a style={{ color: "var(--muted)", cursor: "pointer" }}>项目</a>
+        <a style={{ color: "var(--text-muted)", cursor: "pointer" }}>项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
-        <a style={{ color: "var(--muted)", cursor: "pointer" }}>示例项目</a>
+        <a style={{ color: "var(--text-muted)", cursor: "pointer" }}>示例项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
         <strong>任务详情</strong>
       </div>
@@ -637,12 +637,12 @@ function BreadcrumbCollapsed() {
   return (
     <div className="demo-stack">
       <div className="breadcrumb" style={{ fontSize: 14 }}>
-        <a style={{ color: "var(--muted)", cursor: "pointer" }}>项目</a>
+        <a style={{ color: "var(--text-muted)", cursor: "pointer" }}>项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
         {expanded ? (
           middle.map((item) => (
             <span key={item.title} style={{ display: "inline-flex", alignItems: "center", gap: 9 }}>
-              <a style={{ color: "var(--muted)", cursor: "pointer" }}>{item.title}</a>
+              <a style={{ color: "var(--text-muted)", cursor: "pointer" }}>{item.title}</a>
               <ChevronRight size={13} className="breadcrumb-separator" />
             </span>
           ))
@@ -651,7 +651,7 @@ function BreadcrumbCollapsed() {
             <button
               onClick={() => setExpanded(true)}
               title="展开完整路径"
-              style={{ display: "inline-flex", alignItems: "center", padding: "1px 6px", borderRadius: 6, background: "var(--surface-soft)", color: "var(--muted)", cursor: "pointer" }}
+              style={{ display: "inline-flex", alignItems: "center", padding: "1px 6px", borderRadius: 6, background: "var(--surface-soft)", color: "var(--text-muted)", cursor: "pointer" }}
             >
               <MoreHorizontal size={13} />
             </button>
@@ -669,16 +669,16 @@ function BreadcrumbBusiness() {
   return (
     <div className="demo-stack">
       <div className="breadcrumb" style={{ fontSize: 14 }}>
-        <a style={{ color: "var(--muted)", cursor: "pointer" }}>项目</a>
+        <a style={{ color: "var(--text-muted)", cursor: "pointer" }}>项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
-        <a style={{ color: "var(--muted)", cursor: "pointer" }}>示例项目</a>
+        <a style={{ color: "var(--text-muted)", cursor: "pointer" }}>示例项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
-        <a style={{ color: "var(--muted)", cursor: "pointer" }}>计算任务</a>
+        <a style={{ color: "var(--text-muted)", cursor: "pointer" }}>计算任务</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
         <strong className="mono" style={{ fontSize: 14 }}>run-28003</strong>
       </div>
       <div className="breadcrumb" style={{ fontSize: 14 }}>
-        <a style={{ color: "var(--muted)", cursor: "pointer" }}>项目</a>
+        <a style={{ color: "var(--text-muted)", cursor: "pointer" }}>项目</a>
         <ChevronRight size={13} className="breadcrumb-separator" />
         <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "var(--faint)" }}>
           内部项目 <Lock size={11} />
@@ -792,7 +792,7 @@ function tabButtonStyle(active: boolean): CSSProperties {
     cursor: "pointer",
     fontSize: 14,
     fontWeight: active ? 700 : 400,
-    color: active ? "var(--brand)" : "var(--muted)",
+    color: active ? "var(--brand)" : "var(--text-muted)",
     borderBottom: active ? "2px solid var(--brand)" : "2px solid transparent",
     marginBottom: -1,
     display: "inline-flex",
@@ -888,7 +888,7 @@ function TabsBusiness() {
       {active === "logs" && (
         <div style={{ display: "grid", gap: 4 }}>
           {["10:02:31 输入校验通过 · ds-118", "10:04:02 迭代 120/400 · loss 0.041", "10:04:02 当前电导率均值 12.1 mS/cm"].map((line) => (
-            <span key={line} className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>{line}</span>
+            <span key={line} className="mono" style={{ fontSize: 12, color: "var(--text-muted)" }}>{line}</span>
           ))}
         </div>
       )}
@@ -934,7 +934,7 @@ function StepsStates() {
     <div className="demo-stack">
       <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
         {legend.map((item, index) => (
-          <span key={item.status} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--muted)" }}>
+          <span key={item.status} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-muted)" }}>
             <StepDot status={item.status} index={index} />
             {item.label}
           </span>

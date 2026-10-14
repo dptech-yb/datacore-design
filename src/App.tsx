@@ -19,6 +19,7 @@ import {
 } from "./catalog";
 import { parseHash, navigate, routeToHash, type Route } from "./router";
 import { SearchModal } from "./components/SearchModal";
+import { Toaster } from "@/components/ui/sonner";
 import { Modal } from "./components/Modal";
 import { HomePage } from "./pages/HomePage";
 import { ComponentDirectory } from "./pages/ComponentDirectory";
@@ -360,6 +361,8 @@ export default function App() {
         </div>
       </Modal>
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+      {/* 组件源的全局容器：示例里直接调用 toast() / 使用 Tooltip */}
+      <Toaster />
     </div>
   );
 }

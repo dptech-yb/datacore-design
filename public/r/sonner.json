@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "sonner",
+  "type": "registry:ui",
+  "title": "Toast 消息提示（sonner）",
+  "dependencies": [
+    "sonner"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "ui/sonner.tsx",
+      "type": "registry:ui",
+      "content": "// 源自 shadcn/ui（MIT，shadcn@2.3.0 new-york）。改动：去掉 next-themes，主题从 <html data-theme> 读取；再导出 toast。\nimport * as React from \"react\"\nimport { Toaster as Sonner, toast } from \"sonner\"\n\ntype ToasterProps = React.ComponentProps<typeof Sonner>\n\nfunction useDocumentTheme(): \"light\" | \"dark\" {\n  const read = () => (document.documentElement.dataset.theme === \"dark\" ? \"dark\" : \"light\")\n  const [theme, setTheme] = React.useState<\"light\" | \"dark\">(read)\n  React.useEffect(() => {\n    const observer = new MutationObserver(() => setTheme(read()))\n    observer.observe(document.documentElement, { attributes: true, attributeFilter: [\"data-theme\", \"class\"] })\n    return () => observer.disconnect()\n  }, [])\n  return theme\n}\n\nconst Toaster = ({ ...props }: ToasterProps) => {\n  const theme = useDocumentTheme()\n  return (\n    <Sonner\n      theme={theme}\n      className=\"toaster group\"\n      position=\"top-center\"\n      toastOptions={{\n        classNames: {\n          toast:\n            \"group toast group-[.toaster]:bg-popover group-[.toaster]:text-popover-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg\",\n          description: \"group-[.toast]:text-muted-foreground\",\n          actionButton: \"group-[.toast]:bg-primary group-[.toast]:text-primary-foreground\",\n          cancelButton: \"group-[.toast]:bg-muted group-[.toast]:text-muted-foreground\",\n        },\n      }}\n      {...props}\n    />\n  )\n}\n\nexport { Toaster, toast }\n"
+    }
+  ]
+}

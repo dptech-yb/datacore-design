@@ -92,7 +92,7 @@ function SideEffects({ items, danger }: { items: string[]; danger?: boolean }) {
         style={{
           margin: "6px 0 0",
           paddingLeft: 16,
-          color: danger ? "var(--red)" : "var(--muted)",
+          color: danger ? "var(--red)" : "var(--text-muted)",
           fontSize: 14,
           display: "grid",
           gap: 4,
@@ -561,7 +561,7 @@ function RunStatusDetail() {
         <button className="inline-action">查看明细</button>
       </div>
       <div className="status-line">
-        <Clock size={16} style={{ color: "var(--muted)" }} />
+        <Clock size={16} style={{ color: "var(--text-muted)" }} />
         <div>
           <strong>run-28004 · 结构优化</strong>
           <span>排队中：队列第 2 位，预计 5 分钟</span>
@@ -588,7 +588,7 @@ function RunStatusFlow() {
   return (
     <div className="demo-stack">
       <div className="status-line">
-        <History size={16} style={{ color: "var(--muted)" }} />
+        <History size={16} style={{ color: "var(--text-muted)" }} />
         <div>
           <strong>run-28003 · 电导率计算</strong>
           <span>{stage.detail}</span>
@@ -893,7 +893,7 @@ function DatasetPickerBasic() {
                 <span className="mono" style={{ color: "var(--faint)" }}>{dataset.id} · {dataset.batch} · {dataset.version}</span>
               </div>
               <span className={`status-badge ${dataset.sourceCls}`}>{dataset.source}</span>
-              <span className="mono" style={{ color: "var(--muted)", flex: "0 0 auto" }}>{dataset.records} 条</span>
+              <span className="mono" style={{ color: "var(--text-muted)", flex: "0 0 auto" }}>{dataset.records} 条</span>
             </button>
           );
         })}
@@ -949,7 +949,7 @@ function DatasetPickerMulti() {
                 <span className="mono" style={{ color: "var(--faint)" }}>{dataset.id} · {dataset.batch} · {dataset.version}</span>
               </div>
               <span className={`status-badge ${dataset.sourceCls}`}>{dataset.source}</span>
-              <span className="mono" style={{ color: "var(--muted)", flex: "0 0 auto" }}>{dataset.records} 条</span>
+              <span className="mono" style={{ color: "var(--text-muted)", flex: "0 0 auto" }}>{dataset.records} 条</span>
             </button>
           );
         })}
@@ -1020,7 +1020,7 @@ function DatasetPickerBusiness() {
                   </span>
                 )}
                 <span className={`status-badge ${option.sourceCls}`}>{option.source}</span>
-                <span className="mono" style={{ color: "var(--muted)", flex: "0 0 auto" }}>{option.records} 条</span>
+                <span className="mono" style={{ color: "var(--text-muted)", flex: "0 0 auto" }}>{option.records} 条</span>
               </button>
             );
           })}
@@ -1102,7 +1102,7 @@ function PermissionScopeBusiness() {
     <div className="demo-stack" style={{ maxWidth: 480 }}>
       {members.map((member) => (
         <div className="status-line" key={member.name}>
-          <UserCheck size={15} style={{ color: "var(--muted)" }} />
+          <UserCheck size={15} style={{ color: "var(--text-muted)" }} />
           <div>
             <strong>{member.name}</strong>
             <span>{member.role}</span>
@@ -1157,7 +1157,7 @@ function AuditRow({
           <strong>{actor}</strong> {action} <span className="mono">{target}</span>
         </span>
         <span style={{ color: "var(--faint)", fontSize: 12 }}>{at}</span>
-        {detail && <span style={{ color: "var(--muted)", fontSize: 12 }}>{detail}</span>}
+        {detail && <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{detail}</span>}
       </div>
       {badge}
     </div>
@@ -1610,12 +1610,12 @@ function ToolRunHeader({
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}>
       <span style={{ display: "inline-flex", alignItems: "center", gap: 7, minWidth: 0 }}>
-        <Wrench size={14} style={{ color: "var(--muted)", flex: "0 0 auto" }} />
+        <Wrench size={14} style={{ color: "var(--text-muted)", flex: "0 0 auto" }} />
         <span className="mono" style={{ fontSize: 14, fontWeight: 700 }}>{tool}</span>
       </span>
       <span style={{ display: "inline-flex", alignItems: "center", gap: 7, flex: "0 0 auto" }}>
         {badge}
-        <span className="mono" style={{ color: "var(--muted)" }}>{duration}</span>
+        <span className="mono" style={{ color: "var(--text-muted)" }}>{duration}</span>
       </span>
     </div>
   );
@@ -1626,7 +1626,7 @@ const paramsLineStyle: CSSProperties = {
   padding: "7px 9px",
   borderRadius: 7,
   background: "var(--surface-soft)",
-  color: "var(--muted)",
+  color: "var(--text-muted)",
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",

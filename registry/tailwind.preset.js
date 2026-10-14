@@ -34,6 +34,8 @@ export default {
         success: { DEFAULT: v("success"), soft: v("success-soft") },
         warning: { DEFAULT: v("warning"), soft: v("warning-soft") },
         danger: { DEFAULT: v("danger"), soft: v("danger-soft"), foreground: v("primary-foreground") },
+        // shadcn 组件使用 destructive，与 danger 同义
+        destructive: { DEFAULT: v("danger"), foreground: v("primary-foreground") },
         agent: { DEFAULT: v("agent"), soft: v("agent-soft") },
         chart: { 1: v("chart-1"), 2: v("chart-2"), 3: v("chart-3"), 4: v("chart-4"), 5: v("chart-5"), 6: v("chart-6") },
       },

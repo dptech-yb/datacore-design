@@ -74,7 +74,7 @@ function Toast({ tone, children, spinning }: { tone: ToastTone; children: ReactN
 function DescItem({ label, children, mono }: { label: string; children: ReactNode; mono?: boolean }) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 10, padding: "7px 0", borderBottom: "1px solid var(--line)", fontSize: 14 }}>
-      <span style={{ color: "var(--muted)" }}>{label}</span>
+      <span style={{ color: "var(--text-muted)" }}>{label}</span>
       <span className={mono ? "mono" : undefined} style={mono ? undefined : { minWidth: 0 }}>{children}</span>
     </div>
   );
@@ -111,7 +111,7 @@ function TableBasic() {
   return (
     <div className="table-wrap">
       <table>
-        <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--muted)", fontSize: 12 }}>
+        <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--text-muted)", fontSize: 12 }}>
           示例项目（project-042）· 最近计算任务
         </caption>
         <thead>
@@ -177,7 +177,7 @@ function TableScroll() {
     <div className="demo-stack">
       <div className="table-wrap">
         <table style={{ minWidth: 880 }}>
-          <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--muted)", fontSize: 12 }}>
+          <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--text-muted)", fontSize: 12 }}>
             数据集 ds-118 · 全部字段（表格最小宽度 880px，窄屏横向滚动）
           </caption>
           <thead>
@@ -265,7 +265,7 @@ function TableBusiness() {
   return (
     <div className="table-wrap">
       <table>
-        <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--muted)", fontSize: 12 }}>
+        <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--text-muted)", fontSize: 12 }}>
           示例项目（project-042）· 计算任务列表
         </caption>
         <thead>
@@ -372,7 +372,7 @@ function DescriptionsLayout() {
       <div className="demo-grid-2" style={{ maxWidth: 560 }}>
         {items.map((item) => (
           <div key={item.label} style={{ border: "1px solid var(--line)", borderRadius: 8, padding: "9px 12px", background: "var(--surface)" }}>
-            <div style={{ color: "var(--muted)", fontSize: 12 }}>{item.label}</div>
+            <div style={{ color: "var(--text-muted)", fontSize: 12 }}>{item.label}</div>
             <div className={item.mono ? "mono" : undefined} style={{ marginTop: 2, fontSize: 14 }}>
               {item.value}
             </div>
@@ -422,10 +422,10 @@ function DescriptionsBusiness() {
 function StatBlock({ title, value, suffix, extra }: { title: string; value: string; suffix?: string; extra?: ReactNode }) {
   return (
     <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: "12px 14px", background: "var(--surface)", display: "grid", gap: 4 }}>
-      <span style={{ color: "var(--muted)", fontSize: 12 }}>{title}</span>
+      <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{title}</span>
       <span style={{ fontSize: 24.0, fontWeight: 700, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
         {value}
-        {suffix && <span style={{ fontSize: 14, fontWeight: 500, color: "var(--muted)", marginLeft: 4 }}>{suffix}</span>}
+        {suffix && <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-muted)", marginLeft: 4 }}>{suffix}</span>}
       </span>
       {extra}
     </div>
@@ -585,19 +585,19 @@ function TreeBasic() {
   return (
     <div style={{ maxWidth: 380, fontSize: 14 }}>
       <button style={treeRowStyle} onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-        {open ? <ChevronDown size={14} style={{ color: "var(--muted)" }} /> : <ChevronRight size={14} style={{ color: "var(--muted)" }} />}
+        {open ? <ChevronDown size={14} style={{ color: "var(--text-muted)" }} /> : <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />}
         <FolderOpen size={14} style={{ color: "var(--brand)" }} />
         示例项目（project-042）
       </button>
       {open && (
         <>
           <div style={{ ...treeRowStyle, paddingLeft: 30, cursor: "default" }}>
-            <Database size={14} style={{ color: "var(--muted)" }} />
+            <Database size={14} style={{ color: "var(--text-muted)" }} />
             数据集 ds-118
             <span className="mono" style={{ color: "var(--faint)" }}>1,000 行</span>
           </div>
           <div style={{ ...treeRowStyle, paddingLeft: 30, cursor: "default" }}>
-            <Database size={14} style={{ color: "var(--muted)" }} />
+            <Database size={14} style={{ color: "var(--text-muted)" }} />
             数据集 ds-121
             <span className="mono" style={{ color: "var(--faint)" }}>320 行</span>
           </div>
@@ -634,7 +634,7 @@ function TreeSelectable() {
             onChange={() => setChecked((prev) => ({ ...prev, [key]: !prev[key] }))}
             style={{ accentColor: "var(--brand)" }}
           />
-          <Database size={14} style={{ color: "var(--muted)" }} />
+          <Database size={14} style={{ color: "var(--text-muted)" }} />
           数据集 {key}
         </label>
       ))}
@@ -653,7 +653,7 @@ function TreeBusiness() {
   return (
     <div style={{ maxWidth: 400, fontSize: 14 }}>
       <div style={{ ...treeRowStyle, cursor: "default" }}>
-        <ChevronDown size={14} style={{ color: "var(--muted)" }} />
+        <ChevronDown size={14} style={{ color: "var(--text-muted)" }} />
         <FolderOpen size={14} style={{ color: "var(--brand)" }} />
         示例项目（project-042）
       </div>
@@ -670,7 +670,7 @@ function TreeBusiness() {
           onClick={() => !row.locked && setSelected(row.key)}
           disabled={row.locked}
         >
-          {row.locked ? <Lock size={14} /> : <Database size={14} style={{ color: "var(--muted)" }} />}
+          {row.locked ? <Lock size={14} /> : <Database size={14} style={{ color: "var(--text-muted)" }} />}
           {row.label}
           <span className="mono" style={{ color: "var(--faint)", marginLeft: "auto" }}>{row.meta}</span>
         </button>
@@ -708,12 +708,12 @@ function CollapseBasic() {
           <button style={collapsePanelStyle} onClick={() => setOpenKey(openKey === panel.key ? null : panel.key)} aria-expanded={openKey === panel.key}>
             <ChevronRight
               size={14}
-              style={{ transform: openKey === panel.key ? "rotate(90deg)" : "none", transition: "transform .15s ease", color: "var(--muted)" }}
+              style={{ transform: openKey === panel.key ? "rotate(90deg)" : "none", transition: "transform .15s ease", color: "var(--text-muted)" }}
             />
             {panel.title}
           </button>
           {openKey === panel.key && (
-            <div style={{ padding: "10px 14px 12px 36px", fontSize: 14, color: "var(--muted)", borderTop: "1px solid var(--line)" }}>{panel.body}</div>
+            <div style={{ padding: "10px 14px 12px 36px", fontSize: 14, color: "var(--text-muted)", borderTop: "1px solid var(--line)" }}>{panel.body}</div>
           )}
         </div>
       ))}
@@ -745,13 +745,13 @@ function CollapseBusiness() {
             <button style={collapsePanelStyle} onClick={() => setOpenKey(openKey === panel.key ? null : panel.key)} aria-expanded={openKey === panel.key}>
               <ChevronRight
                 size={14}
-                style={{ transform: openKey === panel.key ? "rotate(90deg)" : "none", transition: "transform .15s ease", color: "var(--muted)" }}
+                style={{ transform: openKey === panel.key ? "rotate(90deg)" : "none", transition: "transform .15s ease", color: "var(--text-muted)" }}
               />
               {panel.title}
               <span style={{ marginLeft: "auto" }}>{panel.badge}</span>
             </button>
             {openKey === panel.key && (
-              <div style={{ padding: "10px 14px 12px 36px", fontSize: 14, color: "var(--muted)", borderTop: "1px solid var(--line)" }}>{panel.body}</div>
+              <div style={{ padding: "10px 14px 12px 36px", fontSize: 14, color: "var(--text-muted)", borderTop: "1px solid var(--line)" }}>{panel.body}</div>
             )}
           </div>
         ))}
@@ -775,7 +775,7 @@ function CodeShell({ title, children, onCopy, copied }: { title: string; childre
           borderBottom: "1px solid var(--line)",
           background: "var(--surface-soft)",
           fontSize: 12,
-          color: "var(--muted)",
+          color: "var(--text-muted)",
         }}
       >
         <span>{title}</span>
@@ -874,8 +874,8 @@ function JsonKey({ k, suffix }: { k: string; suffix?: string }) {
   return (
     <>
       <span style={{ color: "var(--violet)" }}>&quot;{k}&quot;</span>
-      <span style={{ color: "var(--muted)" }}>: </span>
-      {suffix && <span style={{ color: "var(--muted)" }}>{suffix}</span>}
+      <span style={{ color: "var(--text-muted)" }}>: </span>
+      {suffix && <span style={{ color: "var(--text-muted)" }}>{suffix}</span>}
     </>
   );
 }
@@ -908,7 +908,7 @@ function JsonViewerBasic() {
         <JsonKey k="seconds" /> <span style={{ color: "var(--brand)" }}>286.4</span>,
       </div>
       <div style={{ paddingLeft: 16, display: "flex", alignItems: "center", gap: 4 }}>
-        <button aria-expanded={open} aria-label="展开 params" onClick={() => setOpen((v) => !v)} style={{ background: "none", cursor: "pointer", display: "inline-flex", color: "var(--muted)", padding: 0 }}>
+        <button aria-expanded={open} aria-label="展开 params" onClick={() => setOpen((v) => !v)} style={{ background: "none", cursor: "pointer", display: "inline-flex", color: "var(--text-muted)", padding: 0 }}>
           <ChevronRight size={12} style={{ transform: open ? "rotate(90deg)" : "none", transition: "transform .12s ease" }} />
         </button>
         <JsonKey k="params" suffix={open ? "{" : "{ … }"} />
@@ -1261,7 +1261,7 @@ function NotificationBasic() {
           <CheckCircle2 size={16} style={{ color: "var(--green)", flex: "0 0 auto", marginTop: 1 }} />
           <div style={{ display: "grid", gap: 3, minWidth: 0 }}>
             <strong>计算任务已完成</strong>
-            <span style={{ color: "var(--muted)" }}>run-28003 电导率计算已完成，耗时 286.4 秒。</span>
+            <span style={{ color: "var(--text-muted)" }}>run-28003 电导率计算已完成，耗时 286.4 秒。</span>
             <span>
               <button className="inline-action" style={{ marginLeft: 0 }}>查看结果</button>
             </span>
@@ -1282,7 +1282,7 @@ function NotificationBusiness() {
         <CheckCircle2 size={16} style={{ color: "var(--green)", flex: "0 0 auto", marginTop: 1 }} />
         <div style={{ display: "grid", gap: 3, minWidth: 0 }}>
           <strong>计算任务已完成</strong>
-          <span style={{ color: "var(--muted)" }}>run-28003 电导率计算已完成，耗时 286.4 秒。</span>
+          <span style={{ color: "var(--text-muted)" }}>run-28003 电导率计算已完成，耗时 286.4 秒。</span>
           <span>
             <button className="inline-action" style={{ marginLeft: 0 }}>查看结果</button>
           </span>
@@ -1294,7 +1294,7 @@ function NotificationBusiness() {
           <strong>
             计算任务执行失败 <span className="status-badge badge-danger">常驻</span>
           </strong>
-          <span style={{ color: "var(--muted)" }}>run-28002 结构优化失败：K 点网格与截断能设置冲突。</span>
+          <span style={{ color: "var(--text-muted)" }}>run-28002 结构优化失败：K 点网格与截断能设置冲突。</span>
           <span style={{ display: "flex", gap: 10 }}>
             <button className="inline-action" style={{ marginLeft: 0 }}>查看日志</button>
             <button className="inline-action" style={{ marginLeft: 0 }}>重新提交</button>
@@ -1323,7 +1323,7 @@ function ProgressBasic() {
     <div className="demo-stack" style={{ maxWidth: 480 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <ProgressBar percent={percent} />
-        <span className="mono" style={{ color: "var(--muted)" }}>{percent}%</span>
+        <span className="mono" style={{ color: "var(--text-muted)" }}>{percent}%</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <ProgressBar percent={100} tone="green" />
@@ -1341,7 +1341,7 @@ function ProgressStatus() {
     <div className="demo-stack" style={{ maxWidth: 480 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <ProgressBar percent={80} />
-        <span className="mono" style={{ color: "var(--muted)" }}>80%</span>
+        <span className="mono" style={{ color: "var(--text-muted)" }}>80%</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <ProgressBar percent={45} tone="red" />
@@ -1357,7 +1357,7 @@ function ProgressBusiness() {
     <div className="demo-stack" style={{ maxWidth: 520 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <ProgressBar percent={62} />
-        <span className="mono" style={{ color: "var(--muted)" }}>62%</span>
+        <span className="mono" style={{ color: "var(--text-muted)" }}>62%</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
         <span className="demo-note">正在导入 ds-118 · 第 620/1,000 行 · 预计剩余 40 秒</span>
@@ -1638,7 +1638,7 @@ function DrawerBusiness() {
             <div style={{ padding: "9px 12px", fontSize: 14, fontWeight: 600, borderBottom: "1px solid var(--line)", background: "var(--surface-soft)" }}>
               日志摘要
             </div>
-            <div style={{ padding: "10px 12px", fontFamily: '"DM Mono", monospace', fontSize: 12, color: "var(--muted)", display: "grid", gap: 4 }}>
+            <div style={{ padding: "10px 12px", fontFamily: '"DM Mono", monospace', fontSize: 12, color: "var(--text-muted)", display: "grid", gap: 4 }}>
               <span>[09:14:02] 分配到计算节点 node-07</span>
               <span>[09:18:45] SCF 收敛，迭代 58 步</span>
               <span>[09:18:46] 结果写回 run-28003</span>

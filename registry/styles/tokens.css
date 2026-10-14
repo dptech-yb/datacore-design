@@ -4,7 +4,10 @@
  * 第二层 · 语义别名：--primary / --foreground / --border …（组件只能用这一层）
  * 值用 HSL 三元组，便于 Tailwind 透明度修饰。
  */
-:root {
+/* 浅色：根节点，或任意 .light 容器（深色页面里局部预览浅色时也成立） */
+:root,
+.light,
+[data-theme="dark"] .light {
   /* —— 全局：DataCore Blue（保持现有蓝色系，H≈221，600 级与主站 #2563EB 一致） —— */
   --blue-50: 214 100% 97%;  --blue-100: 214 95% 93%;  --blue-200: 213 97% 87%;
   --blue-300: 212 96% 78%;  --blue-400: 213 94% 68%;  --blue-500: 217 91% 60%;
@@ -41,7 +44,9 @@
   color-scheme: light;
 }
 
-[data-theme="dark"] {
+/* 深色：<html data-theme="dark">，或任意 .dark 容器 */
+[data-theme="dark"],
+.dark {
   --canvas: var(--gray-950);
   --background: 224 20% 9%;
   --foreground: 220 14% 94%;
