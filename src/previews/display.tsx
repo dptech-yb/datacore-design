@@ -11,6 +11,7 @@ import {
   FileText,
   FolderOpen,
   Info,
+  Loader2,
   Lock,
   Trash2,
   TrendingDown,
@@ -20,56 +21,29 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/sonner";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import type { PreviewFn } from "./types";
 
 /* ---------- shared demo helpers (inline styles only, theme-token based) ---------- */
-
-function ProgressBar({ percent, tone = "brand" }: { percent: number; tone?: "brand" | "green" | "red" }) {
-  const fill = tone === "green" ? "var(--green)" : tone === "red" ? "var(--red)" : "var(--brand)";
-  return (
-    <div
-      role="progressbar"
-      aria-valuenow={percent}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      style={{ flex: 1, minWidth: 120, height: 8, borderRadius: 999, background: "var(--surface-soft)", overflow: "hidden" }}
-    >
-      <div style={{ width: `${percent}%`, height: "100%", background: fill, borderRadius: 999, transition: "width .3s ease" }} />
-    </div>
-  );
-}
-
-const toastTones = {
-  success: { color: "var(--green)", Icon: CheckCircle2 },
-  warning: { color: "var(--amber)", Icon: AlertTriangle },
-  error: { color: "var(--red)", Icon: XCircle },
-  info: { color: "var(--brand)", Icon: Info },
-} as const;
-
-type ToastTone = keyof typeof toastTones;
-
-function Toast({ tone, children, spinning }: { tone: ToastTone; children: ReactNode; spinning?: boolean }) {
-  const { color, Icon } = toastTones[tone];
-  return (
-    <div
-      role="status"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 8,
-        padding: "9px 14px",
-        borderRadius: 10,
-        border: "1px solid var(--line)",
-        background: "var(--surface)",
-        boxShadow: "var(--shadow-md)",
-        fontSize: 14,
-      }}
-    >
-      {spinning ? <span className="spinner spinner-dark" aria-hidden="true" /> : <Icon size={15} style={{ color, flex: "0 0 auto" }} />}
-      <span>{children}</span>
-    </div>
-  );
-}
 
 function DescItem({ label, children, mono }: { label: string; children: ReactNode; mono?: boolean }) {
   return (
@@ -107,234 +81,194 @@ const fileRowStyle: CSSProperties = {
 
 /* ---------- Table ---------- */
 
+/** 数字列：右对齐 + 等宽数字。 */
+const num = "text-right tabular-nums";
+
+function RunName({ name, id }: { name: string; id: string }) {
+  return (
+    <div className="flex flex-col">
+      <span className="font-medium">{name}</span>
+      <span className="font-mono text-xs text-muted-foreground">{id}</span>
+    </div>
+  );
+}
+
 function TableBasic() {
   return (
-    <div className="table-wrap">
-      <table>
-        <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--text-muted)", fontSize: 12 }}>
-          示例项目（project-042）· 最近计算任务
-        </caption>
-        <thead>
-          <tr>
-            <th>任务</th>
-            <th>数据集</th>
-            <th className="num">耗时（秒）</th>
-            <th>状态</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <strong>电导率计算</strong>
-              <span className="table-secondary">run-28003</span>
-            </td>
-            <td>ds-118</td>
-            <td className="num">286.4</td>
-            <td>
-              <span className="status-badge badge-success">
-                <span className="badge-dot" />
-                已完成
-              </span>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <strong>结构优化</strong>
-              <span className="table-secondary">run-28002</span>
-            </td>
-            <td>ds-121</td>
-            <td className="num">412.7</td>
-            <td>
-              <span className="status-badge badge-danger">
-                <span className="badge-dot" />
-                失败
-              </span>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <strong>电导率计算</strong>
-              <span className="table-secondary">run-28001</span>
-            </td>
-            <td>ds-118</td>
-            <td className="num">291.0</td>
-            <td>
-              <span className="status-badge badge-success">
-                <span className="badge-dot" />
-                已完成
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div className="rounded-lg border bg-card">
+      <Table className="border-collapse">
+        <caption className="caption-top px-3 py-2 text-left text-xs text-muted-foreground">示例项目（project-042）· 最近计算任务</caption>
+        <TableHeader>
+          <TableRow>
+            <TableHead scope="col">任务</TableHead>
+            <TableHead scope="col">数据集</TableHead>
+            <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+            <TableHead scope="col">状态</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell><RunName name="电导率计算" id="run-28003" /></TableCell>
+            <TableCell className="font-mono">ds-118</TableCell>
+            <TableCell className={num}>286.4</TableCell>
+            <TableCell><Badge tone="success" dot>已完成</Badge></TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell><RunName name="结构优化" id="run-28002" /></TableCell>
+            <TableCell className="font-mono">ds-121</TableCell>
+            <TableCell className={num}>412.7</TableCell>
+            <TableCell><Badge tone="danger" dot>失败</Badge></TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell><RunName name="电导率计算" id="run-28001" /></TableCell>
+            <TableCell className="font-mono">ds-118</TableCell>
+            <TableCell className={num}>291.0</TableCell>
+            <TableCell><Badge tone="success" dot>已完成</Badge></TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
   );
 }
 
 function TableScroll() {
-  const sticky: CSSProperties = { position: "sticky", left: 0, background: "var(--surface)", zIndex: 1 };
+  const sticky = "sticky left-0 z-[1] bg-card";
   return (
     <div className="demo-stack">
-      <div className="table-wrap">
-        <table style={{ minWidth: 880 }}>
-          <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--text-muted)", fontSize: 12 }}>
+      <div className="rounded-lg border bg-card">
+        <Table className="min-w-[880px] border-collapse">
+          <caption className="caption-top px-3 py-2 text-left text-xs text-muted-foreground">
             数据集 ds-118 · 全部字段（表格最小宽度 880px，窄屏横向滚动）
           </caption>
-          <thead>
-            <tr>
-              <th style={sticky}>任务</th>
-              <th>数据集</th>
-              <th>方法</th>
-              <th className="num">截断能（eV）</th>
-              <th className="num">耗时（秒）</th>
-              <th className="num">费用（元）</th>
-              <th>状态</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style={sticky}>
-                <strong>电导率计算</strong>
-                <span className="table-secondary">run-28003</span>
-              </td>
-              <td>ds-118</td>
-              <td>PBE0</td>
-              <td className="num">520</td>
-              <td className="num">286.4</td>
-              <td className="num">12.40</td>
-              <td>
-                <span className="status-badge badge-success">
-                  <span className="badge-dot" />
-                  已完成
-                </span>
-              </td>
-            </tr>
-            <tr>
-              <td style={sticky}>
-                <strong>结构优化</strong>
-                <span className="table-secondary">run-28002</span>
-              </td>
-              <td>ds-121</td>
-              <td>PBE</td>
-              <td className="num">450</td>
-              <td className="num">412.7</td>
-              <td className="num">17.90</td>
-              <td>
-                <span className="status-badge badge-danger">
-                  <span className="badge-dot" />
-                  失败
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <TableHeader>
+            <TableRow>
+              <TableHead scope="col" className="sticky left-0 z-[1] bg-muted">任务</TableHead>
+              <TableHead scope="col">数据集</TableHead>
+              <TableHead scope="col">方法</TableHead>
+              <TableHead scope="col" className="text-right">截断能（eV）</TableHead>
+              <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+              <TableHead scope="col" className="text-right">费用（元）</TableHead>
+              <TableHead scope="col">状态</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className={sticky}><RunName name="电导率计算" id="run-28003" /></TableCell>
+              <TableCell className="font-mono">ds-118</TableCell>
+              <TableCell>PBE0</TableCell>
+              <TableCell className={num}>520</TableCell>
+              <TableCell className={num}>286.4</TableCell>
+              <TableCell className={num}>12.40</TableCell>
+              <TableCell><Badge tone="success" dot>已完成</Badge></TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className={sticky}><RunName name="结构优化" id="run-28002" /></TableCell>
+              <TableCell className="font-mono">ds-121</TableCell>
+              <TableCell>PBE</TableCell>
+              <TableCell className={num}>450</TableCell>
+              <TableCell className={num}>412.7</TableCell>
+              <TableCell className={num}>17.90</TableCell>
+              <TableCell><Badge tone="danger" dot>失败</Badge></TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
-      <p className="demo-note">横向滚动时首列冻结（stickyFirstColumn），列宽不压缩、文字不换行。</p>
+      <p className="demo-note">横向滚动时首列冻结（sticky left-0），列宽不压缩、文字不换行。</p>
+    </div>
+  );
+}
+
+function StatesTable({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="rounded-lg border bg-card">
+      <Table className="border-collapse">
+        <caption className="caption-top px-3 py-2 text-left text-xs text-muted-foreground">{label}</caption>
+        <TableHeader>
+          <TableRow>
+            <TableHead scope="col">任务</TableHead>
+            <TableHead scope="col">数据集</TableHead>
+            <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+            <TableHead scope="col">状态</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>{children}</TableBody>
+      </Table>
     </div>
   );
 }
 
 function TableStates() {
-  const bar = (width: string): CSSProperties => ({ height: 10, width, borderRadius: 4, background: "var(--surface-soft)" });
   return (
     <div className="demo-stack">
-      <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: 12, display: "grid", gap: 10, background: "var(--surface)" }}>
-        <span className="demo-note">loading：骨架行替换数据行，表头保留</span>
-        <span style={bar("42%")} />
-        <span style={bar("78%")} />
-        <span style={bar("61%")} />
-      </div>
-      <div className="empty-line">
-        <strong>当前筛选条件下没有任务</strong>
-        <span>empty：说明是无数据还是被筛选清空，并给出下一步</span>
-        <button className="inline-action">清除筛选</button>
-      </div>
-      <div className="status-line status-danger">
-        <XCircle size={16} />
-        <div>
-          <strong>任务列表加载失败</strong>
-          <span>error：保留筛选上下文，提供重试</span>
-        </div>
-        <button className="inline-action">重试</button>
-      </div>
+      <StatesTable label="loading：骨架行替换数据行，表头保留">
+        {["w-32", "w-24", "w-28"].map((w) => (
+          <TableRow key={w} className="hover:bg-transparent">
+            <TableCell><Skeleton className={cn("h-3.5", w)} /></TableCell>
+            <TableCell><Skeleton className="h-3.5 w-14" /></TableCell>
+            <TableCell><Skeleton className="ml-auto h-3.5 w-12" /></TableCell>
+            <TableCell><Skeleton className="h-3.5 w-14" /></TableCell>
+          </TableRow>
+        ))}
+      </StatesTable>
+      <StatesTable label="empty：说明是无数据还是被筛选清空，并给出下一步">
+        <TableRow className="hover:bg-transparent">
+          <TableCell colSpan={4} className="h-24 text-center">
+            <div className="flex flex-col items-center gap-1">
+              <span className="font-medium">当前筛选条件下没有任务</span>
+              <Button variant="link" size="sm" className="h-auto px-0">清除筛选</Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      </StatesTable>
+      <StatesTable label="error：保留筛选上下文，提供重试">
+        <TableRow className="hover:bg-transparent">
+          <TableCell colSpan={4} className="h-24">
+            <div className="flex items-center justify-center gap-2 text-danger">
+              <XCircle className="size-4" />
+              <span className="font-medium">任务列表加载失败</span>
+              <Button variant="secondary" size="sm" className="ml-2">重试</Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      </StatesTable>
     </div>
   );
 }
 
+const businessRuns = [
+  { id: "run-28003", name: "电导率计算", dataset: "ds-118", seconds: "286.4", cost: "12.40", status: "已完成", tone: "success", action: "查看日志" },
+  { id: "run-28002", name: "结构优化", dataset: "ds-121", seconds: "412.7", cost: "17.90", status: "失败", tone: "danger", action: "查看日志" },
+  { id: "run-27998", name: "能带计算", dataset: "ds-118", seconds: "1,024.5", cost: "43.20", status: "排队中", tone: "neutral", action: "取消排队" },
+] as const;
+
 function TableBusiness() {
   return (
-    <div className="table-wrap">
-      <table>
-        <caption style={{ textAlign: "left", paddingBottom: 8, color: "var(--text-muted)", fontSize: 12 }}>
-          示例项目（project-042）· 计算任务列表
-        </caption>
-        <thead>
-          <tr>
-            <th>任务</th>
-            <th>数据集</th>
-            <th className="num">耗时（秒）</th>
-            <th className="num">费用（元）</th>
-            <th>状态</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <strong>电导率计算</strong>
-              <span className="table-secondary">run-28003</span>
-            </td>
-            <td>ds-118</td>
-            <td className="num">286.4</td>
-            <td className="num">12.40</td>
-            <td>
-              <span className="status-badge badge-success">
-                <span className="badge-dot" />
-                已完成
-              </span>
-            </td>
-            <td>
-              <button className="table-action">查看日志</button>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <strong>结构优化</strong>
-              <span className="table-secondary">run-28002</span>
-            </td>
-            <td>ds-121</td>
-            <td className="num">412.7</td>
-            <td className="num">17.90</td>
-            <td>
-              <span className="status-badge badge-danger">
-                <span className="badge-dot" />
-                失败
-              </span>
-            </td>
-            <td>
-              <button className="table-action">查看日志</button>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <strong>能带计算</strong>
-              <span className="table-secondary">run-27998</span>
-            </td>
-            <td>ds-118</td>
-            <td className="num">1,024.5</td>
-            <td className="num">43.20</td>
-            <td>
-              <span className="status-badge badge-neutral">
-                <span className="badge-dot" />
-                排队中
-              </span>
-            </td>
-            <td>
-              <button className="table-action">取消排队</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div className="rounded-lg border bg-card">
+      <Table className="border-collapse">
+        <caption className="caption-top px-3 py-2 text-left text-xs text-muted-foreground">示例项目（project-042）· 计算任务列表</caption>
+        <TableHeader>
+          <TableRow>
+            <TableHead scope="col">任务</TableHead>
+            <TableHead scope="col">数据集</TableHead>
+            <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+            <TableHead scope="col" className="text-right">费用（元）</TableHead>
+            <TableHead scope="col">状态</TableHead>
+            <TableHead scope="col">操作</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {businessRuns.map((run) => (
+            <TableRow key={run.id}>
+              <TableCell><RunName name={run.name} id={run.id} /></TableCell>
+              <TableCell className="font-mono">{run.dataset}</TableCell>
+              <TableCell className={num}>{run.seconds}</TableCell>
+              <TableCell className={num}>{run.cost}</TableCell>
+              <TableCell><Badge tone={run.tone} dot>{run.status}</Badge></TableCell>
+              <TableCell><Button variant="ghost" size="sm">{run.action}</Button></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -349,10 +283,7 @@ function DescriptionsBasic() {
         <DescItem label="任务 ID" mono>run-28003</DescItem>
         <DescItem label="所属项目">示例项目（project-042）</DescItem>
         <DescItem label="状态">
-          <span className="status-badge badge-success">
-            <span className="badge-dot" />
-            已完成
-          </span>
+          <Badge tone="success" dot>已完成</Badge>
         </DescItem>
         <DescItem label="耗时" mono>286.4 秒</DescItem>
       </div>
@@ -390,9 +321,8 @@ function DescriptionsBusiness() {
     <div className="card-demo" style={{ maxWidth: 560 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
         <h4>数据集 ds-118</h4>
-        <button
-          className="inline-action"
-          style={{ marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }}
+        <Button
+          variant="link" size="sm" className="h-auto px-0"
           onClick={() => {
             setCopied(true);
             window.setTimeout(() => setCopied(false), 1500);
@@ -400,7 +330,7 @@ function DescriptionsBusiness() {
         >
           {copied ? <Check size={13} /> : <Copy size={13} />}
           {copied ? "已复制 ID" : "复制 ID"}
-        </button>
+        </Button>
       </div>
       <div style={{ marginTop: 8 }}>
         <DescItem label="数据集 ID" mono>ds-118</DescItem>
@@ -408,9 +338,7 @@ function DescriptionsBusiness() {
         <DescItem label="版本">v3 · 2026-09-18 更新</DescItem>
         <DescItem label="数据量" mono>1,000 行 · 12 字段</DescItem>
         <DescItem label="质量状态">
-          <span className="status-badge badge-warning">
-            <span className="badge-dot" />3 行缺少密度字段
-          </span>
+          <Badge tone="warning" dot>3 行缺少密度字段</Badge>
         </DescItem>
       </div>
     </div>
@@ -554,7 +482,7 @@ function TimelineStatus() {
         tone="error"
         desc={
           <>
-            K 点网格与截断能冲突 · <button className="inline-action" style={{ marginLeft: 0 }}>查看日志</button>
+            K 点网格与截断能冲突 · <Button variant="link" size="sm" className="h-auto px-0">查看日志</Button>
           </>
         }
       />
@@ -727,13 +655,13 @@ function CollapseBusiness() {
     {
       key: "input",
       title: "输入文件（3）",
-      badge: <span className="status-badge badge-success">已校验</span>,
+      badge: <Badge tone="success">已校验</Badge>,
       body: <span className="mono">structure.cif · params.json · kpoints.conf</span>,
     },
     {
       key: "result",
       title: "结果文件（2）",
-      badge: <span className="status-badge badge-neutral">待生成</span>,
+      badge: <Badge tone="neutral">待生成</Badge>,
       body: <span>任务 run-28003 完成后生成 output.json 与 report.pdf</span>,
     },
   ];
@@ -779,10 +707,10 @@ function CodeShell({ title, children, onCopy, copied }: { title: string; childre
         }}
       >
         <span>{title}</span>
-        <button className="button button-ghost button-sm" aria-label="复制代码" onClick={onCopy}>
+        <Button variant="ghost" size="sm" aria-label="复制代码" onClick={onCopy}>
           {copied ? <Check size={14} /> : <Copy size={14} />}
           {copied ? "已复制" : "复制"}
-        </button>
+        </Button>
       </div>
       {children}
     </div>
@@ -950,16 +878,15 @@ function JsonViewerBusiness() {
         <div style={{ paddingLeft: 16 }}>{"},"}</div>
         <div style={{ paddingLeft: 16, display: "flex", alignItems: "center", gap: 6 }}>
           <JsonKey k="params" suffix="{" />
-          <button
-            className="inline-action"
-            style={{ marginLeft: 0 }}
+          <Button
+            variant="link" size="sm" className="h-auto px-0"
             onClick={() => {
               setCopied(true);
               window.setTimeout(() => setCopied(false), 1500);
             }}
           >
             {copied ? "已复制 params.kpoints[2]" : "复制路径"}
-          </button>
+          </Button>
         </div>
         <div style={{ paddingLeft: 32 }}>
           <JsonKey k="method" /> <JsonString v="PBE0" />,
@@ -993,12 +920,12 @@ function FileListBasic() {
           <span style={{ fontWeight: 600 }}>{file.name}</span>
           <span className="mono" style={{ color: "var(--faint)" }}>{file.size}</span>
           <span style={{ marginLeft: "auto", display: "inline-flex", gap: 2 }}>
-            <button className="icon-button" aria-label={`下载 ${file.name}`}>
+            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={`下载 ${file.name}`}>
               <Download size={15} />
-            </button>
-            <button className="icon-button" aria-label={`删除 ${file.name}`}>
+            </Button>
+            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={`删除 ${file.name}`}>
               <Trash2 size={15} />
-            </button>
+            </Button>
           </span>
         </div>
       ))}
@@ -1016,9 +943,9 @@ function FileListStates() {
             <span style={{ fontWeight: 600 }}>raw-data.csv</span>
             <span className="mono" style={{ color: "var(--faint)" }}>1.2 MB · 62%</span>
           </span>
-          <ProgressBar percent={62} />
+          <Progress value={62} />
         </span>
-        <button className="inline-action">取消</button>
+        <Button variant="link" size="sm" className="h-auto px-0">取消</Button>
       </div>
       <div style={{ ...fileRowStyle, borderColor: "color-mix(in srgb, var(--red) 30%, var(--line))" }}>
         <AlertTriangle size={16} style={{ color: "var(--red)", flex: "0 0 auto" }} />
@@ -1027,8 +954,8 @@ function FileListStates() {
           <span style={{ color: "var(--red)", fontSize: 12 }}>格式不支持（仅支持 .cif / .json）</span>
         </span>
         <span style={{ marginLeft: "auto", display: "inline-flex", gap: 8 }}>
-          <button className="inline-action" style={{ marginLeft: 0 }}>重试</button>
-          <button className="inline-action" style={{ marginLeft: 0 }}>移除</button>
+          <Button variant="link" size="sm" className="h-auto px-0">重试</Button>
+          <Button variant="link" size="sm" className="h-auto px-0">移除</Button>
         </span>
       </div>
     </div>
@@ -1050,17 +977,17 @@ function FileListBusiness() {
           <span style={{ fontWeight: 600 }}>{file.name}</span>
           <span className="mono" style={{ color: "var(--faint)" }}>{file.size}</span>
           <span style={{ marginLeft: "auto", display: "inline-flex", gap: 2 }}>
-            <button className="icon-button" aria-label={`下载 ${file.name}`}>
+            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={`下载 ${file.name}`}>
               <Download size={15} />
-            </button>
-            <button className="icon-button" aria-label={`删除 ${file.name}`}>
+            </Button>
+            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={`删除 ${file.name}`}>
               <Trash2 size={15} />
-            </button>
+            </Button>
           </span>
         </div>
       ))}
       <div>
-        <button className="inline-action" style={{ marginLeft: 0 }}>查看全部（5）</button>
+        <Button variant="link" size="sm" className="h-auto px-0">查看全部（5）</Button>
       </div>
     </div>
   );
@@ -1107,9 +1034,9 @@ function AlertClosable() {
   const [visible, setVisible] = useState(true);
   if (!visible) {
     return (
-      <button className="inline-action" style={{ marginLeft: 0 }} onClick={() => setVisible(true)}>
+      <Button variant="link" size="sm" className="h-auto px-0" onClick={() => setVisible(true)}>
         重新显示提示
-      </button>
+      </Button>
     );
   }
   return (
@@ -1119,10 +1046,10 @@ function AlertClosable() {
         <strong>项目额度剩余 12%</strong>
         <span>示例项目（project-042）本周期额度即将用完</span>
       </div>
-      <button className="inline-action">查看用量</button>
-      <button className="icon-button" aria-label="关闭提示" onClick={() => setVisible(false)}>
+      <Button variant="link" size="sm" className="ml-auto h-auto px-0">查看用量</Button>
+      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="关闭提示" onClick={() => setVisible(false)}>
         <X size={15} />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -1136,8 +1063,8 @@ function AlertBusiness() {
           <strong>3 行缺少密度字段，无法直接提交</strong>
           <span>第 128、512、907 行缺失。可逐行补全，或以项目默认值 2.50 g/cm³ 填充后继续。</span>
           <span style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button className="button button-ghost button-sm">查看缺失行</button>
-            <button className="button button-secondary button-sm">以默认值填充</button>
+            <Button variant="ghost" size="sm">查看缺失行</Button>
+            <Button variant="secondary" size="sm">以默认值填充</Button>
           </span>
         </div>
       </div>
@@ -1149,167 +1076,183 @@ function AlertBusiness() {
 /* ---------- Message ---------- */
 
 function MessageBasic() {
-  const [toast, setToast] = useState<{ tone: ToastTone; text: string } | null>(null);
-  const show = (tone: ToastTone, text: string) => {
-    setToast({ tone, text });
-    window.setTimeout(() => setToast(null), 2500);
-  };
   return (
-    <div className="demo-stack" style={{ position: "relative", minHeight: 96 }}>
+    <div className="demo-stack">
       <div className="demo-row">
-        <button className="button button-primary" onClick={() => show("success", "已保存到示例项目（project-042）")}>
-          保存
-        </button>
-        <button className="button button-secondary" onClick={() => show("error", "保存失败：网络异常，请重试")}>
+        <Button onClick={() => toast.success("已保存到示例项目（project-042）")}>保存</Button>
+        <Button variant="secondary" onClick={() => toast.error("保存失败：网络异常，请重试")}>
           演示失败
-        </button>
+        </Button>
       </div>
-      {toast && (
-        <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)" }}>
-          <Toast tone={toast.tone}>{toast.text}</Toast>
-        </div>
-      )}
       <p className="demo-note">顶部居中浮出，默认 3 秒自动消失；hover 暂停计时。</p>
     </div>
   );
 }
 
 function MessageTypes() {
+  const showLoading = () => {
+    const id = toast.loading("正在提交…");
+    window.setTimeout(() => toast.success("提交成功", { id }), 1500);
+  };
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <Toast tone="success">已复制任务 ID run-28003</Toast>
-        <Toast tone="warning">项目额度剩余不足 20%</Toast>
+        <Button variant="secondary" onClick={() => toast.success("已复制任务 ID run-28003")}>
+          <CheckCircle2 className="text-success" />
+          success
+        </Button>
+        <Button variant="secondary" onClick={() => toast.warning("项目额度剩余不足 20%")}>
+          <AlertTriangle className="text-warning" />
+          warning
+        </Button>
+        <Button variant="secondary" onClick={() => toast.error("提交失败：参数校验未通过")}>
+          <XCircle className="text-danger" />
+          error
+        </Button>
+        <Button variant="secondary" onClick={showLoading}>
+          <Loader2 className="text-primary" />
+          loading
+        </Button>
       </div>
-      <div className="demo-row">
-        <Toast tone="error">提交失败：参数校验未通过</Toast>
-        <Toast tone="info" spinning>
-          正在提交…
-        </Toast>
-      </div>
-      <p className="demo-note">图标 + 文字同时表达；loading 用同一 key 更新为结果，不堆叠。</p>
+      <p className="demo-note">图标 + 文字同时表达；loading 用同一 id 更新为结果，不堆叠。</p>
     </div>
   );
 }
 
 function MessageBusiness() {
-  const [phase, setPhase] = useState<"idle" | "saving" | "saved">("idle");
+  const [saving, setSaving] = useState(false);
   const save = () => {
-    setPhase("saving");
+    setSaving(true);
+    const id = toast.loading("正在保存到示例项目（project-042）…");
     window.setTimeout(() => {
-      setPhase("saved");
-      window.setTimeout(() => setPhase("idle"), 2200);
+      setSaving(false);
+      toast.success("已保存 · 版本 v3", { id });
     }, 1200);
   };
   return (
-    <div className="demo-stack" style={{ position: "relative", minHeight: 96 }}>
+    <div className="demo-stack">
       <div className="demo-row">
-        <button className="button button-primary" disabled={phase === "saving"} onClick={save}>
-          {phase === "saving" && <span className="spinner" aria-hidden="true" />}
-          {phase === "saving" ? "正在保存" : "保存数据集"}
-        </button>
+        <Button disabled={saving} onClick={save}>
+          {saving && <Loader2 className="animate-spin" />}
+          {saving ? "正在保存" : "保存数据集"}
+        </Button>
       </div>
-      {phase !== "idle" && (
-        <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)" }}>
-          {phase === "saving" ? (
-            <Toast tone="info" spinning>
-              正在保存到示例项目（project-042）…
-            </Toast>
-          ) : (
-            <Toast tone="success">已保存 · 版本 v3</Toast>
-          )}
-        </div>
-      )}
-      <p className="demo-note">同一 key 从 loading 更新为成功，不堆叠两条 Message。</p>
+      <p className="demo-note">同一 id 从 loading 更新为成功，不堆叠两条 Message。</p>
     </div>
   );
 }
 
 /* ---------- Notification ---------- */
 
-const noticeCardStyle: CSSProperties = {
-  display: "flex",
-  gap: 10,
-  alignItems: "flex-start",
-  width: 320,
-  maxWidth: "100%",
-  padding: "12px 14px",
-  borderRadius: 12,
-  border: "1px solid var(--line)",
-  background: "var(--surface)",
-  boxShadow: "var(--shadow-md)",
-  fontSize: 14,
-};
-
 function NotificationBasic() {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    if (!visible) return;
-    const timer = window.setTimeout(() => setVisible(false), 4500);
-    return () => window.clearTimeout(timer);
-  }, [visible]);
   return (
-    <div className="demo-stack" style={{ position: "relative", minHeight: 110 }}>
-      <div className="demo-row">
-        <button className="button button-secondary" onClick={() => setVisible(true)}>
-          演示通知
-        </button>
-        <span className="demo-note">右上角滑入，默认 4.5 秒消失</span>
-      </div>
-      {visible && (
-        <div style={{ ...noticeCardStyle, position: "absolute", top: 0, right: 0 }}>
-          <CheckCircle2 size={16} style={{ color: "var(--green)", flex: "0 0 auto", marginTop: 1 }} />
-          <div style={{ display: "grid", gap: 3, minWidth: 0 }}>
-            <strong>计算任务已完成</strong>
-            <span style={{ color: "var(--text-muted)" }}>run-28003 电导率计算已完成，耗时 286.4 秒。</span>
-            <span>
-              <button className="inline-action" style={{ marginLeft: 0 }}>查看结果</button>
-            </span>
-          </div>
-          <button className="icon-button" aria-label="关闭通知" style={{ marginLeft: "auto" }} onClick={() => setVisible(false)}>
-            <X size={14} />
-          </button>
-        </div>
-      )}
+    <div className="demo-row">
+      <Button
+        variant="secondary"
+        onClick={() =>
+          toast.success("计算任务已完成", {
+            description: "run-28003 电导率计算已完成，耗时 286.4 秒。",
+            position: "top-right",
+            duration: 4500,
+            action: { label: "查看结果", onClick: () => {} },
+          })
+        }
+      >
+        演示通知
+      </Button>
+      <span className="demo-note">右上角滑入，默认 4.5 秒消失</span>
     </div>
   );
 }
 
+function NoticeCard({
+  tone,
+  title,
+  description,
+  actions,
+  onClose,
+}: {
+  tone: "success" | "danger";
+  title: ReactNode;
+  description: string;
+  actions: string[];
+  onClose?: () => void;
+}) {
+  const Icon = tone === "success" ? CheckCircle2 : XCircle;
+  return (
+    <Card role={tone === "danger" ? "alert" : "status"} className="flex w-80 max-w-full items-start gap-2.5 p-3.5 shadow-md">
+      <Icon className={cn("mt-0.5 size-4 shrink-0", tone === "success" ? "text-success" : "text-danger")} />
+      <div className="grid min-w-0 gap-1 text-base">
+        <div className="flex items-center gap-1.5 font-semibold">{title}</div>
+        <p className="m-0 text-muted-foreground">{description}</p>
+        <div className="flex gap-3">
+          {actions.map((label) => (
+            <Button key={label} variant="link" size="sm" className="h-auto px-0">{label}</Button>
+          ))}
+        </div>
+      </div>
+      {onClose && (
+        <Button variant="ghost" size="icon" className="-mr-1.5 -mt-1.5 ml-auto size-7 shrink-0 text-muted-foreground" aria-label="关闭通知" onClick={onClose}>
+          <X />
+        </Button>
+      )}
+    </Card>
+  );
+}
+
 function NotificationBusiness() {
+  const [failedVisible, setFailedVisible] = useState(true);
   return (
     <div className="demo-stack">
-      <div style={noticeCardStyle}>
-        <CheckCircle2 size={16} style={{ color: "var(--green)", flex: "0 0 auto", marginTop: 1 }} />
-        <div style={{ display: "grid", gap: 3, minWidth: 0 }}>
-          <strong>计算任务已完成</strong>
-          <span style={{ color: "var(--text-muted)" }}>run-28003 电导率计算已完成，耗时 286.4 秒。</span>
-          <span>
-            <button className="inline-action" style={{ marginLeft: 0 }}>查看结果</button>
-          </span>
+      <NoticeCard tone="success" title="计算任务已完成" description="run-28003 电导率计算已完成，耗时 286.4 秒。" actions={["查看结果"]} />
+      {failedVisible ? (
+        <NoticeCard
+          tone="danger"
+          title={
+            <>
+              计算任务执行失败 <Badge tone="danger">常驻</Badge>
+            </>
+          }
+          description="run-28002 结构优化失败：K 点网格与截断能设置冲突。"
+          actions={["查看日志", "重新提交"]}
+          onClose={() => setFailedVisible(false)}
+        />
+      ) : (
+        <div>
+          <Button variant="link" size="sm" className="h-auto px-0" onClick={() => setFailedVisible(true)}>重新显示失败通知</Button>
         </div>
+      )}
+      <div className="demo-row">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            toast.error("计算任务执行失败", {
+              description: "run-28002 结构优化失败：K 点网格与截断能设置冲突。",
+              position: "top-right",
+              duration: Infinity,
+              closeButton: true,
+              action: { label: "查看日志", onClick: () => {} },
+            })
+          }
+        >
+          弹出常驻失败通知
+        </Button>
+        <span className="demo-note">error 类型常驻直到用户处理；描述带稳定 ID，操作直达目标页面。</span>
       </div>
-      <div style={noticeCardStyle}>
-        <XCircle size={16} style={{ color: "var(--red)", flex: "0 0 auto", marginTop: 1 }} />
-        <div style={{ display: "grid", gap: 3, minWidth: 0 }}>
-          <strong>
-            计算任务执行失败 <span className="status-badge badge-danger">常驻</span>
-          </strong>
-          <span style={{ color: "var(--text-muted)" }}>run-28002 结构优化失败：K 点网格与截断能设置冲突。</span>
-          <span style={{ display: "flex", gap: 10 }}>
-            <button className="inline-action" style={{ marginLeft: 0 }}>查看日志</button>
-            <button className="inline-action" style={{ marginLeft: 0 }}>重新提交</button>
-          </span>
-        </div>
-        <button className="icon-button" aria-label="关闭通知" style={{ marginLeft: "auto" }}>
-          <X size={14} />
-        </button>
-      </div>
-      <p className="demo-note">error 类型常驻直到用户处理；描述带稳定 ID，操作直达目标页面。</p>
     </div>
   );
 }
 
 /* ---------- Progress ---------- */
+
+function ProgressRow({ children }: { children: ReactNode }) {
+  return <div className="flex items-center gap-2.5">{children}</div>;
+}
+
+function ProgressValue({ value }: { value: number }) {
+  return <span className="w-10 shrink-0 text-right font-mono text-sm tabular-nums text-muted-foreground">{value}%</span>;
+}
 
 function ProgressBasic() {
   const [percent, setPercent] = useState(0);
@@ -1321,17 +1264,17 @@ function ProgressBasic() {
   }, []);
   return (
     <div className="demo-stack" style={{ maxWidth: 480 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <ProgressBar percent={percent} />
-        <span className="mono" style={{ color: "var(--text-muted)" }}>{percent}%</span>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <ProgressBar percent={100} tone="green" />
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--green)", fontSize: 14 }}>
-          <Check size={14} />
+      <ProgressRow>
+        <Progress value={percent} />
+        <ProgressValue value={percent} />
+      </ProgressRow>
+      <ProgressRow>
+        <Progress value={100} tone="success" />
+        <span className="inline-flex shrink-0 items-center gap-1 text-sm text-success">
+          <Check className="size-3.5" />
           已完成
         </span>
-      </div>
+      </ProgressRow>
     </div>
   );
 }
@@ -1339,14 +1282,15 @@ function ProgressBasic() {
 function ProgressStatus() {
   return (
     <div className="demo-stack" style={{ maxWidth: 480 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <ProgressBar percent={80} />
-        <span className="mono" style={{ color: "var(--text-muted)" }}>80%</span>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <ProgressBar percent={45} tone="red" />
-        <span style={{ color: "var(--red)", fontSize: 14 }}>导入中断</span>
-      </div>
+      <ProgressRow>
+        <Progress value={80} />
+        <ProgressValue value={80} />
+      </ProgressRow>
+      <ProgressRow>
+        {/* 失败态：Progress 无 danger tone，用语义令牌覆盖指示条颜色 */}
+        <Progress value={45} className="[&>div]:bg-danger" />
+        <span className="shrink-0 text-sm text-danger">导入中断</span>
+      </ProgressRow>
       <p className="demo-note">error 停在失败点，邻近文案给出原因：第 450 行密度字段格式错误。</p>
     </div>
   );
@@ -1355,13 +1299,13 @@ function ProgressStatus() {
 function ProgressBusiness() {
   return (
     <div className="demo-stack" style={{ maxWidth: 520 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <ProgressBar percent={62} />
-        <span className="mono" style={{ color: "var(--text-muted)" }}>62%</span>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+      <ProgressRow>
+        <Progress value={62} />
+        <ProgressValue value={62} />
+      </ProgressRow>
+      <div className="flex flex-wrap items-center gap-2.5">
         <span className="demo-note">正在导入 ds-118 · 第 620/1,000 行 · 预计剩余 40 秒</span>
-        <button className="button button-ghost button-sm" style={{ marginLeft: "auto" }}>取消</button>
+        <Button variant="ghost" size="sm" className="ml-auto">取消</Button>
       </div>
     </div>
   );
@@ -1409,8 +1353,8 @@ function SpinContainer() {
         )}
       </div>
       <div className="demo-row">
-        <button
-          className="button button-secondary button-sm"
+        <Button
+          variant="secondary" size="sm"
           disabled={loading}
           onClick={() => {
             setLoading(true);
@@ -1418,7 +1362,7 @@ function SpinContainer() {
           }}
         >
           模拟容器加载
-        </button>
+        </Button>
         <span className="demo-note">遮罩期间内部不可交互，aria-busy=true。</span>
       </div>
     </div>
@@ -1430,11 +1374,11 @@ function SpinBusiness() {
   return (
     <div className="demo-stack" style={{ maxWidth: 520 }}>
       <div className="demo-row">
-        <button className="button button-secondary button-sm">状态：全部</button>
-        <button className="button button-secondary button-sm">数据集：ds-118</button>
-        <button className="button button-ghost button-sm" onClick={() => setLoading((v) => !v)}>
+        <Button variant="secondary" size="sm">状态：全部</Button>
+        <Button variant="secondary" size="sm">数据集：ds-118</Button>
+        <Button variant="ghost" size="sm" onClick={() => setLoading((v) => !v)}>
           {loading ? "加载完成" : "重新加载"}
-        </button>
+        </Button>
       </div>
       <div style={{ position: "relative", border: "1px solid var(--line)", borderRadius: 10, background: "var(--surface)", overflow: "hidden" }}>
         <div style={{ display: "flex", gap: 24, padding: "10px 14px", borderBottom: "1px solid var(--line)", color: "var(--faint)", fontSize: 12, fontWeight: 700, letterSpacing: ".08em" }}>
@@ -1476,35 +1420,26 @@ function ModalBasic() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="demo-stack">
-      <div className="demo-row">
-        <button className="button button-primary" onClick={() => setOpen(true)}>
-          打开对话框
-        </button>
-        <span className="demo-note">Esc 关闭 · 打开后焦点进入对话框 · 关闭后焦点还原</span>
-      </div>
-      {open && (
-        <AccessibleModal open={open} onClose={() => setOpen(false)} label="重命名数据集">
-          <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="demo-modal-title" onClick={(event) => event.stopPropagation()}>
-            <div className="dialog-header">
-              <h2 id="demo-modal-title">重命名数据集</h2>
-              <button className="icon-button" aria-label="关闭" onClick={() => setOpen(false)}>
-                <X size={16} />
-              </button>
-            </div>
-            <p>修改数据集 ds-118 的显示名称，数据集 ID 保持不变。</p>
-            <input className="field-control" defaultValue="ds-118 电导率实验数据" aria-label="数据集名称" autoFocus />
-            <div className="dialog-actions">
-              <button className="button button-secondary" onClick={() => setOpen(false)}>
-                取消
-              </button>
-              <button className="button button-primary" onClick={() => setOpen(false)}>
-                保存
-              </button>
-            </div>
-          </div>
-        </AccessibleModal>
-      )}
+    <div className="demo-row">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button>打开对话框</Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>重命名数据集</DialogTitle>
+            <DialogDescription>修改数据集 ds-118 的显示名称，数据集 ID 保持不变。</DialogDescription>
+          </DialogHeader>
+          <Input defaultValue="ds-118 电导率实验数据" aria-label="数据集名称" />
+          <DialogFooter className="gap-2 sm:space-x-0">
+            <DialogClose asChild>
+              <Button variant="secondary">取消</Button>
+            </DialogClose>
+            <Button onClick={() => setOpen(false)}>保存</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <span className="demo-note">Esc 关闭 · 打开后焦点进入对话框 · 关闭后焦点还原</span>
     </div>
   );
 }
@@ -1513,49 +1448,46 @@ function ModalBusiness() {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const handleSubmit = () => {
+    setSubmitting(true);
+    window.setTimeout(() => {
+      setSubmitting(false);
+      setOpen(false);
+    }, 1200);
+  };
+
   return (
-    <div className="demo-stack">
-      <div className="demo-row">
-        <button className="button button-primary" onClick={() => setOpen(true)}>
-          创建计算任务
-        </button>
-        <span className="demo-note">提交中禁用 Esc、遮罩关闭与重复提交</span>
-      </div>
-      {open && (
-        <AccessibleModal open={open} onClose={() => {if(!submitting)setOpen(false);}} label="创建计算任务">
-          <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="demo-modal-biz-title" onClick={(event) => event.stopPropagation()}>
-            <div className="dialog-header">
-              <h2 id="demo-modal-biz-title">创建计算任务</h2>
-              <button className="icon-button" aria-label="关闭" disabled={submitting} onClick={() => setOpen(false)}>
-                <X size={16} />
-              </button>
-            </div>
-            <p>
+    <div className="demo-row">
+      <Dialog open={open} onOpenChange={(next) => !submitting && setOpen(next)}>
+        <DialogTrigger asChild>
+          <Button>创建计算任务</Button>
+        </DialogTrigger>
+        <DialogContent
+          className="max-w-md"
+          onEscapeKeyDown={(event) => submitting && event.preventDefault()}
+          onInteractOutside={(event) => submitting && event.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>创建计算任务</DialogTitle>
+            <DialogDescription>
               将在 示例项目（project-042）下创建电导率计算任务：输入数据集 ds-118 · 方法 PBE0 · 预计最长 300 秒。
-            </p>
-            <div className="dialog-note">确认后创建可追踪任务并记录审计日志；危险或不可逆动作请使用 ConfirmPanel。</div>
-            <div className="dialog-actions">
-              <button className="button button-secondary" disabled={submitting} onClick={() => setOpen(false)}>
-                取消
-              </button>
-              <button
-                className="button button-primary"
-                disabled={submitting}
-                onClick={() => {
-                  setSubmitting(true);
-                  window.setTimeout(() => {
-                    setSubmitting(false);
-                    setOpen(false);
-                  }, 1200);
-                }}
-              >
-                {submitting && <span className="spinner" aria-hidden="true" />}
-                {submitting ? "正在创建" : "确认创建"}
-              </button>
-            </div>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+            确认后创建可追踪任务并记录审计日志；危险或不可逆动作请使用 ConfirmPanel。
           </div>
-        </AccessibleModal>
-      )}
+          <DialogFooter className="gap-2 sm:space-x-0">
+            <DialogClose asChild>
+              <Button variant="secondary" disabled={submitting}>取消</Button>
+            </DialogClose>
+            <Button disabled={submitting} onClick={handleSubmit}>
+              {submitting && <Loader2 className="animate-spin" />}
+              {submitting ? "正在创建" : "确认创建"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <span className="demo-note">提交中禁用 Esc、遮罩关闭与重复提交</span>
     </div>
   );
 }
@@ -1567,9 +1499,9 @@ function DrawerShell({ title, onClose, children, footer }: { title: string; onCl
     <AccessibleModal open onClose={onClose} label={title} className="demo-drawer"><div className="drawer-body">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderBottom: "1px solid var(--line)" }}>
           <strong style={{ fontSize: 14.0 }}>{title}</strong>
-          <button className="icon-button" aria-label="关闭" onClick={onClose}>
+          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="关闭" onClick={onClose}>
             <X size={16} />
-          </button>
+          </Button>
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px" }}>{children}</div>
         {footer && <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "12px 18px", borderTop: "1px solid var(--line)" }}>{footer}</div>}
@@ -1584,9 +1516,9 @@ function DrawerBasic() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <button className="button button-secondary" onClick={() => setOpen(true)}>
+        <Button variant="secondary" onClick={() => setOpen(true)}>
           查看任务详情
-        </button>
+        </Button>
         <span className="demo-note">Esc 与遮罩点击关闭 · 标题带对象 ID</span>
       </div>
       {open && (
@@ -1594,10 +1526,7 @@ function DrawerBasic() {
           <DescItem label="任务 ID" mono>run-28003</DescItem>
           <DescItem label="所属项目">示例项目（project-042）</DescItem>
           <DescItem label="状态">
-            <span className="status-badge badge-success">
-              <span className="badge-dot" />
-              已完成
-            </span>
+            <Badge tone="success" dot>已完成</Badge>
           </DescItem>
           <DescItem label="耗时" mono>286.4 秒</DescItem>
         </DrawerShell>
@@ -1612,9 +1541,9 @@ function DrawerBusiness() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <button className="button button-primary" onClick={() => setOpen(true)}>
+        <Button variant="default" onClick={() => setOpen(true)}>
           从列表行打开详情抽屉
-        </button>
+        </Button>
         <span className="demo-note">关闭后列表滚动位置与选中行保持</span>
       </div>
       {open && (
@@ -1623,10 +1552,10 @@ function DrawerBusiness() {
           onClose={() => setOpen(false)}
           footer={
             <>
-              <button className="button button-secondary" onClick={() => setOpen(false)}>
+              <Button variant="secondary" onClick={() => setOpen(false)}>
                 关闭
-              </button>
-              <button className="button button-primary">查看完整日志</button>
+              </Button>
+              <Button variant="default">查看完整日志</Button>
             </>
           }
         >
@@ -1652,69 +1581,74 @@ function DrawerBusiness() {
 
 /* ---------- Popconfirm ---------- */
 
-const bubbleStyle: CSSProperties = {
-  position: "absolute",
-  bottom: "calc(100% + 8px)",
-  left: 0,
-  width: 268,
-  padding: 12,
-  borderRadius: 10,
-  border: "1px solid var(--line)",
-  background: "var(--surface)",
-  boxShadow: "var(--shadow-md)",
-  zIndex: 10,
-  textAlign: "left",
-};
+function ConfirmBubble({
+  description,
+  busy,
+  danger,
+  onCancel,
+  onConfirm,
+}: {
+  description: string;
+  busy: boolean;
+  danger?: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <>
+      <div className="flex gap-2">
+        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+        <div className="grid gap-1">
+          <p className="m-0 text-base font-semibold">删除该文件？</p>
+          <p className="m-0 text-sm text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <div className="mt-3 flex justify-end gap-1.5">
+        <Button variant="secondary" size="sm" onClick={onCancel}>取消</Button>
+        <Button variant={danger ? "danger" : "default"} size="sm" disabled={busy} onClick={onConfirm}>
+          {busy && <Loader2 className="animate-spin" />}
+          {busy ? "删除中…" : "删除"}
+        </Button>
+      </div>
+    </>
+  );
+}
 
 function PopconfirmBasic() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const confirm = () => {
+    setBusy(true);
+    window.setTimeout(() => {
+      setBusy(false);
+      setOpen(false);
+      setDone(true);
+      toast.success("已删除 structure.cif");
+    }, 900);
+  };
   return (
     <div className="demo-row" style={{ alignItems: "center" }}>
-      <span style={{ position: "relative", display: "inline-block" }}>
-        <button
-          className="button button-danger button-sm"
-          onClick={() => {
-            setOpen((v) => !v);
-            setDone(false);
-          }}
-        >
-          删除
-        </button>
-        {open && (
-          <span style={bubbleStyle} role="alertdialog" aria-label="删除确认">
-            <span style={{ display: "flex", gap: 8 }}>
-              <AlertTriangle size={15} style={{ color: "var(--amber)", flex: "0 0 auto", marginTop: 1 }} />
-              <span>
-                <strong style={{ fontSize: 14 }}>删除该文件？</strong>
-                <span className="demo-note" style={{ display: "block", marginTop: 3 }}>
-                  structure.cif 将从数据集 ds-118 移除，任务产物不受影响。
-                </span>
-              </span>
-            </span>
-            <span style={{ display: "flex", justifyContent: "flex-end", gap: 6, marginTop: 10 }}>
-              <button className="button button-secondary button-sm" onClick={() => setOpen(false)}>
-                取消
-              </button>
-              <button
-                className="button button-primary button-sm"
-                disabled={busy}
-                onClick={() => {
-                  setBusy(true);
-                  window.setTimeout(() => {
-                    setBusy(false);
-                    setOpen(false);
-                    setDone(true);
-                  }, 900);
-                }}
-              >
-                {busy ? "删除中…" : "删除"}
-              </button>
-            </span>
-          </span>
-        )}
-      </span>
+      <Popover
+        open={open}
+        onOpenChange={(next) => {
+          if (busy) return;
+          setOpen(next);
+          if (next) setDone(false);
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button variant="danger" size="sm">删除</Button>
+        </PopoverTrigger>
+        <PopoverContent side="top" align="start" className="w-[268px] p-3" role="alertdialog" aria-label="删除确认">
+          <ConfirmBubble
+            description="structure.cif 将从数据集 ds-118 移除，任务产物不受影响。"
+            busy={busy}
+            onCancel={() => setOpen(false)}
+            onConfirm={confirm}
+          />
+        </PopoverContent>
+      </Popover>
       {done ? (
         <span className="demo-note">已删除 structure.cif（Message 反馈）</span>
       ) : (
@@ -1728,57 +1662,43 @@ function PopconfirmBusiness() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [removed, setRemoved] = useState(false);
+  const confirm = () => {
+    setBusy(true);
+    window.setTimeout(() => {
+      setBusy(false);
+      setOpen(false);
+      setRemoved(true);
+      toast.success("已删除 raw-data.csv");
+    }, 900);
+  };
   return (
     <div className="demo-stack" style={{ maxWidth: 520 }}>
-      <div style={fileRowStyle}>
-        <FileText size={16} style={{ color: removed ? "var(--faint)" : "var(--brand)", flex: "0 0 auto" }} />
-        <span style={{ fontWeight: 600, color: removed ? "var(--faint)" : "var(--text)", textDecoration: removed ? "line-through" : "none" }}>
-          raw-data.csv
-        </span>
-        <span className="mono" style={{ color: "var(--faint)" }}>1.2 MB</span>
-        <span style={{ marginLeft: "auto", position: "relative", display: "inline-block" }}>
+      <Card className="flex items-center gap-2.5 px-3 py-2 text-base">
+        <FileText className={cn("size-4 shrink-0", removed ? "text-subtle" : "text-primary")} />
+        <span className={cn("font-semibold", removed && "text-subtle line-through")}>raw-data.csv</span>
+        <span className="font-mono text-sm text-subtle">1.2 MB</span>
+        <span className="ml-auto">
           {removed ? (
             <span className="demo-note">已删除</span>
           ) : (
-            <button className="inline-action" style={{ marginLeft: 0, color: "var(--red)" }} onClick={() => setOpen((v) => !v)}>
-              删除
-            </button>
-          )}
-          {open && (
-            <span style={{ ...bubbleStyle, left: "auto", right: 0 }} role="alertdialog" aria-label="删除确认">
-              <span style={{ display: "flex", gap: 8 }}>
-                <AlertTriangle size={15} style={{ color: "var(--amber)", flex: "0 0 auto", marginTop: 1 }} />
-                <span>
-                  <strong style={{ fontSize: 14 }}>删除该文件？</strong>
-                  <span className="demo-note" style={{ display: "block", marginTop: 3 }}>
-                    raw-data.csv 将从数据集 ds-118 移除，已完成的 2 个任务产物保留。
-                  </span>
-                </span>
-              </span>
-              <span style={{ display: "flex", justifyContent: "flex-end", gap: 6, marginTop: 10 }}>
-                <button className="button button-secondary button-sm" onClick={() => setOpen(false)}>
-                  取消
-                </button>
-                <button
-                  className="button button-danger button-sm"
-                  disabled={busy}
-                  onClick={() => {
-                    setBusy(true);
-                    window.setTimeout(() => {
-                      setBusy(false);
-                      setOpen(false);
-                      setRemoved(true);
-                    }, 900);
-                  }}
-                >
-                  {busy ? "删除中…" : "删除"}
-                </button>
-              </span>
-            </span>
+            <Popover open={open} onOpenChange={(next) => !busy && setOpen(next)}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-danger">删除</Button>
+              </PopoverTrigger>
+              <PopoverContent side="top" align="end" className="w-[268px] p-3" role="alertdialog" aria-label="删除确认">
+                <ConfirmBubble
+                  danger
+                  description="raw-data.csv 将从数据集 ds-118 移除，已完成的 2 个任务产物保留。"
+                  busy={busy}
+                  onCancel={() => setOpen(false)}
+                  onConfirm={confirm}
+                />
+              </PopoverContent>
+            </Popover>
           )}
         </span>
-      </div>
-      <p className="demo-note">危险动作 okDanger；确认中主按钮 loading，禁止重复点击。</p>
+      </Card>
+      <p className="demo-note">危险动作用 danger 主按钮；确认中主按钮 loading，禁止重复点击。</p>
     </div>
   );
 }

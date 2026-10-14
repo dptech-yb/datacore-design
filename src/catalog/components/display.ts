@@ -19,24 +19,48 @@ export const displayComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "caption 说明表格范围；数字列的表头与单元格同时右对齐；状态列使用带文字的 Badge。",
-        code: `<Table caption="示例项目（project-042）最近计算任务">
-  <TableHead>
-    <TableRow>
-      <TableHeader scope="col">任务</TableHeader>
-      <TableHeader scope="col">数据集</TableHeader>
-      <TableHeader scope="col" align="right">耗时（秒）</TableHeader>
-      <TableHeader scope="col">状态</TableHeader>
-    </TableRow>
-  </TableHead>
-  <TableBody>
-    <TableRow>
-      <TableCell>run-28003</TableCell>
-      <TableCell>ds-118</TableCell>
-      <TableCell align="right">286.4</TableCell>
-      <TableCell><Badge color="success">已完成</Badge></TableCell>
-    </TableRow>
-  </TableBody>
-</Table>`,
+        code: `import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+
+<div className="rounded-lg border bg-card">
+  <Table className="border-collapse">
+    <caption className="caption-top px-3 py-2 text-left text-xs text-muted-foreground">
+      示例项目（project-042）· 最近计算任务
+    </caption>
+    <TableHeader>
+      <TableRow>
+        <TableHead scope="col">任务</TableHead>
+        <TableHead scope="col">数据集</TableHead>
+        <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+        <TableHead scope="col">状态</TableHead>
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      <TableRow>
+        <TableCell>
+          <div className="flex flex-col">
+            <span className="font-medium">电导率计算</span>
+            <span className="font-mono text-xs text-muted-foreground">run-28003</span>
+          </div>
+        </TableCell>
+        <TableCell className="font-mono">ds-118</TableCell>
+        <TableCell className="text-right tabular-nums">286.4</TableCell>
+        <TableCell><Badge tone="success" dot>已完成</Badge></TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell>
+          <div className="flex flex-col">
+            <span className="font-medium">结构优化</span>
+            <span className="font-mono text-xs text-muted-foreground">run-28002</span>
+          </div>
+        </TableCell>
+        <TableCell className="font-mono">ds-121</TableCell>
+        <TableCell className="text-right tabular-nums">412.7</TableCell>
+        <TableCell><Badge tone="danger" dot>失败</Badge></TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
+</div>`,
         preview: "table/basic",
       },
       {
@@ -44,24 +68,39 @@ export const displayComponents: ComponentDoc[] = [
         title: "窄屏横向滚动",
         kind: "variant",
         description: "列多或屏幕窄时，表格在滚动容器内横向滚动；首列冻结保持定位，不压缩列宽、不挤压换行。",
-        code: `<Table
-  caption="数据集 ds-118 · 全部字段"
-  scroll={{ x: 960 }}
-  stickyFirstColumn
->
-  <TableHead>
-    <TableRow>
-      <TableHeader scope="col">任务</TableHeader>
-      <TableHeader scope="col">数据集</TableHeader>
-      <TableHeader scope="col">方法</TableHeader>
-      <TableHeader scope="col" align="right">截断能（eV）</TableHeader>
-      <TableHeader scope="col" align="right">耗时（秒）</TableHeader>
-      <TableHeader scope="col" align="right">费用（元）</TableHeader>
-      <TableHeader scope="col">状态</TableHeader>
-    </TableRow>
-  </TableHead>
-  <TableBody>{rows}</TableBody>
-</Table>`,
+        code: `import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+
+{/* Table 自带 overflow-x-auto 容器；给 table 最小宽度即可在窄屏横向滚动 */}
+<div className="rounded-lg border bg-card">
+  <Table className="min-w-[880px] border-collapse">
+    <caption className="caption-top px-3 py-2 text-left text-xs text-muted-foreground">
+      数据集 ds-118 · 全部字段
+    </caption>
+    <TableHeader>
+      <TableRow>
+        <TableHead scope="col" className="sticky left-0 z-[1] bg-muted">任务</TableHead>
+        <TableHead scope="col">数据集</TableHead>
+        <TableHead scope="col">方法</TableHead>
+        <TableHead scope="col" className="text-right">截断能（eV）</TableHead>
+        <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+        <TableHead scope="col" className="text-right">费用（元）</TableHead>
+        <TableHead scope="col">状态</TableHead>
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      <TableRow>
+        <TableCell className="sticky left-0 z-[1] bg-card">电导率计算 · run-28003</TableCell>
+        <TableCell className="font-mono">ds-118</TableCell>
+        <TableCell>PBE0</TableCell>
+        <TableCell className="text-right tabular-nums">520</TableCell>
+        <TableCell className="text-right tabular-nums">286.4</TableCell>
+        <TableCell className="text-right tabular-nums">12.40</TableCell>
+        <TableCell><Badge tone="success" dot>已完成</Badge></TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
+</div>`,
         preview: "table/scroll",
       },
       {
@@ -69,9 +108,45 @@ export const displayComponents: ComponentDoc[] = [
         title: "加载、空与错误",
         kind: "state",
         description: "骨架行替换数据行但保留表头；空态说明原因并给出下一步；错误态保留筛选上下文并提供重试。",
-        code: `<Table caption="任务列表" loading />
-<Table caption="任务列表" empty={<Empty description="当前筛选条件下没有任务" actionText="清除筛选" />} />
-<Table caption="任务列表" error={{ message: "任务列表加载失败", onRetry: reload }} />`,
+        code: `import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { XCircle } from "lucide-react";
+
+{/* loading：骨架行替换数据行，表头（TableHeader）保留 */}
+<TableBody>
+  {[0, 1, 2].map((i) => (
+    <TableRow key={i}>
+      <TableCell><Skeleton className="h-3.5 w-32" /></TableCell>
+      <TableCell><Skeleton className="h-3.5 w-14" /></TableCell>
+      <TableCell><Skeleton className="ml-auto h-3.5 w-12" /></TableCell>
+      <TableCell><Skeleton className="h-3.5 w-14" /></TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+
+{/* empty：说明原因并给出下一步 */}
+<TableBody>
+  <TableRow>
+    <TableCell colSpan={4} className="h-24 text-center">
+      <span className="font-medium">当前筛选条件下没有任务</span>
+      <Button variant="link" size="sm" className="h-auto px-0" onClick={clearFilters}>清除筛选</Button>
+    </TableCell>
+  </TableRow>
+</TableBody>
+
+{/* error：保留筛选上下文并提供重试 */}
+<TableBody>
+  <TableRow>
+    <TableCell colSpan={4} className="h-24">
+      <div className="flex items-center justify-center gap-2 text-danger">
+        <XCircle className="size-4" />
+        <span className="font-medium">任务列表加载失败</span>
+        <Button variant="secondary" size="sm" onClick={reload}>重试</Button>
+      </div>
+    </TableCell>
+  </TableRow>
+</TableBody>`,
         preview: "table/states",
       },
       {
@@ -79,33 +154,52 @@ export const displayComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "计算任务列表：首列名称 + 稳定 ID，数字列右对齐等宽数字，状态用 Badge，行内操作不超过 3 个。",
-        code: `<Table caption="示例项目（project-042）· 计算任务列表" rowKey="id">
-  <TableHead>
-    <TableRow>
-      <TableHeader scope="col">任务</TableHeader>
-      <TableHeader scope="col">数据集</TableHeader>
-      <TableHeader scope="col" align="right">耗时（秒）</TableHeader>
-      <TableHeader scope="col" align="right">费用（元）</TableHeader>
-      <TableHeader scope="col">状态</TableHeader>
-      <TableHeader scope="col">操作</TableHeader>
-    </TableRow>
-  </TableHead>
-  <TableBody>
-    {runs.map((run) => (
-      <TableRow key={run.id}>
-        <TableCell>
-          <strong>{run.name}</strong>
-          <span className="table-secondary">{run.id}</span>
-        </TableCell>
-        <TableCell>{run.dataset}</TableCell>
-        <TableCell align="right">{run.seconds}</TableCell>
-        <TableCell align="right">{run.cost}</TableCell>
-        <TableCell><Badge color={run.statusColor}>{run.status}</Badge></TableCell>
-        <TableCell><Button size="sm" variant="ghost">查看日志</Button></TableCell>
+        code: `import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+const runs = [
+  { id: "run-28003", name: "电导率计算", dataset: "ds-118", seconds: "286.4", cost: "12.40", status: "已完成", tone: "success" },
+  { id: "run-28002", name: "结构优化", dataset: "ds-121", seconds: "412.7", cost: "17.90", status: "失败", tone: "danger" },
+  { id: "run-27998", name: "能带计算", dataset: "ds-118", seconds: "1,024.5", cost: "43.20", status: "排队中", tone: "neutral" },
+] as const;
+
+<div className="rounded-lg border bg-card">
+  <Table className="border-collapse">
+    <caption className="caption-top px-3 py-2 text-left text-xs text-muted-foreground">
+      示例项目（project-042）· 计算任务列表
+    </caption>
+    <TableHeader>
+      <TableRow>
+        <TableHead scope="col">任务</TableHead>
+        <TableHead scope="col">数据集</TableHead>
+        <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+        <TableHead scope="col" className="text-right">费用（元）</TableHead>
+        <TableHead scope="col">状态</TableHead>
+        <TableHead scope="col">操作</TableHead>
       </TableRow>
-    ))}
-  </TableBody>
-</Table>`,
+    </TableHeader>
+    <TableBody>
+      {runs.map((run) => (
+        <TableRow key={run.id}>
+          <TableCell>
+            <div className="flex flex-col">
+              <span className="font-medium">{run.name}</span>
+              <span className="font-mono text-xs text-muted-foreground">{run.id}</span>
+            </div>
+          </TableCell>
+          <TableCell className="font-mono">{run.dataset}</TableCell>
+          <TableCell className="text-right tabular-nums">{run.seconds}</TableCell>
+          <TableCell className="text-right tabular-nums">{run.cost}</TableCell>
+          <TableCell><Badge tone={run.tone} dot>{run.status}</Badge></TableCell>
+          <TableCell>
+            <Button variant="ghost" size="sm">{run.status === "排队中" ? "取消排队" : "查看日志"}</Button>
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+</div>`,
         preview: "table/business",
       },
     ],
@@ -1165,10 +1259,14 @@ export const displayComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "顶部居中浮出，一句话结果，默认 3 秒自动消失。",
-        code: `<Button variant="primary" onClick={() => message.success("已保存到示例项目（project-042）")}>
+        code: `import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
+
+{/* 应用根节点已挂载 <Toaster />（顶部居中） */}
+<Button onClick={() => toast.success("已保存到示例项目（project-042）")}>
   保存
 </Button>
-<Button variant="secondary" onClick={() => message.error("保存失败：网络异常，请重试")}>
+<Button variant="secondary" onClick={() => toast.error("保存失败：网络异常，请重试")}>
   演示失败
 </Button>`,
         preview: "message/basic",
@@ -1178,22 +1276,48 @@ export const displayComponents: ComponentDoc[] = [
         title: "类型变体",
         kind: "variant",
         description: "success / warning / error / loading 四种常用类型，图标 + 文字表达。",
-        code: `message.success("已复制任务 ID run-28003")
-message.warning("项目额度剩余不足 20%")
-message.error("提交失败：参数校验未通过")
-message.loading("正在提交…", { duration: 0, key: "submit" })`,
+        code: `import { toast } from "@/components/ui/sonner";
+
+toast.success("已复制任务 ID run-28003");
+toast.warning("项目额度剩余不足 20%");
+toast.error("提交失败：参数校验未通过");
+
+// loading 返回 id，之后用同一 id 更新为结果，不堆叠
+const id = toast.loading("正在提交…");
+toast.success("提交成功", { id });`,
         preview: "message/types",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "异步动作用同一 key 从 loading 更新为结果，不堆叠两条。",
-        code: `function handleSave() {
-  message.loading("正在保存到示例项目（project-042）…", { key: "save", duration: 0 });
-  saveDataset()
-    .then(() => message.success("已保存 · 版本 v3", { key: "save" }))
-    .catch(() => message.error("保存失败：网络异常，修改未丢失，请重试", { key: "save" }));
+        description: "异步动作用同一 id 从 loading 更新为结果，不堆叠两条。",
+        code: `import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
+
+function SaveDatasetButton() {
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+    const id = toast.loading("正在保存到示例项目（project-042）…");
+    try {
+      await saveDataset();
+      toast.success("已保存 · 版本 v3", { id });
+    } catch {
+      toast.error("保存失败：网络异常，修改未丢失，请重试", { id });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Button disabled={saving} onClick={handleSave}>
+      {saving && <Loader2 className="animate-spin" />}
+      {saving ? "正在保存" : "保存数据集"}
+    </Button>
+  );
 }`,
         preview: "message/business",
       },
@@ -1269,14 +1393,20 @@ message.loading("正在提交…", { duration: 0, key: "submit" })`,
         title: "基础示例",
         kind: "basic",
         description: "右上角滑入卡片：类型图标 + 标题 + 描述 + 操作，默认 4.5 秒消失。",
-        code: `<Button variant="secondary" onClick={() =>
-  notification.open({
-    type: "success",
-    title: "计算任务已完成",
-    description: "run-28003 电导率计算已完成，耗时 286.4 秒。",
-    actions: [{ label: "查看结果", href: "#/runs/run-28003" }],
-  })
-}>
+        code: `import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
+
+<Button
+  variant="secondary"
+  onClick={() =>
+    toast.success("计算任务已完成", {
+      description: "run-28003 电导率计算已完成，耗时 286.4 秒。",
+      position: "top-right",
+      duration: 4500,
+      action: { label: "查看结果", onClick: () => navigate("/runs/run-28003") },
+    })
+  }
+>
   演示通知
 </Button>`,
         preview: "notification/basic",
@@ -1286,16 +1416,38 @@ message.loading("正在提交…", { duration: 0, key: "submit" })`,
         title: "真实业务示例",
         kind: "business",
         description: "error 类型常驻直到用户处理；描述带稳定 ID，操作直达目标页面。",
-        code: `notification.open({
-  type: "error",
-  title: "计算任务执行失败",
+        code: `import { XCircle, X } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+// 浮层形态：error 常驻（duration: Infinity）直到用户处理
+toast.error("计算任务执行失败", {
   description: "run-28002 结构优化失败：K 点网格与截断能设置冲突。",
-  duration: 0,
-  actions: [
-    { label: "查看日志", href: "#/runs/run-28002/logs" },
-    { label: "重新提交", onClick: () => retryRun("run-28002") },
-  ],
-})`,
+  position: "top-right",
+  duration: Infinity,
+  closeButton: true,
+  action: { label: "查看日志", onClick: () => navigate("/runs/run-28002/logs") },
+});
+
+// 常驻卡片形态（通知中心 / 页面内）：Card + 语义令牌组合
+<Card role="alert" className="flex w-80 max-w-full items-start gap-2.5 p-3.5 shadow-md">
+  <XCircle className="mt-0.5 size-4 shrink-0 text-danger" />
+  <div className="grid min-w-0 gap-1">
+    <div className="flex items-center gap-1.5 font-semibold">
+      计算任务执行失败 <Badge tone="danger">常驻</Badge>
+    </div>
+    <p className="text-muted-foreground">run-28002 结构优化失败：K 点网格与截断能设置冲突。</p>
+    <div className="flex gap-3">
+      <Button variant="link" size="sm" className="h-auto px-0">查看日志</Button>
+      <Button variant="link" size="sm" className="h-auto px-0" onClick={() => retryRun("run-28002")}>重新提交</Button>
+    </div>
+  </div>
+  <Button variant="ghost" size="icon" className="ml-auto size-7" aria-label="关闭通知" onClick={dismiss}>
+    <X />
+  </Button>
+</Card>`,
         preview: "notification/business",
       },
     ],
@@ -1370,8 +1522,20 @@ message.loading("正在提交…", { duration: 0, key: "submit" })`,
         title: "基础示例",
         kind: "basic",
         description: "品牌色轨道 + 等宽百分比；完成态变为绿色。",
-        code: `<Progress percent={62} />
-<Progress percent={100} status="success" />`,
+        code: `import { Check } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+
+<div className="flex items-center gap-2.5">
+  <Progress value={62} />
+  <span className="w-10 text-right font-mono text-sm tabular-nums text-muted-foreground">62%</span>
+</div>
+<div className="flex items-center gap-2.5">
+  <Progress value={100} tone="success" />
+  <span className="inline-flex items-center gap-1 text-sm text-success">
+    <Check className="size-3.5" />
+    已完成
+  </span>
+</div>`,
         preview: "progress/basic",
       },
       {
@@ -1379,8 +1543,17 @@ message.loading("正在提交…", { duration: 0, key: "submit" })`,
         title: "状态变体",
         kind: "variant",
         description: "error 停在失败点并给出原因；active 表示进行中。",
-        code: `<Progress percent={80} status="active" />
-<Progress percent={45} status="error" format={() => "导入中断"} />`,
+        code: `import { Progress } from "@/components/ui/progress";
+
+<div className="flex items-center gap-2.5">
+  <Progress value={80} />
+  <span className="w-10 text-right font-mono text-sm tabular-nums text-muted-foreground">80%</span>
+</div>
+{/* 失败态：停在失败点，用语义令牌覆盖指示条颜色 */}
+<div className="flex items-center gap-2.5">
+  <Progress value={45} className="[&>div]:bg-danger" />
+  <span className="text-sm text-danger">导入中断</span>
+</div>`,
         preview: "progress/status",
       },
       {
@@ -1388,10 +1561,18 @@ message.loading("正在提交…", { duration: 0, key: "submit" })`,
         title: "真实业务示例",
         kind: "business",
         description: "数据导入进度：邻近文案说明对象、当前位置与预计剩余时间。",
-        code: `<div className="import-progress">
-  <Progress percent={62} status="active" />
-  <span>正在导入 ds-118 · 第 620/1,000 行 · 预计剩余 40 秒</span>
-  <Button size="sm" variant="ghost" onClick={cancelImport}>取消</Button>
+        code: `import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+
+<div className="grid gap-2.5">
+  <div className="flex items-center gap-2.5">
+    <Progress value={62} />
+    <span className="w-10 text-right font-mono text-sm tabular-nums text-muted-foreground">62%</span>
+  </div>
+  <div className="flex flex-wrap items-center gap-2.5">
+    <span className="text-sm text-muted-foreground">正在导入 ds-118 · 第 620/1,000 行 · 预计剩余 40 秒</span>
+    <Button variant="ghost" size="sm" className="ml-auto" onClick={cancelImport}>取消</Button>
+  </div>
 </div>`,
         preview: "progress/business",
       },
@@ -1560,22 +1741,39 @@ message.loading("正在提交…", { duration: 0, key: "submit" })`,
         title: "基础示例",
         kind: "basic",
         description: "打开后焦点进入对话框，Esc 关闭，关闭后焦点回到触发按钮。",
-        code: `const [open, setOpen] = useState(false);
+        code: `import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-<Button variant="primary" onClick={() => setOpen(true)}>打开对话框</Button>
-<Modal
-  open={open}
-  title="重命名数据集"
-  onClose={() => setOpen(false)}
-  footer={
-    <>
-      <Button variant="secondary" onClick={() => setOpen(false)}>取消</Button>
-      <Button variant="primary" onClick={handleSave}>保存</Button>
-    </>
-  }
->
-  <Input defaultValue="ds-118 电导率实验数据" aria-label="数据集名称" />
-</Modal>`,
+const [open, setOpen] = useState(false);
+
+<Dialog open={open} onOpenChange={setOpen}>
+  <DialogTrigger asChild>
+    <Button>打开对话框</Button>
+  </DialogTrigger>
+  <DialogContent className="max-w-md">
+    <DialogHeader>
+      <DialogTitle>重命名数据集</DialogTitle>
+      <DialogDescription>修改数据集 ds-118 的显示名称，数据集 ID 保持不变。</DialogDescription>
+    </DialogHeader>
+    <Input defaultValue="ds-118 电导率实验数据" aria-label="数据集名称" />
+    <DialogFooter className="gap-2 sm:space-x-0">
+      <DialogClose asChild>
+        <Button variant="secondary">取消</Button>
+      </DialogClose>
+      <Button onClick={handleSave}>保存</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>`,
         preview: "modal/basic",
       },
       {
@@ -1583,20 +1781,49 @@ message.loading("正在提交…", { duration: 0, key: "submit" })`,
         title: "真实业务示例",
         kind: "business",
         description: "创建计算任务：回显项目与预计耗时；提交中禁用 Esc、遮罩关闭与重复提交。",
-        code: `<Modal
-  open={open}
-  title="创建计算任务"
-  onClose={() => setOpen(false)}
-  footer={
-    <>
-      <Button variant="secondary" onClick={() => setOpen(false)} disabled={submitting}>取消</Button>
-      <Button variant="primary" loading={submitting} onClick={handleSubmit}>确认创建</Button>
-    </>
-  }
->
-  <p>将在 示例项目（project-042）下创建电导率计算任务。</p>
-  <p>输入数据集 ds-118 · 方法 PBE0 · 预计最长 300 秒。</p>
-</Modal>`,
+        code: `import { Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+{/* 提交中：忽略 onOpenChange，并阻止 Esc 与遮罩关闭 */}
+<Dialog open={open} onOpenChange={(next) => !submitting && setOpen(next)}>
+  <DialogTrigger asChild>
+    <Button>创建计算任务</Button>
+  </DialogTrigger>
+  <DialogContent
+    className="max-w-md"
+    onEscapeKeyDown={(e) => submitting && e.preventDefault()}
+    onInteractOutside={(e) => submitting && e.preventDefault()}
+  >
+    <DialogHeader>
+      <DialogTitle>创建计算任务</DialogTitle>
+      <DialogDescription>
+        将在 示例项目（project-042）下创建电导率计算任务：输入数据集 ds-118 · 方法 PBE0 · 预计最长 300 秒。
+      </DialogDescription>
+    </DialogHeader>
+    <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+      确认后创建可追踪任务并记录审计日志；危险或不可逆动作请使用 ConfirmPanel。
+    </div>
+    <DialogFooter className="gap-2 sm:space-x-0">
+      <DialogClose asChild>
+        <Button variant="secondary" disabled={submitting}>取消</Button>
+      </DialogClose>
+      <Button disabled={submitting} onClick={handleSubmit}>
+        {submitting && <Loader2 className="animate-spin" />}
+        {submitting ? "正在创建" : "确认创建"}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>`,
         preview: "modal/business",
       },
     ],
@@ -1779,32 +2006,72 @@ message.loading("正在提交…", { duration: 0, key: "submit" })`,
         title: "基础示例",
         kind: "basic",
         description: "点击触发元素弹出；点击外部或 Esc 取消，不产生副作用。",
-        code: `<Popconfirm
-  title="删除该文件？"
-  description="structure.cif 将从数据集 ds-118 移除，任务产物不受影响。"
-  okText="删除"
-  cancelText="取消"
-  onConfirm={handleDelete}
->
-  <Button size="sm" variant="danger">删除</Button>
-</Popconfirm>`,
+        code: `import { AlertTriangle } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+
+<Popover open={open} onOpenChange={setOpen}>
+  <PopoverTrigger asChild>
+    <Button variant="danger" size="sm">删除</Button>
+  </PopoverTrigger>
+  <PopoverContent side="top" align="start" className="w-[268px] p-3" role="alertdialog" aria-label="删除确认">
+    <div className="flex gap-2">
+      <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+      <div className="grid gap-1">
+        <p className="font-semibold">删除该文件？</p>
+        <p className="text-sm text-muted-foreground">structure.cif 将从数据集 ds-118 移除，任务产物不受影响。</p>
+      </div>
+    </div>
+    <div className="mt-3 flex justify-end gap-1.5">
+      <Button variant="secondary" size="sm" onClick={() => setOpen(false)}>取消</Button>
+      <Button size="sm" onClick={handleDelete}>删除</Button>
+    </div>
+  </PopoverContent>
+</Popover>`,
         preview: "popconfirm/basic",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "危险动作用 okDanger；确认中主按钮 loading，禁止重复点击。",
-        code: `<Popconfirm
-  title="删除该文件？"
-  description="raw-data.csv 将从数据集 ds-118 移除，已完成的 2 个任务产物保留。"
-  okText="删除"
-  cancelText="取消"
-  okDanger
-  onConfirm={() => removeFile("f-03")}
->
-  <Button size="sm" variant="ghost">删除</Button>
-</Popconfirm>`,
+        description: "危险动作用 danger 主按钮；确认中主按钮 loading，禁止重复点击。",
+        code: `import { AlertTriangle, Loader2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
+
+async function confirmRemove() {
+  setBusy(true);
+  await removeFile("f-03");
+  setBusy(false);
+  setOpen(false);
+  toast.success("已删除 raw-data.csv");
+}
+
+{/* 确认中忽略关闭，主按钮 loading 防重复点击 */}
+<Popover open={open} onOpenChange={(next) => !busy && setOpen(next)}>
+  <PopoverTrigger asChild>
+    <Button variant="ghost" size="sm" className="text-danger">删除</Button>
+  </PopoverTrigger>
+  <PopoverContent side="top" align="end" className="w-[268px] p-3" role="alertdialog" aria-label="删除确认">
+    <div className="flex gap-2">
+      <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+      <div className="grid gap-1">
+        <p className="font-semibold">删除该文件？</p>
+        <p className="text-sm text-muted-foreground">
+          raw-data.csv 将从数据集 ds-118 移除，已完成的 2 个任务产物保留。
+        </p>
+      </div>
+    </div>
+    <div className="mt-3 flex justify-end gap-1.5">
+      <Button variant="secondary" size="sm" onClick={() => setOpen(false)}>取消</Button>
+      <Button variant="danger" size="sm" disabled={busy} onClick={confirmRemove}>
+        {busy && <Loader2 className="animate-spin" />}
+        {busy ? "删除中…" : "删除"}
+      </Button>
+    </div>
+  </PopoverContent>
+</Popover>`,
         preview: "popconfirm/business",
       },
     ],

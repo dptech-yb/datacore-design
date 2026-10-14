@@ -17,6 +17,8 @@ export const buttonVariants = cva(
       },
       size: { sm: "h-7 px-2.5 text-sm", default: "h-8 px-3 text-base", lg: "h-10 px-4 text-md", icon: "size-8" },
     },
+    // link 在任何尺寸下都不要高度和左右内边距（compound 排在 size 之后，合并时胜出）
+    compoundVariants: [{ variant: "link", className: "h-auto px-0" }],
     defaultVariants: { variant: "default", size: "default" },
   },
 );
