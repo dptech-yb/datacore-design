@@ -135,7 +135,16 @@ function statusLabel(status: ComponentDoc["status"]) {
 const REGISTRY_BASE = "https://design.datacore.dp.cd.mba/r";
 const REGISTRY_NAMES = new Set(registry.items.map((item) => item.name));
 /** 文档 id 与组件源名称不一致时在这里对齐。 */
-const REGISTRY_ALIAS: Record<string, string> = { divider: "separator" };
+const REGISTRY_ALIAS: Record<string, string> = {
+  divider: "separator",
+  radio: "radio-group",
+  modal: "dialog",
+  popconfirm: "popover",
+  dropdown: "dropdown-menu",
+  message: "sonner",
+  notification: "sonner",
+  segmented: "tabs",
+};
 
 /** 组件已进入组件源时，给出一行可复制的安装命令；还没进的不显示，避免误导。 */
 function InstallBlock({ id }: { id: string }) {
