@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "progress",
+  "type": "registry:ui",
+  "title": "Progress 进度条",
+  "dependencies": [
+    "@radix-ui/react-progress"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/progress.tsx",
+      "type": "registry:ui",
+      "content": "import * as ProgressPrimitive from \"@radix-ui/react-progress\";\nimport { cn } from \"@/lib/utils\";\n\nexport function Progress({ value, className, tone = \"primary\" }: { value: number; className?: string; tone?: \"primary\" | \"success\" | \"warning\" }) {\n  const bar = tone === \"success\" ? \"bg-success\" : tone === \"warning\" ? \"bg-warning\" : \"bg-primary\";\n  return (\n    <ProgressPrimitive.Root value={value} className={cn(\"relative h-1.5 w-full overflow-hidden rounded-full bg-secondary\", className)}>\n      <ProgressPrimitive.Indicator className={cn(\"h-full transition-all duration-base ease-standard\", bar)} style={{ width: `${value}%` }} />\n    </ProgressPrimitive.Root>\n  );\n}\n"
+    }
+  ]
+}

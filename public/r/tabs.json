@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "tabs",
+  "type": "registry:ui",
+  "title": "Tabs 页签 / 分段控件",
+  "dependencies": [
+    "@radix-ui/react-tabs"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/tabs.tsx",
+      "type": "registry:ui",
+      "content": "import * as React from \"react\";\nimport * as TabsPrimitive from \"@radix-ui/react-tabs\";\nimport { cn } from \"@/lib/utils\";\n\nexport const Tabs = TabsPrimitive.Root;\nexport const TabsContent = TabsPrimitive.Content;\n\n/** 下划线式页签：用于页面级分区（详情页的“概览/数据/文件”）。 */\nexport function TabsList({ className, ...p }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>) {\n  return <TabsPrimitive.List className={cn(\"flex items-center gap-5 overflow-x-auto border-b\", className)} {...p} />;\n}\nexport function TabsTrigger({ className, ...p }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>) {\n  return (\n    <TabsPrimitive.Trigger\n      className={cn(\"relative -mb-px inline-flex h-10 items-center gap-1.5 border-b-2 border-transparent text-base font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground [&_svg]:size-4\", className)}\n      {...p}\n    />\n  );\n}\n\n/** 分段控件：用于同一视图内的切换（单目标/多目标、日/周）。 */\nexport function SegmentedList({ className, ...p }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>) {\n  return <TabsPrimitive.List className={cn(\"inline-flex h-8 items-center rounded-md bg-secondary p-0.5\", className)} {...p} />;\n}\nexport function SegmentedTrigger({ className, ...p }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>) {\n  return <TabsPrimitive.Trigger className={cn(\"inline-flex h-7 items-center rounded px-3 text-sm font-medium text-muted-foreground transition-colors data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs\", className)} {...p} />;\n}\n"
+    }
+  ]
+}

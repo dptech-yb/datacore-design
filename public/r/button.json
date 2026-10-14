@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "button",
+  "type": "registry:ui",
+  "title": "Button 按钮",
+  "dependencies": [
+    "@radix-ui/react-slot",
+    "class-variance-authority"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/button.tsx",
+      "type": "registry:ui",
+      "content": "import * as React from \"react\";\nimport { Slot } from \"@radix-ui/react-slot\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport { cn } from \"@/lib/utils\";\n\nconst buttonVariants = cva(\n  \"inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md font-medium transition-colors duration-fast ease-standard disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0\",\n  {\n    variants: {\n      variant: {\n        default: \"bg-primary text-primary-foreground shadow-xs hover:bg-primary-hover\",\n        secondary: \"border border-input bg-background text-foreground shadow-xs hover:bg-accent\",\n        ghost: \"text-foreground hover:bg-accent\",\n        soft: \"bg-primary-soft text-primary hover:bg-primary-soft/70\",\n        danger: \"bg-danger text-danger-foreground shadow-xs hover:bg-danger/90\",\n        link: \"h-auto px-0 text-primary underline-offset-4 hover:underline\",\n      },\n      size: { sm: \"h-7 px-2.5 text-sm\", default: \"h-8 px-3 text-base\", lg: \"h-10 px-4 text-md\", icon: \"size-8\" },\n    },\n    defaultVariants: { variant: \"default\", size: \"default\" },\n  },\n);\n\nexport interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {\n  asChild?: boolean;\n}\n\nexport const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, asChild, ...props }, ref) => {\n  const Comp = asChild ? Slot : \"button\";\n  return <Comp ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props} />;\n});\nButton.displayName = \"Button\";\n"
+    }
+  ]
+}

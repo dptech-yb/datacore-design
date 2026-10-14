@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "separator",
+  "type": "registry:ui",
+  "title": "Separator 分隔线",
+  "dependencies": [
+    "@radix-ui/react-separator"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/separator.tsx",
+      "type": "registry:ui",
+      "content": "import * as SeparatorPrimitive from \"@radix-ui/react-separator\";\nimport { cn } from \"@/lib/utils\";\n\nexport function Separator({ className, orientation = \"horizontal\" }: { className?: string; orientation?: \"horizontal\" | \"vertical\" }) {\n  return <SeparatorPrimitive.Root orientation={orientation} className={cn(\"shrink-0 bg-border\", orientation === \"horizontal\" ? \"h-px w-full\" : \"h-full w-px\", className)} />;\n}\n"
+    }
+  ]
+}

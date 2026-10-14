@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "tooltip",
+  "type": "registry:ui",
+  "title": "Tooltip 提示",
+  "dependencies": [
+    "@radix-ui/react-tooltip"
+  ],
+  "files": [
+    {
+      "path": "ui/tooltip.tsx",
+      "type": "registry:ui",
+      "content": "import * as React from \"react\";\nimport * as TooltipPrimitive from \"@radix-ui/react-tooltip\";\n\nexport const TooltipProvider = TooltipPrimitive.Provider;\nexport function Tooltip({ content, children }: { content: React.ReactNode; children: React.ReactNode }) {\n  return (\n    <TooltipPrimitive.Root delayDuration={300}>\n      <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>\n      <TooltipPrimitive.Portal>\n        <TooltipPrimitive.Content sideOffset={6} className=\"z-50 rounded bg-foreground px-2 py-1 text-xs text-background shadow-md animate-in fade-in-0\">\n          {content}\n        </TooltipPrimitive.Content>\n      </TooltipPrimitive.Portal>\n    </TooltipPrimitive.Root>\n  );\n}\n"
+    }
+  ],
+  "registryDependencies": []
+}

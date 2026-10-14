@@ -39,3 +39,17 @@ npm run build
 新增组件前，请先说明它解决的业务问题、状态集合和权限边界，并同步更新 `public/component-registry.json` 与 `public/llms-full.txt`。示例数据必须是合成数据。
 
 本项目采用 MIT License。
+
+## 组件源（registry，进行中）
+
+`registry/` 是可直接装进业务项目的组件源码（shadcn/ui 写法：Radix + Tailwind 3 + cva，只用语义令牌）。
+`npm run registry` 生成 `public/r/*.json`，随站点发布到 `https://design.datacore.dp.cd.mba/r/`。
+
+在业务项目里安装（两种方式读同一份 JSON）：
+
+```bash
+# 官方 CLI（需能访问 ui.shadcn.com）
+npx shadcn@2.3.0 add https://design.datacore.dp.cd.mba/r/theme.json https://design.datacore.dp.cd.mba/r/button.json
+# 离线脚本（不依赖外网，默认不覆盖已有文件，升级加 --force 后看 git diff）
+curl -O https://design.datacore.dp.cd.mba/r/add.mjs && node add.mjs https://design.datacore.dp.cd.mba/r theme button select
+```

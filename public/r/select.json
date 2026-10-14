@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "select",
+  "type": "registry:ui",
+  "title": "Select 下拉选择",
+  "dependencies": [
+    "@radix-ui/react-select",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/select.tsx",
+      "type": "registry:ui",
+      "content": "import * as React from \"react\";\nimport * as SelectPrimitive from \"@radix-ui/react-select\";\nimport { Check, ChevronDown } from \"lucide-react\";\nimport { cn } from \"@/lib/utils\";\n\nexport const Select = SelectPrimitive.Root;\nexport const SelectValue = SelectPrimitive.Value;\n\nexport const SelectTrigger = React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>>(({ className, children, ...props }, ref) => (\n  <SelectPrimitive.Trigger\n    ref={ref}\n    className={cn(\"flex h-8 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-2.5 text-base shadow-xs focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20 data-[placeholder]:text-subtle [&>span]:truncate\", className)}\n    {...props}\n  >\n    {children}\n    <SelectPrimitive.Icon asChild><ChevronDown className=\"size-4 text-muted-foreground\" /></SelectPrimitive.Icon>\n  </SelectPrimitive.Trigger>\n));\nSelectTrigger.displayName = \"SelectTrigger\";\n\nexport function SelectContent({ className, children, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>) {\n  return (\n    <SelectPrimitive.Portal>\n      <SelectPrimitive.Content position=\"popper\" sideOffset={4} className={cn(\"z-50 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95\", className)} {...props}>\n        <SelectPrimitive.Viewport>{children}</SelectPrimitive.Viewport>\n      </SelectPrimitive.Content>\n    </SelectPrimitive.Portal>\n  );\n}\n\nexport function SelectItem({ className, children, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>) {\n  return (\n    <SelectPrimitive.Item className={cn(\"relative flex h-8 cursor-default select-none items-center rounded pl-2 pr-8 text-base outline-none data-[highlighted]:bg-accent data-[disabled]:opacity-50\", className)} {...props}>\n      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>\n      <SelectPrimitive.ItemIndicator className=\"absolute right-2\"><Check className=\"size-4 text-primary\" /></SelectPrimitive.ItemIndicator>\n    </SelectPrimitive.Item>\n  );\n}\n"
+    }
+  ]
+}

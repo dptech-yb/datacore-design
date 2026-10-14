@@ -10,7 +10,8 @@
     "build": "npm run generate && tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
-    "generate": "node scripts/generate-ai-files.mjs"
+    "generate": "node scripts/generate-ai-files.mjs && node scripts/build-registry.mjs",
+    "registry": "node scripts/build-registry.mjs"
   },
   "dependencies": {
     "@google/model-viewer": "^4.3.1",

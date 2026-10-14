@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "badge",
+  "type": "registry:ui",
+  "title": "Badge 状态徽标",
+  "dependencies": [
+    "class-variance-authority"
+  ],
+  "registryDependencies": [
+    "https://design.datacore.dp.cd.mba/r/utils.json"
+  ],
+  "files": [
+    {
+      "path": "ui/badge.tsx",
+      "type": "registry:ui",
+      "content": "import { cva, type VariantProps } from \"class-variance-authority\";\nimport { cn } from \"@/lib/utils\";\n\nconst badgeVariants = cva(\"inline-flex items-center gap-1 rounded px-1.5 h-5 text-xs font-medium whitespace-nowrap\", {\n  variants: {\n    tone: {\n      neutral: \"bg-secondary text-secondary-foreground\",\n      primary: \"bg-primary-soft text-primary\",\n      success: \"bg-success-soft text-success\",\n      warning: \"bg-warning-soft text-warning\",\n      danger: \"bg-danger-soft text-danger\",\n      agent: \"bg-agent-soft text-agent\",\n      outline: \"border border-border text-muted-foreground\",\n    },\n  },\n  defaultVariants: { tone: \"neutral\" },\n});\n\nexport function Badge({ className, tone, dot, children, ...props }: React.HTMLAttributes<HTMLSpanElement> & VariantProps<typeof badgeVariants> & { dot?: boolean }) {\n  return (\n    <span className={cn(badgeVariants({ tone }), className)} {...props}>\n      {dot && <span className=\"size-1.5 rounded-full bg-current\" aria-hidden />}\n      {children}\n    </span>\n  );\n}\n"
+    }
+  ]
+}
