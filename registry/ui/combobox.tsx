@@ -158,6 +158,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>((props, ref)
         <Command shouldFilter={shouldFilter}>
           <CommandInput
             placeholder={searchPlaceholder}
+            className="focus-visible:outline-none"
             value={search}
             onValueChange={(next) => {
               setSearch(next);
@@ -173,8 +174,8 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>((props, ref)
             ) : (
               <>
                 {!showCreate && <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">{emptyText}</CommandEmpty>}
-                <CommandGroup>
-                  {showCreate && (
+                {showCreate && (
+                  <CommandGroup forceMount>
                     <CommandItem
                       forceMount
                       value={`__create__${keyword}`}
@@ -188,7 +189,9 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>((props, ref)
                       <Plus />
                       创建：{keyword}
                     </CommandItem>
-                  )}
+                  </CommandGroup>
+                )}
+                <CommandGroup>
                   {options.map((option) => {
                     const checked = selected.includes(option.value);
                     return (

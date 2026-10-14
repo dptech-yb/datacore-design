@@ -153,7 +153,7 @@ const SearchField = React.forwardRef<HTMLInputElement, SearchFieldProps>(
             }
           }}
           className={cn(
-            "h-full min-w-0 flex-1 bg-transparent outline-none placeholder:text-subtle disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
+            "h-full min-w-0 flex-1 bg-transparent outline-none focus-visible:outline-none placeholder:text-subtle disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
             className,
           )}
           {...props}

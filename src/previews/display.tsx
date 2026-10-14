@@ -273,7 +273,7 @@ function DescriptionsLayout() {
       <Descriptions title="数据集信息" columns={2} layout="vertical" bordered className="max-w-xl">
         <DescriptionsItem label="数据集 ID" mono>ds-118</DescriptionsItem>
         <DescriptionsItem label="版本">v3 · 2026-09-18 更新</DescriptionsItem>
-        <DescriptionsItem label="数据量" mono>1,000 行 · 12 字段</DescriptionsItem>
+        <DescriptionsItem label="数据量">1,000 行 · 12 字段</DescriptionsItem>
         <DescriptionsItem label="创建方式">UniLab 导入</DescriptionsItem>
       </Descriptions>
       <Descriptions columns={2} bordered labelWidth={96} className="max-w-xl">
@@ -288,11 +288,11 @@ function DescriptionsLayout() {
 
 function DescriptionsBusiness() {
   return (
-    <Descriptions title="数据集 ds-118" columns={2} className="max-w-xl">
+    <Descriptions title="数据集 ds-118" columns={2} labelWidth={80} className="max-w-2xl">
       <DescriptionsItem label="数据集 ID" mono copyable>ds-118</DescriptionsItem>
       <DescriptionsItem label="所属项目">示例项目（project-042）</DescriptionsItem>
       <DescriptionsItem label="版本">v3 · 2026-09-18 更新</DescriptionsItem>
-      <DescriptionsItem label="数据量" mono>1,000 行 · 12 字段</DescriptionsItem>
+      <DescriptionsItem label="数据量">1,000 行 · 12 字段</DescriptionsItem>
       <DescriptionsItem label="质量状态" span={2}>
         <Badge tone="warning" dot>3 行缺少密度字段</Badge>
       </DescriptionsItem>
@@ -609,7 +609,7 @@ function JsonViewerBusiness() {
         copyPath
         copyValue
         maskKeys={["credential"]}
-        maxHeight={320}
+        maxHeight={360}
         onCopy={(text, kind) => toast.success(kind === "path" ? `已复制路径 ${text}` : "已复制值")}
       />
       <p className="demo-note">hover / 聚焦行显示“复制路径”“复制值”；maskKeys 中的字段值一律显示 ***，键名保留便于理解结构。</p>
@@ -706,22 +706,22 @@ function AlertBasic() {
     <div className="demo-stack">
       <Alert variant="info" role="status">
         <Info className="size-4" />
-        <AlertTitle>计算任务将于今晚 22:00 排队执行</AlertTitle>
+        <AlertTitle className="mt-0 text-base font-semibold">计算任务将于今晚 22:00 排队执行</AlertTitle>
         <AlertDescription className="text-muted-foreground">示例项目（project-042）· 队列预计等待 20 分钟</AlertDescription>
       </Alert>
       <Alert variant="success" role="status">
         <CheckCircle2 className="size-4" />
-        <AlertTitle>数据集 ds-118 校验通过</AlertTitle>
+        <AlertTitle className="mt-0 text-base font-semibold">数据集 ds-118 校验通过</AlertTitle>
         <AlertDescription className="text-muted-foreground">1,000 行全部通过字段校验</AlertDescription>
       </Alert>
       <Alert variant="warning" role="status">
         <AlertTriangle className="size-4" />
-        <AlertTitle>3 行缺少密度字段</AlertTitle>
+        <AlertTitle className="mt-0 text-base font-semibold">3 行缺少密度字段</AlertTitle>
         <AlertDescription className="text-muted-foreground">缺失行将以项目默认值填充，可在导入预览中逐行修改</AlertDescription>
       </Alert>
       <Alert variant="danger">
         <XCircle className="size-4" />
-        <AlertTitle>任务 run-28002 执行失败</AlertTitle>
+        <AlertTitle className="mt-0 text-base font-semibold">任务 run-28002 执行失败</AlertTitle>
         <AlertDescription className="text-muted-foreground">K 点网格与截断能设置冲突，请检查参数后重试</AlertDescription>
       </Alert>
     </div>
@@ -740,7 +740,7 @@ function AlertClosable() {
   return (
     <Alert variant="warning" role="status" className="pr-12">
       <AlertTriangle className="size-4" />
-      <AlertTitle>项目额度剩余 12%</AlertTitle>
+      <AlertTitle className="mt-0 text-base font-semibold">项目额度剩余 12%</AlertTitle>
       <AlertDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
         示例项目（project-042）本周期额度即将用完
         <Button variant="link" size="sm">查看用量</Button>
@@ -763,7 +763,7 @@ function AlertBusiness() {
     <div className="demo-stack">
       <Alert variant="warning">
         <AlertTriangle className="size-4" />
-        <AlertTitle>3 行缺少密度字段，无法直接提交</AlertTitle>
+        <AlertTitle className="mt-0 text-base font-semibold">3 行缺少密度字段，无法直接提交</AlertTitle>
         <AlertDescription className="text-muted-foreground">
           第 128、512、907 行缺失。可逐行补全，或以项目默认值 2.50 g/cm³ 填充后继续。
           <div className="mt-2 flex flex-wrap gap-2">
@@ -1233,7 +1233,7 @@ function DrawerBusiness() {
           <div className="grid flex-1 content-start gap-4 overflow-y-auto px-6 py-4">
             <Descriptions columns={side === "bottom" ? 2 : 1}>
               <DescriptionsItem label="数据集" mono>ds-118</DescriptionsItem>
-              <DescriptionsItem label="方法" mono>PBE0 · 截断能 520 eV</DescriptionsItem>
+              <DescriptionsItem label="方法">PBE0 · 截断能 520 eV</DescriptionsItem>
               <DescriptionsItem label="耗时" mono>286.4 秒</DescriptionsItem>
               <DescriptionsItem label="费用" mono>¥12.40</DescriptionsItem>
             </Descriptions>

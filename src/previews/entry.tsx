@@ -103,7 +103,7 @@ function InputBusiness() {
   );
 }
 
-/* ---------- InputNumber ---------- */
+/* ---------- NumberInput（doc id: input-number） ---------- */
 
 function InputNumberBasic() {
   const id = useId();

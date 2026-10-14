@@ -159,7 +159,8 @@ export const ToolRunCard = React.forwardRef<HTMLDivElement, ToolRunCardProps>(
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm" className="-ml-2">
                   <ChevronDown className={cn("transition-transform", open && "rotate-180")} aria-hidden />
-                  {open ? "收起完整参数" : "展开完整参数"}
+                  {open ? "收起" : "展开"}
+                  {paramsText ? "完整参数" : "详情"}
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-2">{expandable}</CollapsibleContent>

@@ -14,7 +14,7 @@ export const entryComponents: ComponentDoc[] = [
     version: "0.1.0",
     purpose: "收集单行短文本，是表单里最基础的信息录入单元。",
     usage:
-      "用于名称、编号、简短标识等单行文本。多行内容用 Textarea；纯数值用 InputNumber；从有限选项中选值用 Select；即时过滤查找用 SearchField。",
+      "用于名称、编号、简短标识等单行文本。多行内容用 Textarea；纯数值用 NumberInput；从有限选项中选值用 Select；即时过滤查找用 SearchField。",
     keywords: ["input", "text", "输入框", "单行文本", "录入"],
     examples: [
       {
@@ -174,7 +174,7 @@ const [name, setName] = useState("示例项目（project-042）");
   },
   {
     id: "input-number",
-    name: "InputNumber",
+    name: "NumberInput",
     chineseName: "数字输入框",
     category: "entry",
     status: "beta",
@@ -182,93 +182,137 @@ const [name, setName] = useState("示例项目（project-042）");
     purpose: "录入带范围、步长和精度约束的数值，把非法数字拦在输入阶段。",
     usage:
       "用于质量、浓度、温度、循环次数等数值字段。展示用数字不要用它（用 Statistic）；编号即使全是数字也用 Input，避免丢失前导零。",
-    keywords: ["input-number", "number", "数字输入", "数值", "步进", "精度"],
+    keywords: ["input-number", "number-input", "NumberInput", "number", "数字输入", "数值", "步进", "精度"],
     examples: [
       {
         id: "basic",
         title: "基础示例",
         kind: "basic",
         description: "min / max / step 约束输入，步进按钮与方向键等价。",
-        code: `<InputNumber min={0} max={100} step={0.1} defaultValue={1.5} />`,
+        code: `import { Label } from "@/components/ui/label";
+import { NumberInput } from "@/components/ui/number-input";
+
+const [value, setValue] = useState<number | null>(1.5);
+
+<div className="grid gap-1.5">
+  <Label htmlFor="additive-conc">添加剂浓度（%）</Label>
+  <NumberInput
+    id="additive-conc"
+    value={value}
+    onValueChange={setValue}
+    min={0}
+    max={100}
+    step={0.1}
+    precision={1}
+  />
+</div>`,
         preview: "input-number/basic",
       },
       {
         id: "precision-unit",
         title: "精度与单位",
         kind: "variant",
-        description: "precision 控制小数位，单位展示在控件内右侧，不参与提交值。",
-        code: `<InputNumber defaultValue={12.4} precision={2} unit="mg" min={0} max={500} />
-<InputNumber defaultValue={200} precision={0} unit="次" min={1} max={2000} />`,
+        description: "precision 控制小数位，unit 展示在控件内右侧，不参与提交值。",
+        code: `import { NumberInput } from "@/components/ui/number-input";
+
+<NumberInput aria-label="称量质量" defaultValue={12.4} precision={2} unit="mg" min={0} max={500} step={0.1} />
+<NumberInput aria-label="循环次数" defaultValue={200} precision={0} unit="次" min={1} max={2000} step={10} />`,
         preview: "input-number/precision-unit",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "称量质量录入：精度与天平一致，范围与量程一致，辅助文本写明依据。",
-        code: `<div className="field">
-  <label htmlFor="sample-mass">称量质量</label>
-  <InputNumber id="sample-mass" defaultValue={12.4} precision={2} unit="mg" min={0} max={500} />
-  <small>精度与天平一致（0.01 mg），量程 0–500 mg；留空表示未称量。</small>
+        description: "称量质量录入：精度与天平一致，范围与量程一致；必填未填时 invalid 标红并就近报错。",
+        code: `import { Label } from "@/components/ui/label";
+import { NumberInput } from "@/components/ui/number-input";
+
+const [mass, setMass] = useState<number | null>(12.4);
+const missing = mass === null;
+
+<div className="grid gap-1.5">
+  <Label htmlFor="sample-mass">称量质量</Label>
+  <NumberInput
+    id="sample-mass"
+    value={mass}
+    onValueChange={setMass}
+    min={0}
+    max={500}
+    step={0.01}
+    precision={2}
+    unit="mg"
+    invalid={missing}
+    aria-describedby="sample-mass-help"
+  />
+  {missing ? (
+    <p id="sample-mass-help" role="alert" className="text-xs text-danger">请填写称量质量，允许 0–500 mg。</p>
+  ) : (
+    <p id="sample-mass-help" className="text-xs text-muted-foreground">
+      精度与天平一致（0.01 mg），量程 0–500 mg；留空表示未称量，不等于 0。
+    </p>
+  )}
 </div>`,
         preview: "input-number/business",
       },
     ],
     props: [
       { name: "value", type: "number | null", description: "受控值；null 表示未填写，不强制为 0。" },
-      { name: "min", type: "number", description: "下限；越界输入在失焦时收敛到边界并提示。" },
-      { name: "max", type: "number", description: "上限；越界输入在失焦时收敛到边界并提示。" },
-      { name: "step", type: "number", default: "1", description: "步进按钮与方向键的步长。" },
-      { name: "precision", type: "number", description: "小数位数，超出自动四舍五入。" },
-      { name: "unit", type: "string", description: "单位文本，展示在控件内右侧，不参与值。" },
-      { name: "disabled", type: "boolean", default: "false", description: "禁止编辑并隐藏步进按钮。" },
-      { name: "onChange", type: "(value: number | null) => void", description: "值变化回调；清空时回传 null。" },
+      { name: "defaultValue", type: "number | null", default: "null", description: "非受控初始值。" },
+      { name: "onValueChange", type: "(value: number | null) => void", description: "提交后的值变化：失焦、Enter、步进时触发；清空回传 null。" },
+      { name: "min / max", type: "number", description: "上下限；越界输入实时标红，失焦时收敛到边界；到达边界时对应步进按钮禁用。" },
+      { name: "step", type: "number", default: "1", description: "步进按钮与 ↑ / ↓ 方向键的步长。" },
+      { name: "precision", type: "number", description: "小数位数，展示与提交都按此四舍五入；0 时唤起纯数字键盘。" },
+      { name: "unit", type: "ReactNode", description: "单位后缀，展示在控件内右侧，不参与值。" },
+      { name: "invalid", type: "boolean", default: "false", description: "外部校验失败（如必填未填）时标红；越界会自动标红，无需传入。" },
+      { name: "hideSteppers", type: "boolean", default: "false", description: "隐藏 − / + 按钮，只保留方向键步进（表格行内等紧凑场景）。" },
+      { name: "disabled / readOnly", type: "boolean", default: "false", description: "禁用整体变灰；只读时隐藏步进按钮。" },
+      { name: "wrapperClassName", type: "string", description: "外层容器样式（宽度等）；className 作用于内部 input。" },
     ],
     states: [
       { name: "default", note: "显示格式化后的值与单位；null 时显示占位。" },
-      { name: "hover", note: "边框加深或变为品牌色，步进按钮显现。" },
-      { name: "focus-visible", note: "品牌色边框 + 3px 外发光，Tab 可达。" },
-      { name: "pressed", note: "步进按钮按下时背景加深一档，时长 < 120ms。" },
-      { name: "disabled", note: "灰底 + not-allowed，步进按钮隐藏；原因就近说明。" },
+      { name: "hover", note: "步进按钮悬停时背景变为 accent。" },
+      { name: "focus-visible", note: "整个控件（含单位与步进按钮）显示 ring 边框与外发光；Tab 只停在输入框，步进按钮不进 Tab 序列（方向键等价）。" },
+      { name: "pressed", note: "步进按钮按下即增减一步；到达 min / max 时对应按钮禁用。" },
+      { name: "disabled", note: "整体半透明 + not-allowed，步进按钮同步禁用；只读（readOnly）时隐藏步进按钮。原因就近说明。" },
       { name: "loading", note: "不适用：数字输入无加载态；提交等待由 Form 承担。", applicable: false },
       { name: "empty", note: "null 显示占位文本；空值不自动补 0，由校验决定是否必填。" },
-      { name: "error", note: "越界或格式错误时红色边框 + 就近文案，aria-invalid=\"true\"。" },
+      { name: "error", note: "输入越界时自动红色边框并设 aria-invalid；必填未填等外部校验用 invalid 属性 + 就近文案。" },
       { name: "permission-limited", note: "无权限时只读展示值与单位，不渲染为可编辑控件。" },
-      { name: "mobile", note: "唤起数字键盘（inputMode=\"decimal\"）；步进按钮触控区域 ≥32×40px。" },
+      { name: "mobile", note: "唤起数字键盘（inputMode=\"decimal\"，precision=0 时为 numeric）；触控场景用 wrapperClassName=\"h-10\" 加大控件与步进按钮。" },
       { name: "dark-mode", note: "使用语义令牌自动适配，不单独覆盖颜色。" },
     ],
     interaction: [
-      "非法字符实时过滤，失焦时按 min / max / precision 收敛并给出提示。",
+      "非法字符直接忽略；越界时实时标红，失焦或 Enter 时按 min / max / precision 收敛。",
       "上下方向键与步进按钮完全等价。",
       "单位只展示不进值，提交始终是纯数字。",
       "清空后为 null，不自动补 0；“未填”与“填 0”语义不同。",
     ],
     keyboard: [
-      "Tab 聚焦；↑ / ↓ 按 step 增减。",
+      "Tab 聚焦；↑ / ↓ 按 step 增减（不超出 min / max）；Enter 立即提交。",
       "输入非法字符被忽略；Esc 放弃本次编辑并还原为进入前的值。",
     ],
     accessibility: [
       "使用 role=\"spinbutton\" 语义，同步 aria-valuemin / aria-valuemax / aria-valuenow。",
-      "步进按钮提供 aria-label（增加 / 减少），单位包含在可访问名称或 aria-describedby 中。",
-      "错误时 aria-invalid=\"true\"，错误文案 role=\"alert\" 就近播报。",
+      "步进按钮提供 aria-label（增加 / 减少）；unit 为字符串时写入 aria-valuetext（如“12.40 mg”）。",
+      "错误时 aria-invalid=\"true\"，错误文案 role=\"alert\" 并经 aria-describedby 关联。",
     ],
     responsive: [
       "移动端唤起数字键盘，输入框全宽。",
       "窄屏下单位内联显示，不与输入值折行分离。",
     ],
     content: [
-      "单位写在 unit 里，不写进标签或占位。",
+      "单位写在 unit 里，不写进占位；标签可补充单位便于读屏。",
       "错误文案给出允许范围：允许 0–500 mg。",
       "辅助文本写明精度依据：与天平精度一致（0.01 mg）。",
     ],
     dos: [
-      "数值字段用 InputNumber 而不是 Input。",
+      "数值字段用 NumberInput 而不是 Input。",
       "标明范围与单位，精度与仪器一致。",
       "用 null 表达“未填”，不用 0 占位。",
     ],
     donts: [
       "不要把编号当数字录入（前导零会丢失）。",
-      "不要越界静默收敛而没有任何提示。",
+      "不要只靠失焦收敛而不说明范围——辅助文本写明允许范围。",
       "不要把单位拼进提交值。",
       "不要默认填 0 代替“未填写”。",
     ],
@@ -657,26 +701,54 @@ const selected = datasets.find((d) => d.value === value);
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "输入即时过滤选项，匹配的片段高亮显示。",
-        code: `<Combobox
-  placeholder="搜索试剂名称"
-  options={[
-    { value: "ec", label: "碳酸乙烯酯", hint: "EC" },
-    { value: "dmc", label: "碳酸二甲酯", hint: "DMC" },
-  ]}
-/>`,
+        description: "输入即时过滤选项，名称与副信息（缩写）都参与匹配。",
+        code: `import { Combobox } from "@/components/ui/combobox";
+import { Label } from "@/components/ui/label";
+
+const [value, setValue] = useState<string | null>(null);
+
+<div className="grid gap-1.5">
+  <Label htmlFor="solvent">溶剂</Label>
+  <Combobox
+    id="solvent"
+    value={value}
+    onValueChange={setValue}
+    placeholder="选择溶剂"
+    searchPlaceholder="搜索试剂名称或缩写"
+    emptyText="没有匹配的试剂"
+    options={[
+      { value: "ec", label: "碳酸乙烯酯", description: "EC" },
+      { value: "dmc", label: "碳酸二甲酯", description: "DMC" },
+      { value: "emc", label: "碳酸甲乙酯", description: "EMC" },
+      { value: "pc", label: "碳酸丙烯酯", description: "PC" },
+    ]}
+  />
+</div>`,
         preview: "combobox/basic",
       },
       {
         id: "allow-create",
-        title: "允许创建新值",
+        title: "多选与创建新值",
         kind: "variant",
-        description: "无匹配时首项提供创建入口，创建即选中；重名或相似项给出提示。",
-        code: `<Combobox
-  allowCreate
-  placeholder="搜索或输入标签"
-  options={tagOptions}
-  onCreate={(name) => createTag({ projectId: "project-042", name })}
+        description: "multiple 多选以 Badge 回显；传 onCreate 后，无完全匹配时首项为“创建：输入值”，创建即选中。",
+        code: `import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
+
+const [options, setOptions] = useState<ComboboxOption[]>(tagOptions);
+const [value, setValue] = useState<string[]>(["round-3"]);
+
+<Combobox
+  multiple
+  aria-label="实验标签"
+  options={options}
+  value={value}
+  onValueChange={setValue}
+  placeholder="选择或创建标签"
+  searchPlaceholder="搜索或输入新标签"
+  onCreate={(name) => {
+    const tag = { value: \`tag-\${options.length + 1}\`, label: name };
+    setOptions((list) => [...list, tag]);
+    setValue((list) => [...list, tag.value]);
+  }}
 />`,
         preview: "combobox/allow-create",
       },
@@ -684,55 +756,65 @@ const selected = datasets.find((d) => d.value === value);
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "选择仪器：选项带编号与可用状态，忙碌仪器禁用并注明原因。",
-        code: `<Combobox
-  placeholder="搜索仪器名称或编号"
-  options={[
-    { value: "ins-07", label: "恒温箱 07", hint: "可用" },
-    { value: "ins-09", label: "恒温箱 09", hint: "维护中", disabled: true },
-  ]}
+        description: "选择仪器：选项带可用状态，维护中的仪器禁用并注明原因。",
+        code: `import { Combobox } from "@/components/ui/combobox";
+
+<Combobox
+  aria-label="预约仪器"
+  defaultValue="ins-07"
+  placeholder="选择仪器"
+  searchPlaceholder="搜索仪器名称或编号"
   emptyText="没有匹配的仪器"
+  options={[
+    { value: "ins-07", label: "恒温箱 07", description: "可用" },
+    { value: "ins-08", label: "恒温箱 08", description: "可用" },
+    { value: "ins-09", label: "恒温箱 09", description: "维护中", disabled: true },
+    { value: "ins-12", label: "手套箱 12", description: "可用" },
+  ]}
 />`,
         preview: "combobox/business",
       },
     ],
     props: [
-      { name: "value", type: "string", description: "受控值；选中已有项或创建的新值。" },
-      { name: "options", type: "{ value: string; label: ReactNode; hint?: string; disabled?: boolean }[]", required: true, description: "候选列表；hint 放编号、状态等副信息。" },
-      { name: "allowCreate", type: "boolean", default: "false", description: "无匹配时展示“创建：输入值”入口。" },
-      { name: "onCreate", type: "(name: string) => void", description: "创建回调；创建成功后自动选中新值。" },
-      { name: "onSearch", type: "(keyword: string) => void", description: "搜索回调；远程场景防抖 ≥300ms。" },
-      { name: "loading", type: "boolean", default: "false", description: "远程搜索中，面板内显示加载占位。" },
-      { name: "emptyText", type: "ReactNode", default: '"无匹配结果"', description: "无匹配时的空态文案；allowCreate 时创建入口始终在前。" },
-      { name: "onChange", type: "(value: string) => void", description: "选中变化回调。" },
+      { name: "options", type: "{ value: string; label: string; description?: string; disabled?: boolean }[]", required: true, description: "候选列表；description 放编号、状态等副信息，弱化显示且参与搜索。" },
+      { name: "multiple", type: "boolean", default: "false", description: "多选：值为 string[]，面板保持打开，触发器以 Badge 回显。" },
+      { name: "value / defaultValue", type: "string | null（多选为 string[]）", description: "受控 / 非受控值；单选再次点选已选项会取消选择。" },
+      { name: "onValueChange", type: "(value: string | null) => void（多选为 string[]）", description: "选中变化回调。" },
+      { name: "placeholder / searchPlaceholder", type: "string", default: '"请选择" / "搜索…"', description: "触发器占位与面板内搜索框占位。" },
+      { name: "emptyText", type: "ReactNode", default: '"无匹配结果"', description: "无匹配时的空态文案。" },
+      { name: "onCreate", type: "(keyword: string) => void", description: "传入即开启创建：无完全匹配时首项为“创建：输入值”；由调用方加入 options 并选中。" },
+      { name: "onSearchChange / shouldFilter", type: "(keyword: string) => void / boolean", default: "— / true", description: "远程搜索：关掉本地过滤，在回调里自行防抖（≥300ms）并更新 options。" },
+      { name: "loading", type: "boolean", default: "false", description: "远程搜索中，列表显示“正在搜索…”。" },
+      { name: "maxBadges", type: "number", default: "3", description: "多选时触发器最多显示的 Badge 数，其余折叠为 +N。" },
+      { name: "disabled / invalid", type: "boolean", default: "false", description: "禁用触发器 / 校验失败时红色边框并设 aria-invalid。" },
     ],
     states: [
-      { name: "default", note: "未选中时为输入态，选中后回显选项 label。" },
-      { name: "hover", note: "输入框边框变为品牌色；选项悬停高亮。" },
-      { name: "focus-visible", note: "输入框 3px 外发光；面板打开时高亮项清晰可见。" },
+      { name: "default", note: "未选中时显示占位；单选回显选项 label，多选回显 Badge（超出 maxBadges 折叠为 +N）。" },
+      { name: "hover", note: "触发器背景变为 accent；选项悬停时 accent 背景。" },
+      { name: "focus-visible", note: "打开面板后焦点进入搜索框，当前高亮项以 accent 背景标出。" },
       { name: "pressed", note: "点选瞬间选项背景高亮，时长 < 120ms。" },
       { name: "disabled", note: "灰底 + not-allowed，不展开面板。" },
       { name: "loading", note: "远程搜索时面板内显示 spinner 与“正在搜索”占位，输入不锁定。" },
-      { name: "empty", note: "无匹配时展示空态；allowCreate 时首项为“创建：输入值”。" },
-      { name: "error", note: "搜索服务失败时面板内给出错误与重试，保留已输入关键词。" },
-      { name: "permission-limited", note: "创建入口仅对有权限的角色显示；无权限时只能选已有值。" },
-      { name: "mobile", note: "面板全宽展示，选项触控高度 ≥40px。" },
+      { name: "empty", note: "无匹配时展示 emptyText；传了 onCreate 时改为“创建：输入值”入口。" },
+      { name: "error", note: "invalid 时触发器红色边框；远程搜索失败时把错误与重试作为 emptyText 传入，保留关键词。" },
+      { name: "permission-limited", note: "无创建权限时不传 onCreate，只能选已有值；无权限选项用 disabled + description 注明。" },
+      { name: "mobile", note: "面板宽度跟随触发器（最小 220px），触发器全宽。" },
       { name: "dark-mode", note: "使用语义令牌自动适配，不单独覆盖颜色。" },
     ],
     interaction: [
-      "输入即时过滤，匹配片段高亮；远程搜索防抖 ≥300ms。",
-      "无匹配且 allowCreate 时，首项固定为“创建：输入值”。",
-      "创建前检测重名与相似项并提示，创建成功后自动选中。",
-      "选中后输入框显示选中值，清除后恢复输入态。",
+      "输入即时过滤（label、value、description 都参与匹配）；远程搜索用 shouldFilter={false} + onSearchChange，防抖 ≥300ms。",
+      "传了 onCreate 且无完全同名项时，首项固定为“创建：输入值”。",
+      "完全同名时不显示创建入口；相似项提示由调用方在 onCreate 中处理，创建后由调用方加入 options 并选中。",
+      "单选点选即关闭面板，再次点选已选项可取消；多选保持面板打开。关闭面板时清空搜索词。",
     ],
     keyboard: [
-      "输入字符即搜索；↓ 进入列表，↑ / ↓ 移动高亮。",
-      "Enter 选中高亮项或触发创建；Esc 关闭面板并保留输入。",
+      "Enter / Space / ↓ 打开面板，焦点进入搜索框；输入字符即过滤，↑ / ↓ 移动高亮（跳过禁用项）。",
+      "Enter 选中高亮项或触发创建；Esc 关闭面板，焦点回到触发器。",
     ],
     accessibility: [
-      "输入框使用 role=\"combobox\"，同步 aria-expanded 与 aria-controls。",
-      "aria-activedescendant 指向当前高亮项。",
-      "结果数量变化通过 aria-live=\"polite\" 播报。",
+      "触发器使用 role=\"combobox\"，同步 aria-expanded 与 aria-controls；必须关联 Label 或 aria-label。",
+      "搜索框由 cmdk 维护 aria-activedescendant 指向当前高亮项；已选项附读屏文本“（已选）”。",
+      "远程搜索时 loading 区域为 role=\"status\"（正在搜索…）。",
       "创建入口语义清晰：文案为“创建：输入值”，不只依赖加号图标。",
     ],
     responsive: [
@@ -750,7 +832,7 @@ const selected = datasets.find((d) => d.value === value);
       "远程搜索防抖 ≥300ms 并显示加载占位。",
     ],
     donts: [
-      "不要把 Combobox 当普通 Select 用（选项固定时是多此一举）。",
+      "不要把 Combobox 当普通 Select 用（选项固定且少时是多此一举）。",
       "不要创建前不提示重名，制造重复数据。",
       "不要输入即触发写操作；创建必须经用户明确选择。",
     ],
@@ -772,18 +854,29 @@ const selected = datasets.find((d) => d.value === value);
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "点选日期即确认；也支持手动输入，失焦时解析。",
-        code: `<DatePicker placeholder="选择日期" defaultValue="2026-09-22" />`,
+        description: "点选日期即确认并关闭面板；有值时右侧可清除。",
+        code: `import { DatePicker } from "@/components/ui/date-picker";
+import { Label } from "@/components/ui/label";
+
+const [date, setDate] = useState<Date | null>(new Date(2026, 8, 22));
+
+<div className="grid gap-1.5">
+  <Label htmlFor="exp-date">实验日期</Label>
+  <DatePicker id="exp-date" value={date} onValueChange={setDate} />
+</div>`,
         preview: "date-picker/basic",
       },
       {
         id: "disabled-date",
         title: "禁用日期",
         kind: "variant",
-        description: "不可选的日期在面板内直接禁用并弱化显示，而不是选中后再报错。",
-        code: `<DatePicker
+        description: "disabledDates 命中的日期在面板内直接禁用并弱化显示，而不是选中后再报错。",
+        code: `import { DatePicker } from "@/components/ui/date-picker";
+
+<DatePicker
+  aria-label="实验日期"
   placeholder="选择实验日期"
-  disabledDate={(date) => date.isAfter("2026-09-22")}
+  disabledDates={{ after: new Date() }}
 />`,
         preview: "date-picker/disabled-date",
       },
@@ -791,42 +884,54 @@ const selected = datasets.find((d) => d.value === value);
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "预约设备日期：可约范围与规则前置写在辅助文本里。",
-        code: `<div className="field">
-  <label htmlFor="reserve-date">预约日期</label>
-  <DatePicker id="reserve-date" disabledDate={(d) => d.isAfter("2026-10-06")} />
-  <small>可预约未来 14 天，需提前 2 小时；预约计入 示例项目（project-042）额度。</small>
+        description: "预约设备日期：可约范围用 disabledDates 限定，规则前置写在辅助文本里。",
+        code: `import { DatePicker } from "@/components/ui/date-picker";
+import { Label } from "@/components/ui/label";
+
+<div className="grid gap-1.5">
+  <Label htmlFor="reserve-date">预约日期</Label>
+  <DatePicker
+    id="reserve-date"
+    defaultValue={new Date(2026, 8, 24)}
+    disabledDates={[{ before: new Date(2026, 8, 22) }, { after: new Date(2026, 9, 6) }]}
+    aria-describedby="reserve-date-help"
+  />
+  <p id="reserve-date-help" className="text-xs text-muted-foreground">
+    可预约 2026-09-22 至 2026-10-06，需提前 2 小时；预约计入 示例项目（project-042）额度。
+  </p>
 </div>`,
         preview: "date-picker/business",
       },
     ],
     props: [
-      { name: "value", type: "string | null", description: "受控值，格式 YYYY-MM-DD；null 表示未选择。" },
-      { name: "showTime", type: "boolean", default: "false", description: "同时选择时间；开启后面板需点“确定”才确认。" },
-      { name: "disabledDate", type: "(date: Date) => boolean", description: "禁用日期函数；被禁日期不可点且弱化显示。" },
-      { name: "format", type: "string", default: '"YYYY-MM-DD"', description: "展示格式，全平台统一，不逐页自定义。" },
-      { name: "placeholder", type: "string", description: "占位提示，写格式示例（例如：2026-09-22）。" },
-      { name: "disabled", type: "boolean", default: "false", description: "禁止打开面板；原因就近说明。" },
-      { name: "onChange", type: "(value: string | null) => void", description: "选中变化回调。" },
+      { name: "value", type: "Date | null", description: "受控值；null 表示未选择。" },
+      { name: "defaultValue", type: "Date | null", default: "null", description: "非受控初始值。" },
+      { name: "onValueChange", type: "(value: Date | null) => void", description: "点选日期或清除时触发。" },
+      { name: "placeholder", type: "string", default: '"选择日期"', description: "未选择时的占位文本。" },
+      { name: "format", type: "string", default: '"yyyy-MM-dd"', description: "展示格式（date-fns 语法），全站统一，不逐页自定义。" },
+      { name: "disabledDates", type: "Matcher | Matcher[]", description: "react-day-picker 匹配器：函数、{ before }、{ after }、日期数组等；命中日期不可点且弱化。" },
+      { name: "clearable", type: "boolean", default: "true", description: "有值时右侧显示清除按钮（aria-label=\"清除日期\"）。" },
+      { name: "disabled / invalid", type: "boolean", default: "false", description: "禁用触发器 / 校验失败时红色边框并设 aria-invalid。" },
+      { name: "id / aria-describedby / className", type: "string", description: "关联 Label 与辅助文本；className 作用于外层（控制宽度）。" },
     ],
     states: [
       { name: "default", note: "显示格式化日期或占位文本，前置日历图标。" },
-      { name: "hover", note: "触发器边框变为品牌色。" },
+      { name: "hover", note: "触发器背景变为 accent。" },
       { name: "focus-visible", note: "触发器 3px 外发光；面板打开后焦点在面板内可循环。" },
       { name: "pressed", note: "面板中日期按下时背景加深一档，时长 < 120ms。" },
       { name: "disabled", note: "灰底 + not-allowed，不展开面板；原因就近说明。" },
       { name: "loading", note: "不适用：日期数据本地生成，无加载态。", applicable: false },
       { name: "empty", note: "未选择时显示占位文本；清除后恢复占位。" },
-      { name: "error", note: "必选未选或手动输入非法时红色边框 + 就近文案，aria-invalid=\"true\"。" },
+      { name: "error", note: "必选未选时传 invalid：红色边框 + aria-invalid，并在下方就近给出文案。" },
       { name: "permission-limited", note: "无修改权限时只读展示日期文本，不渲染触发器。" },
       { name: "mobile", note: "日期单元触控区域 ≥40px，面板高度适配屏幕。" },
       { name: "dark-mode", note: "使用语义令牌自动适配，不单独覆盖颜色。" },
     ],
     interaction: [
-      "点击触发器打开面板，点选日期即确认（无时间部分时）。",
-      "disabledDate 命中的日期不可点且弱化显示，规则前置说明。",
-      "支持手动输入，失焦解析；非法输入回退为原值并提示。",
-      "showTime 时需点“确定”才提交值，避免半完成状态。",
+      "点击触发器打开面板，点选日期即确认并关闭；再次点选已选日期会清空。",
+      "disabledDates 命中的日期不可点且弱化显示，规则前置写在辅助文本。",
+      "有值时右侧显示清除按钮（clearable），清除后恢复占位。",
+      "不支持手动键入和时间选择；需要时间部分时与 Input type=\"time\" 组合。",
     ],
     keyboard: [
       "Tab 聚焦触发器，Enter / ↓ 打开面板。",
@@ -835,7 +940,7 @@ const selected = datasets.find((d) => d.value === value);
     accessibility: [
       "触发器使用 aria-haspopup=\"dialog\" 并同步 aria-expanded。",
       "日期网格 role=\"grid\"，日期单元同步 aria-selected，禁用日期 aria-disabled=\"true\"。",
-      "手动输入框必须关联标签（预约日期），不能只靠图标。",
+      "触发器必须关联 Label（预约日期），不能只靠日历图标；清除按钮 aria-label=\"清除日期\"。",
     ],
     responsive: [
       "小屏下面板占可用宽度，日期单元 ≥40px。",
@@ -848,11 +953,11 @@ const selected = datasets.find((d) => d.value === value);
     ],
     dos: [
       "禁选规则前置说明，并在面板内直接禁用。",
-      "允许手动输入并做容错解析。",
+      "可约范围用 disabledDates 表达，不在提交时才校验。",
       "时区与格式全局统一。",
     ],
     donts: [
-      "不要只给日历面板而不允许手动输入。",
+      "不要把禁选规则只写在报错里而不前置说明。",
       "不要等用户选中未来日期后提交时才报错（应在面板内禁选）。",
       "不要在单个页面自定义一套日期格式。",
     ],
@@ -874,20 +979,31 @@ const selected = datasets.find((d) => d.value === value);
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "第一次点击选开始，第二次点击选结束，悬停预览区间。",
-        code: `<DateRangePicker placeholder={["开始日期", "结束日期"]} />`,
+        description: "第一次点击选开始，第二次点击选结束，点“确定”生效；面板底部实时显示已选天数。",
+        code: `import { Badge } from "@/components/ui/badge";
+import { DateRangePicker, countRangeDays, type DateRange } from "@/components/ui/date-picker";
+
+const [range, setRange] = useState<DateRange | null>({
+  from: new Date(2026, 8, 1),
+  to: new Date(2026, 8, 22),
+});
+
+<DateRangePicker aria-label="创建时间" value={range} onValueChange={setRange} presets={[]} />
+<Badge tone="primary">已选 {countRangeDays(range)} 天</Badge>`,
         preview: "date-range-picker/basic",
       },
       {
         id: "presets",
         title: "快捷选项",
         kind: "variant",
-        description: "常用区间一键填充；快捷项语义必须写清是否含今天。",
-        code: `<DateRangePicker
+        description: "默认快捷项“近 7 天 / 近 30 天”（含今天）一键填充；可追加业务区间。",
+        code: `import { DateRangePicker, defaultDateRangePresets } from "@/components/ui/date-picker";
+
+<DateRangePicker
+  aria-label="统计区间"
   presets={[
-    { label: "最近 7 天", value: ["2026-09-16", "2026-09-22"] },
-    { label: "最近 30 天", value: ["2026-08-24", "2026-09-22"] },
-    { label: "本轮次", value: ["2026-09-01", "2026-09-22"] },
+    ...defaultDateRangePresets,
+    { label: "本轮次", range: { from: new Date(2026, 8, 1), to: new Date(2026, 8, 22) } },
   ]}
 />`,
         preview: "date-range-picker/presets",
@@ -897,52 +1013,73 @@ const selected = datasets.find((d) => d.value === value);
         title: "真实业务示例",
         kind: "business",
         description: "任务列表时间筛选：已选区间、命中数量与清除动作一并展示。",
-        code: `<DateRangePicker
-  value={["2026-09-01", "2026-09-22"]}
-  onChange={(range) => applyFilter({ projectId: "project-042", createdAt: range })}
-/>
-<span>已选 22 天 · 命中 18 个任务 · <a>清除筛选</a></span>`,
+        code: `import { Button } from "@/components/ui/button";
+import { DateRangePicker, countRangeDays, type DateRange } from "@/components/ui/date-picker";
+
+const [range, setRange] = useState<DateRange | null>({
+  from: new Date(2026, 8, 1),
+  to: new Date(2026, 8, 22),
+});
+
+<div className="flex flex-wrap items-center gap-2">
+  <DateRangePicker
+    aria-label="创建时间"
+    className="w-[300px]"
+    value={range}
+    onValueChange={(next) => {
+      setRange(next);
+      applyFilter({ projectId: "project-042", createdAt: next });
+    }}
+  />
+  {range && <Button variant="ghost" size="sm" onClick={() => setRange(null)}>清除筛选</Button>}
+</div>
+<p aria-live="polite">已选 {countRangeDays(range)} 天 · 命中 18 个任务 · 区间含开始与结束当日</p>`,
         preview: "date-range-picker/business",
       },
     ],
     props: [
-      { name: "value", type: "[string, string] | null", description: "受控区间 [开始, 结束]，格式 YYYY-MM-DD；null 表示未选择。" },
-      { name: "presets", type: "{ label: string; value: [string, string] }[]", description: "快捷区间；命名必须具体（最近 7 天，含今天）。" },
-      { name: "disabledDate", type: "(date: Date) => boolean", description: "禁用日期函数，对开始与结束同时生效。" },
-      { name: "placeholder", type: "[string, string]", default: '["开始日期", "结束日期"]', description: "两个输入各自的占位。" },
-      { name: "disabled", type: "boolean", default: "false", description: "禁止打开面板；原因就近说明。" },
-      { name: "onChange", type: "(value: [string, string] | null) => void", description: "区间确认后回调；中途点选不触发。" },
+      { name: "value", type: "DateRange | null", description: "受控区间 { from, to }（DateRange 来自 react-day-picker，组件文件重新导出）；null 表示未选择。" },
+      { name: "defaultValue", type: "DateRange | null", default: "null", description: "非受控初始区间。" },
+      { name: "onValueChange", type: "(value: DateRange | null) => void", description: "点“确定”、快捷项或清除时触发；面板内中途点选不触发。" },
+      { name: "presets", type: "{ label: string; range: DateRange | (() => DateRange) }[]", default: "近 7 天 / 近 30 天", description: "快捷区间，函数形式在点击时相对今天计算；传 [] 隐藏。" },
+      { name: "numberOfMonths", type: "number", default: "2", description: "面板同时显示的月份数；窄容器可设为 1。" },
+      { name: "disabledDates", type: "Matcher | Matcher[]", description: "禁用日期，对开始与结束同时生效。" },
+      { name: "placeholder", type: "string", default: '"开始日期 ~ 结束日期"', description: "未选择时的占位文本。" },
+      { name: "format", type: "string", default: '"yyyy-MM-dd"', description: "回显格式：2026-09-01 ~ 2026-09-22。" },
+      { name: "clearable", type: "boolean", default: "true", description: "有完整区间时右侧显示清除按钮。" },
+      { name: "disabled / invalid", type: "boolean", default: "false", description: "禁用触发器 / 校验失败时红色边框并设 aria-invalid。" },
+      { name: "countRangeDays(range)", type: "工具函数", description: "返回区间含首尾的天数，用于“已选 22 天”回显。" },
     ],
     states: [
-      { name: "default", note: "显示已选区间（开始 ~ 结束）或两个占位。" },
-      { name: "hover", note: "触发器边框变为品牌色；面板内悬停日期预览区间。" },
+      { name: "default", note: "显示已选区间（开始 ~ 结束）或占位“开始日期 ~ 结束日期”。" },
+      { name: "hover", note: "触发器背景变为 accent；面板内日期悬停高亮。" },
       { name: "focus-visible", note: "触发器 3px 外发光；面板打开后焦点在面板内可循环。" },
       { name: "pressed", note: "面板中日期按下时背景加深一档，时长 < 120ms。" },
       { name: "disabled", note: "灰底 + not-allowed，不展开面板；原因就近说明。" },
       { name: "loading", note: "不适用：日期数据本地生成，无加载态。", applicable: false },
-      { name: "empty", note: "未选择时显示开始 / 结束两个占位；清除后恢复。" },
-      { name: "error", note: "手动输入非法或结束早于开始时红色边框 + 就近文案，aria-invalid=\"true\"。" },
+      { name: "empty", note: "未选择时显示占位；面板底部提示“请选择开始日期”。清除后恢复。" },
+      { name: "error", note: "必选未选时传 invalid：红色边框 + aria-invalid，并就近给出文案。" },
       { name: "permission-limited", note: "无权限时只读展示区间文本，不渲染触发器。" },
-      { name: "mobile", note: "窄屏面板切换为单月视图，日期单元 ≥40px。" },
+      { name: "mobile", note: "窄屏传 numberOfMonths={1}；快捷项移到日历上方横排。" },
       { name: "dark-mode", note: "使用语义令牌自动适配，不单独覆盖颜色。" },
     ],
     interaction: [
-      "第一次点击选开始，第二次点击选结束；悬停实时预览区间。",
+      "第一次点击选开始，第二次点击选结束，点“确定”生效；底部实时显示“已选 N 天（含首尾）”。",
       "快捷项一键填充并关闭面板。",
       "跨月导航不清空已选的开始日期。",
-      "结束早于开始时自动交换并给出提示，不静默互换。",
+      "点击早于开始的日期会成为新的开始日期；点面板外关闭会放弃未确定的修改。",
     ],
     keyboard: [
-      "Tab 在开始 / 结束输入间切换，Enter / ↓ 打开面板。",
-      "面板内方向键移动，Enter 确认，Esc 关闭并保留已选。",
+      "Tab 聚焦触发器，Enter / Space 打开面板；Tab 在快捷项、日历与“清除 / 确定”按钮间移动。",
+      "日历内方向键移动日期，Enter 选中；Esc 关闭面板并保留已确认的区间。",
     ],
     accessibility: [
-      "开始与结束输入各自拥有标签（开始日期 / 结束日期）。",
-      "区间高亮同时用颜色与文字（已选 22 天）表达，不只依赖颜色。",
+      "触发器关联 Label 或 aria-label（创建时间）；清除按钮 aria-label=\"清除日期范围\"。",
+      "区间高亮同时用颜色与文字（已选 22 天，aria-live 播报）表达，不只依赖颜色。",
       "快捷项为真实按钮，可 Tab 到达。",
     ],
     responsive: [
-      "窄屏面板切换为单月视图。",
+      "窄屏传 numberOfMonths={1}，面板最大宽度为视口宽减 2rem。",
       "已选区间文本允许换行，不截断开始日期。",
     ],
     content: [
@@ -1641,23 +1778,41 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "点击或拖拽均可；接受的格式与大小上限前置写在区域内。",
-        code: `<Upload accept=".csv,.xlsx" maxSize={50 * 1024 * 1024}>
-  拖拽文件到此处，或点击选择
-</Upload>`,
+        description: "点击或拖拽均可；接受的格式与大小上限自动写在区域内，不符在选择时即拒绝。",
+        code: `import { Upload, UploadFileList, type UploadFileItem } from "@/components/ui/upload";
+
+const [files, setFiles] = useState<UploadFileItem[]>([]);
+
+<Upload
+  accept=".csv,.xlsx"
+  maxSize={50 * 1024 * 1024}
+  multiple
+  onFilesSelected={(picked) => startUpload(picked)} // 父组件发请求并回写 progress / status
+  onFilesRejected={(rejections) =>
+    setFiles((list) => [
+      ...list,
+      ...rejections.map((r) => ({ id: r.file.name, name: r.file.name, size: r.file.size, status: "error" as const, error: r.reason })),
+    ])
+  }
+/>
+<UploadFileList files={files} onRetry={retryUpload} onRemove={removeFile} />`,
         preview: "upload/basic",
       },
       {
         id: "progress",
         title: "进度与失败重试",
         kind: "state",
-        description: "逐文件展示进度与百分比；失败文件给出具体原因并可单独重试。",
-        code: `<Upload.FileList
+        description: "逐文件展示进度与百分比；失败文件给出具体原因并可单独重试，上传中可取消。",
+        code: `import { UploadFileList } from "@/components/ui/upload";
+
+<UploadFileList
   files={[
-    { name: "cycle_data_20260901.csv", size: "18.2 MB", status: "uploading", percent: 72 },
-    { name: "notes_final(2).xlsx", size: "61 MB", status: "error", reason: "超过 50 MB 上限" },
+    { id: "f1", name: "cycle_data_20260901.csv", size: 19084492, status: "uploading", progress: 72 },
+    { id: "f2", name: "notes_final(2).xlsx", size: 63963136, status: "error", error: "超过 50.0 MB 上限（61.0 MB），未开始上传" },
+    { id: "f3", name: "impedance_run-28003.csv", size: 2411724, status: "success" },
   ]}
-  onRetry={(file) => retry(file)}
+  onRetry={(file) => retryUpload(file)}
+  onRemove={(file) => removeFile(file)}
 />`,
         preview: "upload/progress",
       },
@@ -1666,28 +1821,41 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
         title: "真实业务示例",
         kind: "business",
         description: "数据导入语义：原始文件不可变保留，解析产物单独存储，解析失败可重新解析。",
-        code: `<Upload
+        code: `import { FileText } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Upload, UploadFileList } from "@/components/ui/upload";
+
+<Upload
+  layout="inline"
   accept=".csv,.xlsx"
   maxSize={50 * 1024 * 1024}
-  keepOriginal
-  onUploaded={(file) => createDataset({ projectId: "project-042", source: file })}
->
-  导入仪器原始数据
-</Upload>
-<Alert type="info">
-  原始文件将不可变保留，与解析产物分开存储；解析失败可重新解析，不覆盖原始文件。
+  title="导入仪器原始数据"
+  description=".csv / .xlsx · 单个 ≤ 50 MB"
+  onFilesSelected={(picked) => importRawFiles({ projectId: "project-042", files: picked })}
+  onFilesRejected={showRejections}
+/>
+<UploadFileList files={files} onRetry={retryUpload} onRemove={removeFile} />
+<Alert variant="success">
+  <FileText className="size-4" />
+  <AlertTitle>原始文件将不可变保留</AlertTitle>
+  <AlertDescription>
+    原始文件与解析产物分开存储；解析失败可重新解析，不覆盖原始文件。
+  </AlertDescription>
 </Alert>`,
         preview: "upload/business",
       },
     ],
     props: [
-      { name: "accept", type: "string", required: true, description: "允许的类型（扩展名 + MIME）；不符在选择时即拒绝。" },
-      { name: "maxSize", type: "number", required: true, description: "单文件字节上限；超限拒绝并在提示中写明上限。" },
-      { name: "multiple", type: "boolean", default: "false", description: "允许一次选择多个文件。" },
-      { name: "keepOriginal", type: "boolean", default: "true", description: "原始文件不可变保留；解析产物与原始文件分开存储，数据导入场景必须为 true。" },
-      { name: "onProgress", type: "(file: UploadFile, percent: number) => void", description: "逐文件进度回调。" },
-      { name: "onChange", type: "(files: UploadFile[]) => void", description: "文件状态变化回调（上传中 / 成功 / 失败）。" },
-      { name: "disabled", type: "boolean", default: "false", description: "禁止选择文件；上传中或达数量上限时自动禁用。" },
+      { name: "accept", type: "string", description: "Upload：允许的类型，扩展名（.csv）、MIME（text/csv）或通配（image/*），逗号分隔；不符在选择时即拒绝。" },
+      { name: "maxSize", type: "number", description: "Upload：单文件字节上限；超限拒绝，原因里写明上限与实际大小。" },
+      { name: "multiple", type: "boolean", default: "false", description: "Upload：允许一次选择 / 拖入多个文件；false 时只取第一个。" },
+      { name: "onFilesSelected", type: "(files: File[]) => void", description: "Upload：通过校验的文件。组件不发网络请求，由父组件上传并维护 UploadFileItem 状态。" },
+      { name: "onFilesRejected", type: "(rejections: { file: File; reason: string }[]) => void", description: "Upload：未通过校验的文件与可直接展示的中文原因。" },
+      { name: "title / description", type: "ReactNode", default: '"拖拽文件到此处，或点击选择" / 按 accept、maxSize 生成', description: "Upload：主文案与说明；说明经 aria-describedby 关联到上传区。" },
+      { name: "layout", type: '"default" | "inline"', default: '"default"', description: "Upload：default 为居中大区域；inline 为单行紧凑区，用于表单或侧栏。" },
+      { name: "disabled", type: "boolean", default: "false", description: "Upload：禁止选择与拖入（上传中、达数量上限或无写入权限时），原因写在 description。" },
+      { name: "files", type: "{ id; name; size?; status: \"uploading\" | \"success\" | \"error\"; progress?; error? }[]", required: true, description: "UploadFileList：文件状态，uploading 显示 Progress 与百分比，error 显示原因。" },
+      { name: "onRetry / onRemove", type: "(file: UploadFileItem) => void", description: "UploadFileList：失败重试；移除（上传中时为“取消上传”）。" },
     ],
     states: [
       { name: "default", note: "拖拽区 + 格式与上限说明常驻；点击区域任意位置打开文件选择。" },
@@ -1706,16 +1874,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
       "类型或大小不符在选择时即拒绝，不上传一半再失败。",
       "上传进度逐文件展示，支持取消与失败单独重试。",
       "上传完成后进入解析 / 预览步骤；原始文件单独保留、不可变。",
-      "同名文件给出选择：覆盖、保留两者或自动重命名。",
+      "同名文件由父组件决定覆盖、保留两者或自动重命名，并在文件项上说明。",
     ],
     keyboard: [
       "Tab 聚焦上传区，Enter / Space 打开文件选择。",
       "文件项的操作（重试、删除、取消）均可 Tab 到达并触发。",
     ],
     accessibility: [
-      "上传区使用按钮语义，并经 aria-describedby 指向格式与上限说明。",
-      "进度条使用 role=\"progressbar\" 并同步 aria-valuenow。",
-      "失败原因 role=\"alert\" 就近播报；文件列表每项可朗读名称、大小与状态。",
+      "上传区为 role=\"button\"（tabIndex 0），经 aria-describedby 指向格式与上限说明；隐藏的 file input 不进 Tab 序列。",
+      "进度条为 Radix Progress（role=\"progressbar\"，同步 aria-valuenow），旁边同时显示百分比文字。",
+      "失败原因 role=\"alert\" 就近播报；重试 / 移除按钮的 aria-label 带文件名（重试上传 xxx.csv）。",
     ],
     responsive: [
       "移动端拖拽降级为按钮，区域全宽。",
@@ -1757,68 +1925,82 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "占位文本写明可搜索的字段范围；页面级搜索支持 / 快捷键聚焦。",
-        code: `<SearchField placeholder="搜索数据集名称或编号" onSearch={handleSearch} />`,
+        description: "占位文本写明可搜索的字段范围；页面级搜索用 shortcut=\"/\" 支持 / 键聚焦。",
+        code: `import { SearchField } from "@/components/ui/search-field";
+
+<SearchField placeholder="搜索数据集名称或编号" shortcut="/" onSearch={handleSearch} />`,
         preview: "search-field/basic",
       },
       {
         id: "loading-clear",
         title: "搜索中与可清空",
         kind: "variant",
-        description: "搜索中右侧显示 spinner，输入不锁定；有值时提供一键清除。",
-        code: `<SearchField value="ds-118" loading allowClear onSearch={handleSearch} />`,
+        description: "loading 时右侧显示 spinner，输入不锁定；有值时提供一键清除。",
+        code: `import { SearchField } from "@/components/ui/search-field";
+
+<SearchField aria-label="搜索数据集" defaultValue="ds-118" loading clearable={false} />
+<SearchField aria-label="搜索任务" value={keyword} onValueChange={setKeyword} />`,
         preview: "search-field/loading-clear",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "任务列表搜索：防抖 300ms 即时过滤，空结果给出清除动作。",
-        code: `<SearchField
+        description: "任务列表搜索：debounce 300ms 后过滤，Enter 立即搜索，空结果给出清除动作。",
+        code: `import { SearchField } from "@/components/ui/search-field";
+
+<SearchField
   placeholder="搜索任务名称或编号"
+  value={input}
+  onValueChange={setInput}
   debounce={300}
+  loading={searching}
   onSearch={(kw) => filterRuns({ projectId: "project-042", keyword: kw })}
-  emptyText="没有匹配的任务"
-/>`,
+/>
+{runs.length === 0 && <p>没有匹配「{input}」的任务</p>}`,
         preview: "search-field/business",
       },
     ],
     props: [
-      { name: "value", type: "string", description: "受控关键词。" },
-      { name: "placeholder", type: "string", description: "占位提示，写明可搜范围（搜索任务名称或编号）。" },
-      { name: "debounce", type: "number", default: "300", description: "输入防抖毫秒数；不逐击键发请求。" },
-      { name: "loading", type: "boolean", default: "false", description: "搜索中右侧显示 spinner，输入保持可编辑。" },
-      { name: "allowClear", type: "boolean", default: "true", description: "有值时显示一键清除按钮。" },
-      { name: "shortcut", type: "string", description: "聚焦快捷键，页面级搜索约定为 /。" },
-      { name: "onSearch", type: "(keyword: string) => void", required: true, description: "防抖后或 Enter 时触发。" },
+      { name: "value / defaultValue", type: "string", default: '— / ""', description: "受控 / 非受控关键词。" },
+      { name: "onValueChange", type: "(value: string) => void", description: "每次输入变化（含清除）。" },
+      { name: "onSearch", type: "(value: string) => void", description: "Enter 时立即触发；设置 debounce 后停止输入也会触发。" },
+      { name: "debounce", type: "number", description: "防抖毫秒数，建议 300；不传则只在 Enter 时触发 onSearch，不逐击键请求。" },
+      { name: "loading", type: "boolean", default: "false", description: "搜索中右侧显示 spinner（含“正在搜索”读屏文本），输入保持可编辑。" },
+      { name: "clearable", type: "boolean", default: "true", description: "有值时显示清除按钮（aria-label=\"清除搜索\"）；Esc 同样清空。" },
+      { name: "onClear", type: "() => void", description: "清除后的额外处理。" },
+      { name: "shortcut", type: '"/" | "mod+k"', description: "聚焦快捷键并在右侧显示 Kbd 提示：页面级搜索用 /，全局入口用 ⌘K / Ctrl+K。" },
+      { name: "size", type: '"sm" | "default" | "lg"', default: '"default"', description: "高度 28 / 32 / 40px，与 Input、Button 尺寸对齐。" },
+      { name: "placeholder", type: "string", default: '"搜索"', description: "占位提示，写明可搜范围；未传 aria-label 时兼作可访问名称。" },
+      { name: "wrapperClassName", type: "string", description: "外层容器样式（宽度等）；className 作用于内部 input。" },
     ],
     states: [
       { name: "default", note: "放大镜图标 + 占位文本，占位写明可搜字段。" },
-      { name: "hover", note: "边框变为品牌色。" },
-      { name: "focus-visible", note: "品牌色边框 + 3px 外发光；快捷键聚焦后同样显示。" },
+      { name: "hover", note: "不改变外观；清除按钮悬停时背景变为 accent。" },
+      { name: "focus-visible", note: "整个容器 ring 边框与外发光；快捷键聚焦后同样显示并全选已有关键词。" },
       { name: "pressed", note: "不适用：搜索框无按下态。", applicable: false },
       { name: "disabled", note: "数据加载失败导致不可搜索时禁用并说明原因。" },
       { name: "loading", note: "搜索中右侧显示 spinner，输入不锁定，可继续修改关键词。" },
       { name: "empty", note: "无结果时给出空态（没有匹配的任务）与清除动作。" },
       { name: "error", note: "搜索服务失败用 Message / Alert 提示，保留已输入关键词。" },
       { name: "permission-limited", note: "无权限的对象不出现在结果中，也不提示其存在。" },
-      { name: "mobile", note: "高度 ≥40px，唤起搜索键盘（enterKeyHint=\"search\"）。" },
+      { name: "mobile", note: "触控场景用 size=\"lg\"（40px）；键盘回车键显示为“搜索”（enterKeyHint=\"search\"）。" },
       { name: "dark-mode", note: "使用语义令牌自动适配，不单独覆盖颜色。" },
     ],
     interaction: [
-      "输入防抖 ≥300ms 后触发；Enter 立即搜索。",
+      "设置 debounce（建议 300）后停止输入即触发 onSearch；Enter 立即搜索。",
       "清除按钮一键还原关键词与结果。",
-      "结果随关键词即时更新，命中片段高亮。",
-      "页面级搜索支持 / 快捷键聚焦。",
+      "结果随关键词即时更新；命中片段高亮由结果列表负责。",
+      "shortcut=\"/\" 时在非输入状态按 / 聚焦；shortcut=\"mod+k\" 时 ⌘K / Ctrl+K 聚焦。",
     ],
     keyboard: [
       "/ 聚焦搜索框（页面级场景）。",
-      "Enter 立即搜索；Esc 清空并失焦。",
-      "有建议列表时 ↓ 进入列表，Enter 选中。",
+      "Enter 立即搜索；Esc 有值时清空，无值时失焦。",
+      "需要建议列表时改用 Combobox 或 CommandDialog，SearchField 本身不带下拉。",
     ],
     accessibility: [
-      "使用 type=\"search\" 或 role=\"searchbox\"，并提供 aria-label。",
-      "结果数量变化通过 aria-live=\"polite\" 播报。",
+      "使用 type=\"search\"；未传 aria-label 时以 placeholder 作为可访问名称。",
+      "结果数量变化由结果区域 aria-live=\"polite\" 播报；loading 时有“正在搜索”读屏文本。",
       "清除按钮提供 aria-label（清除搜索）。",
     ],
     responsive: [
@@ -1858,59 +2040,118 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "常用条件外露不超过 3 个，其余收进“更多筛选”；有非默认条件时出现重置。",
-        code: `<FilterBar
-  filters={[
-    { key: "status", label: "状态", type: "select", options: statusOptions, primary: true },
-    { key: "createdAt", label: "创建时间", type: "date-range", primary: true },
-    { key: "owner", label: "负责人", type: "select", options: memberOptions },
-    { key: "instrument", label: "仪器", type: "select", options: instrumentOptions },
-  ]}
-  value={filters}
-  onChange={setFilters}
-/>`,
+        description: "FilterBar 是组合：SearchField + Select + DateRangePicker 横向排列，有非默认条件时出现“重置”。",
+        code: `import { RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DateRangePicker, type DateRange } from "@/components/ui/date-picker";
+import { SearchField } from "@/components/ui/search-field";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const [keyword, setKeyword] = useState("");
+const [status, setStatus] = useState("running");
+const [createdAt, setCreatedAt] = useState<DateRange | null>(null);
+const dirty = keyword !== "" || status !== "all" || createdAt !== null;
+
+<div role="search" aria-label="筛选条件" className="flex flex-wrap items-center gap-2">
+  <SearchField wrapperClassName="w-[220px]" placeholder="搜索任务名称或编号" value={keyword} onValueChange={setKeyword} />
+  <Select value={status} onValueChange={setStatus}>
+    <SelectTrigger aria-label="状态" className="w-[132px]">
+      <SelectValue />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="all">全部状态</SelectItem>
+      <SelectItem value="running">运行中</SelectItem>
+      <SelectItem value="queued">排队中</SelectItem>
+      <SelectItem value="finished">已完成</SelectItem>
+    </SelectContent>
+  </Select>
+  <DateRangePicker aria-label="创建时间" className="w-[260px]" placeholder="创建时间" value={createdAt} onValueChange={setCreatedAt} />
+  {dirty && (
+    <Button variant="ghost" onClick={() => { setKeyword(""); setStatus("all"); setCreatedAt(null); }}>
+      <RotateCcw />
+      重置
+    </Button>
+  )}
+</div>`,
         preview: "filter-bar/basic",
       },
       {
         id: "active-filters",
         title: "已选条件回显",
         kind: "variant",
-        description: "面板收起后，已选条件以 Tag 回显，可单个移除；重置一键恢复默认。",
-        code: `<FilterBar.ActiveFilters
-  value={{ status: "运行中", createdAt: "最近 7 天", project: "project-042" }}
-  onRemove={(key) => removeFilter(key)}
-  onReset={resetFilters}
-/>`,
+        description: "已选条件以 Badge 回显，内嵌移除按钮可单个移除；“重置”一键恢复默认。",
+        code: `import { RotateCcw, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+<div className="flex flex-wrap items-center gap-1.5">
+  <span className="text-sm text-muted-foreground">已选条件：</span>
+  {chips.map((chip) => (
+    <Badge key={chip.key} tone="primary" className="pr-0.5">
+      {chip.label}
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={\`移除筛选：\${chip.label}\`}
+        onClick={() => removeFilter(chip.key)}
+        className="size-4 text-primary hover:bg-primary/10 [&_svg]:size-3"
+      >
+        <X />
+      </Button>
+    </Badge>
+  ))}
+</div>
+<Button variant="ghost" size="sm" onClick={resetFilters}>
+  <RotateCcw />
+  重置
+</Button>`,
         preview: "filter-bar/active-filters",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "任务列表筛选：条件变化即时刷新表格与计数，无需“查询”按钮。",
-        code: `<FilterBar
-  filters={taskFilters}
-  value={filters}
-  onChange={(next) => {
-    setFilters(next);
-    loadRuns({ projectId: "project-042", ...next }); // 即时应用
-  }}
-/>
-<Table data={runs} />
-<span>共 3 个任务 · 已按“状态 = 运行中”筛选</span>`,
+        description: "任务列表筛选：条件变化即时刷新表格与计数，无需“查询”按钮；筛选无结果时说明是被筛选清空。",
+        code: `import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+// 上方筛选栏同“基础示例”；条件写入页面状态 / URL，变化即时应用
+const rows = runs.filter((run) => matchFilters(run, { keyword, status, createdAt }));
+
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>任务</TableHead>
+      <TableHead>状态</TableHead>
+      <TableHead className="text-right">创建时间</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {rows.map((run) => (
+      <TableRow key={run.id}>
+        <TableCell>{run.name}</TableCell>
+        <TableCell><Badge tone="success" dot>运行中</Badge></TableCell>
+        <TableCell className="text-right tabular-nums">{run.createdAt}</TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+<p aria-live="polite">共 {rows.length} 个任务 · 条件变化即时应用到列表与计数</p>`,
         preview: "filter-bar/business",
       },
     ],
     props: [
-      { name: "filters", type: "FilterField[]", required: true, description: "条件配置：key / label / type / options；primary 标记常用条件。" },
-      { name: "value", type: "Record<string, unknown>", required: true, description: "当前条件值；受控使用并写入 URL 或页面状态。" },
-      { name: "visibleCount", type: "number", default: "3", description: "外露的常用条件数量，其余收进“更多筛选”。" },
-      { name: "onChange", type: "(value: Record<string, unknown>) => void", required: true, description: "条件变化即时应用，无“确定 / 查询”按钮。" },
-      { name: "onReset", type: "() => void", description: "恢复默认条件；仅在有非默认条件时显示入口。" },
+      { name: "组合方式", type: "composition", description: "FilterBar 不是单独组件：用 role=\"search\" 的 flex 容器（flex-wrap gap-2）排列下列 registry 组件。" },
+      { name: "SearchField", type: "@/components/ui/search-field", description: "关键词条件（名称 / 编号），宽 200–240px。" },
+      { name: "Select", type: "@/components/ui/select", description: "枚举条件（状态、类型），SelectTrigger 设 aria-label 与固定宽度。" },
+      { name: "DateRangePicker", type: "@/components/ui/date-picker", description: "时间条件，带“近 7 天 / 近 30 天”快捷项。" },
+      { name: "Combobox", type: "@/components/ui/combobox", description: "选项多或需搜索的条件（负责人、仪器），可 multiple。" },
+      { name: "Button（重置）", type: "@/components/ui/button", description: "variant=\"ghost\" + RotateCcw 图标，文案固定“重置”；仅在有非默认条件时显示。" },
+      { name: "Badge（已选条件）", type: "@/components/ui/badge", description: "tone=\"primary\" 回显已选条件，内嵌 ghost icon Button 单个移除。" },
     ],
     states: [
-      { name: "default", note: "常用条件外露，其余收进“更多筛选”；有非默认条件时出现重置入口。" },
-      { name: "hover", note: "各控件自行处理；“更多筛选”按钮悬停时边框变为品牌色。" },
+      { name: "default", note: "常用条件外露（≤3 个），其余收进“更多筛选”Popover；有非默认条件时出现重置入口。" },
+      { name: "hover", note: "各控件自行处理。" },
       { name: "focus-visible", note: "Tab 顺序走外露条件 → 更多筛选 → 重置，控件各自外发光。" },
       { name: "pressed", note: "不适用：筛选栏容器无按下态，内部控件自行处理。", applicable: false },
       { name: "disabled", note: "无权限查看列表数据时整体禁用，并注明所需权限。" },
@@ -1923,7 +2164,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
     ],
     interaction: [
       "条件变化即时应用到列表与计数，无需“查询”按钮（重型查询除外）。",
-      "常用条件外露 ≤3 个，其余收进“更多筛选”面板。",
+      "常用条件外露 ≤3 个，其余收进“更多筛选”（Popover + 表单控件组合）。",
       "已选条件以 Tag 回显，可单个移除；重置一键恢复默认。",
       "筛选条件写入 URL 或页面状态，刷新、返回后保留。",
     ],

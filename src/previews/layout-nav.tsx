@@ -76,7 +76,10 @@ const stop = (event: MouseEvent<HTMLElement>) => event.preventDefault();
 function getPageItems(page: number, totalPages: number): (number | "ellipsis")[] {
   const items: (number | "ellipsis")[] = [];
   for (let item = 1; item <= totalPages; item += 1) {
-    if (item === 1 || item === totalPages || Math.abs(item - page) <= 1) items.push(item);
+    const edge = item === 1 || item === totalPages;
+    // 省略号只替代 ≥2 个页码：只隐藏 1 页时直接显示该页
+    const fillsGap = (item === 2 && page <= 4) || (item === totalPages - 1 && page >= totalPages - 3);
+    if (edge || fillsGap || Math.abs(item - page) <= 1) items.push(item);
     else if (items[items.length - 1] !== "ellipsis") items.push("ellipsis");
   }
   return items;
@@ -106,7 +109,7 @@ function PageNumbers({
           aria-label="上一页"
           aria-disabled={disabled || page === 1 || undefined}
           tabIndex={disabled || page === 1 ? -1 : undefined}
-          className={disabled || page === 1 ? lockClass : undefined}
+          className={cn("no-underline", (disabled || page === 1) && lockClass)}
           onClick={go(page - 1)}
         >
           <ChevronLeft className="size-4" />
@@ -123,7 +126,7 @@ function PageNumbers({
               href={`?page=${item}`}
               isActive={item === page}
               aria-disabled={disabled || undefined}
-              className={cn("font-mono", disabled && item !== page && lockClass)}
+              className={cn("font-mono no-underline", disabled && item !== page && lockClass)}
               onClick={go(item)}
             >
               {item}
@@ -137,7 +140,7 @@ function PageNumbers({
           aria-label="下一页"
           aria-disabled={disabled || page === totalPages || undefined}
           tabIndex={disabled || page === totalPages ? -1 : undefined}
-          className={disabled || page === totalPages ? lockClass : undefined}
+          className={cn("no-underline", (disabled || page === totalPages) && lockClass)}
           onClick={go(page + 1)}
         >
           <ChevronRight className="size-4" />
@@ -180,9 +183,9 @@ function ShellSider({ activeKey = "runs", withLocked }: { activeKey?: string; wi
 function ShellBreadcrumb() {
   return (
     <Breadcrumb aria-label="面包屑">
-      <BreadcrumbList className="text-xs sm:gap-1.5">
+      <BreadcrumbList className="m-0 list-none p-0 text-xs sm:gap-1.5">
         <BreadcrumbItem>
-          <BreadcrumbLink href="/projects" onClick={stop}>
+          <BreadcrumbLink className="no-underline" href="/projects" onClick={stop}>
             项目
           </BreadcrumbLink>
         </BreadcrumbItem>
@@ -315,7 +318,7 @@ function StackBusiness() {
       </div>
       <Alert variant="warning">
         <AlertTriangle className="size-4" />
-        <AlertTitle>2 条记录缺少测试温度</AlertTitle>
+        <AlertTitle className="m-0 text-sm font-semibold">2 条记录缺少测试温度</AlertTitle>
         <AlertDescription className="text-muted-foreground">第 18、42 行 · 修正后可继续导入</AlertDescription>
       </Alert>
       <div className="flex flex-wrap items-center gap-2">
@@ -533,9 +536,9 @@ function PageHeaderWithBreadcrumb() {
     <PageHeader
       breadcrumb={
         <Breadcrumb aria-label="面包屑">
-          <BreadcrumbList>
+          <BreadcrumbList className="m-0 list-none p-0">
             <BreadcrumbItem>
-              <BreadcrumbLink href="/projects" onClick={stop}>
+              <BreadcrumbLink className="no-underline" href="/projects" onClick={stop}>
                 项目
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -611,15 +614,15 @@ function BreadcrumbBasic() {
   return (
     <div className="demo-stack">
       <Breadcrumb aria-label="面包屑">
-        <BreadcrumbList>
+        <BreadcrumbList className="m-0 list-none p-0">
           <BreadcrumbItem>
-            <BreadcrumbLink href="/projects" onClick={stop}>
+            <BreadcrumbLink className="no-underline" href="/projects" onClick={stop}>
               项目
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/projects/project-042" onClick={stop}>
+            <BreadcrumbLink className="no-underline" href="/projects/project-042" onClick={stop}>
               示例项目
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -640,9 +643,9 @@ function BreadcrumbCollapsed() {
   return (
     <div className="demo-stack">
       <Breadcrumb aria-label="面包屑">
-        <BreadcrumbList>
+        <BreadcrumbList className="m-0 list-none p-0">
           <BreadcrumbItem>
-            <BreadcrumbLink href="/projects" onClick={stop}>
+            <BreadcrumbLink className="no-underline" href="/projects" onClick={stop}>
               项目
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -681,21 +684,21 @@ function BreadcrumbBusiness() {
   return (
     <div className="demo-stack">
       <Breadcrumb aria-label="面包屑">
-        <BreadcrumbList>
+        <BreadcrumbList className="m-0 list-none p-0">
           <BreadcrumbItem>
-            <BreadcrumbLink href="/projects" onClick={stop}>
+            <BreadcrumbLink className="no-underline" href="/projects" onClick={stop}>
               项目
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/projects/project-042" onClick={stop}>
+            <BreadcrumbLink className="no-underline" href="/projects/project-042" onClick={stop}>
               示例项目
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/projects/project-042/runs" onClick={stop}>
+            <BreadcrumbLink className="no-underline" href="/projects/project-042/runs" onClick={stop}>
               计算任务
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -706,9 +709,9 @@ function BreadcrumbBusiness() {
         </BreadcrumbList>
       </Breadcrumb>
       <Breadcrumb aria-label="面包屑（权限受限）">
-        <BreadcrumbList>
+        <BreadcrumbList className="m-0 list-none p-0">
           <BreadcrumbItem>
-            <BreadcrumbLink href="/projects" onClick={stop}>
+            <BreadcrumbLink className="no-underline" href="/projects" onClick={stop}>
               项目
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -806,7 +809,7 @@ function MenuBusiness() {
           <NavMenuItem href="/overview" icon={<Home />} active={selected === "overview"} onClick={pick("overview")}>
             项目概览
           </NavMenuItem>
-          <NavMenuItem href="/runs" icon={<FlaskConical />} active={selected === "runs"} onClick={pick("runs")} badge={<Badge tone="primary">3</Badge>}>
+          <NavMenuItem href="/runs" icon={<FlaskConical />} active={selected === "runs"} onClick={pick("runs")} badge={<Badge>3</Badge>}>
             计算任务
           </NavMenuItem>
           <NavMenuItem href="/members" icon={<Users />} active={selected === "members"} onClick={pick("members")}>
@@ -966,7 +969,7 @@ function StepsBusiness() {
       {current === 1 && (
         <Alert variant="danger">
           <XCircle className="size-4" />
-          <AlertTitle>校验未通过：2 条记录缺少必填字段</AlertTitle>
+          <AlertTitle className="m-0 text-sm font-semibold">校验未通过：2 条记录缺少必填字段</AlertTitle>
           <AlertDescription className="text-muted-foreground">修正后可从当前步骤继续，已上传的文件保留。</AlertDescription>
         </Alert>
       )}

@@ -284,12 +284,17 @@ const runs = [
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "标签 muted、值正文色，同组标签等宽对齐；ID 与数值使用等宽字体。",
-        code: `<Descriptions title="任务详情">
-  <Descriptions.Item label="任务 ID">run-28003</Descriptions.Item>
-  <Descriptions.Item label="所属项目">示例项目（project-042）</Descriptions.Item>
-  <Descriptions.Item label="状态"><Badge color="success">已完成</Badge></Descriptions.Item>
-  <Descriptions.Item label="耗时">286.4 秒</Descriptions.Item>
+        description: "标签 muted、值正文色，同组标签等宽对齐；ID 与数值用 mono 等宽字体。",
+        code: `import { Descriptions, DescriptionsItem } from "@/components/ui/descriptions";
+import { Badge } from "@/components/ui/badge";
+
+<Descriptions title="任务详情" className="max-w-lg">
+  <DescriptionsItem label="任务 ID" mono>run-28003</DescriptionsItem>
+  <DescriptionsItem label="所属项目">示例项目（project-042）</DescriptionsItem>
+  <DescriptionsItem label="状态">
+    <Badge tone="success" dot>已完成</Badge>
+  </DescriptionsItem>
+  <DescriptionsItem label="耗时" mono>286.4 秒</DescriptionsItem>
 </Descriptions>`,
         preview: "descriptions/basic",
       },
@@ -297,12 +302,21 @@ const runs = [
         id: "layout",
         title: "布局变体",
         kind: "variant",
-        description: "layout=\"vertical\" 标签在值上方，column 控制每行字段数，bordered 用于正式详情页。",
-        code: `<Descriptions title="数据集信息" column={2} layout="vertical" bordered>
-  <Descriptions.Item label="数据集 ID">ds-118</Descriptions.Item>
-  <Descriptions.Item label="版本">v3 · 2026-09-18 更新</Descriptions.Item>
-  <Descriptions.Item label="数据量">1,000 行 · 12 字段</Descriptions.Item>
-  <Descriptions.Item label="创建方式">UniLab 导入</Descriptions.Item>
+        description: "layout=\"vertical\" 标签在值上方，columns 控制每行字段数（窄屏自动降为 1），bordered 用于正式详情页；labelWidth 调整标签列宽。",
+        code: `import { Descriptions, DescriptionsItem } from "@/components/ui/descriptions";
+
+<Descriptions title="数据集信息" columns={2} layout="vertical" bordered>
+  <DescriptionsItem label="数据集 ID" mono>ds-118</DescriptionsItem>
+  <DescriptionsItem label="版本">v3 · 2026-09-18 更新</DescriptionsItem>
+  <DescriptionsItem label="数据量" mono>1,000 行 · 12 字段</DescriptionsItem>
+  <DescriptionsItem label="创建方式">UniLab 导入</DescriptionsItem>
+</Descriptions>
+
+{/* horizontal + 自定义标签宽度；空值自动显示 — */}
+<Descriptions columns={2} bordered labelWidth={96}>
+  <DescriptionsItem label="方法">PBE0</DescriptionsItem>
+  <DescriptionsItem label="截断能" mono>520 eV</DescriptionsItem>
+  <DescriptionsItem label="备注" span={2}>{null}</DescriptionsItem>
 </Descriptions>`,
         preview: "descriptions/layout",
       },
@@ -310,27 +324,34 @@ const runs = [
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "数据驱动写法；质量状态字段跨两列展示，ID 旁提供复制操作。",
-        code: `<Descriptions
-  title="数据集 ds-118"
-  column={2}
-  items={[
-    { label: "数据集 ID", children: "ds-118" },
-    { label: "所属项目", children: "示例项目（project-042）" },
-    { label: "版本", children: "v3 · 2026-09-18 更新" },
-    { label: "数据量", children: "1,000 行 · 12 字段" },
-    { label: "质量状态", children: <Badge color="warning">3 行缺少密度字段</Badge>, span: 2 },
-  ]}
-/>`,
+        description: "数据集详情：两列布局，质量状态字段 span={2} 跨两列，数据集 ID 提供 copyable 复制按钮。",
+        code: `import { Descriptions, DescriptionsItem } from "@/components/ui/descriptions";
+import { Badge } from "@/components/ui/badge";
+
+<Descriptions title="数据集 ds-118" columns={2} labelWidth={80}>
+  <DescriptionsItem label="数据集 ID" mono copyable>ds-118</DescriptionsItem>
+  <DescriptionsItem label="所属项目">示例项目（project-042）</DescriptionsItem>
+  <DescriptionsItem label="版本">v3 · 2026-09-18 更新</DescriptionsItem>
+  <DescriptionsItem label="数据量">1,000 行 · 12 字段</DescriptionsItem>
+  <DescriptionsItem label="质量状态" span={2}>
+    <Badge tone="warning" dot>3 行缺少密度字段</Badge>
+  </DescriptionsItem>
+</Descriptions>`,
         preview: "descriptions/business",
       },
     ],
     props: [
-      { name: "title", type: "ReactNode", description: "区块标题，说明这组字段属于哪个对象。" },
-      { name: "column", type: "number | { xs?: number; sm?: number; md?: number }", default: "3", description: "每行字段数，窄屏自动降为 1。" },
-      { name: "layout", type: '"horizontal" | "vertical"', default: '"horizontal"', description: "horizontal 标签在左，vertical 标签在上。" },
-      { name: "bordered", type: "boolean", default: "false", description: "带边框的正式详情样式。" },
-      { name: "items", type: "Array<{ label: ReactNode; children: ReactNode; span?: number }>", description: "数据驱动写法，与 Item 子组件二选一；span 用于跨列。" },
+      { name: "title", type: "ReactNode", description: "Descriptions 区块标题（h4），同时作为 <dl> 的 aria-labelledby。" },
+      { name: "extra", type: "ReactNode", description: "Descriptions 标题行右侧附加内容，如链接按钮。" },
+      { name: "columns", type: "1 | 2 | 3 | 4", default: "1", description: "目标列数；手机单列，sm 起最多 2 列，lg 起达到目标列数。" },
+      { name: "layout", type: '"horizontal" | "vertical"', default: '"horizontal"', description: "horizontal 标签在左（窄屏自动上下排列），vertical 标签在上。" },
+      { name: "bordered", type: "boolean", default: "false", description: "带边框单元格；horizontal 时标签列为 muted 底色。" },
+      { name: "labelWidth", type: "number | string", default: "120", description: "horizontal 布局的标签列宽，数字按 px。" },
+      { name: "DescriptionsItem label", type: "ReactNode", required: true, description: "字段名（<dt>），名词短语，不带冒号。" },
+      { name: "DescriptionsItem span", type: "1 | 2 | 3 | 4", default: "1", description: "跨列数，自动收敛到 columns 以内；窄屏不跨列。" },
+      { name: "DescriptionsItem mono", type: "boolean", default: "false", description: "值使用等宽字体 + tabular-nums（ID、数值、时间）。" },
+      { name: "DescriptionsItem copyable", type: "boolean | string", description: "显示复制按钮：true 复制值的文本，字符串则复制该字符串；成功后图标变对勾 1.5 秒。" },
+      { name: "children（值）", type: "ReactNode", description: "值（<dd>）；null / undefined / 空字符串自动显示 —。" },
     ],
     states: [
       { name: "default", note: "标签 muted、值正文色，同组标签等宽对齐，行距一致。" },
@@ -342,7 +363,7 @@ const runs = [
       { name: "empty", note: "单个值为空显示 —；整组无数据时不渲染空壳，由页面级 Empty 承担。" },
       { name: "error", note: "取值失败的字段显示“加载失败 + 重试”，不影响其他字段。" },
       { name: "permission-limited", note: "无权限字段显示“无权限查看”，并说明所需权限。" },
-      { name: "mobile", note: "column 降为 1，标签与值上下排列（vertical）。" },
+      { name: "mobile", note: "手机宽度自动单列，horizontal 布局的标签与值改为上下排列。" },
       { name: "dark-mode", note: "使用语义令牌自动适配。" },
     ],
     interaction: [
@@ -394,54 +415,78 @@ const runs = [
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "数值大号字重，标题 muted，单位缩小一档。",
-        code: `<Statistic title="本周计算任务" value={128} suffix="个" />
-<Statistic title="平均成功率" value={86.4} precision={1} suffix="%" />
-<Statistic title="本周费用" value={1280.4} precision={2} prefix="¥" />`,
+        description: "数值大号等宽数字，标签 muted；prefix / suffix 缩小一档贴着数值，unit 弱化显示。",
+        code: `import { Statistic } from "@/components/ui/statistic";
+
+<div className="grid gap-3 sm:grid-cols-3">
+  <Statistic variant="card" label="本周计算任务" value={128} unit="个" />
+  <Statistic variant="card" label="平均成功率" value={86.4} precision={1} suffix="%" />
+  <Statistic variant="card" label="本周费用" value={1280.4} precision={2} prefix="¥" />
+</div>`,
         preview: "statistic/basic",
       },
       {
         id: "trend",
         title: "趋势变体",
         kind: "variant",
-        description: "趋势用箭头 + 文字 + 对比口径表达，不只靠红绿颜色。",
-        code: `<Statistic
-  title="平均耗时"
+        description: "趋势用箭头 + 文字 + 对比口径表达；goodDirection 决定涨跌哪个是好（绿）；loading 显示数值骨架。",
+        code: `import { Statistic } from "@/components/ui/statistic";
+
+<Statistic
+  variant="card"
+  label="平均耗时"
   value={286.4}
   precision={1}
-  suffix="秒"
+  unit="秒"
+  goodDirection="down"
   trend={{ value: "-12.3%", direction: "down", label: "较上周" }}
+  loading={isRefreshing}
 />
-<Statistic
-  title="失败任务"
-  value={6}
-  suffix="个"
-  trend={{ value: "+2", direction: "up", label: "较上周" }}
-/>`,
+{/* 数字趋势自动补正负号并推断方向；失败数上升为坏（红） */}
+<Statistic variant="card" label="失败任务" value={6} unit="个" goodDirection="down" trend={{ value: 2, label: "较上周" }} />
+<Statistic variant="card" label="成功率" value={86.4} precision={1} suffix="%" trend={{ value: 0, label: "较上周" }} />`,
         preview: "statistic/trend",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "项目概览统计组：写清统计周期，可点击的统计卡跳转到携带筛选的列表页。",
-        code: `<div className="stat-grid">
-  <Statistic title="计算任务" value={128} suffix="个" onClick={() => goRuns("project-042")} />
-  <Statistic title="成功率" value={86.4} precision={1} suffix="%" />
-  <Statistic title="费用" value={1280.4} precision={2} prefix="¥" />
-</div>
-<p>示例项目（project-042）· 统计周期 2026-09-15 – 2026-09-21</p>`,
+        description: "项目概览统计组：写清统计周期；可点击的统计卡用 <a> 包裹跳转到携带筛选的列表页；无数据显示 —。",
+        code: `import { Statistic } from "@/components/ui/statistic";
+import { Card } from "@/components/ui/card";
+
+const link =
+  "block rounded-lg border bg-card px-4 py-3 transition-shadow hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+<Card className="grid gap-3 p-4">
+  <div className="flex flex-wrap items-baseline justify-between gap-2">
+    <h4 className="text-base font-semibold">示例项目（project-042）· 近 7 天概览</h4>
+    <span className="text-xs text-muted-foreground">统计周期 2026-09-15 – 2026-09-21</span>
+  </div>
+  <div className="grid gap-3 sm:grid-cols-3">
+    <a href="/runs?project=project-042" className={link}>
+      <Statistic label="计算任务" value={128} unit="个" trend={{ value: 14, label: "较前 7 天" }} />
+    </a>
+    <a href="/runs?project=project-042&status=finished" className={link}>
+      <Statistic label="成功率" value={86.4} precision={1} suffix="%" trend={{ value: "+1.2%", direction: "up", label: "较前 7 天" }} />
+    </a>
+    <Statistic variant="card" label="费用" value={null} prefix="¥" />
+  </div>
+</Card>`,
         preview: "statistic/business",
       },
     ],
     props: [
-      { name: "title", type: "ReactNode", required: true, description: "指标名称，写清统计口径（范围、周期）。" },
-      { name: "value", type: "number | string", required: true, description: "数值，大数千分位由组件格式化。" },
-      { name: "precision", type: "number", description: "小数位数，同组指标保持一致。" },
-      { name: "prefix", type: "ReactNode", description: "前缀，如 ¥。" },
-      { name: "suffix", type: "ReactNode", description: "后缀单位，缩小一档展示。" },
-      { name: "trend", type: '{ value: string; direction: "up" | "down" | "flat"; label?: string }', description: "对比趋势，label 写清对比口径。" },
-      { name: "loading", type: "boolean", default: "false", description: "数值骨架条，标题保留。" },
+      { name: "label", type: "ReactNode", required: true, description: "指标名称，写清统计口径（范围、周期）。" },
+      { name: "value", type: "number | string | null", description: "数值；数字按 zh-CN 千分位格式化；null / undefined 显示 —。" },
+      { name: "precision", type: "number", description: "小数位数（数字值与数字趋势都生效），同组指标保持一致。" },
+      { name: "prefix / suffix", type: "ReactNode", description: "紧贴数值、缩小一档的前后缀，如 ¥、%。" },
+      { name: "unit", type: "ReactNode", description: "计量单位，弱化显示在数值后，如“个”“秒”。" },
+      { name: "trend", type: '{ value: number | string; direction?: "up" | "down" | "flat"; label?: ReactNode }', description: "对比趋势：箭头 + 数值 + 口径；数字自动补正负号并推断方向，含读屏方向文字。" },
+      { name: "goodDirection", type: '"up" | "down"', default: '"up"', description: "哪个方向是好：好为 success 色、坏为 danger 色，持平为 muted。" },
+      { name: "loading", type: "boolean", default: "false", description: "数值与趋势替换为骨架条，标签保留，容器 aria-busy。" },
+      { name: "variant", type: '"plain" | "card"', default: '"plain"', description: "card 带边框卡片样式；可点击统计卡用 <a> 包裹 plain。" },
+      { name: "size", type: '"sm" | "default" | "lg"', default: '"default"', description: "数值字号 20 / 24 / 30px。" },
     ],
     states: [
       { name: "default", note: "数值大号字重，标题 muted，单位缩小一档，同组基线对齐。" },
@@ -504,83 +549,99 @@ const runs = [
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "节点竖向排列，时间使用等宽字体，连接线 1px。",
-        code: `<Timeline
-  items={[
-    { time: "09:12", title: "任务创建", description: "run-28003 已提交到队列" },
-    { time: "09:14", title: "开始执行", description: "分配到计算节点 node-07" },
-    { time: "09:19", title: "执行完成", description: "耗时 286.4 秒" },
-  ]}
-/>`,
+        description: "<ol> 竖向排列，时间使用等宽字体，节点间 1px 连接线；children 为描述。",
+        code: `import { Timeline, TimelineItem } from "@/components/ui/timeline";
+
+<Timeline className="max-w-md">
+  <TimelineItem time="09:12" title="任务创建">run-28003 已提交到队列</TimelineItem>
+  <TimelineItem time="09:14" title="开始执行">分配到计算节点 node-07</TimelineItem>
+  <TimelineItem time="09:19" title="执行完成">耗时 286.4 秒</TimelineItem>
+</Timeline>`,
         preview: "timeline/basic",
       },
       {
         id: "status",
         title: "状态节点",
         kind: "variant",
-        description: "success / error / processing 节点各有图标与颜色，失败节点提供日志入口。",
-        code: `<Timeline
-  items={[
-    { time: "09:12", title: "任务创建", status: "success" },
-    { time: "09:13", title: "参数校验失败", status: "error", description: "K 点网格与截断能冲突 · 查看日志" },
-    { time: "09:15", title: "修正参数并重新提交", status: "success" },
-    { time: "09:16", title: "重新校验中", status: "processing" },
-  ]}
-/>`,
+        description: "tone 决定圆点语义色（primary / success / warning / danger / neutral / agent），icon 替换圆点；失败节点提供日志入口，pending 表示进行中。",
+        code: `import { Sparkles, XCircle } from "lucide-react";
+import { Timeline, TimelineItem } from "@/components/ui/timeline";
+import { Button } from "@/components/ui/button";
+
+<Timeline>
+  <TimelineItem time="09:12" title="任务创建" tone="success" />
+  <TimelineItem time="09:13" title="参数校验失败" tone="danger" icon={<XCircle />}>
+    K 点网格与截断能冲突 · <Button variant="link" size="sm">查看日志</Button>
+  </TimelineItem>
+  <TimelineItem time="09:14" title="Agent 建议调整 K 点网格" tone="agent" icon={<Sparkles />} />
+  <TimelineItem time="09:15" title="修正参数并重新提交" tone="warning" />
+  <TimelineItem time="09:16" title="重新校验中" pending />
+</Timeline>`,
         preview: "timeline/status",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "run-28003 执行时间线：进行中的末节点实时更新，pending 表达“未完待续”。",
-        code: `<Timeline
-  pending="结果回传中…"
-  items={[
-    { time: "09:12", title: "任务创建", description: "run-28003 · 示例项目（project-042）" },
-    { time: "09:14", title: "开始执行", description: "数据集 ds-118 · 方法 PBE0" },
-    { time: "09:19", title: "计算完成", description: "耗时 286.4 秒 · 查看日志", status: "success" },
-  ]}
-/>`,
+        description: "run-28003 执行时间线：dateTime 写机器可读时间；末节点 pending 表达“未完待续”。",
+        code: `import { CheckCircle2 } from "lucide-react";
+import { Timeline, TimelineItem } from "@/components/ui/timeline";
+import { Button } from "@/components/ui/button";
+
+<Timeline>
+  <TimelineItem time="09:12" dateTime="2026-09-21T09:12" title="任务创建" tone="primary">
+    run-28003 · 示例项目（project-042）
+  </TimelineItem>
+  <TimelineItem time="09:14" dateTime="2026-09-21T09:14" title="开始执行" tone="primary">
+    数据集 ds-118 · 方法 PBE0
+  </TimelineItem>
+  <TimelineItem time="09:19" dateTime="2026-09-21T09:19" title="计算完成" tone="success" icon={<CheckCircle2 />}>
+    耗时 286.4 秒 · <Button variant="link" size="sm">查看日志</Button>
+  </TimelineItem>
+  <TimelineItem time="现在" title="结果回传中…" pending />
+</Timeline>`,
         preview: "timeline/business",
       },
     ],
     props: [
-      { name: "items", type: "TimelineItem[]", required: true, description: '节点数组：{ time, title, description?, status?, icon? }。' },
-      { name: "status", type: '"default" | "success" | "warning" | "error" | "processing"', description: "节点状态，决定图标与颜色；在单个 item 上设置。" },
-      { name: "pending", type: "ReactNode | boolean", default: "false", description: "末尾的进行中占位，表达“未完待续”。" },
-      { name: "reverse", type: "boolean", default: "false", description: "最新事件在上，仅用于监控类场景。" },
-      { name: "mode", type: '"left" | "alternate"', default: '"left"', description: "节点布局；窄屏强制 left。" },
+      { name: "Timeline", type: "OlHTMLAttributes<HTMLOListElement>", required: true, description: "<ol> 容器，按先后顺序放 TimelineItem；倒序（最新在上）由业务自行排列。" },
+      { name: "title", type: "ReactNode", required: true, description: "TimelineItem 事件标题，完成态动词短语。" },
+      { name: "time", type: "ReactNode", description: "显示时间（<time>，等宽字体），位于标题右侧，窄屏换行。" },
+      { name: "dateTime", type: "string", description: "机器可读时间，写入 <time dateTime>。" },
+      { name: "tone", type: '"neutral" | "primary" | "success" | "warning" | "danger" | "agent"', default: '"neutral"', description: "节点语义色（圆点背景 / 图标颜色）。" },
+      { name: "icon", type: "ReactNode", description: "替换圆点的图标（lucide），颜色跟随 tone；状态不只靠颜色时使用。" },
+      { name: "pending", type: "boolean", default: "false", description: "进行中节点：旋转指示 + 弱化标题 + 读屏“（进行中）”，内容区 aria-live=\"polite\"。" },
+      { name: "children", type: "ReactNode", description: "描述文字或链接（muted 小号）。" },
     ],
     states: [
       { name: "default", note: "节点竖向排列，时间等宽字体，连接线 1px，节点间距一致。" },
-      { name: "hover", note: "可展开节点整行 hover 高亮；纯展示节点无 hover。" },
-      { name: "focus-visible", note: "节点内的链接与展开按钮有品牌色焦点环。" },
-      { name: "pressed", note: "可展开节点按压有短暂反馈，时长 < 120ms。" },
+      { name: "hover", note: "节点本身无 hover；节点内的链接按钮各自有 hover。" },
+      { name: "focus-visible", note: "节点内的链接按钮有品牌色焦点环。" },
+      { name: "pressed", note: "不适用：节点不可按压，按压反馈由节点内按钮承担。", applicable: false },
       { name: "disabled", note: "不适用：展示型组件无禁用态；不可交互的节点本就不渲染控件。", applicable: false },
-      { name: "loading", note: "processing 节点显示旋转指示并实时更新，其余节点不受影响。" },
+      { name: "loading", note: "pending 节点显示旋转指示并实时更新，其余节点不受影响。" },
       { name: "empty", note: "无事件显示 Empty“暂无记录”，不渲染一条空轴线。" },
-      { name: "error", note: "error 节点红色图标 + 错误摘要 + 查看日志入口。" },
+      { name: "error", note: "tone=\"danger\" + XCircle 图标 + 错误摘要 + 查看日志入口。" },
       { name: "permission-limited", note: "无权限事件脱敏为“无权限查看该事件”，时间点保留。" },
-      { name: "mobile", note: "统一左对齐单列，时间移到标题上方。" },
+      { name: "mobile", note: "始终左对齐单列；时间跟在标题后，空间不足时自动换行。" },
       { name: "dark-mode", note: "使用语义令牌自动适配。" },
     ],
     interaction: [
-      "节点可展开查看详情（日志摘要、参数快照）。",
-      "进行中的最新节点自动滚动进入视野并实时更新。",
-      "节点内的操作（查看日志）不触发展开/收起。",
+      "需要查看详情（日志摘要、参数快照）时，在描述里放链接按钮或配合 Collapsible，节点本身不可点击。",
+      "进行中的最新节点（pending）实时更新；新节点出现时由业务滚动进入视野。",
+      "节点内的操作（查看日志）用 Button variant=\"link\"，不超过 1 个。",
     ],
     keyboard: [
-      "可展开节点 Tab 聚焦，Enter / Space 展开或收起。",
+      "时间线本身不进入 Tab 序列；节点内的链接按钮可 Tab 到达。",
       "节点内的链接按视觉顺序逐个到达。",
     ],
     accessibility: [
       "使用 ol / li 语义表达先后顺序。",
       "状态不只靠颜色：图标 + 文字同时表达。",
-      "进行中节点 aria-live=\"polite\" 节流播报关进度变化。",
+      "pending 节点内容区 aria-live=\"polite\"，并带读屏文字“（进行中）”。",
     ],
     responsive: [
-      "窄屏统一为左对齐单列，时间移到标题上方。",
+      "始终左对齐单列，窄屏时间自动换到标题下一行。",
       "时间戳允许换行，不截断。",
     ],
     content: [
@@ -615,75 +676,106 @@ const runs = [
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "点击箭头展开/收起，点击标题选中节点。",
-        code: `<Tree
-  data={[
-    {
-      key: "project-042",
-      title: "示例项目（project-042）",
-      children: [
-        { key: "ds-118", title: "数据集 ds-118" },
-        { key: "ds-121", title: "数据集 ds-121" },
-      ],
-    },
-  ]}
-  defaultExpandedKeys={["project-042"]}
-/>`,
+        description: "点击箭头展开 / 收起，点击行选中；键盘 ↑↓ 移动、→ 展开、← 收起、Enter 选中。",
+        code: `import { Database, FileText, FolderOpen } from "lucide-react";
+import { Tree, type TreeNode } from "@/components/ui/tree";
+
+const projectTree: TreeNode[] = [
+  {
+    id: "project-042",
+    label: "示例项目（project-042）",
+    icon: <FolderOpen />,
+    children: [
+      {
+        id: "ds-118",
+        label: "数据集 ds-118",
+        icon: <Database />,
+        meta: "1,000 行",
+        children: [
+          { id: "ds-118/structure", label: "structure.cif", icon: <FileText />, meta: "48 KB" },
+          { id: "ds-118/params", label: "params.json", icon: <FileText />, meta: "2 KB" },
+        ],
+      },
+      { id: "ds-121", label: "数据集 ds-121", icon: <Database />, meta: "320 行" },
+    ],
+  },
+];
+
+<Tree aria-label="项目目录" data={projectTree} defaultExpanded={["project-042"]} />`,
         preview: "tree/basic",
       },
       {
         id: "selectable",
         title: "勾选模式",
         kind: "variant",
-        description: "checkable 开启复选，父子勾选联动，父级半选态明确。",
-        code: `<Tree
+        description: "checkable 显示三态复选框：父子联动，部分子级选中时父级半选；checked 只记录叶子 ID。",
+        code: `import { useState } from "react";
+import { Tree } from "@/components/ui/tree";
+
+const [checked, setChecked] = useState<string[]>(["ds-118/structure"]);
+
+<Tree
+  aria-label="选择输入文件"
   checkable
-  defaultExpandedKeys={["project-042"]}
-  defaultCheckedKeys={["ds-118"]}
-  onCheck={(keys) => setDatasetKeys(keys)}
   data={projectTree}
-/>`,
+  defaultExpanded={["project-042", "ds-118"]}
+  checked={checked}
+  onCheckedChange={setChecked}
+/>
+<p>已选 {checked.length} 项</p>`,
         preview: "tree/selectable",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "项目目录树：选中高亮，无权限节点显示锁图标，超过 50 个节点提供搜索定位。",
-        code: `<Tree
-  data={[
-    {
-      key: "project-042",
-      title: "示例项目（project-042）",
-      children: [
-        { key: "ds-118", title: "数据集 ds-118 · 1,000 行" },
-        { key: "ds-121", title: "数据集 ds-121 · 320 行" },
-        { key: "ds-130", title: "数据集 ds-130", disabled: true },
-      ],
-    },
-  ]}
-  selectedKeys={selected}
-  onSelect={(keys) => setSelected(keys)}
+        description: "项目目录树：受控选中高亮；无权限节点 disabled + 锁图标 + “无权限”文字，可聚焦但不可选中。",
+        code: `import { useState } from "react";
+import { Database, FolderOpen, Lock } from "lucide-react";
+import { Tree, type TreeNode } from "@/components/ui/tree";
+
+const data: TreeNode[] = [
+  {
+    id: "project-042",
+    label: "示例项目（project-042）",
+    icon: <FolderOpen />,
+    children: [
+      { id: "ds-118", label: "数据集 ds-118", icon: <Database />, meta: "1,000 行" },
+      { id: "ds-121", label: "数据集 ds-121", icon: <Database />, meta: "320 行" },
+      { id: "ds-130", label: "数据集 ds-130", icon: <Lock />, meta: "无权限", disabled: true },
+    ],
+  },
+];
+
+const [selected, setSelected] = useState<string | null>("ds-118");
+
+<Tree
+  aria-label="项目目录"
+  data={data}
+  defaultExpanded={["project-042"]}
+  selected={selected}
+  onSelectedChange={(id) => setSelected(id)}
 />`,
         preview: "tree/business",
       },
     ],
     props: [
-      { name: "data", type: "TreeNode[]", required: true, description: "节点数组：{ key, title, children?, disabled?, icon? }。" },
-      { name: "checkable", type: "boolean", default: "false", description: "复选模式，父子勾选联动。" },
-      { name: "selectable", type: "boolean", default: "true", description: "点击标题单选高亮。" },
-      { name: "defaultExpandedKeys", type: "string[]", description: "默认展开的节点 key。" },
-      { name: "onSelect", type: "(keys: string[], node: TreeNode) => void", description: "单选回调，回传 key 与节点信息。" },
-      { name: "onCheck", type: "(keys: string[]) => void", description: "勾选回调，checkable 时可用。" },
-      { name: "loading", type: "boolean", default: "false", description: "异步加载子级时显示节点级 spinner。" },
+      { name: "data", type: "TreeNode[]", required: true, description: "节点数组：{ id, label, icon?, meta?, children?, disabled? }；meta 为右侧次级信息。" },
+      { name: "aria-label", type: "string", required: true, description: "树的可访问名称（role=\"tree\"）。" },
+      { name: "expanded / defaultExpanded", type: "string[]", default: "[]", description: "受控 / 非受控展开的节点 ID；配合 onExpandedChange(ids)。" },
+      { name: "selected / defaultSelected", type: "string | null", default: "null", description: "受控 / 非受控单选节点；非 checkable 时点击或 Enter / Space 选中。" },
+      { name: "onSelectedChange", type: "(id: string, node: TreeNode) => void", description: "选中回调；disabled 节点不会触发。" },
+      { name: "checkable", type: "boolean", default: "false", description: "显示三态复选框（aria-checked=true / false / mixed），父子联动；此时点击与 Space 勾选。" },
+      { name: "checked / defaultChecked", type: "string[]", default: "[]", description: "已勾选的叶子 ID；父级状态由子级推导，不需要写入。" },
+      { name: "onCheckedChange", type: "(leafIds: string[]) => void", description: "勾选变化回调，回传全部已勾选叶子 ID。" },
     ],
     states: [
       { name: "default", note: "缩进 16px/级，节点高 32px，展开图标、类型图标与文字对齐。" },
       { name: "hover", note: "节点整行 hover 高亮，不改变缩进。" },
       { name: "focus-visible", note: "节点焦点环可见，方向键导航时焦点位置明确。" },
       { name: "pressed", note: "展开按钮按下即触发，箭头旋转 90°，动画 160ms。" },
-      { name: "disabled", note: "禁用节点 opacity .45，不可勾选，原因在 Tooltip 说明。" },
-      { name: "loading", note: "异步加载子级时该节点显示 spinner；整树加载用骨架。" },
+      { name: "disabled", note: "disabled 节点文字弱化、不可选中 / 勾选，仍可聚焦（aria-disabled）；原因写在 meta 或 Tooltip。" },
+      { name: "loading", note: "组件无内置异步加载：整树加载用 Skeleton；懒加载子级时在 meta 放 Spinner size=\"sm\"。" },
       { name: "empty", note: "空数据显示 Empty“暂无目录”，不渲染空树。" },
       { name: "error", note: "子级加载失败原地显示“加载失败，点击重试”节点。" },
       { name: "permission-limited", note: "无权限节点显示锁图标与“无权限”，默认脱敏展示而不是隐藏。" },
@@ -742,47 +834,72 @@ const runs = [
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "点击面板头整行展开/收起，箭头方向指示当前状态。",
-        code: `<Collapse defaultActiveKeys={["params"]}>
-  <Collapse.Panel key="params" header="计算参数">
-    交换关联泛函 PBE0 · 截断能 520 eV · K 点 4×4×4
-  </Collapse.Panel>
-  <Collapse.Panel key="advanced" header="高级设置">
-    最大迭代步数 200 · 收敛阈值 1e-6
-  </Collapse.Panel>
-</Collapse>`,
+        description: "Accordion type=\"single\" collapsible：点击面板头整行展开 / 收起，箭头方向指示当前状态。",
+        code: `import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+<Accordion type="single" collapsible defaultValue="params" className="rounded-lg border bg-card px-4">
+  <AccordionItem value="params" className="last:border-b-0">
+    <AccordionTrigger className="py-3 text-base hover:no-underline">计算参数</AccordionTrigger>
+    <AccordionContent className="text-muted-foreground">
+      交换关联泛函 PBE0 · 截断能 520 eV · K 点 4×4×4
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="advanced" className="last:border-b-0">
+    <AccordionTrigger className="py-3 text-base hover:no-underline">高级设置</AccordionTrigger>
+    <AccordionContent className="text-muted-foreground">最大迭代步数 200 · 收敛阈值 1e-6</AccordionContent>
+  </AccordionItem>
+</Accordion>`,
         preview: "collapse/basic",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "手风琴模式 + extra 状态徽标：输入文件校验状态一目了然。",
-        code: `<Collapse accordion defaultActiveKeys={["input"]}>
-  <Collapse.Panel key="input" header="输入文件（3）" extra={<Badge color="success">已校验</Badge>}>
-    structure.cif · params.json · kpoints.conf
-  </Collapse.Panel>
-  <Collapse.Panel key="result" header="结果文件（2）" extra={<Badge color="neutral">待生成</Badge>}>
-    任务 run-28003 完成后生成
-  </Collapse.Panel>
-</Collapse>`,
+        description: "type=\"multiple\" 可同时展开多个面板；触发行内放状态 Badge，输入文件校验状态一目了然。",
+        code: `import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+
+<Accordion type="multiple" defaultValue={["input"]} className="rounded-lg border bg-card px-4">
+  <AccordionItem value="input" className="last:border-b-0">
+    <AccordionTrigger className="gap-3 py-3 text-base hover:no-underline">
+      <span className="flex flex-1 items-center gap-2">
+        输入文件（3）
+        <Badge tone="success" className="ml-auto">已校验</Badge>
+      </span>
+    </AccordionTrigger>
+    <AccordionContent className="font-mono text-muted-foreground">
+      structure.cif · params.json · kpoints.conf
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="result" className="last:border-b-0">
+    <AccordionTrigger className="gap-3 py-3 text-base hover:no-underline">
+      <span className="flex flex-1 items-center gap-2">
+        结果文件（2）
+        <Badge tone="neutral" className="ml-auto">待生成</Badge>
+      </span>
+    </AccordionTrigger>
+    <AccordionContent className="text-muted-foreground">任务 run-28003 完成后生成 output.json 与 report.pdf</AccordionContent>
+  </AccordionItem>
+</Accordion>`,
         preview: "collapse/business",
       },
     ],
     props: [
-      { name: "accordion", type: "boolean", default: "false", description: "手风琴模式，展开一个自动收起其他。" },
-      { name: "defaultActiveKeys", type: "string[]", description: "默认展开的面板 key。" },
-      { name: "bordered", type: "boolean", default: "true", description: "false 用于卡片内嵌的无边框变体。" },
-      { name: "header", type: "ReactNode", required: true, description: "Panel 的面板头，名词短语并标注数量。" },
-      { name: "extra", type: "ReactNode", description: "Panel 右侧附加内容（状态徽标），点击不触发展开。" },
-      { name: "collapsible", type: '"header" | "icon" | "disabled"', description: "Panel 的触发区域；disabled 禁止展开。" },
+      { name: "Accordion type", type: '"single" | "multiple"', required: true, description: "single 一次只展开一个（手风琴），multiple 可同时展开多个。" },
+      { name: "collapsible", type: "boolean", default: "false", description: "type=\"single\" 时允许再次点击收起当前面板。" },
+      { name: "defaultValue / value", type: "string | string[]", description: "默认 / 受控展开的面板 value（multiple 时为数组），配合 onValueChange。" },
+      { name: "AccordionItem value", type: "string", required: true, description: "面板唯一标识；disabled 禁止展开。" },
+      { name: "AccordionTrigger", type: "ButtonHTMLAttributes", required: true, description: "面板头（button + aria-expanded，Radix 处理 aria-controls 与 ↑↓ 键盘）；右侧自带箭头。" },
+      { name: "AccordionContent", type: "HTMLAttributes<HTMLDivElement>", description: "内容区（role=\"region\"），展开收起带高度动画；className 作用于内层。" },
+      { name: "外框", type: "组合", description: "Accordion 加 className=\"rounded-lg border bg-card px-4\"，最后一项 last:border-b-0；默认触发器 hover 下划线可用 hover:no-underline 关闭。" },
+      { name: "状态徽标", type: "组合", description: "无 extra 属性：在 AccordionTrigger 内用 <span className=\"flex flex-1\"> 包住标题和 <Badge className=\"ml-auto\">；触发行内不放按钮。" },
     ],
     states: [
       { name: "default", note: "面板头高 44px，箭头朝右；展开时箭头朝下。" },
       { name: "hover", note: "面板头整行 hover 背景变化。" },
       { name: "focus-visible", note: "面板头有品牌色焦点环。" },
       { name: "pressed", note: "面板头按下时背景再深一档，时长 < 120ms。" },
-      { name: "disabled", note: "禁用面板头 opacity .45，不允许展开，原因在 Tooltip 说明。" },
+      { name: "disabled", note: "AccordionItem disabled：面板头不可展开（Radix data-disabled），原因在邻近文案说明。" },
       { name: "loading", note: "面板内容异步加载时内容区显示骨架，面板头保持可用。" },
       { name: "empty", note: "不适用：无内容的面板不应渲染，由业务判断是否提供该面板。", applicable: false },
       { name: "error", note: "内容加载失败在面板内显示重试，不影响其他面板。" },
@@ -791,7 +908,7 @@ const runs = [
       { name: "dark-mode", note: "使用语义令牌自动适配。" },
     ],
     interaction: [
-      "点击面板头整行展开/收起；extra 区域的点击不触发展开。",
+      "点击面板头整行展开/收起；触发行内的状态 Badge 只做展示，不放可点击元素。",
       "手风琴模式展开一个面板时自动收起其他面板。",
       "详情页可将展开态写入 URL，分享后定位到同一面板。",
     ],
@@ -804,7 +921,7 @@ const runs = [
       "内容区 role=\"region\" 并与面板头关联。",
     ],
     responsive: [
-      "窄屏面板头允许换行，extra 移到第二行。",
+      "窄屏面板头允许换行，状态 Badge 保持在箭头左侧。",
       "触摸热区 ≥ 44px。",
     ],
     content: [
@@ -814,7 +931,7 @@ const runs = [
     dos: [
       "默认展开用户最常看的一个面板。",
       "面板头标注内容数量。",
-      "extra 放状态徽标，不放操作按钮组。",
+      "触发行内只放状态徽标，不放操作按钮组。",
     ],
     donts: [
       "不要把确认、付款、删除等关键动作藏进折叠面板。",
@@ -830,7 +947,7 @@ const runs = [
     category: "display",
     status: "beta",
     version: "0.1.0",
-    purpose: "以等宽字体展示代码与命令，支持语法高亮、行号与一键复制。",
+    purpose: "以等宽字体展示代码与命令，支持语言标签、行号、高亮行、换行切换与一键复制。",
     usage:
       "用于 API 调用示例、配置文件、命令行片段。结构化 JSON 的浏览用 JsonViewer；超长日志用日志查看器。超过 50 行的文件用文件预览，不用 CodeBlock。",
     keywords: ["code", "codeblock", "代码", "命令行", "高亮", "复制"],
@@ -839,49 +956,78 @@ const runs = [
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "命令行片段以 $ 开头表示提示符，复制内容不包含提示符。",
-        code: `<CodeBlock language="bash" showCopy>
-  $ datacore runs submit --project project-042 --dataset ds-118
-</CodeBlock>`,
+        description: "命令行片段以 $ 开头表示提示符，复制内容自动去掉提示符；onCopy 可接 toast 反馈。",
+        code: `import { CodeBlock } from "@/components/ui/code-block";
+import { toast } from "@/components/ui/sonner";
+
+<CodeBlock
+  language="bash"
+  code="$ datacore runs submit --project project-042 --dataset ds-118"
+  onCopy={() => toast.success("已复制命令")}
+/>`,
         preview: "code-block/basic",
       },
       {
         id: "highlight",
         title: "行号与高亮行",
         kind: "variant",
-        description: "超过 3 行显示行号；关键行用高亮行标记，配合行号文字说明。",
-        code: `<CodeBlock language="json" lineNumbers highlightLines={[4]} showCopy>
-  {
-    "projectId": "project-042",
-    "datasetId": "ds-118",
-    "method": "PBE0",
-    "maxSeconds": 300
-  }
-</CodeBlock>`,
+        description: "超过 3 行开启 showLineNumbers；highlightLines 标记关键行（浅底 + 左侧色条），并在标题写明行号。",
+        code: `import { CodeBlock } from "@/components/ui/code-block";
+
+const code = \`{
+  "projectId": "project-042",
+  "datasetId": "ds-118",
+  "method": "PBE0",
+  "maxSeconds": 300
+}\`;
+
+<CodeBlock
+  language="json"
+  title="params.json · 第 4 行需复核"
+  code={code}
+  showLineNumbers
+  highlightLines={[4]}
+/>`,
         preview: "code-block/highlight",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "API 示例中域名一律 example.com，凭证用 *** 占位。",
-        code: `<CodeBlock language="bash" title="查询任务状态" showCopy>
-  $ curl https://api.example.com/v1/runs/run-28003 \\
-      -H "Authorization: Bearer ***"
-</CodeBlock>`,
+        description: "API 示例中域名一律 example.com，凭证用 *** 占位；maxHeight 内部滚动，标题栏可切换自动换行。",
+        code: `import { CodeBlock } from "@/components/ui/code-block";
+import { toast } from "@/components/ui/sonner";
+
+const code = \`$ curl https://api.example.com/v1/runs/run-28003 \\\\
+    -H "Authorization: Bearer ***" \\\\
+    -H "Accept: application/json"
+$ curl https://api.example.com/v1/runs/run-28003/logs?tail=200 \\\\
+    -H "Authorization: Bearer ***"\`;
+
+<CodeBlock
+  language="bash"
+  title="查询任务状态与日志"
+  code={code}
+  maxHeight={120}
+  onCopy={() => toast.success("已复制命令（不含 $ 提示符）")}
+/>`,
         preview: "code-block/business",
       },
     ],
     props: [
-      { name: "language", type: "string", required: true, description: "高亮语言（bash / json / python …）。" },
-      { name: "title", type: "string", description: "代码块标题栏，说明用途或文件名。" },
-      { name: "showCopy", type: "boolean", default: "false", description: "右上角复制按钮，复制全文。" },
-      { name: "lineNumbers", type: "boolean", default: "false", description: "显示行号，超过 3 行建议开启。" },
-      { name: "highlightLines", type: "number[]", description: "需要强调的行号列表。" },
-      { name: "maxHeight", type: "number", description: "超过该高度内部纵向滚动，标题栏固定。" },
+      { name: "code", type: "string", required: true, description: "代码文本（按行渲染，不做语法高亮）。" },
+      { name: "language", type: "string", description: "语言标签（bash / json / python …），只做标注，显示在标题栏左侧。" },
+      { name: "title", type: "ReactNode", description: "标题栏文字，说明用途或文件名。" },
+      { name: "showLineNumbers", type: "boolean", default: "false", description: "显示行号（不参与复制与选中），超过 3 行建议开启。" },
+      { name: "highlightLines", type: "number[]", default: "[]", description: "需要强调的行号（从 1 开始）：浅底 + 左侧色条。" },
+      { name: "maxHeight", type: "number | string", description: "超过该高度代码区内部滚动，标题栏与复制按钮保持可见。" },
+      { name: "defaultWrap / showWrapToggle", type: "boolean", default: "false / true", description: "默认是否自动换行；标题栏换行切换按钮（aria-pressed）。" },
+      { name: "copyable", type: "boolean", default: "true", description: "显示复制按钮；成功后图标变对勾、文字“已复制”2 秒，并经 aria-live 播报。" },
+      { name: "copyText", type: "string", description: "自定义复制内容；默认复制全文并去掉每行开头的 \"$ \" 提示符。" },
+      { name: "onCopy", type: "(text: string) => void", description: "复制完成回调，可接 toast。" },
     ],
     states: [
-      { name: "default", note: "等宽字体 12.5px，代码主题随站点浅色/深色切换。" },
+      { name: "default", note: "等宽字体 13px / 行高 24px，标题栏 muted 底色；不做语法高亮，颜色随站点浅色/深色令牌切换。" },
       { name: "hover", note: "复制按钮常显于右上角；hover 时代码块边框加强。" },
       { name: "focus-visible", note: "复制按钮有品牌色焦点环。" },
       { name: "pressed", note: "复制按钮按下有按压反馈，成功后图标变为对勾 2 秒。" },
@@ -891,7 +1037,7 @@ const runs = [
       { name: "error", note: "不适用：静态展示无错误态；加载失败由页面级错误承担。", applicable: false },
       { name: "permission-limited", note: "含敏感配置的代码以脱敏占位行显示（apiKey: \"***\"），不展示真实值。" },
       { name: "mobile", note: "横向滚动保持缩进，不强制换行，字号不降低。" },
-      { name: "dark-mode", note: "使用暗色代码主题令牌，高亮对比度 ≥ 4.5:1。" },
+      { name: "dark-mode", note: "使用语义令牌自动适配；高亮行为 primary-soft 浅底 + primary 左侧色条。" },
     ],
     interaction: [
       "点击复制按钮复制全文，并用 Message 反馈“已复制”。",
@@ -903,7 +1049,7 @@ const runs = [
     ],
     accessibility: [
       "使用 pre / code 语义；复制按钮 aria-label=\"复制代码\"。",
-      "语法高亮对比度 ≥ 4.5:1。",
+      "不做语法高亮，正文用前景色保证对比度；行号 aria-hidden 且不参与复制。",
       "高亮行不只靠颜色：配合行号文字说明（“第 4 行”）。",
     ],
     responsive: [
@@ -916,7 +1062,7 @@ const runs = [
     ],
     dos: [
       "超过 3 行显示行号。",
-      "标注 language 获得正确高亮。",
+      "标注 language，让读者知道代码类型。",
       "提供复制按钮并反馈复制结果。",
     ],
     donts: [
@@ -942,9 +1088,18 @@ const runs = [
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "默认展开 1 层，点击箭头展开/收起子树。",
-        code: `<JsonViewer
-  data={{ runId: "run-28003", status: "finished", seconds: 286.4 }}
+        description: "defaultExpandDepth={1} 只展开第一层，点击箭头或“N 项”展开子树；值按类型着色。",
+        code: `import { JsonViewer } from "@/components/ui/json-viewer";
+
+<JsonViewer
+  data={{
+    runId: "run-28003",
+    status: "finished",
+    seconds: 286.4,
+    cached: false,
+    note: null,
+    params: { method: "PBE0", cutoff: 520 },
+  }}
   defaultExpandDepth={1}
 />`,
         preview: "json-viewer/basic",
@@ -953,53 +1108,60 @@ const runs = [
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "任务参数快照：支持复制节点值与节点路径，敏感字段一律脱敏。",
-        code: `<JsonViewer
-  data={{
-    runId: "run-28003",
-    project: { id: "project-042", name: "示例项目" },
-    params: { method: "PBE0", cutoff: 520, kpoints: [4, 4, 4] },
-    dataset: { id: "ds-118", version: 3 },
-    credential: "***",
-  }}
+        description: "任务参数快照：行内复制路径与复制值，maskKeys 中的敏感字段一律显示 ***。",
+        code: `import { JsonViewer } from "@/components/ui/json-viewer";
+import { toast } from "@/components/ui/sonner";
+
+<JsonViewer
+  data={snapshot}
   defaultExpandDepth={2}
-  enableCopy
-  enableCopyPath
-/>`,
+  copyPath
+  copyValue
+  maskKeys={["credential"]}
+  maxHeight={360}
+  onCopy={(text, kind) => toast.success(kind === "path" ? "已复制路径 " + text : "已复制值")}
+/>
+
+// snapshot 结构示例：
+// { runId: "run-28003", project: { id: "project-042", name: "示例项目" },
+//   params: { method: "PBE0", cutoff: 520, kpoints: [4, 4, 4] },
+//   dataset: { id: "ds-118", version: 3 }, credential: "…" }`,
         preview: "json-viewer/business",
       },
     ],
     props: [
-      { name: "data", type: "unknown", required: true, description: "要展示的 JSON 数据。" },
-      { name: "defaultExpandDepth", type: "number", default: "1", description: "默认展开层级，大对象不超过 2。" },
-      { name: "enableCopy", type: "boolean", default: "false", description: "hover 节点显示复制值按钮。" },
-      { name: "enableCopyPath", type: "boolean", default: "false", description: "点击键名复制节点路径（如 params.kpoints[2]）。" },
-      { name: "maxHeight", type: "number", description: "超过该高度内部纵向滚动。" },
+      { name: "data", type: "unknown", required: true, description: "要展示的 JSON 值（对象、数组或原始值）。" },
+      { name: "defaultExpandDepth", type: "number", default: "1", description: "默认展开层级；0 只显示根节点摘要，大对象不超过 2。" },
+      { name: "copyPath", type: "boolean", default: "false", description: "行内“复制路径”按钮（如 params.kpoints[2]），hover / 聚焦时显示，触屏常显。" },
+      { name: "copyValue", type: "boolean", default: "false", description: "行内“复制值”按钮；对象 / 数组复制格式化 JSON。" },
+      { name: "maskKeys", type: "string[]", default: "[]", description: "这些键名的值一律显示并复制为 ***，键名保留。" },
+      { name: "maxHeight", type: "number | string", description: "超过该高度内部滚动。" },
+      { name: "onCopy", type: '(text: string, kind: "path" | "value") => void', description: "复制完成回调，可接 toast。" },
     ],
     states: [
-      { name: "default", note: "键紫色、值按类型着色，等宽字体，缩进 14px/级。" },
-      { name: "hover", note: "节点行 hover 显示复制按钮；移动端常显。" },
+      { name: "default", note: "键名 agent 色；字符串 success、数字 primary、布尔 warning、null 斜体 muted；等宽字体，缩进 16px/级。" },
+      { name: "hover", note: "行 hover 浅底并显示复制按钮；触屏设备（hover: none）常显。" },
       { name: "focus-visible", note: "展开图标与复制按钮有品牌色焦点环。" },
-      { name: "pressed", note: "展开图标按下旋转 90°，时长 < 120ms。" },
+      { name: "pressed", note: "展开后箭头旋转 90°，过渡 120ms。" },
       { name: "disabled", note: "不适用：查看器无禁用态。", applicable: false },
       { name: "loading", note: "不适用：数据随页面骨架加载，无独立加载态。", applicable: false },
       { name: "empty", note: "空对象 / 空数组显示 {} / [] 占位，不渲染空节点。" },
-      { name: "error", note: "非法 JSON 显示解析错误与出错位置，不白屏。" },
+      { name: "error", note: "组件只接收已解析的值：字符串先 JSON.parse，失败时由业务用 Alert 显示错误位置，不渲染 JsonViewer。" },
       { name: "permission-limited", note: "敏感字段值显示 ***，键名保留，便于理解结构。" },
       { name: "mobile", note: "横向滚动保持缩进；操作按钮常显，不依赖 hover。" },
       { name: "dark-mode", note: "使用语义令牌，类型着色对比度 ≥ 4.5:1。" },
     ],
     interaction: [
       "点击箭头展开/收起子树；点击键名复制路径。",
-      "超长字符串默认截断 80 字符，点击展开全文。",
-      "大对象（> 1000 节点）开启虚拟滚动或分页加载。",
+      "超长字符串自动换行（break-all），不截断。",
+      "大对象（> 1000 节点）不要一次性交给 JsonViewer：先分页或只传需要的子树。",
     ],
     keyboard: [
       "展开按钮 Tab 聚焦，Enter / Space 切换。",
-      "树内支持方向键导航（同 Tree 键盘模式）。",
+      "复制按钮在行聚焦（focus-within）时显示，可 Tab 到达。",
     ],
     accessibility: [
-      "树结构使用 role=\"tree\" / \"treeitem\"，aria-expanded 标注。",
+      "展开按钮是原生 button，带 aria-expanded 与“展开 / 收起 键名”的 aria-label；层级用嵌套 ul / li 表达。",
       "类型着色不只靠颜色：null 与错误值同时有文本标记。",
     ],
     responsive: [
@@ -1013,7 +1175,7 @@ const runs = [
     dos: [
       "默认只展开 1–2 层。",
       "提供复制值与复制路径。",
-      "大对象开启虚拟滚动。",
+      "大对象只传需要的子树，并设置 maxHeight。",
     ],
     donts: [
       "不要把 JsonViewer 当正式详情页给普通用户。",
@@ -1038,54 +1200,91 @@ const runs = [
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "图标 + 文件名 + 大小 + 操作，操作按钮常显不依赖 hover。",
-        code: `<FileList
-  files={[
-    { id: "f-01", name: "structure.cif", size: "48 KB" },
-    { id: "f-02", name: "params.json", size: "2 KB" },
-  ]}
-  onDownload={(file) => download(file.id)}
-  onRemove={(file) => remove(file.id)}
-/>`,
+        description: "类型图标 + 文件名 + 大小 + 操作；操作用 ghost 图标按钮放在 actions，常显不依赖 hover。",
+        code: `import { Download, Trash2 } from "lucide-react";
+import { FileList, FileListItem } from "@/components/ui/file-list";
+import { Button } from "@/components/ui/button";
+
+function FileActions({ name }: { name: string }) {
+  return (
+    <>
+      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={"下载 " + name}>
+        <Download />
+      </Button>
+      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={"删除 " + name}>
+        <Trash2 />
+      </Button>
+    </>
+  );
+}
+
+<FileList>
+  <FileListItem name="structure.cif" size="48 KB" actions={<FileActions name="structure.cif" />} />
+  <FileListItem name="params.json" size="2 KB" actions={<FileActions name="params.json" />} />
+</FileList>`,
         preview: "file-list/basic",
       },
       {
         id: "states",
-        title: "上传中与失败",
+        title: "上传中、成功与失败",
         kind: "state",
-        description: "上传中显示进度与取消；失败行保留并给出重试与移除两个出口。",
-        code: `<FileList
-  files={[
-    { id: "f-03", name: "raw-data.csv", size: "1.2 MB", status: "uploading", percent: 62 },
-    { id: "f-04", name: "notes.pdf", size: "860 KB", status: "error", error: "格式不支持（仅支持 .cif / .json）" },
-  ]}
-  onCancel={(file) => cancelUpload(file.id)}
-  onRetry={(file) => retry(file.id)}
-/>`,
+        description: "uploading 显示 Progress 与百分比并可取消；success 标记“已上传”；error 行保留并给出重试与移除两个出口。",
+        code: `import { X } from "lucide-react";
+import { FileList, FileListItem } from "@/components/ui/file-list";
+import { Button } from "@/components/ui/button";
+
+<FileList>
+  <FileListItem name="raw-data.csv" size="1.2 MB" status="uploading" progress={62} onCancel={() => cancelUpload("raw-data.csv")} />
+  <FileListItem name="kpoints.conf" size="1 KB" status="success" />
+  <FileListItem
+    name="notes.pdf"
+    size="860 KB"
+    status="error"
+    error="格式不支持（仅支持 .cif / .json / .csv）"
+    onRetry={() => retry("notes.pdf")}
+    actions={
+      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="移除 notes.pdf">
+        <X />
+      </Button>
+    }
+  />
+</FileList>`,
         preview: "file-list/states",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "数据集 ds-118 附件清单：超过 maxVisible 折叠并显示总数。",
-        code: `<FileList
-  files={attachments}
-  maxVisible={3}
-  onDownload={(file) => download(file.id)}
-  onRemove={(file) => confirmRemove(file.id)}
-  emptyText="暂无附件，上传后在此展示"
-/>`,
+        description: "数据集 ds-118 附件清单：默认展示 3 个，超出折叠为“查看全部（N）”。",
+        code: `import { useState } from "react";
+import { FileList, FileListItem } from "@/components/ui/file-list";
+import { Button } from "@/components/ui/button";
+
+const [expanded, setExpanded] = useState(false);
+const visible = expanded ? attachments : attachments.slice(0, 3);
+
+<p className="text-xs text-muted-foreground">数据集 ds-118 · 附件（共 {attachments.length} 个）</p>
+<FileList>
+  {visible.map((file) => (
+    <FileListItem key={file.name} name={file.name} size={file.size} actions={<FileActions name={file.name} />} />
+  ))}
+</FileList>
+<Button variant="link" size="sm" onClick={() => setExpanded((v) => !v)}>
+  {expanded ? "收起" : "查看全部（" + attachments.length + "）"}
+</Button>`,
         preview: "file-list/business",
       },
     ],
     props: [
-      { name: "files", type: "FileItem[]", required: true, description: '文件数组：{ id, name, size, status?, percent?, error? }。' },
-      { name: "status", type: '"uploading" | "success" | "error"', description: "单个文件状态，uploading 需配合 percent。" },
-      { name: "onDownload", type: "(file: FileItem) => void", description: "下载回调；无权限时不渲染该按钮而显示“无权限”。" },
-      { name: "onRemove", type: "(file: FileItem) => void", description: "删除回调，触发前必须经 Popconfirm 确认。" },
-      { name: "maxVisible", type: "number", description: "超过该数量折叠为“查看全部（N）”。" },
-      { name: "emptyText", type: "ReactNode", description: "空态文案，引导上传。" },
+      { name: "FileList", type: "HTMLAttributes<HTMLUListElement>", required: true, description: "<ul> 容器，行间距 8px；折叠 / 空态由业务组合。" },
+      { name: "name", type: "string", required: true, description: "FileListItem 文件名（含扩展名）；超长时截断主体、保留扩展名，完整名在 title。" },
+      { name: "size", type: "string", description: "已格式化的大小，如 “48 KB”。" },
+      { name: "status", type: '"idle" | "uploading" | "success" | "error"', default: '"idle"', description: "uploading 显示进度条与百分比；success 显示“已上传”；error 换成警告图标并显示原因。" },
+      { name: "progress", type: "number", default: "0", description: "上传进度 0–100（Progress，role=\"progressbar\"）。" },
+      { name: "error", type: "ReactNode", description: "失败原因（role=\"alert\"），说人话。" },
+      { name: "onRetry / onCancel", type: "() => void", description: "提供时分别在 error 显示“重试”、在 uploading 显示“取消”按钮。" },
+      { name: "actions", type: "ReactNode", description: "右侧操作区：下载、删除等 ghost 图标按钮（写 aria-label）；删除前用 Popconfirm 确认。" },
+      { name: "icon", type: "ReactNode", description: "自定义类型图标；默认按扩展名推断（json / csv / 图片 / 压缩包 / 代码 / 文本）。" },
     ],
     states: [
       { name: "default", note: "图标 + 文件名 + 大小 + 操作，行高 40px。" },
@@ -1107,7 +1306,7 @@ const runs = [
     ],
     keyboard: [
       "行内操作按视觉顺序进入 Tab 序列。",
-      "焦点位于上传中行时，Esc 请求取消上传。",
+      "上传中行的“取消”按钮与失败行的“重试”按钮可 Tab 到达，aria-label 带文件名。",
     ],
     accessibility: [
       "文件状态有文字表达，不只靠图标颜色。",
@@ -1149,75 +1348,119 @@ const runs = [
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "四种语义类型，图标 + 文字同时表达，不只靠颜色。",
-        code: `<Alert type="info" title="计算任务将于今晚 22:00 排队执行" />
-<Alert type="success" title="数据集 ds-118 校验通过" />
-<Alert type="warning" title="3 行缺少密度字段" description="缺失行将以项目默认值填充，可在导入预览中逐行修改。" />
-<Alert type="error" title="任务 run-28002 执行失败" description="K 点网格与截断能设置冲突，请检查参数后重试。" />`,
+        description: "info / success / warning / danger 四种语义变体，图标 + 标题 + 描述同时表达，不只靠颜色。",
+        code: `import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+<Alert variant="info" role="status">
+  <Info className="size-4" />
+  <AlertTitle className="mt-0 text-base font-semibold">计算任务将于今晚 22:00 排队执行</AlertTitle>
+  <AlertDescription className="text-muted-foreground">示例项目（project-042）· 队列预计等待 20 分钟</AlertDescription>
+</Alert>
+<Alert variant="success" role="status">
+  <CheckCircle2 className="size-4" />
+  <AlertTitle className="mt-0 text-base font-semibold">数据集 ds-118 校验通过</AlertTitle>
+  <AlertDescription className="text-muted-foreground">1,000 行全部通过字段校验</AlertDescription>
+</Alert>
+<Alert variant="warning" role="status">
+  <AlertTriangle className="size-4" />
+  <AlertTitle className="mt-0 text-base font-semibold">3 行缺少密度字段</AlertTitle>
+  <AlertDescription className="text-muted-foreground">缺失行将以项目默认值填充，可在导入预览中逐行修改</AlertDescription>
+</Alert>
+{/* 阻断错误保留默认 role="alert" */}
+<Alert variant="danger">
+  <XCircle className="size-4" />
+  <AlertTitle className="mt-0 text-base font-semibold">任务 run-28002 执行失败</AlertTitle>
+  <AlertDescription className="text-muted-foreground">K 点网格与截断能设置冲突，请检查参数后重试</AlertDescription>
+</Alert>`,
         preview: "alert/basic",
       },
       {
         id: "closable",
         title: "可关闭与操作",
         kind: "variant",
-        description: "非阻断型提示可关闭；action 提供直达入口。",
-        code: `<Alert
-  type="warning"
-  title="项目额度剩余 12%"
-  description="示例项目（project-042）本周期额度即将用完。"
-  closable
-  action={<Button size="sm" variant="ghost">查看用量</Button>}
-/>`,
+        description: "非阻断型提示可关闭：右上角放 ghost 图标 Button（aria-label=\"关闭提示\"）；操作链接放在描述里。",
+        code: `import { useState } from "react";
+import { AlertTriangle, X } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+
+const [visible, setVisible] = useState(true);
+
+{visible && (
+  <Alert variant="warning" role="status" className="pr-12">
+    <AlertTriangle className="size-4" />
+    <AlertTitle className="mt-0 text-base font-semibold">项目额度剩余 12%</AlertTitle>
+    <AlertDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
+      示例项目（project-042）本周期额度即将用完
+      <Button variant="link" size="sm">查看用量</Button>
+    </AlertDescription>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="absolute right-2 top-2 size-7 text-muted-foreground"
+      aria-label="关闭提示"
+      onClick={() => setVisible(false)}
+    >
+      <X />
+    </Button>
+  </Alert>
+)}`,
         preview: "alert/closable",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "数据导入流程中的质量提醒：阻断在提交前，给出逐行处理入口。",
-        code: `<Alert
-  type="warning"
-  title="3 行缺少密度字段，无法直接提交"
-  description="第 128、512、907 行缺失。可逐行补全，或以项目默认值 2.50 g/cm³ 填充后继续。"
-  action={
-    <>
-      <Button size="sm" variant="ghost">查看缺失行</Button>
-      <Button size="sm" variant="secondary">以默认值填充</Button>
-    </>
-  }
-/>`,
+        description: "数据导入流程中的质量提醒：阻断在提交前，描述下方是操作区（最多 2 个按钮）。",
+        code: `import { AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+
+<Alert variant="warning">
+  <AlertTriangle className="size-4" />
+  <AlertTitle className="mt-0 text-base font-semibold">3 行缺少密度字段，无法直接提交</AlertTitle>
+  <AlertDescription className="text-muted-foreground">
+    第 128、512、907 行缺失。可逐行补全，或以项目默认值 2.50 g/cm³ 填充后继续。
+    <div className="mt-2 flex flex-wrap gap-2">
+      <Button variant="secondary" size="sm">查看缺失行</Button>
+      <Button size="sm">以默认值填充</Button>
+    </div>
+  </AlertDescription>
+</Alert>`,
         preview: "alert/business",
       },
     ],
     props: [
-      { name: "type", type: '"info" | "success" | "warning" | "error"', required: true, description: "语义类型，决定图标与底色。" },
-      { name: "title", type: "ReactNode", required: true, description: "一句话结论，不写“提示”“警告”这类词。" },
-      { name: "description", type: "ReactNode", description: "原因与下一步，不给套话。" },
-      { name: "closable", type: "boolean", default: "false", description: "可关闭；阻断型 Alert 不提供关闭。" },
-      { name: "action", type: "ReactNode", description: "右侧操作（查看、重试），最多 2 个。" },
-      { name: "icon", type: "ReactNode", description: "自定义图标，默认按类型给出。" },
+      { name: "variant", type: '"default" | "info" | "success" | "warning" | "danger" | "destructive"', default: '"default"', description: "Alert 语义变体：浅底 + 同色边框 + 同色图标，正文保持前景色。" },
+      { name: "role", type: "string", default: '"alert"', description: "Alert 默认 role=\"alert\"（打断播报）；一般提示改为 role=\"status\"。" },
+      { name: "图标", type: "ReactNode（首个子元素）", description: "lucide 图标放在第一个子元素，自动定位到左上角并按变体着色，后续内容左缩进。" },
+      { name: "AlertTitle", type: "HTMLAttributes<HTMLHeadingElement>", required: true, description: "一句话结论（<h5>）；建议 className=\"text-base font-semibold\"。" },
+      { name: "AlertDescription", type: "HTMLAttributes<HTMLDivElement>", description: "原因与下一步；可在内部放链接或按钮组。" },
+      { name: "关闭", type: "组合", description: "无 closable 属性：Alert 加 pr-12，右上角放 Button variant=\"ghost\" size=\"icon\"（absolute right-2 top-2）+ aria-label=\"关闭提示\"，由业务控制显隐。" },
+      { name: "操作区", type: "组合", description: "无 action 属性：链接按钮跟在描述后，或在描述下方放 <div className=\"mt-2 flex gap-2\"> 按钮组，最多 2 个。" },
     ],
     states: [
       { name: "default", note: "左侧类型图标 + 结论标题，背景为类型色浅底，与页面同宽或随区块。" },
-      { name: "hover", note: "仅 action 与关闭按钮有 hover；Alert 本体无 hover。" },
-      { name: "focus-visible", note: "关闭与 action 按钮有品牌色焦点环。" },
+      { name: "hover", note: "仅内部操作与关闭按钮有 hover；Alert 本体无 hover。" },
+      { name: "focus-visible", note: "关闭与操作按钮有品牌色焦点环。" },
       { name: "pressed", note: "不适用：Alert 本体不可按压，按压反馈由内部按钮承担。", applicable: false },
       { name: "disabled", note: "不适用：Alert 无禁用态。", applicable: false },
       { name: "loading", note: "不适用：加载中的等待用 Spin / Skeleton，不用 Alert。", applicable: false },
       { name: "empty", note: "不适用：无内容不渲染 Alert。", applicable: false },
-      { name: "error", note: "type=\"error\" 即错误态本身：结论 + 原因 + 下一步，不只用红色。" },
-      { name: "permission-limited", note: "权限类提醒用 type=\"warning\"，并给出申请权限或联系人入口。" },
-      { name: "mobile", note: "标题与描述换行展示，action 移到描述下方整行。" },
+      { name: "error", note: "variant=\"danger\" 即错误态本身：结论 + 原因 + 下一步，不只用红色。" },
+      { name: "permission-limited", note: "权限类提醒用 variant=\"warning\"，并给出申请权限或联系人入口。" },
+      { name: "mobile", note: "标题与描述换行展示，操作按钮在描述下方整行（flex-wrap）。" },
       { name: "dark-mode", note: "浅底深字使用语义令牌，对比度 ≥ 4.5:1。" },
     ],
     interaction: [
       "阻断型 Alert 不提供关闭；可关闭的 Alert 关闭只是隐藏，问题未解决时会再次出现。",
-      "action 跳转后携带当前上下文（项目、筛选、行号）。",
+      "操作按钮跳转后携带当前上下文（项目、筛选、行号）。",
       "同一时间同一区域最多 2 条，超出合并为摘要。",
     ],
     keyboard: [
       "关闭按钮 aria-label=\"关闭提示\"，进入 Tab 序列。",
-      "action 按钮按视觉顺序到达。",
+      "操作按钮按视觉顺序到达。",
     ],
     accessibility: [
       "一般提示 role=\"status\"，阻断错误 role=\"alert\"。",
@@ -1225,7 +1468,7 @@ const runs = [
       "新出现的 Alert 由 aria-live 播报，不抢占焦点。",
     ],
     responsive: [
-      "窄屏 action 下移整行，不与标题挤压。",
+      "窄屏操作按钮下移整行，不与标题挤压。",
       "描述允许换行，不截断关键信息。",
     ],
     content: [
@@ -1653,39 +1896,70 @@ import { Button } from "@/components/ui/button";
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "三种尺寸；tip 说明在做什么，不写“加载中”。",
-        code: `<Spin size="sm" />
-<Spin />
-<Spin size="lg" tip="正在加载任务详情…" />`,
+        description: "三种尺寸；label 说明在做什么（默认只给读屏，showLabel 时可见）；按钮内加载用 Loader2 + animate-spin。",
+        code: `import { Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+
+<Spinner size="sm" label="正在加载任务列表" />
+<Spinner label="正在加载任务列表" />
+<Spinner size="lg" label="正在加载任务详情…" showLabel />
+<Button disabled>
+  <Loader2 className="animate-spin" />
+  正在提交
+</Button>`,
         preview: "spin/basic",
       },
       {
         id: "container",
         title: "容器加载",
         kind: "variant",
-        description: "包裹内容时显示半透明遮罩，加载期间阻止内部交互。",
-        code: `<Spin spinning={isLoading} tip="正在重新计算…">
-  <ResultPanel data={data} />
-</Spin>`,
+        description: "LoadingOverlay 包裹一块区域：加载时半透明遮罩 + 说明，内部内容 inert，容器 aria-busy。",
+        code: `import { LoadingOverlay } from "@/components/ui/spinner";
+import { Card } from "@/components/ui/card";
+
+<LoadingOverlay loading={isLoading} label="正在重新计算…" className="rounded-lg">
+  <Card className="p-4">
+    <h4>电导率结果</h4>
+    <p>run-28003 · 4.21 S/cm · 数据集 ds-118</p>
+  </Card>
+</LoadingOverlay>`,
         preview: "spin/container",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "列表页局部加载：遮罩只覆盖表格区域，筛选栏保持可用。",
-        code: `<Spin spinning={isRefreshing} delay={200} tip="正在加载任务列表…">
-  <Table caption="示例项目（project-042）· 计算任务列表">{rows}</Table>
-</Spin>`,
+        description: "列表页局部加载：遮罩只覆盖表格区域，筛选栏保持可用；delay 200ms 防闪烁。",
+        code: `import { LoadingOverlay } from "@/components/ui/spinner";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+{/* 筛选栏在 LoadingOverlay 之外，保持可用 */}
+<LoadingOverlay loading={isRefreshing} delay={200} label="正在加载任务列表…" className="rounded-lg border bg-card">
+  <Table>
+    <TableHeader>
+      <TableRow>
+        <TableHead scope="col">任务</TableHead>
+        <TableHead scope="col">数据集</TableHead>
+        <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+        <TableHead scope="col">状态</TableHead>
+      </TableRow>
+    </TableHeader>
+    <TableBody>{rows}</TableBody>
+  </Table>
+</LoadingOverlay>`,
         preview: "spin/business",
       },
     ],
     props: [
-      { name: "spinning", type: "boolean", default: "true", description: "是否显示加载指示。" },
-      { name: "size", type: '"sm" | "default" | "lg"', default: '"default"', description: "sm 用于按钮内与行内。" },
-      { name: "tip", type: "string", description: "加载文案，说明在做什么。" },
-      { name: "delay", type: "number", default: "0", description: "延迟显示的毫秒数，避免短暂加载闪烁。" },
-      { name: "fullscreen", type: "boolean", default: "false", description: "整页遮罩，仅限提交中等必须阻断的场景。" },
+      { name: "Spinner size", type: '"sm" | "default" | "lg"', default: '"default"', description: "14 / 20 / 28px；sm 用于行内。" },
+      { name: "Spinner label", type: "string", default: '"正在加载"', description: "说明在做什么；放在 role=\"status\" 内被读屏朗读。" },
+      { name: "Spinner showLabel", type: "boolean", default: "false", description: "在指示器旁显示 label；否则 label 为 sr-only。" },
+      { name: "LoadingOverlay loading", type: "boolean", required: true, description: "是否显示遮罩；为 true 时容器 aria-busy，内部内容 inert（不可点击、不可聚焦）。" },
+      { name: "LoadingOverlay label", type: "string", default: '"正在加载"', description: "遮罩中央的可见说明。" },
+      { name: "LoadingOverlay delay", type: "number", default: "0", description: "延迟显示的毫秒数，避免短暂加载闪烁（建议 200）。" },
+      { name: "LoadingOverlay size", type: '"sm" | "default" | "lg"', default: '"default"', description: "遮罩内指示器尺寸。" },
+      { name: "按钮内加载", type: "组合", description: "Button disabled + <Loader2 className=\"animate-spin\" /> + 动词进行时文案，不用 Spinner。" },
     ],
     states: [
       { name: "default", note: "品牌色旋转指示，默认尺寸 20px。" },
@@ -1693,12 +1967,12 @@ import { Button } from "@/components/ui/button";
       { name: "focus-visible", note: "不适用：非交互元素；遮罩期间内部元素不可聚焦。", applicable: false },
       { name: "pressed", note: "不适用：加载指示不可按压。", applicable: false },
       { name: "disabled", note: "不适用：加载期间内容不可交互由遮罩保证，不是 disabled。", applicable: false },
-      { name: "loading", note: "Spin 本身就是加载态：delay < 200ms 防闪烁，超过 5 秒必须给 tip。" },
+      { name: "loading", note: "Spinner 本身就是加载态：LoadingOverlay delay 200ms 防闪烁，超过 5 秒必须给可见 label。" },
       { name: "empty", note: "不适用：空数据由 Empty 承担。", applicable: false },
-      { name: "error", note: "不适用：加载失败后 Spin 停止，错误由 Alert / Message 呈现。", applicable: false },
+      { name: "error", note: "不适用：加载失败后移除 Spinner / 关闭 loading，错误由 Alert / Message 呈现。", applicable: false },
       { name: "permission-limited", note: "不适用：无权限展示权限提示，而不是无限加载。", applicable: false },
       { name: "mobile", note: "尺寸不缩水；遮罩覆盖安全区。" },
-      { name: "dark-mode", note: "遮罩使用深色半透明令牌。" },
+      { name: "dark-mode", note: "遮罩为 bg-background/75，随主题令牌切换。" },
     ],
     interaction: [
       "容器加载时遮罩阻止内部交互；加载不可取消，除非业务显式提供取消按钮。",
@@ -1709,26 +1983,26 @@ import { Button } from "@/components/ui/button";
       "显式提供的取消按钮在 Tab 序列中。",
     ],
     accessibility: [
-      "role=\"status\" 并朗读 tip；容器 aria-busy=\"true\"。",
-      "不只靠旋转动画：必须有 tip 或 sr-only 文本。",
+      "Spinner 自带 role=\"status\" 并朗读 label；LoadingOverlay 加载时容器 aria-busy=\"true\"、内容 inert。",
+      "不只靠旋转动画：label 默认作为 sr-only 文本，长等待用 showLabel 显示。",
     ],
     responsive: [
       "移动端遮罩覆盖全屏安全区。",
       "小容器内自动降为 sm 尺寸。",
     ],
     content: [
-      "tip 说明在做什么：“正在加载任务详情…”。",
+      "label 说明在做什么：“正在加载任务详情…”。",
       "不写“加载中”这种无信息量文案。",
     ],
     dos: [
-      "加 delay 避免闪烁。",
-      "长等待给出 tip 与取消入口。",
+      "LoadingOverlay 加 delay 避免闪烁。",
+      "长等待显示 label 并给出取消入口。",
       "局部加载只遮局部区域。",
     ],
     donts: [
-      "不要用整页 Spin 代替首屏骨架（用 Skeleton）。",
+      "不要用整页遮罩代替首屏骨架（用 Skeleton）。",
       "不要超过 10 秒没有任何说明。",
-      "不要嵌套多层 Spin。",
+      "不要嵌套多层 LoadingOverlay。",
     ],
     related: ["skeleton", "progress", "button", "message"],
   },
@@ -1916,46 +2190,91 @@ import { Button } from "@/components/ui/button";
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "右缘滑入 240ms，遮罩半透明；Esc 与遮罩点击关闭。",
-        code: `const [open, setOpen] = useState(false);
+        description: "Sheet 从右缘滑入，遮罩半透明；Esc 与遮罩点击关闭，关闭后焦点回到触发按钮。",
+        code: `import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Descriptions, DescriptionsItem } from "@/components/ui/descriptions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
-<Button variant="secondary" onClick={() => setOpen(true)}>查看任务详情</Button>
-<Drawer open={open} title="任务详情 · run-28003" placement="right" width={480} onClose={() => setOpen(false)}>
-  <Descriptions title="基本信息">{items}</Descriptions>
-</Drawer>`,
+<Sheet>
+  <SheetTrigger asChild>
+    <Button variant="secondary">查看任务详情</Button>
+  </SheetTrigger>
+  <SheetContent side="right" className="w-full sm:max-w-md">
+    <SheetHeader>
+      <SheetTitle className="text-md">任务详情 · run-28003</SheetTitle>
+      <SheetDescription>示例项目（project-042）中的电导率计算任务</SheetDescription>
+    </SheetHeader>
+    <Descriptions className="mt-4">
+      <DescriptionsItem label="任务 ID" mono copyable>run-28003</DescriptionsItem>
+      <DescriptionsItem label="所属项目">示例项目（project-042）</DescriptionsItem>
+      <DescriptionsItem label="状态"><Badge tone="success" dot>已完成</Badge></DescriptionsItem>
+      <DescriptionsItem label="耗时" mono>286.4 秒</DescriptionsItem>
+    </Descriptions>
+  </SheetContent>
+</Sheet>`,
         preview: "drawer/basic",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "从列表行打开任务详情抽屉：关闭后列表滚动位置与选中行保持。",
-        code: `<Drawer
-  open={open}
-  title="任务详情 · run-28003"
-  width={520}
-  onClose={() => setOpen(false)}
-  footer={<Button variant="primary" onClick={goFullPage}>查看完整日志</Button>}
->
-  <Descriptions column={1} items={runSummary} />
-  <Collapse defaultActiveKeys={["logs"]}>
-    <Collapse.Panel key="logs" header="日志摘要">…</Collapse.Panel>
-  </Collapse>
-</Drawer>`,
+        description: "从列表行打开任务详情抽屉（受控）：头部 / 底部固定、内容区滚动；窄屏可改用 side=\"bottom\"。",
+        code: `import { useState } from "react";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Descriptions, DescriptionsItem } from "@/components/ui/descriptions";
+import { CodeBlock } from "@/components/ui/code-block";
+import { Button } from "@/components/ui/button";
+
+const [open, setOpen] = useState(false);
+
+<Button onClick={() => setOpen(true)}>从列表行打开详情抽屉</Button>
+<Sheet open={open} onOpenChange={setOpen}>
+  <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-lg">
+    <SheetHeader className="border-b px-6 py-4 pr-12">
+      <SheetTitle className="text-md">任务详情 · run-28003</SheetTitle>
+      <SheetDescription>数据集 ds-118 · 方法 PBE0</SheetDescription>
+    </SheetHeader>
+    <div className="grid flex-1 content-start gap-4 overflow-y-auto px-6 py-4">
+      <Descriptions>
+        <DescriptionsItem label="数据集" mono>ds-118</DescriptionsItem>
+        <DescriptionsItem label="方法">PBE0 · 截断能 520 eV</DescriptionsItem>
+        <DescriptionsItem label="耗时" mono>286.4 秒</DescriptionsItem>
+        <DescriptionsItem label="费用" mono>¥12.40</DescriptionsItem>
+      </Descriptions>
+      <CodeBlock language="log" title="日志摘要" showWrapToggle={false} code={logSummary} />
+    </div>
+    <SheetFooter className="gap-2 border-t px-6 py-3 sm:space-x-0">
+      <SheetClose asChild>
+        <Button variant="secondary">关闭</Button>
+      </SheetClose>
+      <Button onClick={goFullLog}>查看完整日志</Button>
+    </SheetFooter>
+  </SheetContent>
+</Sheet>`,
         preview: "drawer/business",
       },
     ],
     props: [
-      { name: "open", type: "boolean", required: true, description: "受控开关。" },
-      { name: "title", type: "ReactNode", required: true, description: "标题带对象 ID（“任务详情 · run-28003”）。" },
-      { name: "onClose", type: "() => void", required: true, description: "Esc、遮罩、关闭按钮的统一出口。" },
-      { name: "placement", type: '"right" | "left" | "top" | "bottom"', default: '"right"', description: "滑出方向。" },
-      { name: "width", type: "number", default: "480", description: "左右抽屉的宽度。" },
-      { name: "maskClosable", type: "boolean", default: "true", description: "点击遮罩关闭；有未保存内容时禁用。" },
-      { name: "footer", type: "ReactNode", description: "固定底部动作区。" },
+      { name: "Sheet open / onOpenChange", type: "boolean / (open: boolean) => void", description: "受控开关；非受控时用 SheetTrigger。Esc、遮罩、关闭按钮都走 onOpenChange(false)。" },
+      { name: "SheetTrigger", type: "asChild", description: "触发按钮（asChild 包 Button），关闭后焦点自动还原到它。" },
+      { name: "SheetContent side", type: '"right" | "left" | "top" | "bottom"', default: '"right"', description: "滑出方向；左右默认宽 3/4、sm 起 max-w-sm，用 className 覆盖（如 w-full sm:max-w-lg）。" },
+      { name: "SheetContent", type: "Radix Dialog.Content props", required: true, description: "role=\"dialog\"、焦点陷阱与右上角关闭按钮内置；onEscapeKeyDown / onInteractOutside 可在提交中阻止关闭。" },
+      { name: "SheetTitle", type: "ReactNode", required: true, description: "标题，带对象 ID（“任务详情 · run-28003”），作为对话框可访问名称。" },
+      { name: "SheetDescription", type: "ReactNode", description: "副标题 / 上下文说明。" },
+      { name: "SheetHeader / SheetFooter", type: "HTMLAttributes<HTMLDivElement>", description: "头部与固定底部动作区；footer 里用 SheetClose asChild 包“关闭”。" },
+      { name: "固定头尾 + 内容滚动", type: "组合", description: "SheetContent className=\"flex flex-col gap-0 p-0\"，中间内容 div 加 flex-1 overflow-y-auto。" },
     ],
     states: [
-      { name: "default", note: "右缘滑入 240ms，遮罩半透明，默认宽度 480。" },
+      { name: "default", note: "右缘滑入，遮罩半透明；默认宽 3/4、sm 起 max-w-sm，详情类建议 sm:max-w-md / lg。" },
       { name: "hover", note: "内部控件各自 hover；遮罩无 hover。" },
       { name: "focus-visible", note: "打开后焦点进入抽屉第一个可交互元素。" },
       { name: "pressed", note: "内部按钮按压反馈；Esc 按下即关闭。" },
@@ -1964,7 +2283,7 @@ import { Button } from "@/components/ui/button";
       { name: "empty", note: "内容为空显示 Empty，不展示一个空白抽屉。" },
       { name: "error", note: "内容加载失败显示原因 + 重试，不自动关闭。" },
       { name: "permission-limited", note: "无权限内容在抽屉内显示权限说明与申请入口。" },
-      { name: "mobile", note: "窄屏强制全宽，placement 视为 right 全屏。" },
+      { name: "mobile", note: "窄屏 className=\"w-full\" 全宽，或改用 side=\"bottom\"。" },
       { name: "dark-mode", note: "使用语义令牌自动适配。" },
     ],
     interaction: [

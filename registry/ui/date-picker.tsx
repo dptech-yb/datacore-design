@@ -12,6 +12,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 export type { DateRange };
 
+/** 月份标题：2026 年 9 月。 */
+const calendarFormatters = { formatCaption: (month: Date) => formatDate(month, "yyyy 年 M 月") };
+
 const triggerCls =
   "w-full justify-start gap-2 px-3 text-sm font-normal tabular-nums data-[state=open]:border-ring";
 
@@ -106,6 +109,7 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             <Calendar
               mode="single"
               locale={zhCN}
+              formatters={calendarFormatters}
               weekStartsOn={1}
               selected={value ?? undefined}
               defaultMonth={value ?? undefined}
@@ -255,6 +259,7 @@ const DateRangePicker = React.forwardRef<HTMLButtonElement, DateRangePickerProps
               <Calendar
                 mode="range"
                 locale={zhCN}
+                formatters={calendarFormatters}
                 weekStartsOn={1}
                 numberOfMonths={numberOfMonths}
                 selected={draft}
