@@ -825,16 +825,16 @@ export const layoutNavComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "当前标签品牌色下划线，点击切换面板。",
-        code: `<Tabs
-  activeKey="overview"
-  onChange={setActiveKey}
-  items={[
-    { key: "overview", label: "概览" },
-    { key: "params", label: "参数" },
-    { key: "logs", label: "日志" },
-    { key: "artifacts", label: "产物" },
-  ]}
-/>`,
+        code: `import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+<Tabs value={activeKey} onValueChange={setActiveKey}>
+  <TabsList aria-label="任务详情">
+    <TabsTrigger value="overview">概览</TabsTrigger>
+    <TabsTrigger value="params">参数</TabsTrigger>
+    <TabsTrigger value="logs">日志</TabsTrigger>
+    <TabsTrigger value="artifacts">产物</TabsTrigger>
+  </TabsList>
+</Tabs>`,
         preview: "tabs/basic",
       },
       {
@@ -842,16 +842,28 @@ export const layoutNavComponents: ComponentDoc[] = [
         title: "带计数徽章",
         kind: "variant",
         description: "计数放在徽章里，不写进标签文字；为 0 时不显示。",
-        code: `<Tabs
-  activeKey={activeKey}
-  onChange={setActiveKey}
-  items={[
-    { key: "all", label: "全部" },
-    { key: "running", label: "运行中", badge: 3 },
-    { key: "queued", label: "排队中", badge: 12 },
-    { key: "done", label: "已完成", badge: 128 },
-  ]}
-/>`,
+        code: `import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+
+const tabs = [
+  { value: "all", label: "全部", count: 0 },
+  { value: "running", label: "运行中", count: 3 },
+  { value: "queued", label: "排队中", count: 12 },
+  { value: "done", label: "已完成", count: 128 },
+];
+
+<Tabs value={activeKey} onValueChange={setActiveKey}>
+  <TabsList aria-label="任务状态">
+    {tabs.map((tab) => (
+      <TabsTrigger key={tab.value} value={tab.value}>
+        {tab.label}
+        {tab.count > 0 && (
+          <Badge tone={activeKey === tab.value ? "primary" : "neutral"}>{tab.count}</Badge>
+        )}
+      </TabsTrigger>
+    ))}
+  </TabsList>
+</Tabs>`,
         preview: "tabs/badges",
       },
       {
@@ -859,21 +871,30 @@ export const layoutNavComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "任务详情标签：日志面板带运行状态点，无权限标签禁用并说明。",
-        code: `<Tabs
-  activeKey={activeKey}
-  onChange={setActiveKey}
-  items={[
-    { key: "overview", label: "运行概览" },
-    { key: "logs", label: "实时日志", badge: <BadgeDot status="processing" /> },
-    { key: "curves", label: "电导率曲线" },
-    {
-      key: "audit",
-      label: "审计记录",
-      disabled: true,
-      disabledReason: "仅项目管理员可见",
-    },
-  ]}
-/>`,
+        code: `import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Lock } from "lucide-react";
+
+<Tabs value={activeKey} onValueChange={setActiveKey}>
+  <TabsList aria-label="run-28003 详情">
+    <TabsTrigger value="overview">运行概览</TabsTrigger>
+    <TabsTrigger value="logs">
+      实时日志
+      <span className="size-1.5 rounded-full bg-success" aria-label="运行中" />
+    </TabsTrigger>
+    <TabsTrigger value="curves">电导率曲线</TabsTrigger>
+    <TabsTrigger
+      value="audit"
+      disabled
+      title="仅项目管理员可见"
+      className="disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      审计记录 <Lock className="!size-3" aria-hidden />
+    </TabsTrigger>
+  </TabsList>
+  <TabsContent value="overview"><RunOverview runId="run-28003" /></TabsContent>
+  <TabsContent value="logs"><RunLogs runId="run-28003" follow /></TabsContent>
+  <TabsContent value="curves"><ConductivityChart runId="run-28003" /></TabsContent>
+</Tabs>`,
         preview: "tabs/business",
       },
     ],
@@ -1184,18 +1205,28 @@ export const layoutNavComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "点击触发，选中后菜单关闭；点击外部或 Esc 同样关闭。",
-        code: `<Dropdown
-  menu={{
-    items: [
-      { key: "detail", label: "查看详情" },
-      { key: "copy", label: "复制任务 ID" },
-      { key: "rerun", label: "重新运行" },
-    ],
-    onSelect: (key) => handleAction(key),
-  }}
->
-  <Button variant="secondary">更多操作</Button>
-</Dropdown>`,
+        code: `import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="secondary">
+      更多操作 <ChevronDown />
+    </Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent align="start" className="w-40">
+    <DropdownMenuItem onSelect={() => handleAction("detail")}>查看详情</DropdownMenuItem>
+    <DropdownMenuItem onSelect={() => handleAction("copy")}>复制任务 ID</DropdownMenuItem>
+    <DropdownMenuItem onSelect={() => handleAction("rerun")}>重新运行</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>`,
         preview: "dropdown/basic",
       },
       {
@@ -1203,18 +1234,31 @@ export const layoutNavComponents: ComponentDoc[] = [
         title: "分组与危险项",
         kind: "variant",
         description: "危险项放在菜单底部并用分割线隔开，文案写清作用对象。",
-        code: `<Dropdown
-  menu={{
-    items: [
-      { key: "detail", label: "查看详情" },
-      { key: "share", label: "分享链接" },
-      { type: "divider" },
-      { key: "revoke", label: "撤销任务", danger: true },
-    ],
-  }}
->
-  <IconButton aria-label="更多操作" icon={<MoreHorizontal size={16} />} />
-</Dropdown>`,
+        code: `import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="ghost" size="icon" aria-label="更多操作">
+      <MoreHorizontal />
+    </Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent align="start" className="w-44">
+    <DropdownMenuItem>查看详情</DropdownMenuItem>
+    <DropdownMenuItem>分享链接</DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem className="text-danger focus:bg-danger-soft focus:text-danger">
+      撤销任务
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>`,
         preview: "dropdown/danger",
       },
       {
@@ -1222,32 +1266,62 @@ export const layoutNavComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "任务行更多操作：无权限项禁用说明，危险项带二次确认。",
-        code: `<Dropdown
-  trigger={["click"]}
-  menu={{
-    items: [
-      { key: "detail", label: "查看详情" },
-      { key: "logs", label: "下载日志" },
-      { key: "clone", label: "以此为模板新建" },
-      {
-        key: "audit",
-        label: "审计记录",
-        disabled: true,
-        disabledReason: "需要项目管理员权限",
-      },
-      { type: "divider" },
-      {
-        key: "revoke",
-        label: "撤销任务 run-28003",
-        danger: true,
-        confirm: "撤销后不可恢复",
-      },
-    ],
-    onSelect: handleRunAction,
-  }}
->
-  <Button variant="ghost">更多操作</Button>
-</Dropdown>`,
+        code: `import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { ChevronDown, Lock } from "lucide-react";
+
+{/* modal={false}：菜单关闭后再打开确认框，焦点与指针事件不残留 */}
+<DropdownMenu modal={false}>
+  <DropdownMenuTrigger asChild>
+    <Button variant="ghost">
+      更多操作 <ChevronDown />
+    </Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent align="start" className="w-56">
+    <DropdownMenuItem onSelect={() => handleRunAction("detail")}>查看详情</DropdownMenuItem>
+    <DropdownMenuItem onSelect={() => handleRunAction("logs")}>下载日志</DropdownMenuItem>
+    <DropdownMenuItem onSelect={() => handleRunAction("clone")}>以此为模板新建</DropdownMenuItem>
+    <DropdownMenuItem disabled>
+      <Lock aria-hidden /> 审计记录
+      <span className="ml-auto text-xs text-muted-foreground">需要项目管理员权限</span>
+    </DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem
+      className="text-danger focus:bg-danger-soft focus:text-danger"
+      onSelect={() => setConfirming(true)}
+    >
+      撤销任务 run-28003
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+
+<AlertDialog open={confirming} onOpenChange={setConfirming}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>撤销任务 run-28003？</AlertDialogTitle>
+      <AlertDialogDescription>撤销后不可恢复，已排队资源立即释放。</AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>取消</AlertDialogCancel>
+      <AlertDialogAction
+        className={buttonVariants({ variant: "danger" })}
+        onClick={() => revokeRun("run-28003")}
+      >
+        确认撤销
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>`,
         preview: "dropdown/business",
       },
     ],
@@ -1321,14 +1395,19 @@ export const layoutNavComponents: ComponentDoc[] = [
         title: "基础示例",
         kind: "basic",
         description: "选中块滑动过渡，切换立即生效。",
-        code: `<Segmented
-  value={view}
-  onChange={setView}
-  options={[
-    { label: "表格", value: "table" },
-    { label: "卡片", value: "card" },
-  ]}
-/>`,
+        code: `import { Tabs, SegmentedList, SegmentedTrigger } from "@/components/ui/tabs";
+import { LayoutGrid, List } from "lucide-react";
+
+<Tabs value={view} onValueChange={setView}>
+  <SegmentedList aria-label="视图">
+    <SegmentedTrigger value="table" className="gap-1.5">
+      <List className="size-3.5" aria-hidden /> 表格
+    </SegmentedTrigger>
+    <SegmentedTrigger value="card" className="gap-1.5">
+      <LayoutGrid className="size-3.5" aria-hidden /> 卡片
+    </SegmentedTrigger>
+  </SegmentedList>
+</Tabs>`,
         preview: "segmented/basic",
       },
       {
@@ -1336,8 +1415,25 @@ export const layoutNavComponents: ComponentDoc[] = [
         title: "尺寸",
         kind: "size",
         description: "sm 用于工具条与卡片头部，md 为默认尺寸。",
-        code: `<Segmented size="sm" value="7d" options={["24h", "7 天", "30 天"]} />
-<Segmented size="md" value="all" options={["全部", "运行中", "已完成"]} />`,
+        code: `import { Tabs, SegmentedList, SegmentedTrigger } from "@/components/ui/tabs";
+
+{/* sm：列表高 28px、选项 12px 字 */}
+<Tabs value={range} onValueChange={setRange}>
+  <SegmentedList aria-label="时间范围" className="h-7">
+    <SegmentedTrigger value="24h" className="h-6 px-2.5 text-xs">24h</SegmentedTrigger>
+    <SegmentedTrigger value="7d" className="h-6 px-2.5 text-xs">7 天</SegmentedTrigger>
+    <SegmentedTrigger value="30d" className="h-6 px-2.5 text-xs">30 天</SegmentedTrigger>
+  </SegmentedList>
+</Tabs>
+
+{/* md：默认尺寸，列表高 32px */}
+<Tabs value={filter} onValueChange={setFilter}>
+  <SegmentedList aria-label="任务状态">
+    <SegmentedTrigger value="all">全部</SegmentedTrigger>
+    <SegmentedTrigger value="running">运行中</SegmentedTrigger>
+    <SegmentedTrigger value="done">已完成</SegmentedTrigger>
+  </SegmentedList>
+</Tabs>`,
         preview: "segmented/sizes",
       },
       {
@@ -1345,18 +1441,28 @@ export const layoutNavComponents: ComponentDoc[] = [
         title: "真实业务示例",
         kind: "business",
         description: "任务指标的时间范围切换；数据不足的选项禁用并说明原因。",
-        code: `<Segmented
+        code: `import { Tabs, SegmentedList, SegmentedTrigger } from "@/components/ui/tabs";
+
+<Tabs
   value={range}
-  onChange={(value) => {
+  onValueChange={(value) => {
     setRange(value);
     refetchMetrics({ runId: "run-28003", range: value });
   }}
-  options={[
-    { label: "24 小时", value: "24h" },
-    { label: "7 天", value: "7d" },
-    { label: "30 天", value: "30d", disabled: true, disabledReason: "任务运行未满 30 天" },
-  ]}
-/>`,
+>
+  <SegmentedList aria-label="指标时间范围">
+    <SegmentedTrigger value="24h">24 小时</SegmentedTrigger>
+    <SegmentedTrigger value="7d">7 天</SegmentedTrigger>
+    <SegmentedTrigger
+      value="30d"
+      disabled
+      title="任务运行未满 30 天"
+      className="disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      30 天
+    </SegmentedTrigger>
+  </SegmentedList>
+</Tabs>`,
         preview: "segmented/business",
       },
     ],

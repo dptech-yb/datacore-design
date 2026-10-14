@@ -1,5 +1,23 @@
-import { DemoMenu } from "../components/DemoMenu";
-import { Modal } from "../components/Modal";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { SegmentedList, SegmentedTrigger, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertTriangle,
   Beaker,
@@ -21,7 +39,7 @@ import {
   X,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import type { CSSProperties, ReactNode, KeyboardEvent } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { PreviewFn } from "./types";
 
 /* ---------- shared demo helpers (not exported) ---------- */
@@ -97,92 +115,17 @@ function PageButton({
   label?: string;
 }) {
   return (
-    <button
+    <Button
+      variant={active ? "default" : "secondary"}
+      size="sm"
       aria-label={label}
       aria-current={active ? "page" : undefined}
       disabled={disabled}
       onClick={onClick}
-      style={{
-        minWidth: 30,
-        height: 30,
-        padding: "0 6px",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 8,
-        fontSize: 14,
-        fontFamily: '"DM Mono", monospace',
-        cursor: disabled ? "not-allowed" : "pointer",
-        border: active ? "1px solid var(--brand)" : "1px solid var(--line-strong)",
-        background: active ? "var(--brand)" : "var(--surface)",
-        color: active ? "#fff" : "var(--text)",
-        opacity: disabled ? 0.45 : 1,
-      }}
+      className="min-w-7 px-1.5 font-mono"
     >
       {children}
-    </button>
-  );
-}
-
-function moveWithinGroup(event: KeyboardEvent<HTMLElement>) {
-  if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End"].includes(event.key))return;
-  const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
-  const current = items.indexOf(document.activeElement as HTMLButtonElement);
-  const next = event.key === "Home" ? 0 : event.key === "End" ? items.length-1 : (current+(["ArrowRight","ArrowDown"].includes(event.key) ? 1 : items.length-1))%items.length;
-  event.preventDefault();items[next]?.focus();items[next]?.click();
-}
-
-function SegmentedControl({
-  options,
-  value,
-  onChange,
-  size = "md",
-}: {
-  options: { label: string; value: string; icon?: ReactNode; disabled?: boolean; reason?: string }[];
-  value: string;
-  onChange: (value: string) => void;
-  size?: "sm" | "md";
-}) {
-  const pad = size === "sm" ? "4px 10px" : "6px 14px";
-  return (
-    <div
-      role="radiogroup" aria-label="分段选项" onKeyDown={moveWithinGroup}
-      style={{ display: "inline-flex", padding: 3, gap: 2, borderRadius: 10, background: "var(--surface-soft)", border: "1px solid var(--line)" }}
-    >
-      {options.map((option) => {
-        const active = value === option.value;
-        return (
-          <button
-            key={option.value}
-            role="radio"
-            tabIndex={active ? 0 : -1}
-            aria-checked={active}
-            disabled={option.disabled}
-            title={option.disabled ? option.reason : undefined}
-            onClick={() => onChange(option.value)}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              padding: pad,
-              borderRadius: 8,
-              fontSize: size === "sm" ? 11 : 12,
-              cursor: option.disabled ? "not-allowed" : "pointer",
-              background: active ? "var(--surface)" : "transparent",
-              color: option.disabled ? "var(--faint)" : active ? "var(--text)" : "var(--text-muted)",
-              fontWeight: active ? 700 : 400,
-              boxShadow: active ? "var(--shadow-sm)" : "none",
-              border: active ? "1px solid var(--line)" : "1px solid transparent",
-              opacity: option.disabled ? 0.6 : 1,
-              transition: "all .16s ease",
-            }}
-          >
-            {option.icon}
-            {option.label}
-          </button>
-        );
-      })}
-    </div>
+    </Button>
   );
 }
 
@@ -279,7 +222,7 @@ function LayoutBusiness() {
         <div style={{ flex: 1, padding: 14, background: "var(--page)", display: "grid", gap: 10, alignContent: "start" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <strong style={{ fontSize: 14 }}>计算任务</strong>
-            <button className="button button-primary button-sm">新建任务</button>
+            <Button size="sm">新建任务</Button>
           </div>
           <div className="demo-grid-3">
             {[
@@ -325,13 +268,13 @@ function StackVariants() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <button className="button button-primary">提交任务</button>
-        <button className="button button-secondary">保存草稿</button>
-        <button className="button button-ghost">取消</button>
+        <Button>提交任务</Button>
+        <Button variant="secondary">保存草稿</Button>
+        <Button variant="ghost">取消</Button>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", border: "1px solid var(--line)", borderRadius: 10, background: "var(--surface)" }}>
         <strong style={{ fontSize: 14 }}>第 3 轮优化</strong>
-        <span className="status-badge badge-success"><span className="badge-dot" />已完成</span>
+        <Badge tone="success" dot>已完成</Badge>
       </div>
       <p className="demo-note">horizontal + gap 8 给按钮组；justify=&quot;space-between&quot; 给标题与状态。</p>
     </div>
@@ -353,8 +296,8 @@ function StackBusiness() {
         </div>
       </div>
       <div className="demo-row">
-        <button className="button button-primary">继续导入</button>
-        <button className="button button-ghost">返回修改</button>
+        <Button>继续导入</Button>
+        <Button variant="ghost">返回修改</Button>
       </div>
     </div>
   );
@@ -407,9 +350,9 @@ function GridResponsive() {
 
 function GridBusiness() {
   const projects = [
-    { name: "示例项目", id: "project-042", runs: 28, status: "进行中", badge: "badge-info" },
-    { name: "电解液筛选", id: "project-051", runs: 12, status: "进行中", badge: "badge-info" },
-    { name: "正极材料库", id: "project-063", runs: 45, status: "已归档", badge: "badge-neutral" },
+    { name: "示例项目", id: "project-042", runs: 28, status: "进行中", tone: "primary" as const },
+    { name: "电解液筛选", id: "project-051", runs: 12, status: "进行中", tone: "primary" as const },
+    { name: "正极材料库", id: "project-063", runs: 45, status: "已归档", tone: "neutral" as const },
   ];
   return (
     <div className="demo-grid-3">
@@ -417,7 +360,7 @@ function GridBusiness() {
         <div className="card-demo" key={project.id}>
           <h4>{project.name}</h4>
           <p className="mono">{project.id} · 任务 {project.runs}</p>
-          <span className={`status-badge ${project.badge}`} style={{ marginTop: 8 }}><span className="badge-dot" />{project.status}</span>
+          <Badge tone={project.tone} dot className="mt-2">{project.status}</Badge>
         </div>
       ))}
     </div>
@@ -557,8 +500,8 @@ function PageHeaderBasic() {
           <p className="demo-note" style={{ marginTop: 6 }}>提交、追踪并管理项目下的所有计算任务。</p>
         </div>
         <div className="demo-row">
-          <button className="button button-secondary">导出记录</button>
-          <button className="button button-primary">新建任务</button>
+          <Button variant="secondary">导出记录</Button>
+          <Button>新建任务</Button>
         </div>
       </div>
       <p className="demo-note">页面级主动作最多一个 primary，其余降级为 secondary / ghost。</p>
@@ -577,11 +520,11 @@ function PageHeaderWithBreadcrumb() {
       <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <h3 style={{ margin: 0, fontSize: 20.0, letterSpacing: "-0.02em" }}>示例项目</h3>
-          <span className="status-badge badge-success"><span className="badge-dot" />进行中</span>
+          <Badge tone="success" dot>进行中</Badge>
         </div>
         <div className="demo-row">
-          <button className="button button-secondary">项目设置</button>
-          <button className="button button-primary">新建任务</button>
+          <Button variant="secondary">项目设置</Button>
+          <Button>新建任务</Button>
         </div>
       </div>
     </div>
@@ -595,14 +538,24 @@ function PageHeaderBusiness() {
         <div style={{ minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <h3 style={{ margin: 0, fontSize: 20.0, letterSpacing: "-0.02em" }}>电导率优化 · 第 3 轮</h3>
-            <span className="status-badge badge-violet"><span className="badge-dot" />等待确认</span>
+            <Badge tone="agent" dot>等待确认</Badge>
           </div>
           <p className="demo-note" style={{ marginTop: 6 }}>Agent 推荐 6 个候选配方，确认后将创建 1 个 CPU 任务。</p>
         </div>
         <div className="demo-row">
-          <button className="button button-ghost">查看历史</button>
-          <button className="button button-secondary">更多操作 <ChevronDown size={14} /></button>
-          <button className="button button-primary">确认并执行</button>
+          <Button variant="ghost">查看历史</Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary">
+                更多操作 <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem>导出候选配方</DropdownMenuItem>
+              <DropdownMenuItem>复制轮次配置</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button>确认并执行</Button>
         </div>
       </div>
       <p className="demo-note">影响范围写在说明里；低频动作收入“更多操作”，primary 只有“确认并执行”。</p>
@@ -648,13 +601,9 @@ function BreadcrumbCollapsed() {
           ))
         ) : (
           <>
-            <button
-              onClick={() => setExpanded(true)}
-              title="展开完整路径"
-              style={{ display: "inline-flex", alignItems: "center", padding: "1px 6px", borderRadius: 6, background: "var(--surface-soft)", color: "var(--text-muted)", cursor: "pointer" }}
-            >
-              <MoreHorizontal size={13} />
-            </button>
+            <Button variant="ghost" size="sm" onClick={() => setExpanded(true)} title="展开完整路径" aria-label="展开完整路径" className="h-6 px-1.5 text-muted-foreground">
+              <MoreHorizontal />
+            </Button>
             <ChevronRight size={13} className="breadcrumb-separator" />
           </>
         )}
@@ -742,7 +691,7 @@ function MenuGroups() {
           <button className="nav-item">
             <Database size={15} />
             <span className="nav-item-label">数据集</span>
-            <span className="status-badge badge-neutral" style={{ marginLeft: "auto" }}>12</span>
+            <Badge className="ml-auto">12</Badge>
           </button>
           <button className="nav-item">
             <Beaker size={15} />
@@ -767,7 +716,7 @@ function MenuBusiness() {
         <button className={`nav-item${selected === "runs" ? " nav-item-active" : ""}`} aria-current={selected === "runs" ? "page" : undefined} onClick={() => setSelected("runs")}>
           <FlaskConical size={15} />
           <span className="nav-item-label">计算任务</span>
-          <span className="status-badge badge-info" style={{ marginLeft: "auto" }}>3</span>
+          <Badge tone="primary" className="ml-auto">3</Badge>
         </button>
         <button className={`nav-item${selected === "members" ? " nav-item-active" : ""}`} onClick={() => setSelected("members")}>
           <FileText size={15} />
@@ -785,22 +734,6 @@ function MenuBusiness() {
 
 /* ---------- Tabs ---------- */
 
-function tabButtonStyle(active: boolean): CSSProperties {
-  return {
-    padding: "8px 2px",
-    background: "none",
-    cursor: "pointer",
-    fontSize: 14,
-    fontWeight: active ? 700 : 400,
-    color: active ? "var(--brand)" : "var(--text-muted)",
-    borderBottom: active ? "2px solid var(--brand)" : "2px solid transparent",
-    marginBottom: -1,
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 6,
-  };
-}
-
 function TabsBasic() {
   const [active, setActive] = useState("overview");
   const tabs = [
@@ -811,13 +744,15 @@ function TabsBasic() {
   ];
   return (
     <div className="demo-stack">
-      <div role="tablist" aria-label="内容面板" onKeyDown={moveWithinGroup} style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--line)" }}>
-        {tabs.map((tab) => (
-          <button key={tab.key} role="tab" tabIndex={active === tab.key ? 0 : -1} aria-selected={active === tab.key} onClick={() => setActive(tab.key)} style={tabButtonStyle(active === tab.key)}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <Tabs value={active} onValueChange={setActive}>
+        <TabsList aria-label="任务详情">
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.key} value={tab.key}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
       <p className="demo-note">当前面板：{tabs.find((tab) => tab.key === active)?.label} · 切换不丢失面板内已输入的状态。</p>
     </div>
   );
@@ -833,16 +768,16 @@ function TabsBadges() {
   ];
   return (
     <div className="demo-stack">
-      <div role="tablist" aria-label="内容面板" onKeyDown={moveWithinGroup} style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--line)", flexWrap: "wrap" }}>
-        {tabs.map((tab) => (
-          <button key={tab.key} role="tab" tabIndex={active === tab.key ? 0 : -1} aria-selected={active === tab.key} onClick={() => setActive(tab.key)} style={tabButtonStyle(active === tab.key)}>
-            {tab.label}
-            {tab.badge !== null && (
-              <span className={`status-badge ${active === tab.key ? "badge-info" : "badge-neutral"}`}>{tab.badge}</span>
-            )}
-          </button>
-        ))}
-      </div>
+      <Tabs value={active} onValueChange={setActive}>
+        <TabsList aria-label="任务状态">
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.key} value={tab.key}>
+              {tab.label}
+              {tab.badge !== null && <Badge tone={active === tab.key ? "primary" : "neutral"}>{tab.badge}</Badge>}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
       <p className="demo-note">计数放徽章里，不写“已完成（128）”；为 0 时不显示。</p>
     </div>
   );
@@ -850,50 +785,40 @@ function TabsBadges() {
 
 function TabsBusiness() {
   const [active, setActive] = useState("overview");
-  const tabs = [
-    { key: "overview", label: "运行概览" },
-    { key: "logs", label: "实时日志", dot: true },
-    { key: "curves", label: "电导率曲线" },
-    { key: "audit", label: "审计记录", disabled: true },
-  ];
   return (
-    <div className="demo-stack">
-      <div role="tablist" aria-label="内容面板" onKeyDown={moveWithinGroup} style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--line)", flexWrap: "wrap" }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            role="tab"
-            tabIndex={active === tab.key ? 0 : -1}
-            aria-selected={active === tab.key}
-            disabled={tab.disabled}
-            title={tab.disabled ? "仅项目管理员可见" : undefined}
-            onClick={() => setActive(tab.key)}
-            style={{ ...tabButtonStyle(active === tab.key), ...(tab.disabled ? { opacity: 0.5, cursor: "not-allowed", color: "var(--faint)" } : {}) }}
-          >
-            {tab.label}
-            {tab.dot && <span className="badge-dot" style={{ color: "var(--green)" }} />}
-            {tab.disabled && <Lock size={11} />}
-          </button>
-        ))}
-      </div>
-      {active === "overview" && (
-        <div className="status-line status-info">
-          <RefreshCw size={15} />
-          <div>
-            <strong>run-28003 运行中 · 迭代 120/400</strong>
-            <span>项目 project-042 · 已运行 38 分钟 · 预计剩余 96 分钟</span>
+    <Tabs value={active} onValueChange={setActive} className="demo-stack">
+      <TabsList aria-label="run-28003 详情">
+        <TabsTrigger value="overview">运行概览</TabsTrigger>
+        <TabsTrigger value="logs">
+          实时日志
+          <span className="size-1.5 rounded-full bg-success" aria-label="运行中" />
+        </TabsTrigger>
+        <TabsTrigger value="curves">电导率曲线</TabsTrigger>
+        <TabsTrigger value="audit" disabled title="仅项目管理员可见" className="disabled:cursor-not-allowed disabled:opacity-50">
+          审计记录
+          <Lock className="!size-3" aria-hidden />
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="overview" className="mt-0">
+        <div className="flex items-start gap-2.5 rounded-lg border border-primary/30 bg-primary-soft px-3 py-2.5 text-sm">
+          <RefreshCw className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+          <div className="grid gap-0.5">
+            <strong className="text-foreground">run-28003 运行中 · 迭代 120/400</strong>
+            <span className="text-muted-foreground">项目 project-042 · 已运行 38 分钟 · 预计剩余 96 分钟</span>
           </div>
         </div>
-      )}
-      {active === "logs" && (
-        <div style={{ display: "grid", gap: 4 }}>
+      </TabsContent>
+      <TabsContent value="logs" className="mt-0">
+        <div className="grid gap-1 font-mono text-xs text-muted-foreground">
           {["10:02:31 输入校验通过 · ds-118", "10:04:02 迭代 120/400 · loss 0.041", "10:04:02 当前电导率均值 12.1 mS/cm"].map((line) => (
-            <span key={line} className="mono" style={{ fontSize: 12, color: "var(--text-muted)" }}>{line}</span>
+            <span key={line}>{line}</span>
           ))}
         </div>
-      )}
-      {active === "curves" && <p className="demo-note">电导率曲线面板（略）· 面板切换不重新请求已加载数据。</p>}
-    </div>
+      </TabsContent>
+      <TabsContent value="curves" className="mt-0">
+        <p className="demo-note">电导率曲线面板（略）· 面板切换不重新请求已加载数据。</p>
+      </TabsContent>
+    </Tabs>
   );
 }
 
@@ -972,8 +897,8 @@ function StepsBusiness() {
         <button className="inline-action">下载错误报告</button>
       </div>
       <div className="demo-row">
-        <button className="button button-primary button-sm">修正后重试</button>
-        <button className="button button-ghost button-sm">返回上一步</button>
+        <Button size="sm">修正后重试</Button>
+        <Button variant="ghost" size="sm">返回上一步</Button>
       </div>
     </div>
   );
@@ -1088,19 +1013,103 @@ function PaginationBusiness() {
 /* ---------- Dropdown ---------- */
 
 function DropdownBasic() {
-  const [lastAction,setLastAction] = useState("");
-  return <div className="demo-stack"><DemoMenu actions={["查看详情","复制任务 ID","重新运行"].map(label => ({label,onSelect:() => setLastAction(label)}))}/><p className="demo-note" role="status">{lastAction ? `已选择：${lastAction}（演示）` : "方向键选择，Enter 确认，Esc 或点击外部关闭。"}</p></div>;
+  const [lastAction, setLastAction] = useState("");
+  return (
+    <div className="demo-stack">
+      <div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary">
+              更多操作 <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-40">
+            {["查看详情", "复制任务 ID", "重新运行"].map((label) => (
+              <DropdownMenuItem key={label} onSelect={() => setLastAction(label)}>
+                {label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <p className="demo-note" role="status">{lastAction ? `已选择：${lastAction}（演示）` : "方向键选择，Enter 确认，Esc 或点击外部关闭。"}</p>
+    </div>
+  );
 }
-function DropdownDanger() { return <DropdownBusiness/>; }
+
+const dangerItemClass = "text-danger focus:bg-danger-soft focus:text-danger";
+
+function DropdownDanger() {
+  const [lastAction, setLastAction] = useState("");
+  return (
+    <div className="demo-stack">
+      <div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="更多操作">
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-44">
+            <DropdownMenuItem onSelect={() => setLastAction("查看详情")}>查看详情</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setLastAction("分享链接")}>分享链接</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className={dangerItemClass} onSelect={() => setLastAction("撤销任务")}>
+              撤销任务
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <p className="demo-note" role="status">{lastAction ? `已选择：${lastAction}（演示）` : "危险项放在底部、用分割线隔开，文字用危险色。"}</p>
+    </div>
+  );
+}
+
 function DropdownBusiness() {
-  const [confirming,setConfirming] = useState(false);
-  const [result,setResult] = useState("");
-  return <div className="demo-stack"><DemoMenu actions={[
-    {label:"查看详情",onSelect:() => setResult("已选择查看 run-28003 详情（演示）")},
-    {label:"下载日志",onSelect:() => setResult("已选择下载日志（演示）")},
-    {label:"审计记录",disabled:true,reason:"需要项目管理员权限",onSelect:() => {}},
-    {label:"撤销任务 run-28003",danger:true,onSelect:() => setConfirming(true)},
-  ]}/><Modal open={confirming} onClose={() => setConfirming(false)} label="撤销任务确认"><div className="dialog"><h2>撤销任务 run-28003？</h2><p>撤销后不可恢复，已排队资源立即释放。本示例不会执行实际任务。</p><div className="dialog-actions"><button className="button button-secondary" onClick={() => setConfirming(false)}>取消</button><button className="button button-danger" onClick={() => {setConfirming(false);setResult("任务已撤销（演示）");}}>确认撤销</button></div></div></Modal><p className="demo-note" role="status">{result || "无权限项注明原因；危险动作先确认再执行。"}</p></div>;
+  const [confirming, setConfirming] = useState(false);
+  const [result, setResult] = useState("");
+  return (
+    <div className="demo-stack">
+      <div>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost">
+              更多操作 <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuItem onSelect={() => setResult("已选择查看 run-28003 详情（演示）")}>查看详情</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setResult("已选择下载日志（演示）")}>下载日志</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setResult("已选择以此为模板新建（演示）")}>以此为模板新建</DropdownMenuItem>
+            <DropdownMenuItem disabled>
+              <Lock aria-hidden />
+              审计记录
+              <span className="ml-auto text-xs text-muted-foreground">需要项目管理员权限</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className={dangerItemClass} onSelect={() => setConfirming(true)}>
+              撤销任务 run-28003
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <AlertDialog open={confirming} onOpenChange={setConfirming}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>撤销任务 run-28003？</AlertDialogTitle>
+            <AlertDialogDescription>撤销后不可恢复，已排队资源立即释放。本示例不会执行实际任务。</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction className={buttonVariants({ variant: "danger" })} onClick={() => setResult("任务已撤销（演示）")}>
+              确认撤销
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <p className="demo-note" role="status">{result || "无权限项注明原因；危险动作先确认再执行。"}</p>
+    </div>
+  );
 }
 
 /* ---------- Segmented ---------- */
@@ -1109,14 +1118,18 @@ function SegmentedBasic() {
   const [view, setView] = useState("table");
   return (
     <div className="demo-stack">
-      <SegmentedControl
-        value={view}
-        onChange={setView}
-        options={[
-          { label: "表格", value: "table", icon: <List size={14} /> },
-          { label: "卡片", value: "card", icon: <LayoutGrid size={14} /> },
-        ]}
-      />
+      <Tabs value={view} onValueChange={setView}>
+        <SegmentedList aria-label="视图">
+          <SegmentedTrigger value="table" className="gap-1.5">
+            <List className="size-3.5" aria-hidden />
+            表格
+          </SegmentedTrigger>
+          <SegmentedTrigger value="card" className="gap-1.5">
+            <LayoutGrid className="size-3.5" aria-hidden />
+            卡片
+          </SegmentedTrigger>
+        </SegmentedList>
+      </Tabs>
       <p className="demo-note">当前视图：{view === "table" ? "表格" : "卡片"} · 选中即生效，无需提交。</p>
     </div>
   );
@@ -1127,30 +1140,36 @@ function SegmentedSizes() {
   const [filter, setFilter] = useState("all");
   return (
     <div className="demo-stack">
-      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-        <SegmentedControl
-          size="sm"
-          value={range}
-          onChange={setRange}
-          options={[
-            { label: "24h", value: "24h" },
-            { label: "7 天", value: "7d" },
-            { label: "30 天", value: "30d" },
-          ]}
-        />
+      <div className="flex flex-wrap items-center gap-2.5">
+        <Tabs value={range} onValueChange={setRange}>
+          <SegmentedList aria-label="时间范围" className="h-7">
+            {[
+              { label: "24h", value: "24h" },
+              { label: "7 天", value: "7d" },
+              { label: "30 天", value: "30d" },
+            ].map((option) => (
+              <SegmentedTrigger key={option.value} value={option.value} className="h-6 px-2.5 text-xs">
+                {option.label}
+              </SegmentedTrigger>
+            ))}
+          </SegmentedList>
+        </Tabs>
         <span className="demo-note">sm · 工具条与卡片头部</span>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-        <SegmentedControl
-          size="md"
-          value={filter}
-          onChange={setFilter}
-          options={[
-            { label: "全部", value: "all" },
-            { label: "运行中", value: "running" },
-            { label: "已完成", value: "done" },
-          ]}
-        />
+      <div className="flex flex-wrap items-center gap-2.5">
+        <Tabs value={filter} onValueChange={setFilter}>
+          <SegmentedList aria-label="任务状态">
+            {[
+              { label: "全部", value: "all" },
+              { label: "运行中", value: "running" },
+              { label: "已完成", value: "done" },
+            ].map((option) => (
+              <SegmentedTrigger key={option.value} value={option.value}>
+                {option.label}
+              </SegmentedTrigger>
+            ))}
+          </SegmentedList>
+        </Tabs>
         <span className="demo-note">md · 默认尺寸</span>
       </div>
     </div>
@@ -1165,20 +1184,18 @@ function SegmentedBusiness() {
   };
   return (
     <div className="demo-stack">
-      <SegmentedControl
-        value={range}
-        onChange={setRange}
-        options={[
-          { label: "24 小时", value: "24h" },
-          { label: "7 天", value: "7d" },
-          { label: "30 天", value: "30d", disabled: true, reason: "任务运行未满 30 天" },
-        ]}
-      />
-      <div className="status-line" style={{ minHeight: 0 }}>
-        <div>
-          <strong className="mono" style={{ fontSize: 14 }}>run-28003</strong>
-          <span>{stats[range]}</span>
-        </div>
+      <Tabs value={range} onValueChange={setRange}>
+        <SegmentedList aria-label="指标时间范围">
+          <SegmentedTrigger value="24h">24 小时</SegmentedTrigger>
+          <SegmentedTrigger value="7d">7 天</SegmentedTrigger>
+          <SegmentedTrigger value="30d" disabled title="任务运行未满 30 天" className="disabled:cursor-not-allowed disabled:opacity-50">
+            30 天
+          </SegmentedTrigger>
+        </SegmentedList>
+      </Tabs>
+      <div className="grid gap-0.5 rounded-lg border bg-card px-3 py-2.5 text-sm">
+        <strong className="font-mono text-foreground">run-28003</strong>
+        <span className="text-muted-foreground">{stats[range]}</span>
       </div>
       <p className="demo-note">数据不足的选项禁用并说明原因；切换后结果区域立即更新。</p>
     </div>
