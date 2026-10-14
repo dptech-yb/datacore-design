@@ -1,65 +1,26 @@
-import { SelectControl } from "../components/SelectControl";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
+import { DatePicker, DateRangePicker, countRangeDays, defaultDateRangePresets, type DateRange } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NumberInput } from "@/components/ui/number-input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { SearchField } from "@/components/ui/search-field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { Upload, UploadFileList, type UploadFileItem, type UploadRejection } from "@/components/ui/upload";
 import { cn } from "@/lib/utils";
-import {
-  AlertCircle,
-  Calendar,
-  Check,
-  ChevronDown,
-  FileText,
-  Loader2,
-  Minus,
-  Plus,
-  RotateCcw,
-  Search,
-  Upload,
-  X,
-} from "lucide-react";
-import { useId, useState } from "react";
-import type { CSSProperties } from "react";
+import { AlertCircle, Check, ChevronDown, FileText, Loader2, RotateCcw, X } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { PreviewFn } from "./types";
 
 /* ---------- 共享演示元件（仅本文件内部使用） ---------- */
-
-const triggerBase: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 8,
-  border: "1px solid var(--line-strong)",
-  borderRadius: 8,
-  background: "var(--surface)",
-  color: "var(--text)",
-  fontSize: 14,
-};
-
-/** 筛选栏里的静态触发器示意（FilterBar 专用，非真实 Select）。 */
-function FilterTrigger({ label, placeholder, width, small }: { label: string; placeholder?: boolean; width?: number | string; small?: boolean }) {
-  return (
-    <span style={{ ...triggerBase, height: small ? 29 : 37, padding: small ? "0 9px" : "0 10px", width, fontSize: small ? 11.5 : 12 }}>
-      <span style={{ color: placeholder ? "var(--faint)" : "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
-      <ChevronDown size={small ? 12 : 14} style={{ color: "var(--faint)", flex: "0 0 auto" }} />
-    </span>
-  );
-}
-
-const panelStyle: CSSProperties = {
-  border: "1px solid var(--line)",
-  borderRadius: 10,
-  background: "var(--surface)",
-  boxShadow: "var(--shadow-md)",
-  overflow: "hidden",
-  fontSize: 14,
-};
 
 /** 示例说明文字。 */
 const noteCls = "m-0 text-sm text-muted-foreground";
@@ -71,147 +32,6 @@ const invalidCls = "border-danger focus-visible:border-danger focus-visible:ring
 /** registry Checkbox 的半选态：隐藏对勾，画一条横线。 */
 const indeterminateCls =
   "relative data-[state=indeterminate]:bg-primary data-[state=indeterminate]:[&_svg]:hidden data-[state=indeterminate]:after:absolute data-[state=indeterminate]:after:inset-x-[3px] data-[state=indeterminate]:after:top-1/2 data-[state=indeterminate]:after:h-0.5 data-[state=indeterminate]:after:-translate-y-1/2 data-[state=indeterminate]:after:rounded-full data-[state=indeterminate]:after:bg-primary-foreground data-[state=indeterminate]:after:content-['']";
-
-function TagChip({ label, onRemove }: { label: string; onRemove?: () => void }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5,
-        height: 24,
-        padding: onRemove ? "0 5px 0 9px" : "0 9px",
-        borderRadius: 6,
-        background: "var(--brand-soft)",
-        color: "var(--brand)",
-        fontSize: 12,
-        fontWeight: 600,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {label}
-      {onRemove && (
-        <button type="button" aria-label={`移除筛选：${label}`} onClick={onRemove} style={{ background: "transparent", border: 0, color: "inherit", cursor: "pointer", display: "inline-flex", padding: 1 }}>
-          <X size={11} />
-        </button>
-      )}
-    </span>
-  );
-}
-
-const stepButton: CSSProperties = {
-  width: 30,
-  border: 0,
-  background: "var(--surface-soft)",
-  color: "var(--text-muted)",
-  cursor: "pointer",
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-function NumberStepper({ value, onChange, step, min, max, unit, digits }: { value: number; onChange: (next: number) => void; step: number; min: number; max: number; unit?: string; digits?: number }) {
-  const clamp = (n: number) => Math.min(max, Math.max(min, Number(n.toFixed(digits ?? 2))));
-  return (
-    <span style={{ display: "inline-flex", alignItems: "stretch", border: "1px solid var(--line-strong)", borderRadius: 8, overflow: "hidden", background: "var(--surface)", height: 37 }}>
-      <button type="button" aria-label="减少" onClick={() => onChange(clamp(value - step))} style={stepButton}>
-        <Minus size={13} />
-      </button>
-      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "0 10px", minWidth: 76, fontSize: 14, fontFamily: '"DM Mono", monospace', color: "var(--text)" }}>
-        {digits !== undefined ? value.toFixed(digits) : value}
-        {unit && <span style={{ color: "var(--faint)", marginLeft: 4 }}>{unit}</span>}
-      </span>
-      <button type="button" aria-label="增加" onClick={() => onChange(clamp(value + step))} style={stepButton}>
-        <Plus size={13} />
-      </button>
-    </span>
-  );
-}
-
-function SearchBox({ value, onChange, placeholder, loading, onClear, width }: { value?: string; onChange?: (next: string) => void; placeholder?: string; loading?: boolean; onClear?: () => void; width?: number | string }) {
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 8, height: 37, padding: "0 10px", border: "1px solid var(--line-strong)", borderRadius: 8, background: "var(--surface)", width: width ?? 320 }}>
-      <Search size={14} style={{ color: "var(--faint)", flex: "0 0 auto" }} />
-      <input
-        type="search"
-        aria-label={placeholder ?? "搜索"}
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => onChange?.(event.target.value)}
-        style={{ flex: 1, minWidth: 0, border: 0, outline: "none", background: "transparent", color: "var(--text)", fontSize: 14 }}
-      />
-      {loading && <span className="spinner-dark" aria-label="正在搜索" />}
-      {!loading && onClear && value && (
-        <button type="button" aria-label="清除搜索" onClick={onClear} style={{ border: 0, background: "transparent", color: "var(--faint)", cursor: "pointer", display: "inline-flex", padding: 2 }}>
-          <X size={13} />
-        </button>
-      )}
-    </span>
-  );
-}
-
-function CalendarPanel({ selectedDay, disableAfter }: { selectedDay?: number; disableAfter?: number }) {
-  const weekdays = ["一", "二", "三", "四", "五", "六", "日"];
-  const cells: (number | null)[] = [null, ...Array.from({ length: 30 }, (_, index) => index + 1)];
-  while (cells.length % 7 !== 0) cells.push(null);
-  return (
-    <div style={{ ...panelStyle, padding: 10, width: 252 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 2px 8px", fontSize: 14, fontWeight: 700 }}>
-        <span>2026 年 9 月</span>
-        <span style={{ color: "var(--faint)", fontWeight: 400, fontSize: 12 }}>今天 9/22</span>
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
-        {weekdays.map((day) => (
-          <span key={day} style={{ textAlign: "center", color: "var(--faint)", fontSize: 12, padding: "2px 0" }}>
-            {day}
-          </span>
-        ))}
-        {cells.map((day, index) => {
-          const disabled = day !== null && disableAfter !== undefined && day > disableAfter;
-          const selected = day === selectedDay;
-          return (
-            <span
-              key={index}
-              aria-disabled={disabled || undefined}
-              style={{
-                textAlign: "center",
-                padding: "4px 0",
-                borderRadius: 6,
-                fontSize: 12,
-                color: day === null ? "transparent" : disabled ? "var(--faint)" : selected ? "white" : "var(--text)",
-                background: selected ? "var(--brand)" : "transparent",
-                opacity: disabled ? 0.55 : 1,
-                cursor: disabled ? "not-allowed" : "pointer",
-              }}
-            >
-              {day ?? "·"}
-            </span>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function DateTrigger({ value, width }: { value: string; width?: number | string }) {
-  return (
-    <span style={{ ...triggerBase, height: 37, padding: "0 10px", width: width ?? 190, justifyContent: "flex-start" }}>
-      <Calendar size={14} style={{ color: "var(--faint)", flex: "0 0 auto" }} />
-      <span style={{ color: value ? "var(--text)" : "var(--faint)" }}>{value || "选择日期"}</span>
-    </span>
-  );
-}
-
-function RangeTrigger({ start, end, width }: { start?: string; end?: string; width?: number | string }) {
-  return (
-    <span style={{ ...triggerBase, height: 37, padding: "0 10px", width: width ?? 260, justifyContent: "flex-start", gap: 7 }}>
-      <Calendar size={14} style={{ color: "var(--faint)", flex: "0 0 auto" }} />
-      <span style={{ color: start ? "var(--text)" : "var(--faint)" }}>{start || "开始日期"}</span>
-      <span style={{ color: "var(--faint)" }}>~</span>
-      <span style={{ color: end ? "var(--text)" : "var(--faint)" }}>{end || "结束日期"}</span>
-    </span>
-  );
-}
 
 /* ---------- Input ---------- */
 
@@ -286,44 +106,69 @@ function InputBusiness() {
 /* ---------- InputNumber ---------- */
 
 function InputNumberBasic() {
-  const [value, setValue] = useState(1.5);
+  const id = useId();
+  const [value, setValue] = useState<number | null>(1.5);
   return (
-    <div className="demo-stack">
-      <div className="demo-row" style={{ alignItems: "center" }}>
-        <NumberStepper value={value} onChange={setValue} step={0.1} min={0} max={100} digits={1} />
-        <span className="demo-note">min 0 · max 100 · step 0.1</span>
+    <div className="grid max-w-[260px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-conc`}>添加剂浓度（%）</Label>
+        <NumberInput id={`${id}-conc`} value={value} onValueChange={setValue} min={0} max={100} step={0.1} precision={1} />
       </div>
-      <p className="demo-note">步进按钮与 ↑ / ↓ 方向键完全等价。</p>
+      <p className={noteCls}>min 0 · max 100 · step 0.1；步进按钮与 ↑ / ↓ 方向键等价。当前值：{value ?? "未填写"}</p>
     </div>
   );
 }
 
 function InputNumberPrecisionUnit() {
-  const [mass, setMass] = useState(12.4);
-  const [cycles, setCycles] = useState(200);
+  const id = useId();
+  const [mass, setMass] = useState<number | null>(12.4);
+  const [cycles, setCycles] = useState<number | null>(200);
   return (
-    <div className="demo-row" style={{ alignItems: "flex-start" }}>
-      <label className="field" style={{ minWidth: 190 }}>
-        称量质量（precision 2）
-        <NumberStepper value={mass} onChange={setMass} step={0.1} min={0} max={500} unit="mg" digits={2} />
-      </label>
-      <label className="field" style={{ minWidth: 190 }}>
-        循环次数（precision 0）
-        <NumberStepper value={cycles} onChange={setCycles} step={10} min={1} max={2000} unit="次" digits={0} />
-      </label>
+    <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-mass`}>称量质量（precision 2）</Label>
+        <NumberInput id={`${id}-mass`} value={mass} onValueChange={setMass} min={0} max={500} step={0.1} precision={2} unit="mg" />
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-cycles`}>循环次数（precision 0）</Label>
+        <NumberInput id={`${id}-cycles`} value={cycles} onValueChange={setCycles} min={1} max={2000} step={10} precision={0} unit="次" />
+      </div>
     </div>
   );
 }
 
 function InputNumberBusiness() {
-  const [mass, setMass] = useState(12.4);
+  const id = useId();
+  const [mass, setMass] = useState<number | null>(12.4);
+  const [touched, setTouched] = useState(false);
+  const missing = touched && mass === null;
   return (
-    <div style={{ maxWidth: 420 }}>
-      <label className="field">
-        称量质量
-        <NumberStepper value={mass} onChange={setMass} step={0.1} min={0} max={500} unit="mg" digits={2} />
-        <small>精度与天平一致（0.01 mg），量程 0–500 mg；留空表示未称量，不等于 0。</small>
-      </label>
+    <div className="grid max-w-[420px] gap-1.5">
+      <Label htmlFor={`${id}-mass`}>称量质量</Label>
+      <NumberInput
+        id={`${id}-mass`}
+        value={mass}
+        onValueChange={(next) => {
+          setMass(next);
+          setTouched(true);
+        }}
+        min={0}
+        max={500}
+        step={0.01}
+        precision={2}
+        unit="mg"
+        invalid={missing}
+        aria-describedby={`${id}-help`}
+      />
+      {missing ? (
+        <p id={`${id}-help`} role="alert" className={errorTextCls}>
+          请填写称量质量，允许 0–500 mg。
+        </p>
+      ) : (
+        <p id={`${id}-help`} className={helpCls}>
+          精度与天平一致（0.01 mg），量程 0–500 mg；超出量程会标红并在失焦时收敛到边界；留空表示未称量，不等于 0。
+        </p>
+      )}
     </div>
   );
 }
@@ -542,49 +387,140 @@ function SelectBusiness() {
 
 /* ---------- Combobox ---------- */
 
+const solventOptions: ComboboxOption[] = [
+  { value: "ec", label: "碳酸乙烯酯", description: "EC" },
+  { value: "dmc", label: "碳酸二甲酯", description: "DMC" },
+  { value: "emc", label: "碳酸甲乙酯", description: "EMC" },
+  { value: "pc", label: "碳酸丙烯酯", description: "PC" },
+];
+
 function ComboboxBasic() {
-  const [value,setValue] = useState<string[]>([]);
-  return <div style={{maxWidth:320}}><SelectControl label="溶剂" searchable options={[{value:"EC",label:"碳酸乙烯酯",hint:"EC"},{value:"DMC",label:"碳酸二甲酯",hint:"DMC"}]} value={value} onChange={setValue}/></div>;
+  const id = useId();
+  const [value, setValue] = useState<string | null>(null);
+  return (
+    <div className="grid max-w-[320px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-solvent`}>溶剂</Label>
+        <Combobox
+          id={`${id}-solvent`}
+          options={solventOptions}
+          value={value}
+          onValueChange={setValue}
+          placeholder="选择溶剂"
+          searchPlaceholder="搜索试剂名称或缩写"
+          emptyText="没有匹配的试剂"
+        />
+      </div>
+      <p className={noteCls}>输入即过滤，名称与缩写（EC / DMC）都可搜；再次点选已选项可取消。</p>
+    </div>
+  );
 }
+
 function ComboboxAllowCreate() {
-  const [value,setValue] = useState<string[]>([]);
-  const [options,setOptions] = useState([{value:"EC",label:"碳酸乙烯酯"}]);
-  return <div className="demo-stack" style={{maxWidth:320}}><SelectControl label="溶剂名称" searchable allowCreate options={options} value={value} onChange={next=>{setValue(next);if(next[0]&&!options.some(o=>o.value===next[0]))setOptions([...options,{value:next[0],label:next[0]}]);}}/><p className="demo-note">无匹配时可创建新的示例选项；已有选项可继续搜索。</p></div>;
+  const id = useId();
+  const [options, setOptions] = useState<ComboboxOption[]>([
+    { value: "high-conductivity", label: "高导配方" },
+    { value: "round-3", label: "第 3 轮" },
+    { value: "to-review", label: "待复核" },
+  ]);
+  const [value, setValue] = useState<string[]>(["round-3"]);
+  return (
+    <div className="grid max-w-[340px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-tags`}>实验标签</Label>
+        <Combobox
+          id={`${id}-tags`}
+          multiple
+          options={options}
+          value={value}
+          onValueChange={setValue}
+          placeholder="选择或创建标签"
+          searchPlaceholder="搜索或输入新标签"
+          onCreate={(name) => {
+            const next = { value: `tag-${options.length + 1}`, label: name };
+            setOptions((list) => [...list, next]);
+            setValue((list) => [...list, next.value]);
+          }}
+        />
+      </div>
+      <p className={noteCls}>多选保持面板打开，已选以 Badge 回显；输入不存在的标签时首项为“创建：输入值”，创建即选中。</p>
+    </div>
+  );
 }
+
 function ComboboxBusiness() {
-  const [value,setValue] = useState(["oven-07"]);
-  return <div className="demo-stack" style={{maxWidth:340}}><SelectControl label="预约仪器" searchable options={[{value:"oven-07",label:"恒温箱 07",hint:"可用"},{value:"oven-09",label:"恒温箱 09",hint:"维护中",disabled:true}]} value={value} onChange={setValue}/><p className="demo-note">不可用仪器保留原因，键盘选择时跳过。</p></div>;
+  const id = useId();
+  const [value, setValue] = useState<string | null>("ins-07");
+  return (
+    <div className="grid max-w-[340px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-instrument`}>预约仪器</Label>
+        <Combobox
+          id={`${id}-instrument`}
+          options={[
+            { value: "ins-07", label: "恒温箱 07", description: "可用" },
+            { value: "ins-08", label: "恒温箱 08", description: "可用" },
+            { value: "ins-09", label: "恒温箱 09", description: "维护中", disabled: true },
+            { value: "ins-12", label: "手套箱 12", description: "可用" },
+          ]}
+          value={value}
+          onValueChange={setValue}
+          placeholder="选择仪器"
+          searchPlaceholder="搜索仪器名称或编号"
+          emptyText="没有匹配的仪器"
+        />
+      </div>
+      <p className={noteCls}>不可用仪器保留并注明原因（维护中），不可选，键盘移动时跳过。</p>
+    </div>
+  );
 }
 
 /* ---------- DatePicker ---------- */
 
 function DatePickerBasic() {
+  const id = useId();
+  const [value, setValue] = useState<Date | null>(new Date(2026, 8, 22));
   return (
-    <div className="demo-stack" style={{ alignItems: "flex-start" }}>
-      <DateTrigger value="2026-09-22" />
-      <CalendarPanel selectedDay={22} />
-      <p className="demo-note">点选日期即确认；也支持手动输入，失焦时解析。</p>
+    <div className="grid max-w-[260px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-date`}>实验日期</Label>
+        <DatePicker id={`${id}-date`} value={value} onValueChange={setValue} />
+      </div>
+      <p className={noteCls}>点选日期即确认并关闭面板；右侧 × 清除，格式统一为 yyyy-MM-dd。</p>
     </div>
   );
 }
 
 function DatePickerDisabledDate() {
+  const id = useId();
+  const [value, setValue] = useState<Date | null>(null);
   return (
-    <div className="demo-stack" style={{ alignItems: "flex-start" }}>
-      <CalendarPanel disableAfter={22} />
-      <p className="demo-note">未来日期在面板内直接禁用并弱化显示，而不是选中后再报错。</p>
+    <div className="grid max-w-[260px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-date`}>实验日期</Label>
+        <DatePicker id={`${id}-date`} value={value} onValueChange={setValue} placeholder="选择实验日期" disabledDates={{ after: new Date() }} />
+      </div>
+      <p className={noteCls}>未来日期在面板内直接禁用并弱化显示，而不是选中后再报错。</p>
     </div>
   );
 }
 
 function DatePickerBusiness() {
+  const id = useId();
+  const [value, setValue] = useState<Date | null>(new Date(2026, 8, 24));
   return (
-    <div style={{ maxWidth: 420 }}>
-      <label className="field">
-        预约日期
-        <DateTrigger value="2026-09-24" width="100%" />
-        <small>可预约未来 14 天，需提前 2 小时；预约计入 示例项目（project-042）额度。</small>
-      </label>
+    <div className="grid max-w-[420px] gap-1.5">
+      <Label htmlFor={`${id}-date`}>预约日期</Label>
+      <DatePicker
+        id={`${id}-date`}
+        value={value}
+        onValueChange={setValue}
+        disabledDates={[{ before: new Date(2026, 8, 22) }, { after: new Date(2026, 9, 6) }]}
+        aria-describedby={`${id}-help`}
+      />
+      <p id={`${id}-help`} className={helpCls}>
+        可预约 2026-09-22 至 2026-10-06，需提前 2 小时；预约计入 示例项目（project-042）额度。
+      </p>
     </div>
   );
 }
@@ -592,55 +528,65 @@ function DatePickerBusiness() {
 /* ---------- DateRangePicker ---------- */
 
 function DateRangePickerBasic() {
+  const id = useId();
+  const [value, setValue] = useState<DateRange | null>({ from: new Date(2026, 8, 1), to: new Date(2026, 8, 22) });
+  const days = countRangeDays(value);
   return (
-    <div className="demo-stack" style={{ alignItems: "flex-start" }}>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-        <RangeTrigger start="2026-09-01" end="2026-09-22" />
-        <span className="status-badge badge-info">22 天</span>
-      </span>
-      <p className="demo-note">第一次点击选开始，第二次点击选结束；悬停实时预览区间。</p>
+    <div className="grid max-w-[340px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-range`}>创建时间</Label>
+        <DateRangePicker id={`${id}-range`} value={value} onValueChange={setValue} presets={[]} />
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {days > 0 && <Badge tone="primary">已选 {days} 天</Badge>}
+        <p className={noteCls}>第一次点击选开始，第二次点击选结束，点“确定”生效。</p>
+      </div>
     </div>
   );
 }
 
-const rangePresets: { label: string; range: [string, string] }[] = [
-  { label: "最近 7 天", range: ["2026-09-16", "2026-09-22"] },
-  { label: "最近 30 天", range: ["2026-08-24", "2026-09-22"] },
-  { label: "本轮次", range: ["2026-09-01", "2026-09-22"] },
-];
-
 function DateRangePickerPresets() {
-  const [active, setActive] = useState(2);
-  const [start, end] = rangePresets[active].range;
+  const id = useId();
+  const [value, setValue] = useState<DateRange | null>(null);
   return (
-    <div className="demo-stack" style={{ alignItems: "flex-start" }}>
-      <div className="demo-row">
-        {rangePresets.map((preset, index) => (
-          <Button
-            key={preset.label}
-            variant={index === active ? "soft" : "secondary"}
-            size="sm"
-            aria-pressed={index === active}
-            onClick={() => setActive(index)}
-          >
-            {preset.label}
-          </Button>
-        ))}
+    <div className="grid max-w-[340px] gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor={`${id}-range`}>统计区间</Label>
+        <DateRangePicker
+          id={`${id}-range`}
+          value={value}
+          onValueChange={setValue}
+          presets={[...defaultDateRangePresets, { label: "本轮次", range: { from: new Date(2026, 8, 1), to: new Date(2026, 8, 22) } }]}
+        />
       </div>
-      <RangeTrigger start={start} end={end} />
-      <p className="demo-note">快捷项一键填充；命名必须具体——“最近 7 天”含今天。</p>
+      <p className={noteCls}>快捷项一键填充并关闭面板；默认提供“近 7 天 / 近 30 天”（含今天），可追加业务区间。</p>
     </div>
   );
 }
 
 function DateRangePickerBusiness() {
+  const id = useId();
+  const initial: DateRange = { from: new Date(2026, 8, 1), to: new Date(2026, 8, 22) };
+  const [value, setValue] = useState<DateRange | null>(initial);
+  const days = countRangeDays(value);
   return (
-    <div className="demo-stack">
-      <div className="demo-row">
-        <RangeTrigger start="2026-09-01" end="2026-09-22" />
-        <Button variant="ghost" size="sm" onClick={() => undefined}>清除筛选</Button>
+    <div className="grid gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <Label htmlFor={`${id}-range`} className="shrink-0">
+          创建时间
+        </Label>
+        <DateRangePicker id={`${id}-range`} className="w-[300px]" value={value} onValueChange={setValue} />
+        {value && (
+          <Button variant="ghost" size="sm" onClick={() => setValue(null)}>
+            清除筛选
+          </Button>
+        )}
       </div>
-      <p className="demo-note">已选 22 天 · 命中 18 个任务 · 区间含开始与结束当日 · 应用到 示例项目（project-042）的任务列表。</p>
+      <p className={noteCls} aria-live="polite">
+        {days > 0
+          ? `已选 ${days} 天 · 命中 18 个任务 · 区间含开始与结束当日 · 应用到 示例项目（project-042）的任务列表。`
+          : "未限定创建时间 · 显示 示例项目（project-042）的全部任务。"}
+      </p>
     </div>
   );
 }
@@ -1083,93 +1029,99 @@ function FormBusiness() {
 
 /* ---------- Upload ---------- */
 
+const MAX_UPLOAD = 50 * 1024 * 1024;
+
+/** 演示用：本地模拟上传进度（真实场景由父组件调用上传接口并回写进度）。 */
+function useDemoUploads(initial: UploadFileItem[] = []) {
+  const [files, setFiles] = useState<UploadFileItem[]>(initial);
+  const timers = useRef(new Map<string, ReturnType<typeof setInterval>>());
+  useEffect(() => {
+    const map = timers.current;
+    return () => map.forEach((timer) => clearInterval(timer));
+  }, []);
+
+  const run = (id: string) => {
+    clearInterval(timers.current.get(id));
+    const timer = setInterval(() => {
+      setFiles((list) =>
+        list.map((file) => {
+          if (file.id !== id || file.status !== "uploading") return file;
+          const progress = Math.min(100, (file.progress ?? 0) + 18);
+          return progress >= 100 ? { ...file, progress: 100, status: "success" } : { ...file, progress };
+        }),
+      );
+    }, 400);
+    timers.current.set(id, timer);
+    setTimeout(() => clearInterval(timer), 400 * 8);
+  };
+
+  const add = (picked: File[]) => {
+    const items = picked.map((file, index) => ({ id: `${Date.now()}-${index}`, name: file.name, size: file.size, status: "uploading" as const, progress: 0 }));
+    setFiles((list) => [...list, ...items]);
+    items.forEach((item) => run(item.id));
+  };
+  const reject = (rejections: UploadRejection[]) =>
+    setFiles((list) => [
+      ...list,
+      ...rejections.map((r, index) => ({ id: `${Date.now()}-r${index}`, name: r.file.name, size: r.file.size, status: "error" as const, error: r.reason })),
+    ]);
+  const retry = (target: UploadFileItem) => {
+    setFiles((list) => list.map((file) => (file.id === target.id ? { ...file, status: "uploading", progress: 0, error: undefined } : file)));
+    run(target.id);
+  };
+  const remove = (target: UploadFileItem) => {
+    clearInterval(timers.current.get(target.id));
+    setFiles((list) => list.filter((file) => file.id !== target.id));
+  };
+  return { files, add, reject, retry, remove };
+}
+
 function UploadBasic() {
+  const uploads = useDemoUploads();
   return (
-    <div className="demo-stack" style={{ maxWidth: 460 }}>
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label="上传文件，支持 .csv 与 .xlsx，单个不超过 50 MB"
-        style={{
-          border: "1.5px dashed var(--line-strong)",
-          borderRadius: 12,
-          padding: "26px 18px",
-          display: "grid",
-          justifyItems: "center",
-          gap: 6,
-          textAlign: "center",
-          cursor: "pointer",
-          background: "var(--surface)",
-        }}
-      >
-        <Upload size={18} style={{ color: "var(--brand)" }} />
-        <strong style={{ fontSize: 14 }}>拖拽文件到此处，或点击选择</strong>
-        <span style={{ color: "var(--text-muted)", fontSize: 12 }}>支持 .csv / .xlsx，单个 ≤ 50 MB · 示例文件：example.com/templates/battery.csv</span>
-      </div>
-      <p className="demo-note">接受的格式与大小上限前置写在区域内；不符在选择时即拒绝。</p>
+    <div className="grid max-w-[480px] gap-3">
+      <Upload accept=".csv,.xlsx" maxSize={MAX_UPLOAD} multiple onFilesSelected={uploads.add} onFilesRejected={uploads.reject} />
+      <UploadFileList files={uploads.files} onRetry={uploads.retry} onRemove={uploads.remove} />
+      <p className={noteCls}>接受的格式与大小上限写在区域内；类型或大小不符在选择时即拒绝并逐个说明原因。示例文件：example.com/templates/battery.csv</p>
     </div>
   );
 }
 
 function UploadProgress() {
+  const uploads = useDemoUploads([
+    { id: "f1", name: "cycle_data_20260901.csv", size: 19_084_492, status: "uploading", progress: 72 },
+    { id: "f2", name: "notes_final(2).xlsx", size: 63_963_136, status: "error", error: "超过 50.0 MB 上限（61.0 MB），未开始上传" },
+    { id: "f3", name: "impedance_run-28003.csv", size: 2_411_724, status: "success" },
+  ]);
   return (
-    <div className="demo-stack" style={{ maxWidth: 480 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "1px solid var(--line)", borderRadius: 10, fontSize: 14 }}>
-        <FileText size={15} style={{ color: "var(--brand)", flex: "0 0 auto" }} />
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <strong style={{ display: "block", fontSize: 14 }}>cycle_data_20260901.csv</strong>
-          <span style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5 }}>
-            <span style={{ flex: 1, height: 5, borderRadius: 999, background: "var(--surface-soft)", overflow: "hidden" }}>
-              <span role="progressbar" aria-valuenow={72} style={{ display: "block", width: "72%", height: "100%", borderRadius: 999, background: "var(--brand)" }} />
-            </span>
-            <span className="mono" style={{ color: "var(--text-muted)" }}>72%</span>
-          </span>
-        </span>
-        <Button variant="link" size="sm">取消</Button>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "1px solid color-mix(in srgb, var(--red) 30%, var(--line))", borderRadius: 10, fontSize: 14 }}>
-        <FileText size={15} style={{ color: "var(--red)", flex: "0 0 auto" }} />
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <strong style={{ display: "block", fontSize: 14 }}>notes_final(2).xlsx</strong>
-          <span role="alert" style={{ color: "var(--red)", fontSize: 12 }}>超过 50 MB 上限（61 MB），未开始上传。</span>
-        </span>
-        <Button variant="link" size="sm">重试</Button>
-      </div>
-      <p className="demo-note">逐文件展示进度与百分比；失败给出具体原因并可单独重试，不静默丢弃。</p>
+    <div className="grid max-w-[480px] gap-3">
+      <UploadFileList files={uploads.files} onRetry={uploads.retry} onRemove={uploads.remove} />
+      <p className={noteCls}>逐文件展示进度与百分比；失败给出具体原因并可单独重试，不静默丢弃。</p>
     </div>
   );
 }
 
 function UploadBusiness() {
+  const uploads = useDemoUploads();
   return (
-    <div className="demo-stack" style={{ maxWidth: 480 }}>
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label="导入仪器原始数据，支持 .csv 与 .xlsx，单个不超过 50 MB"
-        style={{
-          border: "1.5px dashed var(--line-strong)",
-          borderRadius: 12,
-          padding: "18px",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          cursor: "pointer",
-          background: "var(--surface)",
-          fontSize: 14,
-        }}
-      >
-        <Upload size={16} style={{ color: "var(--brand)" }} />
-        <strong>导入仪器原始数据</strong>
-        <span style={{ color: "var(--text-muted)", fontSize: 12 }}>.csv / .xlsx · ≤ 50 MB</span>
-      </div>
-      <div className="notice-card notice-green" style={{ marginTop: 0 }}>
-        <div className="notice-icon"><FileText size={16} /></div>
-        <div>
-          <strong>原始文件将不可变保留</strong>
-          <p>原始文件与解析产物分开存储；解析失败可重新解析，不覆盖原始文件。上传成功后自动关联到 示例项目（<span className="mono">project-042</span>）的数据集（如 <span className="mono">ds-118</span>）。</p>
-        </div>
-      </div>
+    <div className="grid max-w-[520px] gap-3">
+      <Upload
+        layout="inline"
+        accept=".csv,.xlsx"
+        maxSize={MAX_UPLOAD}
+        title="导入仪器原始数据"
+        description=".csv / .xlsx · 单个 ≤ 50 MB"
+        onFilesSelected={uploads.add}
+        onFilesRejected={uploads.reject}
+      />
+      <UploadFileList files={uploads.files} onRetry={uploads.retry} onRemove={uploads.remove} />
+      <Alert variant="success">
+        <FileText className="size-4" />
+        <AlertTitle>原始文件将不可变保留</AlertTitle>
+        <AlertDescription>
+          原始文件与解析产物分开存储；解析失败可重新解析，不覆盖原始文件。上传成功后自动关联到 示例项目（project-042）的数据集（如 ds-118）。
+        </AlertDescription>
+      </Alert>
     </div>
   );
 }
@@ -1177,14 +1129,13 @@ function UploadBusiness() {
 /* ---------- SearchField ---------- */
 
 function SearchFieldBasic() {
+  const [last, setLast] = useState("");
   return (
-    <div className="demo-stack" style={{ alignItems: "flex-start" }}>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 8, height: 37, padding: "0 10px", border: "1px solid var(--line-strong)", borderRadius: 8, background: "var(--surface)", width: 320 }}>
-        <Search size={14} style={{ color: "var(--faint)", flex: "0 0 auto" }} />
-        <input type="search" aria-label="搜索数据集" placeholder="搜索数据集名称或编号" style={{ flex: 1, minWidth: 0, border: 0, outline: "none", background: "transparent", color: "var(--text)", fontSize: 14 }} />
-        <kbd>/</kbd>
-      </span>
-      <p className="demo-note">占位文本写明可搜字段；页面级搜索支持 / 快捷键聚焦。</p>
+    <div className="grid max-w-[320px] gap-3">
+      <SearchField placeholder="搜索数据集名称或编号" shortcut="/" onSearch={setLast} />
+      <p className={noteCls}>
+        占位文本写明可搜字段；按 / 聚焦，Enter 搜索，Esc 清空。{last ? `已搜索：${last}` : ""}
+      </p>
     </div>
   );
 }
@@ -1192,10 +1143,10 @@ function SearchFieldBasic() {
 function SearchFieldLoadingClear() {
   const [value, setValue] = useState("run-");
   return (
-    <div className="demo-stack" style={{ alignItems: "flex-start", gap: 12 }}>
-      <SearchBox value="ds-118" loading width={320} onChange={() => undefined} />
-      <SearchBox value={value} width={320} onChange={setValue} onClear={() => setValue("")} />
-      <p className="demo-note">搜索中右侧显示 spinner，输入不锁定；有值时提供一键清除。</p>
+    <div className="grid max-w-[320px] gap-3">
+      <SearchField aria-label="搜索数据集（搜索中）" defaultValue="ds-118" loading clearable={false} />
+      <SearchField aria-label="搜索任务" value={value} onValueChange={setValue} />
+      <p className={noteCls}>搜索中右侧显示 spinner，输入不锁定；有值时提供一键清除。</p>
     </div>
   );
 }
@@ -1207,115 +1158,236 @@ const demoRuns = [
 ];
 
 function SearchFieldBusiness() {
+  const [input, setInput] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [pending, setPending] = useState(false);
   const matched = demoRuns.filter((run) => run.id.includes(keyword) || run.name.includes(keyword));
   return (
-    <div className="demo-stack" style={{ maxWidth: 420 }}>
-      <SearchBox value={keyword} onChange={setKeyword} onClear={() => setKeyword("")} placeholder="搜索任务名称或编号" width="100%" />
+    <div className="grid max-w-[420px] gap-3">
+      <SearchField
+        placeholder="搜索任务名称或编号"
+        value={input}
+        onValueChange={(next) => {
+          setInput(next);
+          setPending(true);
+        }}
+        debounce={300}
+        loading={pending}
+        onSearch={(next) => {
+          setKeyword(next.trim());
+          setPending(false);
+        }}
+      />
       {matched.length > 0 ? (
-        <div className="demo-stack" style={{ gap: 6 }}>
+        <ul className="m-0 grid list-none gap-1.5 p-0" aria-live="polite">
           {matched.map((run) => (
-            <div key={run.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "8px 10px", border: "1px solid var(--line)", borderRadius: 8, fontSize: 14 }}>
-              <strong style={{ fontSize: 14 }}>{run.name}</strong>
-              <span className="mono" style={{ color: "var(--faint)" }}>{run.id}</span>
-            </div>
+            <li key={run.id} className="flex items-center justify-between gap-2.5 rounded-md border px-2.5 py-2 text-base">
+              <span className="font-medium">{run.name}</span>
+              <span className="font-mono text-xs text-muted-foreground">{run.id}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : (
-        <div className="empty-line">
+        <div className="flex items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2.5 text-sm text-muted-foreground" aria-live="polite">
           <span>没有匹配「{keyword}」的任务</span>
-          <Button variant="link" size="sm" onClick={() => setKeyword("")}>清除关键词</Button>
+          <Button
+            variant="link"
+            size="sm"
+            onClick={() => {
+              setInput("");
+              setKeyword("");
+            }}
+          >
+            清除关键词
+          </Button>
         </div>
       )}
-      <p className="demo-note">防抖 300ms 即时过滤；空结果给出清除动作。</p>
+      <p className={noteCls}>停止输入 300ms 后过滤（Enter 立即搜索）；空结果给出清除动作。</p>
     </div>
   );
 }
 
-/* ---------- FilterBar ---------- */
+/* ---------- FilterBar（组合：SearchField + Select + DateRangePicker + Button） ---------- */
+
+const statusLabels: Record<string, string> = { all: "全部状态", running: "运行中", queued: "排队中", finished: "已完成" };
+
+interface FilterState {
+  keyword: string;
+  status: string;
+  createdAt: DateRange | null;
+}
+
+const emptyFilters: FilterState = { keyword: "", status: "all", createdAt: null };
+
+function isDefaultFilters(f: FilterState) {
+  return f.keyword === "" && f.status === "all" && !f.createdAt;
+}
+
+function DemoFilterBar({ value, onChange }: { value: FilterState; onChange: (next: FilterState) => void }) {
+  return (
+    <div role="search" aria-label="筛选条件" className="flex flex-wrap items-center gap-2">
+      <SearchField
+        wrapperClassName="w-[220px]"
+        placeholder="搜索任务名称或编号"
+        value={value.keyword}
+        onValueChange={(keyword) => onChange({ ...value, keyword })}
+      />
+      <Select value={value.status} onValueChange={(status) => onChange({ ...value, status })}>
+        <SelectTrigger aria-label="状态" className="w-[132px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.entries(statusLabels).map(([key, label]) => (
+            <SelectItem key={key} value={key}>
+              {label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <DateRangePicker
+        aria-label="创建时间"
+        className="w-[260px]"
+        placeholder="创建时间"
+        value={value.createdAt}
+        onValueChange={(createdAt) => onChange({ ...value, createdAt })}
+      />
+      {!isDefaultFilters(value) && (
+        <Button variant="ghost" onClick={() => onChange(emptyFilters)}>
+          <RotateCcw />
+          重置
+        </Button>
+      )}
+    </div>
+  );
+}
 
 function FilterBarBasic() {
+  const [filters, setFilters] = useState<FilterState>({ ...emptyFilters, status: "running" });
   return (
-    <div className="demo-stack">
-      <div className="demo-row" role="search" aria-label="筛选条件">
-        <FilterTrigger small label="状态：全部" />
-        <FilterTrigger small label="创建时间：最近 30 天" />
-        <FilterTrigger small label="负责人：全部" />
-        <Button variant="secondary" size="sm">
-          更多筛选
-          <ChevronDown />
-        </Button>
-        <Button variant="ghost" size="sm">
-          <RotateCcw />
-          重置
-        </Button>
-      </div>
-      <p className="demo-note">常用条件外露不超过 3 个，其余收进“更多筛选”；有非默认条件时出现重置入口。</p>
+    <div className="grid gap-3">
+      <DemoFilterBar value={filters} onChange={setFilters} />
+      <p className={noteCls}>关键词、状态、创建时间三项外露；有非默认条件时出现“重置”。</p>
     </div>
   );
 }
 
-const defaultActiveFilters = ["状态 = 运行中", "创建时间 = 最近 7 天", "项目 = project-042"];
+const fmtDay = (d?: Date) => (d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "");
+
+function activeChips(f: FilterState): { key: keyof FilterState; label: string }[] {
+  const chips: { key: keyof FilterState; label: string }[] = [];
+  if (f.keyword) chips.push({ key: "keyword", label: `关键词 = ${f.keyword}` });
+  if (f.status !== "all") chips.push({ key: "status", label: `状态 = ${statusLabels[f.status]}` });
+  if (f.createdAt?.from && f.createdAt.to) chips.push({ key: "createdAt", label: `创建时间 = ${fmtDay(f.createdAt.from)} ~ ${fmtDay(f.createdAt.to)}` });
+  return chips;
+}
+
+function ActiveFilterBadges({ value, onChange }: { value: FilterState; onChange: (next: FilterState) => void }) {
+  const chips = activeChips(value);
+  if (chips.length === 0) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-sm text-muted-foreground">已选条件：</span>
+      {chips.map((chip) => (
+        <Badge key={chip.key} tone="primary" className="pr-0.5">
+          {chip.label}
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={`移除筛选：${chip.label}`}
+            onClick={() => onChange({ ...value, [chip.key]: emptyFilters[chip.key] })}
+            className="size-4 text-primary hover:bg-primary/10 [&_svg]:size-3"
+          >
+            <X />
+          </Button>
+        </Badge>
+      ))}
+    </div>
+  );
+}
+
+const activeDefaults: FilterState = { keyword: "", status: "running", createdAt: { from: new Date(2026, 8, 16), to: new Date(2026, 8, 22) } };
 
 function FilterBarActiveFilters() {
-  const [active, setActive] = useState(defaultActiveFilters);
+  const [filters, setFilters] = useState<FilterState>(activeDefaults);
   return (
-    <div className="demo-stack">
-      <div className="demo-row">
-        {active.map((filter) => (
-          <TagChip key={filter} label={filter} onRemove={() => setActive((list) => list.filter((item) => item !== filter))} />
-        ))}
-        <Button variant="ghost" size="sm" onClick={() => setActive(defaultActiveFilters)}>
+    <div className="grid gap-3">
+      <ActiveFilterBadges value={filters} onChange={setFilters} />
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="sm" onClick={() => setFilters(emptyFilters)} disabled={isDefaultFilters(filters)}>
           <RotateCcw />
           重置
         </Button>
+        <Button variant="link" size="sm" onClick={() => setFilters(activeDefaults)}>
+          恢复演示条件
+        </Button>
       </div>
-      <p className="demo-note">面板收起后已选条件以 Tag 回显，可单个移除；重置一键恢复默认（演示中恢复全部标签）。</p>
+      <p className={noteCls}>已选条件以 Badge 回显，可单个移除；“重置”一键恢复默认。</p>
     </div>
   );
 }
 
+const filterRuns = [
+  { id: "run-28003", name: "电导率优化第 3 轮", status: "running", createdAt: new Date(2026, 8, 21) },
+  { id: "run-28004", name: "热稳定性复测", status: "running", createdAt: new Date(2026, 8, 19) },
+  { id: "run-28005", name: "空白对照", status: "finished", createdAt: new Date(2026, 8, 12) },
+  { id: "run-28006", name: "低温循环", status: "queued", createdAt: new Date(2026, 8, 20) },
+  { id: "run-28007", name: "倍率性能验证", status: "running", createdAt: new Date(2026, 8, 17) },
+];
+
+const statusTone: Record<string, "success" | "neutral" | "primary"> = { running: "success", queued: "neutral", finished: "primary" };
+
 function FilterBarBusiness() {
+  const [filters, setFilters] = useState<FilterState>({ ...emptyFilters, status: "running" });
+  const rows = filterRuns.filter((run) => {
+    const kw = filters.keyword.trim();
+    if (kw && !run.id.includes(kw) && !run.name.includes(kw)) return false;
+    if (filters.status !== "all" && run.status !== filters.status) return false;
+    const range = filters.createdAt;
+    if (range?.from && range.to && (run.createdAt < range.from || run.createdAt > range.to)) return false;
+    return true;
+  });
   return (
-    <div className="demo-stack">
-      <div className="demo-row" role="search" aria-label="筛选条件">
-        <FilterTrigger small label="状态：运行中" />
-        <FilterTrigger small label="创建时间：最近 7 天" />
-        <Button variant="secondary" size="sm">
-          更多筛选
-          <ChevronDown />
-        </Button>
-        <TagChip label="状态 = 运行中" onRemove={() => undefined} />
+    <div className="grid gap-3">
+      <DemoFilterBar value={filters} onChange={setFilters} />
+      <ActiveFilterBadges value={filters} onChange={setFilters} />
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>任务</TableHead>
+              <TableHead>状态</TableHead>
+              <TableHead className="text-right">创建时间</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.length > 0 ? (
+              rows.map((run) => (
+                <TableRow key={run.id}>
+                  <TableCell>
+                    <span className="font-medium">{run.name}</span>
+                    <span className="ml-2 font-mono text-xs text-muted-foreground">{run.id}</span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge tone={statusTone[run.status]} dot>
+                      {statusLabels[run.status]}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">{fmtDay(run.createdAt)}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center text-muted-foreground">
+                  没有符合当前筛选的任务
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>任务</th>
-              <th>状态</th>
-              <th>创建时间</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>电导率优化第 3 轮</strong><span className="table-secondary">run-28003</span></td>
-              <td><span className="status-badge badge-success"><span className="badge-dot" />运行中</span></td>
-              <td className="num">2026-09-21</td>
-            </tr>
-            <tr>
-              <td><strong>热稳定性复测</strong><span className="table-secondary">run-28004</span></td>
-              <td><span className="status-badge badge-success"><span className="badge-dot" />运行中</span></td>
-              <td className="num">2026-09-19</td>
-            </tr>
-            <tr>
-              <td><strong>倍率性能验证</strong><span className="table-secondary">run-28007</span></td>
-              <td><span className="status-badge badge-success"><span className="badge-dot" />运行中</span></td>
-              <td className="num">2026-09-17</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p className="demo-note">共 3 个任务 · 已按「状态 = 运行中」筛选 · 条件变化即时应用到列表与计数，无需“查询”按钮。</p>
+      <p className={noteCls} aria-live="polite">
+        共 {rows.length} 个任务 · 条件变化即时应用到列表与计数，无需“查询”按钮。
+      </p>
     </div>
   );
 }

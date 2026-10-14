@@ -62,7 +62,7 @@ function flattenVisible(nodes: TreeNode[], expanded: Set<string>, level = 1, par
   return out;
 }
 
-export interface TreeProps extends Omit<React.HTMLAttributes<HTMLUListElement>, "onSelect"> {
+export interface TreeProps extends Omit<React.HTMLAttributes<HTMLUListElement>, "onSelect" | "defaultChecked"> {
   data: TreeNode[];
   /** 受控展开的节点 ID。 */
   expanded?: string[];

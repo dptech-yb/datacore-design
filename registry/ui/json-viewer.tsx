@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
-export interface JsonViewerProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface JsonViewerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onCopy"> {
   /** 要展示的 JSON 数据（可序列化的值）。 */
   data: unknown;
   /** 默认展开的层级；0 只显示根节点摘要。 */

@@ -1,11 +1,7 @@
-import { Modal as AccessibleModal } from "../components/Modal";
 import {
   AlertTriangle,
   Check,
   CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  Copy,
   Database,
   Download,
   FileText,
@@ -13,17 +9,20 @@ import {
   Info,
   Loader2,
   Lock,
+  Sparkles,
   Trash2,
-  TrendingDown,
-  TrendingUp,
   X,
   XCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CodeBlock } from "@/components/ui/code-block";
+import { Descriptions, DescriptionsItem } from "@/components/ui/descriptions";
 import {
   Dialog,
   DialogClose,
@@ -34,50 +33,30 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { FileList, FileListItem } from "@/components/ui/file-list";
 import { Input } from "@/components/ui/input";
+import { JsonViewer } from "@/components/ui/json-viewer";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
+import { LoadingOverlay, Spinner } from "@/components/ui/spinner";
+import { Statistic } from "@/components/ui/statistic";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Timeline, TimelineItem } from "@/components/ui/timeline";
+import { Tree, type TreeNode } from "@/components/ui/tree";
 import { cn } from "@/lib/utils";
 import type { PreviewFn } from "./types";
-
-/* ---------- shared demo helpers (inline styles only, theme-token based) ---------- */
-
-function DescItem({ label, children, mono }: { label: string; children: ReactNode; mono?: boolean }) {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 10, padding: "7px 0", borderBottom: "1px solid var(--line)", fontSize: 14 }}>
-      <span style={{ color: "var(--text-muted)" }}>{label}</span>
-      <span className={mono ? "mono" : undefined} style={mono ? undefined : { minWidth: 0 }}>{children}</span>
-    </div>
-  );
-}
-
-const treeRowStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 6,
-  padding: "5px 6px",
-  borderRadius: 6,
-  fontSize: 14,
-  color: "var(--text)",
-  background: "none",
-  cursor: "pointer",
-  textAlign: "left",
-  width: "100%",
-};
-
-const fileRowStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 10,
-  padding: "9px 12px",
-  border: "1px solid var(--line)",
-  borderRadius: 10,
-  fontSize: 14,
-  background: "var(--surface)",
-};
 
 /* ---------- Table ---------- */
 
@@ -277,717 +256,444 @@ function TableBusiness() {
 
 function DescriptionsBasic() {
   return (
-    <div className="card-demo" style={{ maxWidth: 520 }}>
-      <h4>任务详情</h4>
-      <div style={{ marginTop: 8 }}>
-        <DescItem label="任务 ID" mono>run-28003</DescItem>
-        <DescItem label="所属项目">示例项目（project-042）</DescItem>
-        <DescItem label="状态">
-          <Badge tone="success" dot>已完成</Badge>
-        </DescItem>
-        <DescItem label="耗时" mono>286.4 秒</DescItem>
-      </div>
-    </div>
+    <Descriptions title="任务详情" className="max-w-lg">
+      <DescriptionsItem label="任务 ID" mono>run-28003</DescriptionsItem>
+      <DescriptionsItem label="所属项目">示例项目（project-042）</DescriptionsItem>
+      <DescriptionsItem label="状态">
+        <Badge tone="success" dot>已完成</Badge>
+      </DescriptionsItem>
+      <DescriptionsItem label="耗时" mono>286.4 秒</DescriptionsItem>
+    </Descriptions>
   );
 }
 
 function DescriptionsLayout() {
-  const items = [
-    { label: "数据集 ID", value: "ds-118", mono: true },
-    { label: "版本", value: "v3 · 2026-09-18 更新" },
-    { label: "数据量", value: "1,000 行 · 12 字段", mono: true },
-    { label: "创建方式", value: "UniLab 导入" },
-  ];
   return (
     <div className="demo-stack">
-      <div className="demo-grid-2" style={{ maxWidth: 560 }}>
-        {items.map((item) => (
-          <div key={item.label} style={{ border: "1px solid var(--line)", borderRadius: 8, padding: "9px 12px", background: "var(--surface)" }}>
-            <div style={{ color: "var(--text-muted)", fontSize: 12 }}>{item.label}</div>
-            <div className={item.mono ? "mono" : undefined} style={{ marginTop: 2, fontSize: 14 }}>
-              {item.value}
-            </div>
-          </div>
-        ))}
-      </div>
-      <p className="demo-note">layout=&quot;vertical&quot; + column=&#123;2&#125; + bordered：标签在上、值在下，带边框单元格。</p>
+      <Descriptions title="数据集信息" columns={2} layout="vertical" bordered className="max-w-xl">
+        <DescriptionsItem label="数据集 ID" mono>ds-118</DescriptionsItem>
+        <DescriptionsItem label="版本">v3 · 2026-09-18 更新</DescriptionsItem>
+        <DescriptionsItem label="数据量" mono>1,000 行 · 12 字段</DescriptionsItem>
+        <DescriptionsItem label="创建方式">UniLab 导入</DescriptionsItem>
+      </Descriptions>
+      <Descriptions columns={2} bordered labelWidth={96} className="max-w-xl">
+        <DescriptionsItem label="方法">PBE0</DescriptionsItem>
+        <DescriptionsItem label="截断能" mono>520 eV</DescriptionsItem>
+        <DescriptionsItem label="备注" span={2}>{null}</DescriptionsItem>
+      </Descriptions>
+      <p className="demo-note">上：layout=&quot;vertical&quot; + columns=&#123;2&#125; + bordered；下：horizontal + labelWidth=&#123;96&#125;，空值自动显示 —。</p>
     </div>
   );
 }
 
 function DescriptionsBusiness() {
-  const [copied, setCopied] = useState(false);
   return (
-    <div className="card-demo" style={{ maxWidth: 560 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-        <h4>数据集 ds-118</h4>
-        <Button
-          variant="link" size="sm" className="h-auto px-0"
-          onClick={() => {
-            setCopied(true);
-            window.setTimeout(() => setCopied(false), 1500);
-          }}
-        >
-          {copied ? <Check size={13} /> : <Copy size={13} />}
-          {copied ? "已复制 ID" : "复制 ID"}
-        </Button>
-      </div>
-      <div style={{ marginTop: 8 }}>
-        <DescItem label="数据集 ID" mono>ds-118</DescItem>
-        <DescItem label="所属项目">示例项目（project-042）</DescItem>
-        <DescItem label="版本">v3 · 2026-09-18 更新</DescItem>
-        <DescItem label="数据量" mono>1,000 行 · 12 字段</DescItem>
-        <DescItem label="质量状态">
-          <Badge tone="warning" dot>3 行缺少密度字段</Badge>
-        </DescItem>
-      </div>
-    </div>
+    <Descriptions title="数据集 ds-118" columns={2} className="max-w-xl">
+      <DescriptionsItem label="数据集 ID" mono copyable>ds-118</DescriptionsItem>
+      <DescriptionsItem label="所属项目">示例项目（project-042）</DescriptionsItem>
+      <DescriptionsItem label="版本">v3 · 2026-09-18 更新</DescriptionsItem>
+      <DescriptionsItem label="数据量" mono>1,000 行 · 12 字段</DescriptionsItem>
+      <DescriptionsItem label="质量状态" span={2}>
+        <Badge tone="warning" dot>3 行缺少密度字段</Badge>
+      </DescriptionsItem>
+    </Descriptions>
   );
 }
 
 /* ---------- Statistic ---------- */
 
-function StatBlock({ title, value, suffix, extra }: { title: string; value: string; suffix?: string; extra?: ReactNode }) {
-  return (
-    <div style={{ border: "1px solid var(--line)", borderRadius: 10, padding: "12px 14px", background: "var(--surface)", display: "grid", gap: 4 }}>
-      <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{title}</span>
-      <span style={{ fontSize: 24.0, fontWeight: 700, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
-        {value}
-        {suffix && <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-muted)", marginLeft: 4 }}>{suffix}</span>}
-      </span>
-      {extra}
-    </div>
-  );
-}
-
 function StatisticBasic() {
   return (
-    <div className="demo-grid-3">
-      <StatBlock title="本周计算任务" value="128" suffix="个" />
-      <StatBlock title="平均成功率" value="86.4" suffix="%" />
-      <StatBlock title="本周费用" value="¥1,280.40" />
+    <div className="grid gap-3 sm:grid-cols-3">
+      <Statistic variant="card" label="本周计算任务" value={128} unit="个" />
+      <Statistic variant="card" label="平均成功率" value={86.4} precision={1} suffix="%" />
+      <Statistic variant="card" label="本周费用" value={1280.4} precision={2} prefix="¥" />
     </div>
   );
 }
 
 function StatisticTrend() {
+  const [loading, setLoading] = useState(false);
   return (
     <div className="demo-stack">
-      <div className="demo-grid-2">
-        <StatBlock
-          title="平均耗时"
-          value="286.4"
-          suffix="秒"
-          extra={
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--green)", fontSize: 12 }}>
-              <TrendingDown size={14} />
-              -12.3% · 较上周
-            </span>
-          }
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Statistic
+          variant="card"
+          label="平均耗时"
+          value={286.4}
+          precision={1}
+          unit="秒"
+          goodDirection="down"
+          trend={{ value: "-12.3%", direction: "down", label: "较上周" }}
+          loading={loading}
         />
-        <StatBlock
-          title="失败任务"
-          value="6"
-          suffix="个"
-          extra={
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--red)", fontSize: 12 }}>
-              <TrendingUp size={14} />
-              +2 · 较上周
-            </span>
-          }
-        />
+        <Statistic variant="card" label="失败任务" value={6} unit="个" goodDirection="down" trend={{ value: 2, label: "较上周" }} loading={loading} />
+        <Statistic variant="card" label="成功率" value={86.4} precision={1} suffix="%" trend={{ value: 0, label: "较上周" }} loading={loading} />
       </div>
-      <p className="demo-note">趋势用箭头 + 文字 + 对比口径表达，不只靠红绿颜色。</p>
+      <div className="demo-row">
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={loading}
+          onClick={() => {
+            setLoading(true);
+            window.setTimeout(() => setLoading(false), 1200);
+          }}
+        >
+          模拟刷新
+        </Button>
+        <span className="demo-note">耗时、失败数下降为好（goodDirection=&quot;down&quot;）；箭头 + 文字 + 对比口径，不只靠红绿。</span>
+      </div>
     </div>
   );
 }
 
 function StatisticBusiness() {
+  const open = (label: string) => toast(`跳转到任务列表 · 筛选：${label}`);
+  const link =
+    "block rounded-lg border bg-card px-4 py-3 no-underline transition-shadow duration-fast hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
   return (
-    <div className="demo-stack">
-      <div className="card-demo">
-        <h4>示例项目（project-042）· 近 7 天概览</h4>
-        <div className="demo-grid-3" style={{ marginTop: 12 }}>
-          <StatBlock title="计算任务" value="128" suffix="个" />
-          <StatBlock title="成功率" value="86.4" suffix="%" />
-          <StatBlock title="费用" value="¥1,280.40" />
-        </div>
+    <Card className="grid gap-3 p-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h4 className="m-0 text-base font-semibold">示例项目（project-042）· 近 7 天概览</h4>
+        <span className="text-xs text-muted-foreground">统计周期 2026-09-15 – 2026-09-21</span>
       </div>
-      <p className="demo-note">统计周期 2026-09-15 – 2026-09-21 · 点击统计卡跳转到携带筛选条件的任务列表。</p>
-    </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <a href="#runs" className={link} onClick={(e) => { e.preventDefault(); open("全部"); }}>
+          <Statistic label="计算任务" value={128} unit="个" trend={{ value: 14, label: "较前 7 天" }} />
+        </a>
+        <a href="#runs" className={link} onClick={(e) => { e.preventDefault(); open("已完成"); }}>
+          <Statistic label="成功率" value={86.4} precision={1} suffix="%" trend={{ value: "+1.2%", direction: "up", label: "较前 7 天" }} />
+        </a>
+        <Statistic variant="card" label="费用" value={null} prefix="¥" />
+      </div>
+      <p className="demo-note">统计卡用 &lt;a&gt; 包裹即可点击跳转（携带筛选条件）；费用暂无数据显示 —，不用 0 冒充。</p>
+    </Card>
   );
 }
 
 /* ---------- Timeline ---------- */
 
-function TimelineNode({
-  time,
-  title,
-  desc,
-  tone = "default",
-  last,
-}: {
-  time: string;
-  title: string;
-  desc?: ReactNode;
-  tone?: "default" | "success" | "error" | "processing";
-  last?: boolean;
-}) {
-  const dot =
-    tone === "success" ? "var(--green)" : tone === "error" ? "var(--red)" : tone === "processing" ? "var(--brand)" : "var(--line-strong)";
-  return (
-    <div style={{ display: "flex", gap: 12 }}>
-      <span style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 12, flex: "0 0 auto" }}>
-        {tone === "processing" ? (
-          <span className="spinner spinner-dark" style={{ width: 10, height: 10, marginTop: 4 }} aria-hidden="true" />
-        ) : (
-          <span style={{ width: 9, height: 9, borderRadius: "50%", background: dot, marginTop: 4, flex: "0 0 auto" }} />
-        )}
-        {!last && <span style={{ width: 1, flex: 1, background: "var(--line)", marginTop: 2 }} />}
-      </span>
-      <div style={{ paddingBottom: last ? 0 : 14, minWidth: 0 }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "baseline", fontSize: 14, flexWrap: "wrap" }}>
-          <strong>{title}</strong>
-          <span className="mono" style={{ color: "var(--faint)" }}>
-            {time}
-          </span>
-        </div>
-        {desc && (
-          <p className="demo-note" style={{ marginTop: 2 }}>
-            {desc}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function TimelineBasic() {
   return (
-    <div style={{ maxWidth: 460 }}>
-      <TimelineNode time="09:12" title="任务创建" desc="run-28003 已提交到队列" />
-      <TimelineNode time="09:14" title="开始执行" desc="分配到计算节点 node-07" />
-      <TimelineNode time="09:19" title="执行完成" desc="耗时 286.4 秒" last />
-    </div>
+    <Timeline className="max-w-md">
+      <TimelineItem time="09:12" title="任务创建">run-28003 已提交到队列</TimelineItem>
+      <TimelineItem time="09:14" title="开始执行">分配到计算节点 node-07</TimelineItem>
+      <TimelineItem time="09:19" title="执行完成">耗时 286.4 秒</TimelineItem>
+    </Timeline>
   );
 }
 
 function TimelineStatus() {
   return (
-    <div style={{ maxWidth: 460 }}>
-      <TimelineNode time="09:12" title="任务创建" tone="success" />
-      <TimelineNode
-        time="09:13"
-        title="参数校验失败"
-        tone="error"
-        desc={
-          <>
-            K 点网格与截断能冲突 · <Button variant="link" size="sm" className="h-auto px-0">查看日志</Button>
-          </>
-        }
-      />
-      <TimelineNode time="09:15" title="修正参数并重新提交" tone="success" />
-      <TimelineNode time="09:16" title="重新校验中" tone="processing" last />
-    </div>
+    <Timeline className="max-w-md">
+      <TimelineItem time="09:12" title="任务创建" tone="success" />
+      <TimelineItem time="09:13" title="参数校验失败" tone="danger" icon={<XCircle />}>
+        K 点网格与截断能冲突 · <Button variant="link" size="sm">查看日志</Button>
+      </TimelineItem>
+      <TimelineItem time="09:14" title="Agent 建议调整 K 点网格" tone="agent" icon={<Sparkles />} />
+      <TimelineItem time="09:15" title="修正参数并重新提交" tone="warning" />
+      <TimelineItem time="09:16" title="重新校验中" pending />
+    </Timeline>
   );
 }
 
 function TimelineBusiness() {
   return (
     <div className="demo-stack">
-      <div style={{ maxWidth: 460 }}>
-        <TimelineNode time="09:12" title="任务创建" desc="run-28003 · 示例项目（project-042）" />
-        <TimelineNode time="09:14" title="开始执行" desc="数据集 ds-118 · 方法 PBE0" />
-        <TimelineNode time="09:19" title="计算完成" tone="success" desc="耗时 286.4 秒 · 查看日志" />
-        <TimelineNode time="现在" title="结果回传中…" tone="processing" last />
-      </div>
-      <p className="demo-note">pending 节点表达“未完待续”，进行中的节点实时更新。</p>
+      <Timeline className="max-w-md">
+        <TimelineItem time="09:12" dateTime="2026-09-21T09:12" title="任务创建" tone="primary">run-28003 · 示例项目（project-042）</TimelineItem>
+        <TimelineItem time="09:14" dateTime="2026-09-21T09:14" title="开始执行" tone="primary">数据集 ds-118 · 方法 PBE0</TimelineItem>
+        <TimelineItem time="09:19" dateTime="2026-09-21T09:19" title="计算完成" tone="success" icon={<CheckCircle2 />}>
+          耗时 286.4 秒 · <Button variant="link" size="sm">查看日志</Button>
+        </TimelineItem>
+        <TimelineItem time="现在" title="结果回传中…" pending />
+      </Timeline>
+      <p className="demo-note">pending 节点表达“未完待续”（aria-live 播报），进行中的节点实时更新。</p>
     </div>
   );
 }
 
 /* ---------- Tree ---------- */
 
+const projectTree: TreeNode[] = [
+  {
+    id: "project-042",
+    label: "示例项目（project-042）",
+    icon: <FolderOpen />,
+    children: [
+      {
+        id: "ds-118",
+        label: "数据集 ds-118",
+        icon: <Database />,
+        meta: "1,000 行",
+        children: [
+          { id: "ds-118/structure", label: "structure.cif", icon: <FileText />, meta: "48 KB" },
+          { id: "ds-118/params", label: "params.json", icon: <FileText />, meta: "2 KB" },
+        ],
+      },
+      { id: "ds-121", label: "数据集 ds-121", icon: <Database />, meta: "320 行" },
+    ],
+  },
+];
+
 function TreeBasic() {
-  const [open, setOpen] = useState(true);
   return (
-    <div style={{ maxWidth: 380, fontSize: 14 }}>
-      <button style={treeRowStyle} onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-        {open ? <ChevronDown size={14} style={{ color: "var(--text-muted)" }} /> : <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />}
-        <FolderOpen size={14} style={{ color: "var(--brand)" }} />
-        示例项目（project-042）
-      </button>
-      {open && (
-        <>
-          <div style={{ ...treeRowStyle, paddingLeft: 30, cursor: "default" }}>
-            <Database size={14} style={{ color: "var(--text-muted)" }} />
-            数据集 ds-118
-            <span className="mono" style={{ color: "var(--faint)" }}>1,000 行</span>
-          </div>
-          <div style={{ ...treeRowStyle, paddingLeft: 30, cursor: "default" }}>
-            <Database size={14} style={{ color: "var(--text-muted)" }} />
-            数据集 ds-121
-            <span className="mono" style={{ color: "var(--faint)" }}>320 行</span>
-          </div>
-        </>
-      )}
+    <div className="demo-stack max-w-sm">
+      <Tree aria-label="项目目录" data={projectTree} defaultExpanded={["project-042"]} />
+      <p className="demo-note">点击箭头展开 / 收起；聚焦后 ↑↓ 移动、→ 展开、← 收起、Enter 选中。</p>
     </div>
   );
 }
 
 function TreeSelectable() {
-  const [checked, setChecked] = useState({ "ds-118": true, "ds-121": false });
-  const all = checked["ds-118"] && checked["ds-121"];
-  const some = checked["ds-118"] || checked["ds-121"];
+  const [checked, setChecked] = useState<string[]>(["ds-118/structure"]);
   return (
-    <div className="demo-stack" style={{ maxWidth: 380, fontSize: 14 }}>
-      <label style={{ ...treeRowStyle, cursor: "pointer" }}>
-        <input
-          type="checkbox"
-          checked={all}
-          ref={(el) => {
-            if (el) el.indeterminate = !all && some;
-          }}
-          onChange={() => setChecked({ "ds-118": !all, "ds-121": !all })}
-          style={{ accentColor: "var(--brand)" }}
-        />
-        <FolderOpen size={14} style={{ color: "var(--brand)" }} />
-        示例项目（project-042）
-      </label>
-      {(["ds-118", "ds-121"] as const).map((key) => (
-        <label key={key} style={{ ...treeRowStyle, paddingLeft: 30, cursor: "pointer" }}>
-          <input
-            type="checkbox"
-            checked={checked[key]}
-            onChange={() => setChecked((prev) => ({ ...prev, [key]: !prev[key] }))}
-            style={{ accentColor: "var(--brand)" }}
-          />
-          <Database size={14} style={{ color: "var(--text-muted)" }} />
-          数据集 {key}
-        </label>
-      ))}
-      <p className="demo-note">父子勾选联动：部分子级选中时父级显示半选态。</p>
+    <div className="demo-stack max-w-sm">
+      <Tree
+        aria-label="选择输入文件"
+        checkable
+        data={projectTree}
+        defaultExpanded={["project-042", "ds-118"]}
+        checked={checked}
+        onCheckedChange={setChecked}
+      />
+      <p className="demo-note">
+        已选 {checked.length} 项（{checked.join("、") || "无"}）· 部分子级选中时父级显示半选态，Space 勾选。
+      </p>
     </div>
   );
 }
 
 function TreeBusiness() {
-  const [selected, setSelected] = useState("ds-118");
-  const rows = [
-    { key: "ds-118", label: "数据集 ds-118", meta: "1,000 行", locked: false },
-    { key: "ds-121", label: "数据集 ds-121", meta: "320 行", locked: false },
-    { key: "ds-130", label: "数据集 ds-130", meta: "无权限", locked: true },
+  const [selected, setSelected] = useState<string | null>("ds-118");
+  const data: TreeNode[] = [
+    {
+      id: "project-042",
+      label: "示例项目（project-042）",
+      icon: <FolderOpen />,
+      children: [
+        { id: "ds-118", label: "数据集 ds-118", icon: <Database />, meta: "1,000 行" },
+        { id: "ds-121", label: "数据集 ds-121", icon: <Database />, meta: "320 行" },
+        { id: "ds-130", label: "数据集 ds-130", icon: <Lock />, meta: "无权限", disabled: true },
+      ],
+    },
   ];
   return (
-    <div style={{ maxWidth: 400, fontSize: 14 }}>
-      <div style={{ ...treeRowStyle, cursor: "default" }}>
-        <ChevronDown size={14} style={{ color: "var(--text-muted)" }} />
-        <FolderOpen size={14} style={{ color: "var(--brand)" }} />
-        示例项目（project-042）
-      </div>
-      {rows.map((row) => (
-        <button
-          key={row.key}
-          style={{
-            ...treeRowStyle,
-            paddingLeft: 30,
-            background: selected === row.key ? "var(--brand-soft)" : "none",
-            color: row.locked ? "var(--faint)" : selected === row.key ? "var(--brand)" : "var(--text)",
-            fontWeight: selected === row.key ? 600 : 400,
-          }}
-          onClick={() => !row.locked && setSelected(row.key)}
-          disabled={row.locked}
-        >
-          {row.locked ? <Lock size={14} /> : <Database size={14} style={{ color: "var(--text-muted)" }} />}
-          {row.label}
-          <span className="mono" style={{ color: "var(--faint)", marginLeft: "auto" }}>{row.meta}</span>
-        </button>
-      ))}
+    <div className="demo-stack max-w-sm">
+      <Tree aria-label="项目目录" data={data} defaultExpanded={["project-042"]} selected={selected} onSelectedChange={(id) => setSelected(id)} />
+      <p className="demo-note">当前选中：{selected} · 无权限节点显示锁图标与“无权限”，可聚焦但不可选中。</p>
     </div>
   );
 }
 
 /* ---------- Collapse ---------- */
 
-const collapsePanelStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-  width: "100%",
-  padding: "11px 14px",
-  background: "var(--surface)",
-  cursor: "pointer",
-  fontSize: 14,
-  fontWeight: 600,
-  color: "var(--text)",
-  textAlign: "left",
-};
-
 function CollapseBasic() {
-  const [openKey, setOpenKey] = useState<string | null>("params");
-  const panels = [
-    { key: "params", title: "计算参数", body: "交换关联泛函 PBE0 · 截断能 520 eV · K 点 4×4×4" },
-    { key: "advanced", title: "高级设置", body: "最大迭代步数 200 · 收敛阈值 1e-6" },
-  ];
   return (
-    <div style={{ border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden", maxWidth: 520 }}>
-      {panels.map((panel, index) => (
-        <div key={panel.key} style={{ borderTop: index === 0 ? "none" : "1px solid var(--line)" }}>
-          <button style={collapsePanelStyle} onClick={() => setOpenKey(openKey === panel.key ? null : panel.key)} aria-expanded={openKey === panel.key}>
-            <ChevronRight
-              size={14}
-              style={{ transform: openKey === panel.key ? "rotate(90deg)" : "none", transition: "transform .15s ease", color: "var(--text-muted)" }}
-            />
-            {panel.title}
-          </button>
-          {openKey === panel.key && (
-            <div style={{ padding: "10px 14px 12px 36px", fontSize: 14, color: "var(--text-muted)", borderTop: "1px solid var(--line)" }}>{panel.body}</div>
-          )}
-        </div>
-      ))}
-    </div>
+    <Accordion type="single" collapsible defaultValue="params" className="max-w-lg rounded-lg border bg-card px-4">
+      <AccordionItem value="params" className="last:border-b-0">
+        <AccordionTrigger className="py-3 text-base hover:no-underline">计算参数</AccordionTrigger>
+        <AccordionContent className="text-muted-foreground">交换关联泛函 PBE0 · 截断能 520 eV · K 点 4×4×4</AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="advanced" className="last:border-b-0">
+        <AccordionTrigger className="py-3 text-base hover:no-underline">高级设置</AccordionTrigger>
+        <AccordionContent className="text-muted-foreground">最大迭代步数 200 · 收敛阈值 1e-6</AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }
 
 function CollapseBusiness() {
-  const [openKey, setOpenKey] = useState<string | null>("input");
-  const panels = [
-    {
-      key: "input",
-      title: "输入文件（3）",
-      badge: <Badge tone="success">已校验</Badge>,
-      body: <span className="mono">structure.cif · params.json · kpoints.conf</span>,
-    },
-    {
-      key: "result",
-      title: "结果文件（2）",
-      badge: <Badge tone="neutral">待生成</Badge>,
-      body: <span>任务 run-28003 完成后生成 output.json 与 report.pdf</span>,
-    },
-  ];
   return (
     <div className="demo-stack">
-      <div style={{ border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden", maxWidth: 520 }}>
-        {panels.map((panel, index) => (
-          <div key={panel.key} style={{ borderTop: index === 0 ? "none" : "1px solid var(--line)" }}>
-            <button style={collapsePanelStyle} onClick={() => setOpenKey(openKey === panel.key ? null : panel.key)} aria-expanded={openKey === panel.key}>
-              <ChevronRight
-                size={14}
-                style={{ transform: openKey === panel.key ? "rotate(90deg)" : "none", transition: "transform .15s ease", color: "var(--text-muted)" }}
-              />
-              {panel.title}
-              <span style={{ marginLeft: "auto" }}>{panel.badge}</span>
-            </button>
-            {openKey === panel.key && (
-              <div style={{ padding: "10px 14px 12px 36px", fontSize: 14, color: "var(--text-muted)", borderTop: "1px solid var(--line)" }}>{panel.body}</div>
-            )}
-          </div>
-        ))}
-      </div>
-      <p className="demo-note">手风琴模式 + extra 状态徽标；extra 区域的点击不触发展开。</p>
+      <Accordion type="multiple" defaultValue={["input"]} className="max-w-lg rounded-lg border bg-card px-4">
+        <AccordionItem value="input" className="last:border-b-0">
+          <AccordionTrigger className="gap-3 py-3 text-base hover:no-underline">
+            <span className="flex flex-1 items-center gap-2">
+              输入文件（3）
+              <Badge tone="success" className="ml-auto">已校验</Badge>
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="font-mono text-muted-foreground">structure.cif · params.json · kpoints.conf</AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="result" className="last:border-b-0">
+          <AccordionTrigger className="gap-3 py-3 text-base hover:no-underline">
+            <span className="flex flex-1 items-center gap-2">
+              结果文件（2）
+              <Badge tone="neutral" className="ml-auto">待生成</Badge>
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground">任务 run-28003 完成后生成 output.json 与 report.pdf</AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      <p className="demo-note">type=&quot;multiple&quot; 可同时展开；状态 Badge 放在触发行内、箭头左侧，只做展示不放按钮。</p>
     </div>
   );
 }
 
 /* ---------- CodeBlock ---------- */
 
-function CodeShell({ title, children, onCopy, copied }: { title: string; children: ReactNode; onCopy: () => void; copied: boolean }) {
-  return (
-    <div style={{ border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden", maxWidth: 640 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "6px 12px",
-          borderBottom: "1px solid var(--line)",
-          background: "var(--surface-soft)",
-          fontSize: 12,
-          color: "var(--text-muted)",
-        }}
-      >
-        <span>{title}</span>
-        <Button variant="ghost" size="sm" aria-label="复制代码" onClick={onCopy}>
-          {copied ? <Check size={14} /> : <Copy size={14} />}
-          {copied ? "已复制" : "复制"}
-        </Button>
-      </div>
-      {children}
-    </div>
-  );
-}
-
 function CodeBlockBasic() {
-  const [copied, setCopied] = useState(false);
-  const code = "$ datacore runs submit --project project-042 --dataset ds-118";
   return (
-    <CodeShell
-      title="bash"
-      copied={copied}
-      onCopy={() => {
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 1500);
-      }}
-    >
-      <pre style={{ margin: 0, padding: "12px 14px", overflowX: "auto", background: "var(--surface)" }}>
-        <code style={{ fontFamily: '"DM Mono", monospace', fontSize: 14, color: "var(--text)" }}>{code}</code>
-      </pre>
-    </CodeShell>
+    <CodeBlock
+      className="max-w-2xl"
+      language="bash"
+      code="$ datacore runs submit --project project-042 --dataset ds-118"
+      onCopy={() => toast.success("已复制命令")}
+    />
   );
 }
 
 function CodeBlockHighlight() {
-  const [copied, setCopied] = useState(false);
-  const lines = ["{", '  "projectId": "project-042",', '  "datasetId": "ds-118",', '  "method": "PBE0",', '  "maxSeconds": 300', "}"];
+  const code = `{
+  "projectId": "project-042",
+  "datasetId": "ds-118",
+  "method": "PBE0",
+  "maxSeconds": 300
+}`;
   return (
     <div className="demo-stack">
-      <CodeShell
-        title="json · 第 4 行需复核"
-        copied={copied}
-        onCopy={() => {
-          setCopied(true);
-          window.setTimeout(() => setCopied(false), 1500);
-        }}
-      >
-        <pre style={{ margin: 0, padding: "10px 0", overflowX: "auto", background: "var(--surface)", display: "grid" }}>
-          {lines.map((line, index) => (
-            <span
-              key={index}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "36px 1fr",
-                padding: "0 14px 0 0",
-                background: index === 3 ? "var(--brand-soft)" : "transparent",
-                fontFamily: '"DM Mono", monospace',
-                fontSize: 14,
-                lineHeight: 1.8,
-              }}
-            >
-              <span style={{ textAlign: "right", paddingRight: 10, color: "var(--faint)", userSelect: "none" }}>{index + 1}</span>
-              <span style={{ color: "var(--text)" }}>{line}</span>
-            </span>
-          ))}
-        </pre>
-      </CodeShell>
-      <p className="demo-note">超过 3 行显示行号；高亮行配合行号文字说明（“第 4 行”），不只靠颜色。</p>
+      <CodeBlock className="max-w-2xl" language="json" title="params.json · 第 4 行需复核" code={code} showLineNumbers highlightLines={[4]} />
+      <p className="demo-note">超过 3 行显示行号；高亮行配合标题里的行号说明（“第 4 行”），不只靠颜色。</p>
     </div>
   );
 }
 
 function CodeBlockBusiness() {
-  const [copied, setCopied] = useState(false);
-  const code = '$ curl https://api.example.com/v1/runs/run-28003 \\\n    -H "Authorization: Bearer ***"';
+  const code = `$ curl https://api.example.com/v1/runs/run-28003 \\
+    -H "Authorization: Bearer ***" \\
+    -H "Accept: application/json"
+$ curl https://api.example.com/v1/runs/run-28003/logs?tail=200 \\
+    -H "Authorization: Bearer ***"`;
   return (
     <div className="demo-stack">
-      <CodeShell
-        title="查询任务状态 · bash"
-        copied={copied}
-        onCopy={() => {
-          setCopied(true);
-          window.setTimeout(() => setCopied(false), 1500);
-        }}
-      >
-        <pre style={{ margin: 0, padding: "12px 14px", overflowX: "auto", background: "var(--surface)" }}>
-          <code style={{ fontFamily: '"DM Mono", monospace', fontSize: 14, color: "var(--text)" }}>{code}</code>
-        </pre>
-      </CodeShell>
-      <p className="demo-note">示例域名一律 example.com；凭证用 *** 占位，绝不展示真实密钥。</p>
+      <CodeBlock
+        className="max-w-md"
+        language="bash"
+        title="查询任务状态与日志"
+        code={code}
+        maxHeight={120}
+        onCopy={() => toast.success("已复制命令（不含 $ 提示符）")}
+      />
+      <p className="demo-note">示例域名一律 example.com，凭证用 *** 占位；maxHeight 内部滚动，可切换自动换行。</p>
     </div>
   );
 }
 
 /* ---------- JsonViewer ---------- */
 
-function JsonKey({ k, suffix }: { k: string; suffix?: string }) {
-  return (
-    <>
-      <span style={{ color: "var(--violet)" }}>&quot;{k}&quot;</span>
-      <span style={{ color: "var(--text-muted)" }}>: </span>
-      {suffix && <span style={{ color: "var(--text-muted)" }}>{suffix}</span>}
-    </>
-  );
-}
-
-function JsonString({ v }: { v: string }) {
-  return <span style={{ color: "var(--green)" }}>&quot;{v}&quot;</span>;
-}
-
-const jsonBoxStyle: CSSProperties = {
-  fontFamily: '"DM Mono", monospace',
-  fontSize: 14,
-  lineHeight: 1.9,
-  background: "var(--surface)",
-  border: "1px solid var(--line)",
-  borderRadius: 10,
-  padding: "10px 14px",
-  maxWidth: 540,
-  overflowX: "auto",
-};
-
 function JsonViewerBasic() {
-  const [open, setOpen] = useState(true);
   return (
-    <div style={jsonBoxStyle}>
-      <div>{"{"}</div>
-      <div style={{ paddingLeft: 16 }}>
-        <JsonKey k="runId" /> <JsonString v="run-28003" />,
-      </div>
-      <div style={{ paddingLeft: 16 }}>
-        <JsonKey k="seconds" /> <span style={{ color: "var(--brand)" }}>286.4</span>,
-      </div>
-      <div style={{ paddingLeft: 16, display: "flex", alignItems: "center", gap: 4 }}>
-        <button aria-expanded={open} aria-label="展开 params" onClick={() => setOpen((v) => !v)} style={{ background: "none", cursor: "pointer", display: "inline-flex", color: "var(--text-muted)", padding: 0 }}>
-          <ChevronRight size={12} style={{ transform: open ? "rotate(90deg)" : "none", transition: "transform .12s ease" }} />
-        </button>
-        <JsonKey k="params" suffix={open ? "{" : "{ … }"} />
-      </div>
-      {open && (
-        <>
-          <div style={{ paddingLeft: 32 }}>
-            <JsonKey k="method" /> <JsonString v="PBE0" />,
-          </div>
-          <div style={{ paddingLeft: 32 }}>
-            <JsonKey k="cutoff" /> <span style={{ color: "var(--brand)" }}>520</span>
-          </div>
-          <div style={{ paddingLeft: 16 }}>{"}"}</div>
-        </>
-      )}
-      <div>{"}"}</div>
-    </div>
+    <JsonViewer
+      className="max-w-xl"
+      data={{ runId: "run-28003", status: "finished", seconds: 286.4, cached: false, note: null, params: { method: "PBE0", cutoff: 520 } }}
+      defaultExpandDepth={1}
+    />
   );
 }
 
 function JsonViewerBusiness() {
-  const [copied, setCopied] = useState(false);
   return (
     <div className="demo-stack">
-      <div style={jsonBoxStyle}>
-        <div>{"{"}</div>
-        <div style={{ paddingLeft: 16 }}>
-          <JsonKey k="runId" /> <JsonString v="run-28003" />,
-        </div>
-        <div style={{ paddingLeft: 16 }}>
-          <JsonKey k="project" suffix="{" />
-        </div>
-        <div style={{ paddingLeft: 32 }}>
-          <JsonKey k="id" /> <JsonString v="project-042" />,
-        </div>
-        <div style={{ paddingLeft: 32 }}>
-          <JsonKey k="name" /> <JsonString v="示例项目" />
-        </div>
-        <div style={{ paddingLeft: 16 }}>{"},"}</div>
-        <div style={{ paddingLeft: 16, display: "flex", alignItems: "center", gap: 6 }}>
-          <JsonKey k="params" suffix="{" />
-          <Button
-            variant="link" size="sm" className="h-auto px-0"
-            onClick={() => {
-              setCopied(true);
-              window.setTimeout(() => setCopied(false), 1500);
-            }}
-          >
-            {copied ? "已复制 params.kpoints[2]" : "复制路径"}
-          </Button>
-        </div>
-        <div style={{ paddingLeft: 32 }}>
-          <JsonKey k="method" /> <JsonString v="PBE0" />,
-        </div>
-        <div style={{ paddingLeft: 32 }}>
-          <JsonKey k="kpoints" /> <span style={{ color: "var(--brand)" }}>[4, 4, 4]</span>
-        </div>
-        <div style={{ paddingLeft: 16 }}>{"},"}</div>
-        <div style={{ paddingLeft: 16 }}>
-          <JsonKey k="credential" /> <JsonString v="***" />
-        </div>
-        <div>{"}"}</div>
-      </div>
-      <p className="demo-note">点击键名复制节点路径；敏感字段值一律脱敏为 ***，键名保留便于理解结构。</p>
+      <JsonViewer
+        className="max-w-xl"
+        data={{
+          runId: "run-28003",
+          project: { id: "project-042", name: "示例项目" },
+          params: { method: "PBE0", cutoff: 520, kpoints: [4, 4, 4] },
+          dataset: { id: "ds-118", version: 3 },
+          credential: "demo-token-0000",
+        }}
+        defaultExpandDepth={2}
+        copyPath
+        copyValue
+        maskKeys={["credential"]}
+        maxHeight={320}
+        onCopy={(text, kind) => toast.success(kind === "path" ? `已复制路径 ${text}` : "已复制值")}
+      />
+      <p className="demo-note">hover / 聚焦行显示“复制路径”“复制值”；maskKeys 中的字段值一律显示 ***，键名保留便于理解结构。</p>
     </div>
   );
 }
 
 /* ---------- FileList ---------- */
 
-function FileListBasic() {
-  const files = [
-    { id: "f-01", name: "structure.cif", size: "48 KB" },
-    { id: "f-02", name: "params.json", size: "2 KB" },
-  ];
+function FileActions({ name }: { name: string }) {
   return (
-    <div className="demo-stack" style={{ maxWidth: 520 }}>
-      {files.map((file) => (
-        <div key={file.id} style={fileRowStyle}>
-          <FileText size={16} style={{ color: "var(--brand)", flex: "0 0 auto" }} />
-          <span style={{ fontWeight: 600 }}>{file.name}</span>
-          <span className="mono" style={{ color: "var(--faint)" }}>{file.size}</span>
-          <span style={{ marginLeft: "auto", display: "inline-flex", gap: 2 }}>
-            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={`下载 ${file.name}`}>
-              <Download size={15} />
-            </Button>
-            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={`删除 ${file.name}`}>
-              <Trash2 size={15} />
-            </Button>
-          </span>
-        </div>
-      ))}
-    </div>
+    <>
+      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={`下载 ${name}`}>
+        <Download />
+      </Button>
+      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={`删除 ${name}`}>
+        <Trash2 />
+      </Button>
+    </>
+  );
+}
+
+function FileListBasic() {
+  return (
+    <FileList className="max-w-lg">
+      <FileListItem name="structure.cif" size="48 KB" actions={<FileActions name="structure.cif" />} />
+      <FileListItem name="params.json" size="2 KB" actions={<FileActions name="params.json" />} />
+    </FileList>
   );
 }
 
 function FileListStates() {
+  const [percent, setPercent] = useState(12);
+  const [failed, setFailed] = useState(true);
+  useEffect(() => {
+    const timer = window.setInterval(() => setPercent((v) => (v >= 92 ? 12 : v + 4)), 300);
+    return () => window.clearInterval(timer);
+  }, []);
   return (
-    <div className="demo-stack" style={{ maxWidth: 520 }}>
-      <div style={fileRowStyle}>
-        <FileText size={16} style={{ color: "var(--brand)", flex: "0 0 auto" }} />
-        <span style={{ display: "grid", gap: 5, flex: 1, minWidth: 0 }}>
-          <span style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
-            <span style={{ fontWeight: 600 }}>raw-data.csv</span>
-            <span className="mono" style={{ color: "var(--faint)" }}>1.2 MB · 62%</span>
-          </span>
-          <Progress value={62} />
-        </span>
-        <Button variant="link" size="sm" className="h-auto px-0">取消</Button>
-      </div>
-      <div style={{ ...fileRowStyle, borderColor: "color-mix(in srgb, var(--red) 30%, var(--line))" }}>
-        <AlertTriangle size={16} style={{ color: "var(--red)", flex: "0 0 auto" }} />
-        <span style={{ display: "grid", gap: 1, minWidth: 0 }}>
-          <span style={{ fontWeight: 600 }}>notes.pdf</span>
-          <span style={{ color: "var(--red)", fontSize: 12 }}>格式不支持（仅支持 .cif / .json）</span>
-        </span>
-        <span style={{ marginLeft: "auto", display: "inline-flex", gap: 8 }}>
-          <Button variant="link" size="sm" className="h-auto px-0">重试</Button>
-          <Button variant="link" size="sm" className="h-auto px-0">移除</Button>
-        </span>
-      </div>
-    </div>
+    <FileList className="max-w-lg">
+      <FileListItem name="raw-data.csv" size="1.2 MB" status="uploading" progress={percent} onCancel={() => toast("已取消上传 raw-data.csv")} />
+      <FileListItem name="kpoints.conf" size="1 KB" status="success" actions={<FileActions name="kpoints.conf" />} />
+      {failed ? (
+        <FileListItem
+          name="notes.pdf"
+          size="860 KB"
+          status="error"
+          error="格式不支持（仅支持 .cif / .json / .csv）"
+          onRetry={() => setFailed(false)}
+          actions={
+            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="移除 notes.pdf">
+              <X />
+            </Button>
+          }
+        />
+      ) : (
+        <FileListItem name="notes.pdf" size="860 KB" status="uploading" progress={30} />
+      )}
+    </FileList>
   );
 }
 
 function FileListBusiness() {
+  const [expanded, setExpanded] = useState(false);
   const files = [
-    { id: "f-01", name: "structure.cif", size: "48 KB" },
-    { id: "f-02", name: "params.json", size: "2 KB" },
-    { id: "f-03", name: "raw-data.csv", size: "1.2 MB" },
+    { name: "structure.cif", size: "48 KB" },
+    { name: "params.json", size: "2 KB" },
+    { name: "raw-data.csv", size: "1.2 MB" },
+    { name: "band-structure.png", size: "320 KB" },
+    { name: "outputs.zip", size: "12.4 MB" },
   ];
+  const visible = expanded ? files : files.slice(0, 3);
   return (
-    <div className="demo-stack" style={{ maxWidth: 520 }}>
-      <p className="demo-note">数据集 ds-118 · 附件（共 5 个，默认展示 3 个）</p>
-      {files.map((file) => (
-        <div key={file.id} style={fileRowStyle}>
-          <FileText size={16} style={{ color: "var(--brand)", flex: "0 0 auto" }} />
-          <span style={{ fontWeight: 600 }}>{file.name}</span>
-          <span className="mono" style={{ color: "var(--faint)" }}>{file.size}</span>
-          <span style={{ marginLeft: "auto", display: "inline-flex", gap: 2 }}>
-            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={`下载 ${file.name}`}>
-              <Download size={15} />
-            </Button>
-            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label={`删除 ${file.name}`}>
-              <Trash2 size={15} />
-            </Button>
-          </span>
-        </div>
-      ))}
+    <div className="demo-stack max-w-lg">
+      <p className="demo-note">数据集 ds-118 · 附件（共 {files.length} 个）</p>
+      <FileList>
+        {visible.map((file) => (
+          <FileListItem key={file.name} name={file.name} size={file.size} actions={<FileActions name={file.name} />} />
+        ))}
+      </FileList>
       <div>
-        <Button variant="link" size="sm" className="h-auto px-0">查看全部（5）</Button>
+        <Button variant="link" size="sm" onClick={() => setExpanded((v) => !v)}>
+          {expanded ? "收起" : `查看全部（${files.length}）`}
+        </Button>
       </div>
     </div>
   );
@@ -998,34 +704,26 @@ function FileListBusiness() {
 function AlertBasic() {
   return (
     <div className="demo-stack">
-      <div className="status-line status-info">
-        <Info size={16} />
-        <div>
-          <strong>计算任务将于今晚 22:00 排队执行</strong>
-          <span>示例项目（project-042）· 队列预计等待 20 分钟</span>
-        </div>
-      </div>
-      <div className="status-line status-success">
-        <CheckCircle2 size={16} />
-        <div>
-          <strong>数据集 ds-118 校验通过</strong>
-          <span>1,000 行全部通过字段校验</span>
-        </div>
-      </div>
-      <div className="status-line status-warning">
-        <AlertTriangle size={16} />
-        <div>
-          <strong>3 行缺少密度字段</strong>
-          <span>缺失行将以项目默认值填充，可在导入预览中逐行修改</span>
-        </div>
-      </div>
-      <div className="status-line status-danger">
-        <XCircle size={16} />
-        <div>
-          <strong>任务 run-28002 执行失败</strong>
-          <span>K 点网格与截断能设置冲突，请检查参数后重试</span>
-        </div>
-      </div>
+      <Alert variant="info" role="status">
+        <Info className="size-4" />
+        <AlertTitle>计算任务将于今晚 22:00 排队执行</AlertTitle>
+        <AlertDescription className="text-muted-foreground">示例项目（project-042）· 队列预计等待 20 分钟</AlertDescription>
+      </Alert>
+      <Alert variant="success" role="status">
+        <CheckCircle2 className="size-4" />
+        <AlertTitle>数据集 ds-118 校验通过</AlertTitle>
+        <AlertDescription className="text-muted-foreground">1,000 行全部通过字段校验</AlertDescription>
+      </Alert>
+      <Alert variant="warning" role="status">
+        <AlertTriangle className="size-4" />
+        <AlertTitle>3 行缺少密度字段</AlertTitle>
+        <AlertDescription className="text-muted-foreground">缺失行将以项目默认值填充，可在导入预览中逐行修改</AlertDescription>
+      </Alert>
+      <Alert variant="danger">
+        <XCircle className="size-4" />
+        <AlertTitle>任务 run-28002 执行失败</AlertTitle>
+        <AlertDescription className="text-muted-foreground">K 点网格与截断能设置冲突，请检查参数后重试</AlertDescription>
+      </Alert>
     </div>
   );
 }
@@ -1034,40 +732,46 @@ function AlertClosable() {
   const [visible, setVisible] = useState(true);
   if (!visible) {
     return (
-      <Button variant="link" size="sm" className="h-auto px-0" onClick={() => setVisible(true)}>
+      <Button variant="link" size="sm" onClick={() => setVisible(true)}>
         重新显示提示
       </Button>
     );
   }
   return (
-    <div className="status-line status-warning">
-      <AlertTriangle size={16} />
-      <div>
-        <strong>项目额度剩余 12%</strong>
-        <span>示例项目（project-042）本周期额度即将用完</span>
-      </div>
-      <Button variant="link" size="sm" className="ml-auto h-auto px-0">查看用量</Button>
-      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="关闭提示" onClick={() => setVisible(false)}>
-        <X size={15} />
+    <Alert variant="warning" role="status" className="pr-12">
+      <AlertTriangle className="size-4" />
+      <AlertTitle>项目额度剩余 12%</AlertTitle>
+      <AlertDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
+        示例项目（project-042）本周期额度即将用完
+        <Button variant="link" size="sm">查看用量</Button>
+      </AlertDescription>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute right-2 top-2 size-7 text-muted-foreground"
+        aria-label="关闭提示"
+        onClick={() => setVisible(false)}
+      >
+        <X />
       </Button>
-    </div>
+    </Alert>
   );
 }
 
 function AlertBusiness() {
   return (
     <div className="demo-stack">
-      <div className="status-line status-warning" style={{ alignItems: "flex-start" }}>
-        <AlertTriangle size={16} style={{ marginTop: 2 }} />
-        <div>
-          <strong>3 行缺少密度字段，无法直接提交</strong>
-          <span>第 128、512、907 行缺失。可逐行补全，或以项目默认值 2.50 g/cm³ 填充后继续。</span>
-          <span style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <Button variant="ghost" size="sm">查看缺失行</Button>
-            <Button variant="secondary" size="sm">以默认值填充</Button>
-          </span>
-        </div>
-      </div>
+      <Alert variant="warning">
+        <AlertTriangle className="size-4" />
+        <AlertTitle>3 行缺少密度字段，无法直接提交</AlertTitle>
+        <AlertDescription className="text-muted-foreground">
+          第 128、512、907 行缺失。可逐行补全，或以项目默认值 2.50 g/cm³ 填充后继续。
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button variant="secondary" size="sm">查看缺失行</Button>
+            <Button size="sm">以默认值填充</Button>
+          </div>
+        </AlertDescription>
+      </Alert>
       <p className="demo-note">Alert 常驻页面直到问题解决；轻反馈用 Message，异步事件用 Notification。</p>
     </div>
   );
@@ -1315,13 +1019,14 @@ function ProgressBusiness() {
 
 function SpinBasic() {
   return (
-    <div className="demo-row" style={{ alignItems: "center", gap: 18 }}>
-      <span className="spinner spinner-dark" style={{ width: 13, height: 13 }} aria-label="加载中" />
-      <span className="spinner spinner-dark" style={{ width: 20, height: 20 }} aria-label="加载中" />
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-        <span className="spinner spinner-dark" style={{ width: 26, height: 26 }} aria-hidden="true" />
-        <span className="demo-note">正在加载任务详情…</span>
-      </span>
+    <div className="demo-row" style={{ gap: 20 }}>
+      <Spinner size="sm" label="正在加载任务列表" />
+      <Spinner label="正在加载任务列表" />
+      <Spinner size="lg" label="正在加载任务详情…" showLabel />
+      <Button disabled>
+        <Loader2 className="animate-spin" />
+        正在提交
+      </Button>
     </div>
   );
 }
@@ -1330,31 +1035,19 @@ function SpinContainer() {
   const [loading, setLoading] = useState(false);
   return (
     <div className="demo-stack">
-      <div className="card-demo" style={{ position: "relative", maxWidth: 420, minHeight: 96 }}>
-        <h4>电导率结果</h4>
-        <p>run-28003 · 4.21 S/cm · 数据集 ds-118</p>
-        {loading && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "grid",
-              placeItems: "center",
-              background: "color-mix(in srgb, var(--surface) 78%, transparent)",
-              borderRadius: "var(--radius-lg)",
-              zIndex: 2,
-            }}
-          >
-            <span style={{ display: "grid", justifyItems: "center", gap: 8 }} role="status">
-              <span className="spinner spinner-dark" style={{ width: 20, height: 20 }} aria-hidden="true" />
-              <span className="demo-note">正在重新计算…</span>
-            </span>
+      <LoadingOverlay loading={loading} label="正在重新计算…" className="max-w-md rounded-lg">
+        <Card className="grid gap-1 p-4">
+          <h4 className="m-0 text-base font-semibold">电导率结果</h4>
+          <p className="m-0 text-sm text-muted-foreground">run-28003 · 4.21 S/cm · 数据集 ds-118</p>
+          <div>
+            <Button variant="link" size="sm">查看结果详情</Button>
           </div>
-        )}
-      </div>
+        </Card>
+      </LoadingOverlay>
       <div className="demo-row">
         <Button
-          variant="secondary" size="sm"
+          variant="secondary"
+          size="sm"
           disabled={loading}
           onClick={() => {
             setLoading(true);
@@ -1363,7 +1056,7 @@ function SpinContainer() {
         >
           模拟容器加载
         </Button>
-        <span className="demo-note">遮罩期间内部不可交互，aria-busy=true。</span>
+        <span className="demo-note">遮罩期间内部 inert（不可点击、不可聚焦），容器 aria-busy=true。</span>
       </div>
     </div>
   );
@@ -1372,7 +1065,7 @@ function SpinContainer() {
 function SpinBusiness() {
   const [loading, setLoading] = useState(true);
   return (
-    <div className="demo-stack" style={{ maxWidth: 520 }}>
+    <div className="demo-stack" style={{ maxWidth: 560 }}>
       <div className="demo-row">
         <Button variant="secondary" size="sm">状态：全部</Button>
         <Button variant="secondary" size="sm">数据集：ds-118</Button>
@@ -1380,35 +1073,28 @@ function SpinBusiness() {
           {loading ? "加载完成" : "重新加载"}
         </Button>
       </div>
-      <div style={{ position: "relative", border: "1px solid var(--line)", borderRadius: 10, background: "var(--surface)", overflow: "hidden" }}>
-        <div style={{ display: "flex", gap: 24, padding: "10px 14px", borderBottom: "1px solid var(--line)", color: "var(--faint)", fontSize: 12, fontWeight: 700, letterSpacing: ".08em" }}>
-          <span>任务</span>
-          <span>数据集</span>
-          <span>耗时（秒）</span>
-          <span>状态</span>
-        </div>
-        <div style={{ display: "grid", gap: 10, padding: 14 }}>
-          <span style={{ height: 10, width: "70%", borderRadius: 4, background: "var(--surface-soft)" }} />
-          <span style={{ height: 10, width: "52%", borderRadius: 4, background: "var(--surface-soft)" }} />
-          <span style={{ height: 10, width: "64%", borderRadius: 4, background: "var(--surface-soft)" }} />
-        </div>
-        {loading && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "grid",
-              placeItems: "center",
-              background: "color-mix(in srgb, var(--surface) 78%, transparent)",
-            }}
-          >
-            <span style={{ display: "grid", justifyItems: "center", gap: 8 }} role="status">
-              <span className="spinner spinner-dark" style={{ width: 20, height: 20 }} aria-hidden="true" />
-              <span className="demo-note">正在加载任务列表…</span>
-            </span>
-          </div>
-        )}
-      </div>
+      <LoadingOverlay loading={loading} delay={200} label="正在加载任务列表…" className="rounded-lg border bg-card">
+        <Table className="border-collapse">
+          <TableHeader>
+            <TableRow>
+              <TableHead scope="col">任务</TableHead>
+              <TableHead scope="col">数据集</TableHead>
+              <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+              <TableHead scope="col">状态</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {businessRuns.map((run) => (
+              <TableRow key={run.id}>
+                <TableCell><RunName name={run.name} id={run.id} /></TableCell>
+                <TableCell className="font-mono">{run.dataset}</TableCell>
+                <TableCell className={num}>{run.seconds}</TableCell>
+                <TableCell><Badge tone={run.tone} dot>{run.status}</Badge></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </LoadingOverlay>
       <p className="demo-note">遮罩只覆盖表格区域，筛选栏保持可用（delay 200ms 防闪烁）。</p>
     </div>
   );
@@ -1494,87 +1180,78 @@ function ModalBusiness() {
 
 /* ---------- Drawer ---------- */
 
-function DrawerShell({ title, onClose, children, footer }: { title: string; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
-  return (
-    <AccessibleModal open onClose={onClose} label={title} className="demo-drawer"><div className="drawer-body">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderBottom: "1px solid var(--line)" }}>
-          <strong style={{ fontSize: 14.0 }}>{title}</strong>
-          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="关闭" onClick={onClose}>
-            <X size={16} />
-          </Button>
-        </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px" }}>{children}</div>
-        {footer && <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "12px 18px", borderTop: "1px solid var(--line)" }}>{footer}</div>}
-      </div>
-    </AccessibleModal>
-  );
-}
-
 function DrawerBasic() {
-  const [open, setOpen] = useState(false);
-
   return (
-    <div className="demo-stack">
-      <div className="demo-row">
-        <Button variant="secondary" onClick={() => setOpen(true)}>
-          查看任务详情
-        </Button>
-        <span className="demo-note">Esc 与遮罩点击关闭 · 标题带对象 ID</span>
-      </div>
-      {open && (
-        <DrawerShell title="任务详情 · run-28003" onClose={() => setOpen(false)}>
-          <DescItem label="任务 ID" mono>run-28003</DescItem>
-          <DescItem label="所属项目">示例项目（project-042）</DescItem>
-          <DescItem label="状态">
-            <Badge tone="success" dot>已完成</Badge>
-          </DescItem>
-          <DescItem label="耗时" mono>286.4 秒</DescItem>
-        </DrawerShell>
-      )}
+    <div className="demo-row">
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="secondary">查看任务详情</Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-full sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle className="text-md">任务详情 · run-28003</SheetTitle>
+            <SheetDescription>示例项目（project-042）中的电导率计算任务</SheetDescription>
+          </SheetHeader>
+          <Descriptions className="mt-4">
+            <DescriptionsItem label="任务 ID" mono copyable>run-28003</DescriptionsItem>
+            <DescriptionsItem label="所属项目">示例项目（project-042）</DescriptionsItem>
+            <DescriptionsItem label="状态">
+              <Badge tone="success" dot>已完成</Badge>
+            </DescriptionsItem>
+            <DescriptionsItem label="耗时" mono>286.4 秒</DescriptionsItem>
+          </Descriptions>
+        </SheetContent>
+      </Sheet>
+      <span className="demo-note">Esc 与遮罩点击关闭 · 标题带对象 ID · 关闭后焦点回到触发按钮</span>
     </div>
   );
 }
 
 function DrawerBusiness() {
   const [open, setOpen] = useState(false);
-
+  const [side, setSide] = useState<"right" | "bottom">("right");
+  const show = (next: "right" | "bottom") => {
+    setSide(next);
+    setOpen(true);
+  };
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <Button variant="default" onClick={() => setOpen(true)}>
-          从列表行打开详情抽屉
-        </Button>
+        <Button onClick={() => show("right")}>从列表行打开详情抽屉</Button>
+        <Button variant="secondary" onClick={() => show("bottom")}>底部抽屉（移动端）</Button>
         <span className="demo-note">关闭后列表滚动位置与选中行保持</span>
       </div>
-      {open && (
-        <DrawerShell
-          title="任务详情 · run-28003"
-          onClose={() => setOpen(false)}
-          footer={
-            <>
-              <Button variant="secondary" onClick={() => setOpen(false)}>
-                关闭
-              </Button>
-              <Button variant="default">查看完整日志</Button>
-            </>
-          }
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          side={side}
+          className={cn("flex flex-col gap-0 p-0", side === "right" ? "w-full sm:max-w-lg" : "max-h-[85vh]")}
         >
-          <DescItem label="数据集" mono>ds-118</DescItem>
-          <DescItem label="方法" mono>PBE0 · 截断能 520 eV</DescItem>
-          <DescItem label="耗时" mono>286.4 秒</DescItem>
-          <DescItem label="费用" mono>¥12.40</DescItem>
-          <div style={{ marginTop: 14, border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden" }}>
-            <div style={{ padding: "9px 12px", fontSize: 14, fontWeight: 600, borderBottom: "1px solid var(--line)", background: "var(--surface-soft)" }}>
-              日志摘要
-            </div>
-            <div style={{ padding: "10px 12px", fontFamily: '"DM Mono", monospace', fontSize: 12, color: "var(--text-muted)", display: "grid", gap: 4 }}>
-              <span>[09:14:02] 分配到计算节点 node-07</span>
-              <span>[09:18:45] SCF 收敛，迭代 58 步</span>
-              <span>[09:18:46] 结果写回 run-28003</span>
-            </div>
+          <SheetHeader className="border-b px-6 py-4 pr-12">
+            <SheetTitle className="text-md">任务详情 · run-28003</SheetTitle>
+            <SheetDescription>数据集 ds-118 · 方法 PBE0</SheetDescription>
+          </SheetHeader>
+          <div className="grid flex-1 content-start gap-4 overflow-y-auto px-6 py-4">
+            <Descriptions columns={side === "bottom" ? 2 : 1}>
+              <DescriptionsItem label="数据集" mono>ds-118</DescriptionsItem>
+              <DescriptionsItem label="方法" mono>PBE0 · 截断能 520 eV</DescriptionsItem>
+              <DescriptionsItem label="耗时" mono>286.4 秒</DescriptionsItem>
+              <DescriptionsItem label="费用" mono>¥12.40</DescriptionsItem>
+            </Descriptions>
+            <CodeBlock
+              language="log"
+              title="日志摘要"
+              showWrapToggle={false}
+              code={"[09:14:02] 分配到计算节点 node-07\n[09:18:45] SCF 收敛，迭代 58 步\n[09:18:46] 结果写回 run-28003"}
+            />
           </div>
-        </DrawerShell>
-      )}
+          <SheetFooter className="gap-2 border-t px-6 py-3 sm:space-x-0">
+            <SheetClose asChild>
+              <Button variant="secondary">关闭</Button>
+            </SheetClose>
+            <Button>查看完整日志</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

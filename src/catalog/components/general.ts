@@ -352,8 +352,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
         title: "基础示例",
         kind: "basic",
         description: "文内链接继承正文排版，独立链接可带方向图标；外部链接必须可识别。",
-        code: `<Link href="#/projects/project-042">示例项目（project-042）</Link>
-<Link href="#/runs/run-28003" icon={<ArrowRight size={14} />}>查看运行详情</Link>
+        code: `import { ArrowRight } from "lucide-react";
+import { Link } from "@/components/ui/link";
+
+<Link href="#/projects/project-042">示例项目（project-042）</Link>
+<Link href="#/runs/run-28003">查看运行详情 <ArrowRight /></Link>
 <Link href="https://example.com/docs/fields" external>字段规范文档</Link>`,
         preview: "link/basic",
       },
@@ -361,9 +364,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
         id: "variants",
         title: "变体示例",
         kind: "variant",
-        description: "muted 用于次级导航；danger 链接只允许“离开/放弃”类导航，不允许用于破坏性动作。",
-        code: `<Link href="#/datasets" variant="muted">返回数据集列表</Link>
-<Link href="#/projects/project-042/archive" variant="danger">放弃本次编辑并离开</Link>`,
+        description: "muted 用于次级导航；danger 链接只允许“离开/放弃”类导航，不允许用于破坏性动作；disabled 去掉 href 并在邻近文案说明原因。",
+        code: `import { Link } from "@/components/ui/link";
+
+<Link href="#/datasets" variant="muted">返回数据集列表</Link>
+<Link href="#/projects/project-042/archive" variant="danger">放弃本次编辑并离开</Link>
+<Link disabled>导出记录（CSV）</Link>`,
         preview: "link/variants",
       },
       {
@@ -371,27 +377,32 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
         title: "真实业务示例",
         kind: "business",
         description: "表格中的实体名称渲染为链接跳转详情；ID 用等宽字体跟在名称后，不重复做链接。",
-        code: `<div className="cell-main">
+        code: `import { Link } from "@/components/ui/link";
+import { Num } from "@/components/ui/typography";
+
+<div className="flex items-baseline gap-2">
   <Link href="#/projects/project-042">示例电解液项目</Link>
-  <span className="mono">project-042</span>
+  <Num mono className="text-xs text-muted-foreground">project-042</Num>
 </div>`,
         preview: "link/business",
       },
     ],
     props: [
-      { name: "href", type: "string", required: true, description: "目标地址；站内用路由路径，站外用完整 URL。" },
-      { name: "external", type: "boolean", default: "false", description: "外链标识：新标签页打开，附加 rel=noopener noreferrer 与外链图标。" },
+      { name: "href", type: "string", description: "目标地址；站内用路由路径，站外用完整 URL。disabled 时不渲染。" },
+      { name: "external", type: "boolean", default: "false", description: "外链：默认 target=\"_blank\"、rel=\"noopener noreferrer\"，追加外链图标与读屏提示“（在新标签页打开）”。" },
       { name: "variant", type: '"default" | "muted" | "danger"', default: '"default"', description: "muted 用于次级导航，danger 仅用于离开/放弃类导航。" },
-      { name: "icon", type: "ReactNode", description: "可选图标；方向类图标放右侧，语义图标放左侧。" },
-      { name: "disabled", type: "boolean", default: "false", description: "禁止跳转，渲染为普通文本并由邻近文案说明原因。" },
-      { name: "children", type: "ReactNode", required: true, description: "链接文案，写清去向，不写“点击这里”。" },
+      { name: "disabled", type: "boolean", default: "false", description: "去掉 href，以 aria-disabled 的 muted 文本渲染，点击无效；原因由邻近文案说明。" },
+      { name: "asChild", type: "boolean", default: "false", description: "把样式与外链处理交给子元素（Radix Slot），用于路由库的 <RouterLink>。" },
+      { name: "target / rel", type: "string", description: "覆盖外链默认的 target 与 rel。" },
+      { name: "className", type: "string", description: "追加样式，经 cn 合并。" },
+      { name: "children", type: "ReactNode", required: true, description: "链接文案，写清去向，不写“点击这里”；方向图标可直接放在文案后（图标自动 14px）。" },
     ],
     states: [
-      { name: "default", note: "品牌色；文内链接默认无下划线，hover 时出现。" },
+      { name: "default", note: "品牌色（primary），默认无下划线。" },
       { name: "hover", note: "出现下划线，颜色加深；不改变字重，避免行内抖动。" },
-      { name: "focus-visible", note: "3px 品牌色外发光，与 Button 焦点样式一致。" },
+      { name: "focus-visible", note: "ring 令牌色焦点环，与 Button 焦点样式一致。" },
       { name: "pressed", note: "颜色再深一档；站内导航不记忆 visited 态。" },
-      { name: "disabled", note: "渲染为 muted 文本，去掉跳转能力，邻近文案说明原因。" },
+      { name: "disabled", note: "disabled 渲染为 muted 文本（aria-disabled），去掉跳转能力，邻近文案说明原因。" },
       { name: "loading", note: "不适用：跳转由路由接管，目标页加载用 Skeleton/Spin。", applicable: false },
       { name: "empty", note: "不适用：链接不存在空状态。", applicable: false },
       { name: "error", note: "目标不存在时由目标页的 Result（404）承载，链接自身不表达错误。" },
@@ -406,7 +417,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
     ],
     keyboard: [
       "Tab 聚焦，Enter 触发跳转。",
-      "外链聚焦时读屏器朗读“在新窗口打开”。",
+      "外链聚焦时读屏器额外朗读“（在新标签页打开）”。",
     ],
     accessibility: [
       "使用原生 <a href>，不用 onClick + div 模拟。",
@@ -451,60 +462,81 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
         id: "basic",
         title: "基础示例",
         kind: "basic",
-        description: "五级层级：display 只用于页面主标题，label 用于字段与辅助说明，mono 用于 ID 与数值。",
-        code: `<Typography variant="display">示例项目（project-042）</Typography>
-<Typography variant="heading">基础信息</Typography>
-<Typography variant="body">本项目用于验证电解液配方的筛选流程。</Typography>
-<Typography variant="label">最近更新 · 2026-09-18</Typography>
-<Typography variant="mono">run-28003</Typography>`,
+        description: "H1 只用于页面主标题，H2/H3 为区块标题，Lead/Text 为导语与正文，Small 用于辅助说明，Num 用于 ID 与数值。",
+        code: `import { H1, H2, H3, InlineCode, Lead, Num, Small, Text } from "@/components/ui/typography";
+
+<H1>示例项目（project-042）</H1>
+<H2>基础信息</H2>
+<H3>计算参数</H3>
+<Lead>覆盖导入、计算与复核三个环节。</Lead>
+<Text>本项目用于验证电解液配方的筛选流程，字段 <InlineCode>cycle_count</InlineCode> 为必填。</Text>
+<Small>最近更新 · 2026-09-18</Small>
+<Text><Num mono>run-28003</Num> · 容量保持率 <Num>92.41%</Num></Text>`,
         preview: "typography/basic",
       },
       {
         id: "variants",
         title: "语义文本示例",
         kind: "variant",
-        description: "语义色只用于状态文本：success 完成、warning 待复核、danger 失败、violet Agent 生成。",
-        code: `<Typography type="success">计算完成 · 用时 214 秒</Typography>
-<Typography type="warning">3 个字段待人工复核</Typography>
-<Typography type="danger">任务失败：输入文件缺失</Typography>
-<Typography type="violet">以下内容由 Agent 生成</Typography>`,
+        description: "语义色只用于状态文本：success 完成、warning 待复核、danger 失败、agent 为 Agent 生成。",
+        code: `import { Text } from "@/components/ui/typography";
+
+<Text tone="success">计算完成 · 用时 214 秒</Text>
+<Text tone="warning">3 个字段待人工复核</Text>
+<Text tone="danger">任务失败：输入文件缺失</Text>
+<Text tone="agent">以下内容由 Agent 生成，请复核后采纳</Text>
+<Text tone="muted">muted：次要说明</Text>
+<Text tone="subtle">subtle：最弱提示，如占位与时间戳</Text>`,
         preview: "typography/variants",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "详情页头部：名称用 display，ID 用 mono 紧随名称，归属信息用 label，层级一眼可扫。",
-        code: `<header className="detail-head">
-  <Typography variant="display">NCM811 高温循环实验</Typography>
-  <Typography variant="mono">run-28003</Typography>
-  <Typography variant="label">所属项目 示例项目（project-042）· 数据集 ds-118</Typography>
+        description: "详情页头部：名称用 H2，ID 用 Num mono 紧随名称，归属信息用 muted 小号正文，指标用 tabular 数字对齐。",
+        code: `import { H2, Num, Small, Text } from "@/components/ui/typography";
+
+<header className="flex flex-col gap-1.5">
+  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+    <H2>NCM811 高温循环实验</H2>
+    <Num mono className="text-sm text-muted-foreground">run-28003</Num>
+  </div>
+  <Text tone="muted" size="sm">所属项目 示例项目（project-042）· 数据集 ds-118</Text>
+  <div className="flex flex-col">
+    <Small>容量保持率</Small>
+    <Num className="text-xl font-semibold text-foreground">92.41%</Num>
+  </div>
 </header>`,
         preview: "typography/business",
       },
     ],
     props: [
-      { name: "variant", type: '"display" | "heading" | "body" | "label" | "mono"', default: '"body"', description: "层级变体；display 每屏最多一个。" },
-      { name: "type", type: '"default" | "secondary" | "success" | "warning" | "danger" | "violet"', default: '"default"', description: "语义色；只用于状态文本，不用于装饰。" },
-      { name: "ellipsis", type: "boolean", default: "false", description: "单行截断并在 title 中给出完整值。" },
-      { name: "as", type: '"h1" | "h2" | "h3" | "h4" | "p" | "span"', description: "覆盖渲染标签，保证标题层级语义。" },
-      { name: "children", type: "ReactNode", required: true, description: "文本内容。" },
+      { name: "H1 – H4", type: "HTMLAttributes<HTMLHeadingElement>", description: "语义标题，渲染真实 h1–h4；H1 在 <768px 为 24px、≥768px 为 30px，H2 20px，H3 18px，H4 16px。" },
+      { name: "Text · tone", type: '"default" | "muted" | "subtle" | "success" | "warning" | "danger" | "agent"', default: '"default"', description: "语义色；success/warning/danger/agent 只用于状态文本，不用于装饰。" },
+      { name: "Text · size", type: '"sm" | "base" | "md"', default: '"base"', description: "正文字号：13 / 14 / 16px。" },
+      { name: "Text · truncate", type: "boolean", default: "false", description: "单行截断；完整值请同时放进 title。" },
+      { name: "Text · as", type: '"p" | "span" | "div" | "label"', default: '"p"', description: "覆盖渲染标签。" },
+      { name: "Lead", type: "HTMLAttributes<HTMLParagraphElement>", description: "导语，16px muted，放在标题下的一句概述。" },
+      { name: "Small", type: "HTMLAttributes<HTMLElement>", description: "辅助说明 / 字段标签，12px muted。" },
+      { name: "InlineCode", type: "HTMLAttributes<HTMLElement>", description: "行内代码，用于字段名、命令、路径。" },
+      { name: "Num · mono", type: "boolean", default: "false", description: "Num 默认启用 tabular-nums；mono 额外使用等宽字体，用于 ID。" },
+      { name: "className", type: "string", description: "所有组件均支持，经 cn 合并。" },
     ],
     states: [
-      { name: "default", note: "按 variant 渲染固定字号/字重/行高，不允许局部覆盖。" },
+      { name: "default", note: "按组件渲染固定字号/字重/行高，不手写 font-size 覆盖。" },
       { name: "hover", note: "不适用：静态文本无 hover；可交互文本的 hover 由承载控件定义。", applicable: false },
       { name: "focus-visible", note: "不适用：静态文本不接收焦点。", applicable: false },
       { name: "pressed", note: "不适用：静态文本无按压态。", applicable: false },
       { name: "disabled", note: "不适用：禁用态由对应控件表达，文本不单独变灰。", applicable: false },
       { name: "loading", note: "数据未到时用 Skeleton 占位，不渲染“加载中…”正文文本。" },
       { name: "empty", note: "空值不渲染“暂无”，由 Empty 组件在区块级说明。" },
-      { name: "error", note: "错误摘要文本使用 type=\"danger\"；字段级错误跟随表单的 field-error 样式。" },
+      { name: "error", note: "错误摘要文本使用 tone=\"danger\"；字段级错误跟随表单的 field-error 样式。" },
       { name: "permission-limited", note: "无权限字段渲染为 muted 的“无权限查看”占位，不留空白、不显示部分值。" },
-      { name: "mobile", note: "display 在移动端从 30px 降到 24px，正文保持 14px 不缩小。" },
-      { name: "dark-mode", note: "正文与辅助色使用语义令牌自动适配；mono 品牌色提亮一档。" },
+      { name: "mobile", note: "H1 在移动端从 30px 降到 24px，正文保持 14px 不缩小。" },
+      { name: "dark-mode", note: "正文与辅助色使用语义令牌自动适配；语义色提亮一档。" },
     ],
     interaction: [
-      "ID 与数值用 mono，方便扫描与复制比对。",
+      "ID 与数值用 Num（ID 加 mono），方便扫描与复制比对。",
       "截断文本必须提供完整值入口（title 或展开按钮）。",
       "语义色文本不与同色 Badge 并排重复表达同一状态。",
     ],
@@ -514,27 +546,27 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
     ],
     accessibility: [
       "标题使用真实 h1–h4 标签，层级不跳级。",
-      "正文字号不小于 13px，对比度 ≥ 4.5:1。",
+      "正文字号不小于 13px（Small 12px 仅用于辅助说明），对比度 ≥ 4.5:1。",
       "状态文本不只依赖颜色，配合措辞或图标。",
     ],
     responsive: [
-      "display 在 <760px 降为 24px。",
-      "长表格单元格文本使用 ellipsis，不换行撑高行。",
+      "H1 在 <768px 降为 24px。",
+      "长表格单元格文本使用 truncate，不换行撑高行。",
     ],
     content: [
-      "辅助说明使用 label，句子简短，不以“请”开头。",
+      "辅助说明使用 Small，句子简短，不以“请”开头。",
       "ID 一律等宽字体，不翻译、不改写大小写。",
       "错误文本写清对象与后果：任务失败：输入文件缺失。",
     ],
     dos: [
-      "用 variant 表达层级，而不是手写 font-size。",
-      "ID、时间、数值使用 mono。",
+      "用 H1–H4 / Text / Small 表达层级，而不是手写 font-size。",
+      "ID 用 Num mono，数值用 Num。",
       "状态文本用语义色并写清结论。",
     ],
     donts: [
       "不要新增字号或颜色表达层级。",
       "不要整段正文使用语义色。",
-      "不要把长 URL、长 ID 原样撑破布局（用 ellipsis）。",
+      "不要把长 URL、长 ID 原样撑破布局（用 truncate）。",
       "不要用加粗代替标题层级。",
     ],
     related: ["divider", "badge", "code-block", "empty", "card"],
@@ -673,7 +705,7 @@ import { Separator } from "@/components/ui/separator";
         id: "basic",
         title: "语义色示例",
         kind: "basic",
-        description: "六种语义色各归其位：success 完成、warning 待复核、danger 失败、info 进行中、violet Agent、neutral 默认。",
+        description: "六种语义色各归其位：success 完成、warning 待复核、danger 失败、info 进行中、agent Agent、neutral 默认。",
         code: `import { Badge } from "@/components/ui/badge";
 
 <Badge tone="success" dot>已完成</Badge>
@@ -805,7 +837,7 @@ function RunStatusTable() {
     ],
     content: [
       "文案 2–4 字，写结论不写过程：已完成、待复核、失败。",
-      "语义与颜色固定绑定：violet 只用于 Agent/模型，不用于其他“特别”标记。",
+      "语义与颜色固定绑定：agent 只用于 Agent/模型，不用于其他“特别”标记。",
       "count 只表达未读/待处理数量，不表达总量。",
     ],
     dos: [
@@ -828,7 +860,7 @@ function RunStatusTable() {
     category: "general",
     status: "beta",
     version: "0.1.0",
-    purpose: "标记对象的分类、属性或来源，支持关闭与选择，是属性维度的最小载体。",
+    purpose: "标记对象的分类、属性或来源，支持移除与选择，是属性维度的最小载体。",
     usage:
       "用于数据集属性、筛选条件的已选值、用户自定义分类。状态（已完成/失败）用 Badge，不用 Tag；大量选项的管理用 Select。",
     keywords: ["tag", "label", "标签", "分类", "筛选"],
@@ -838,87 +870,114 @@ function RunStatusTable() {
         title: "基础示例",
         kind: "basic",
         description: "默认标签表达中性属性；语义色只在与 Badge 相同的语义上使用，含义不扩展。",
-        code: `<Tag>电解液</Tag>
-<Tag color="info">内部数据</Tag>
-<Tag color="violet">Agent 标注</Tag>
-<Tag color="warning">待确认来源</Tag>`,
+        code: `import { Sparkles } from "lucide-react";
+import { Tag, TagGroup } from "@/components/ui/tag";
+
+<TagGroup aria-label="数据集属性">
+  <Tag>电解液</Tag>
+  <Tag tone="primary">内部数据</Tag>
+  <Tag tone="agent" icon={<Sparkles />}>Agent 标注</Tag>
+  <Tag tone="warning">待确认来源</Tag>
+  <Tag tone="outline">草稿</Tag>
+</TagGroup>
+<TagGroup>
+  <Tag size="sm">sm · 表格行内</Tag>
+  <Tag>default · 属性区</Tag>
+</TagGroup>`,
         preview: "tag/basic",
       },
       {
         id: "variants",
         title: "可关闭与可选择",
         kind: "variant",
-        description: "可关闭用于已选筛选条件；可选择用于多选分类，选中态用填充色而非勾选图标。",
-        code: `<Tag closable onClose={() => removeFilter("project")}>项目：project-042</Tag>
-<Tag checkable checked={selected} onChange={setSelected}>高温循环</Tag>`,
+        description: "可移除用于已选筛选条件；可选择用于多选分类（asChild 包一个 button aria-pressed），选中态用填充色而非勾选图标。",
+        code: `import { Tag, TagGroup } from "@/components/ui/tag";
+
+<TagGroup aria-label="已选筛选">
+  <Tag onRemove={() => removeFilter("project")} removeLabel="移除筛选 项目：project-042">
+    项目：project-042
+  </Tag>
+</TagGroup>
+<TagGroup aria-label="实验分类（可多选）">
+  <Tag asChild tone={selected ? "primary" : "outline"}>
+    <button type="button" aria-pressed={selected} onClick={() => setSelected(!selected)}>
+      高温循环
+    </button>
+  </Tag>
+</TagGroup>`,
         preview: "tag/variants",
       },
       {
         id: "business",
         title: "真实业务示例",
         kind: "business",
-        description: "数据集属性区：来源、格式用中性标签，Agent 生成的标注用 violet 并注明来源；已选筛选外露为可关闭标签。",
-        code: `<div className="dataset-tags">
+        description: "数据集属性区：来源、格式用中性标签，Agent 生成的标注用 agent 色并注明来源；已选筛选外露为可移除标签。",
+        code: `import { Sparkles } from "lucide-react";
+import { Tag, TagGroup } from "@/components/ui/tag";
+
+<TagGroup aria-label="数据集属性">
   <Tag>来源：导入</Tag>
   <Tag>格式：CSV</Tag>
-  <Tag color="violet">Agent 标注：含异常点</Tag>
-</div>
-<FilterBar>
-  <Tag closable>状态：进行中</Tag>
-  <Tag closable>项目：project-042</Tag>
-</FilterBar>`,
+  <Tag tone="agent" icon={<Sparkles />}>Agent 标注：含异常点</Tag>
+</TagGroup>
+<TagGroup aria-label="已选筛选">
+  {filters.map((f) => (
+    <Tag key={f} onRemove={() => remove(f)} removeLabel={\`移除筛选 \${f}\`}>{f}</Tag>
+  ))}
+</TagGroup>`,
         preview: "tag/business",
       },
     ],
     props: [
-      { name: "color", type: '"default" | "info" | "success" | "warning" | "danger" | "violet"', default: '"default"', description: "语义色，与 Badge 同一套规则，不扩展含义。" },
-      { name: "closable", type: "boolean", default: "false", description: "显示关闭按钮，用于已选条件或可移除属性。" },
-      { name: "onClose", type: "() => void", description: "关闭回调；关闭即移除条件并触发对应查询。" },
-      { name: "checkable", type: "boolean", default: "false", description: "可选择模式，用于多选分类。" },
-      { name: "checked", type: "boolean", description: "checkable 模式下的选中态，受控。" },
-      { name: "onChange", type: "(checked: boolean) => void", description: "checkable 模式的选中变化回调。" },
-      { name: "children", type: "ReactNode", required: true, description: "标签内容，推荐「维度：值」格式。" },
+      { name: "tone", type: '"neutral" | "primary" | "success" | "warning" | "danger" | "agent" | "outline"', default: '"neutral"', description: "语义色，与 Badge 同一套规则，不扩展含义；outline 为描边弱化样式。" },
+      { name: "size", type: '"sm" | "default"', default: '"default"', description: "sm（20px）用于表格行内，default（24px）用于属性区。" },
+      { name: "icon", type: "ReactNode", description: "前置图标，装饰性，自动 aria-hidden。" },
+      { name: "onRemove", type: "() => void", description: "传入后显示移除按钮；点击即移除条件，无需二次确认。" },
+      { name: "removeLabel", type: "string", default: "“移除 {文本}”", description: "移除按钮的无障碍名称，建议写明对象：移除筛选 状态：进行中。" },
+      { name: "asChild", type: "boolean", default: "false", description: "把样式交给子元素，例如 <button aria-pressed> 实现可选择标签。" },
+      { name: "children", type: "ReactNode", required: true, description: "标签内容，推荐「维度：值」格式；字符串内容超长时截断并写入 title。" },
+      { name: "TagGroup", type: "HTMLAttributes<HTMLDivElement>", description: "换行排列的容器（gap 6px）；传 aria-label 时以 role=group 作为一组朗读。" },
     ],
     states: [
       { name: "default", note: "中性灰底；语义色仅在与 Badge 相同的含义上使用。" },
-      { name: "hover", note: "可关闭/可选择时 hover 加深背景并显示指针；只读标签无 hover。" },
-      { name: "focus-visible", note: "可交互标签有 3px 品牌色外发光；只读标签不接收焦点。" },
-      { name: "pressed", note: "checkable 点击切换选中，用填充色表达选中，不使用勾选图标。" },
-      { name: "disabled", note: "可交互标签禁用时 opacity .45，原因由上下文说明。" },
+      { name: "hover", note: "可移除/可选择时 hover 降低不透明度并显示指针；只读标签无 hover。" },
+      { name: "focus-visible", note: "可交互标签有 ring 令牌色焦点环；只读标签不接收焦点。" },
+      { name: "pressed", note: "可选择标签（asChild + button）点击切换选中，用 primary 填充色表达选中，不使用勾选图标。" },
+      { name: "disabled", note: "禁用的可交互标签 opacity 50%，原因由上下文说明。" },
       { name: "loading", note: "不适用：标签内容的加载由所在区块 Skeleton 承担。", applicable: false },
       { name: "empty", note: "不适用：没有标签时不渲染标签区域，由 Empty 说明。", applicable: false },
       { name: "error", note: "不适用：标签不表达错误；错误用 Badge danger 或 Alert。", applicable: false },
-      { name: "permission-limited", note: "无权限修改的属性标签渲染为只读，隐藏关闭按钮。" },
-      { name: "mobile", note: "标签组允许换行；单个标签最大宽度 100%，超出截断。" },
+      { name: "permission-limited", note: "无权限修改的属性标签渲染为只读，不传 onRemove 即不显示移除按钮。" },
+      { name: "mobile", note: "TagGroup 自动换行；单个标签最大宽度 100%，超出截断。" },
       { name: "dark-mode", note: "语义色使用令牌自动适配。" },
     ],
     interaction: [
-      "closable 关闭即生效：移除条件并刷新查询，不需要二次确认。",
-      "checkable 点击切换选中，用于多选分类筛选。",
+      "onRemove 即时生效：移除条件并刷新查询，不需要二次确认。",
+      "可选择标签通过 asChild 包一个 button，点击切换选中，用于多选分类筛选。",
       "标签过多时收起为「+N」，展开后逐行展示。",
     ],
     keyboard: [
-      "可交互标签进入 Tab 序列；Enter / Space 触发选择或关闭。",
-      "关闭按钮不单独设焦点，整个标签是一个交互单元。",
+      "可选择标签（button）与移除按钮各自进入 Tab 序列；Enter / Space 触发选择或移除。",
+      "移除按钮是独立的可聚焦按钮，带有明确的 aria-label。",
     ],
     accessibility: [
-      "checkable 使用 aria-pressed 表达选中态。",
-      "closable 标签的 aria-label 说明关闭对象：移除筛选 状态：进行中。",
-      "选中态不只依赖颜色，配合字重或边框变化。",
+      "可选择标签的 button 使用 aria-pressed 表达选中态。",
+      "移除按钮的 aria-label 说明对象（removeLabel）：移除筛选 状态：进行中。",
+      "选中态不只依赖颜色，同时有 aria-pressed 供读屏器朗读。",
     ],
     responsive: [
-      "标签组换行展示，不横向滚动。",
+      "TagGroup 换行展示，不横向滚动。",
       "移动端单个标签内容超长时截断，完整值由 title 提供。",
     ],
     content: [
       "属性标签格式「维度：值」：来源：导入、格式：CSV。",
       "筛选标签保留维度名，关闭后用户能记住刚才筛了什么。",
-      "Agent 生成的标注必须用 violet 并注明来源。",
+      "Agent 生成的标注必须用 agent 色并注明来源。",
     ],
     dos: [
       "状态用 Badge，属性用 Tag，分工不混。",
-      "已选筛选条件用 closable Tag 外露在 FilterBar。",
-      "Agent 标注用 violet 并写明来源。",
+      "已选筛选条件用带 onRemove 的 Tag 外露在筛选栏。",
+      "Agent 标注用 agent 色并写明来源。",
     ],
     donts: [
       "不要用 Tag 表达任务状态（用 Badge）。",
@@ -1102,10 +1161,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
         title: "基础示例",
         kind: "basic",
         description: "空状态三要素：发生了什么（还没有实验记录）、是否需要操作（需要）、下一步（新建实验）。",
-        code: `<Empty
+        code: `import { Button } from "@/components/ui/button";
+import { Empty } from "@/components/ui/empty";
+
+<Empty
   title="还没有实验记录"
   description="创建第一个实验后，数据会展示在这里。"
-  action={<Button variant="primary">新建实验</Button>}
+  actions={<Button size="sm">新建实验</Button>}
 />`,
         preview: "empty/basic",
       },
@@ -1113,14 +1175,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
         id: "variants",
         title: "变体示例",
         kind: "variant",
-        description: "筛选无结果与无数据是两种空态：前者给「清除筛选」，后者给创建入口；行内小空态用 size=\"sm\"。",
-        code: `<Empty
-  variant="no-result"
+        description: "筛选无结果与无数据是两种空态：前者给「清除筛选」，后者给创建入口；行内小空态用 size=\"compact\"。",
+        code: `import { SearchX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Empty } from "@/components/ui/empty";
+
+<Empty
+  icon={<SearchX />}
   title="没有符合条件的结果"
   description="尝试调整筛选条件或关键字。"
-  action={<Button variant="secondary">清除筛选</Button>}
+  actions={<Button variant="secondary" size="sm">清除筛选</Button>}
 />
-<Empty size="sm" description="暂无附件" />`,
+<Empty size="compact" icon={null} description="暂无附件" />`,
         preview: "empty/variants",
       },
       {
@@ -1128,31 +1194,42 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
         title: "真实业务示例",
         kind: "business",
         description: "项目详情页的数据集列表：区分「项目还没有数据集」与「筛选后没有结果」，文案与动作不同。",
-        code: `<Empty
-  title="示例项目（project-042）还没有数据集"
-  description="导入或新建数据集后即可开始计算。"
-  action={<Button variant="primary">导入数据集</Button>}
-/>
-<Empty
-  variant="no-result"
-  title="没有符合「进行中」的数据集"
-  description="当前筛选条件下没有结果。"
-  action={<Button variant="ghost">清除筛选</Button>}
-/>`,
+        code: `import { Database, SearchX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Empty } from "@/components/ui/empty";
+
+<Card>
+  <Empty
+    icon={<Database />}
+    title="示例项目（project-042）还没有数据集"
+    description="导入或新建数据集后即可开始计算。"
+    actions={<Button size="sm">导入数据集</Button>}
+  />
+</Card>
+<Card>
+  <Empty
+    icon={<SearchX />}
+    title="没有符合「进行中」的数据集"
+    description="当前筛选条件下没有结果。"
+    actions={<Button variant="ghost" size="sm">清除筛选</Button>}
+  />
+</Card>`,
         preview: "empty/business",
       },
     ],
     props: [
-      { name: "title", type: "string", required: true, description: "发生了什么；一句话，写对象不写情绪。" },
-      { name: "description", type: "string", description: "是否需要操作的补充说明；一句话。" },
-      { name: "action", type: "ReactNode", description: "下一步动作；最多一个按钮，不需要动作时省略。" },
-      { name: "variant", type: '"no-data" | "no-result"', default: '"no-data"', description: "no-data 无数据，no-result 筛选/搜索无结果。" },
-      { name: "size", type: '"md" | "sm"', default: '"md"', description: "sm 用于表格单元格、卡片内的行内空态，只保留说明文字。" },
-      { name: "image", type: "ReactNode", description: "可选插画；默认使用统一空态插画，不替换为彩色图片。" },
+      { name: "title", type: "ReactNode", description: "发生了什么；一句话，写对象不写情绪。" },
+      { name: "description", type: "ReactNode", description: "是否需要操作的补充说明；一句话。" },
+      { name: "actions", type: "ReactNode", description: "下一步动作，通常一个 Button（size=\"sm\"）；不需要动作时省略。" },
+      { name: "icon", type: "ReactNode | null", default: "<Inbox />", description: "顶部图标（装饰性，aria-hidden）；筛选无结果换成 SearchX，传 null 则不显示。" },
+      { name: "size", type: '"default" | "compact"', default: '"default"', description: "compact 用于表格单元格、卡片内的行内空态，间距与字号更小。" },
+      { name: "children", type: "ReactNode", description: "插入在说明与动作之间的自定义内容。" },
+      { name: "className", type: "string", description: "追加样式，例如在卡片内去掉内边距。" },
     ],
     states: [
-      { name: "default", note: "居中：插画 + 标题 + 说明 + 动作，三要素齐全。" },
-      { name: "hover", note: "不适用：空状态本身不可交互，仅 action 按钮有 hover。", applicable: false },
+      { name: "default", note: "居中：图标 + 标题 + 说明 + 动作，三要素齐全。" },
+      { name: "hover", note: "不适用：空状态本身不可交互，仅 actions 中的按钮有 hover。", applicable: false },
       { name: "focus-visible", note: "不适用：空状态容器不接收焦点。", applicable: false },
       { name: "pressed", note: "不适用：空状态容器无按压态。", applicable: false },
       { name: "disabled", note: "不适用：空状态无禁用态。", applicable: false },
@@ -1160,25 +1237,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
       { name: "empty", note: "Empty 本身就是空态的表达；数据到达后原位替换为内容，布局不跳动。" },
       { name: "error", note: "错误不是空态：加载失败用 Result 或 Alert 给出原因与重试。" },
       { name: "permission-limited", note: "无权限不是空态：用 Result（403）说明所需权限与联系人。" },
-      { name: "mobile", note: "插画缩小、文案保持完整，动作按钮宽度 100%。" },
-      { name: "dark-mode", note: "插画使用单色系，随 muted 令牌适配。" },
+      { name: "mobile", note: "文案保持完整，动作按钮自动换行居中。" },
+      { name: "dark-mode", note: "图标底板使用 muted 令牌，自动适配。" },
     ],
     interaction: [
-      "action 最多一个；空状态不承担教学任务，不放图文教程。",
+      "actions 最多一个按钮；空状态不承担教学任务，不放图文教程。",
       "数据到达后内容原位替换，空态与内容的高度尽量接近，避免布局跳动。",
       "筛选无结果时保留筛选栏可见，不清空用户已输入的条件。",
     ],
     keyboard: [
-      "action 按钮正常进入 Tab 序列。",
+      "actions 中的按钮正常进入 Tab 序列。",
       "空状态容器不接收焦点，屏幕阅读器以文本朗读标题与说明。",
     ],
     accessibility: [
-      "插画 aria-hidden，信息由标题与说明文本承载。",
-      "标题使用描述性文本，不只显示图标或插画。",
+      "图标 aria-hidden，信息由标题与说明文本承载。",
+      "标题使用描述性文本，不只显示图标。",
     ],
     responsive: [
-      "移动端插画宽度 ≤ 120px，标题与说明不截断。",
-      "action 按钮在窄屏全宽。",
+      "移动端标题与说明不截断，说明文字最大宽度 24rem 居中换行。",
+      "actions 在窄屏自动换行并居中。",
     ],
     content: [
       "三要素齐全：发生了什么、是否需要操作、下一步。",
@@ -1188,13 +1265,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
     dos: [
       "区分无数据与筛选无结果，动作不同。",
       "给得出下一步时提供唯一动作按钮。",
-      "行内小空态用 size=\"sm\"，只保留说明文字。",
+      "行内小空态用 size=\"compact\"，只保留说明文字。",
     ],
     donts: [
       "不要用空状态代替错误提示。",
       "不要放多个动作按钮或教学长文。",
       "不要让空态与骨架屏交替闪烁。",
-      "不要在表格单元格里放整版空状态（用 sm）。",
+      "不要在表格单元格里放整版空状态（用 compact）。",
     ],
     related: ["result", "skeleton", "button", "table", "card"],
   },
@@ -1380,19 +1457,28 @@ function RunList() {
         title: "基础示例",
         kind: "basic",
         description: "四种语义结论：success 成功、info 提示、warning 需注意、danger 失败；图标与语义色绑定。",
-        code: `<Result status="success" title="任务已提交" description="任务 ID：run-28003" />
-<Result status="info" title="正在排队" />
-<Result status="warning" title="部分字段待复核" />
-<Result status="danger" title="任务失败" />`,
+        code: `import { Result } from "@/components/ui/result";
+
+<Result status="success" title="任务已提交" description="任务 ID：run-28003" />
+<Result status="info" title="正在排队" description="前方还有 2 个任务" />
+<Result status="warning" title="部分字段待复核" description="3 个字段需要人工确认" />
+<Result status="danger" title="任务失败" description="输入文件缺失：electrolyte.csv" />`,
         preview: "result/basic",
       },
       {
         id: "variants",
         title: "页面级异常",
         kind: "variant",
-        description: "404 与 403 是固定变体：文案与动作预置，不允许自由改写。",
-        code: `<Result status="404" />
-<Result status="403" />`,
+        description: "not-found（404）与 forbidden（403）自带预置标题与说明，业务只补充所需权限与动作，不自由改写标题。",
+        code: `import { Button } from "@/components/ui/button";
+import { Result } from "@/components/ui/result";
+
+<Result status="not-found" actions={<Button variant="secondary" size="sm">返回首页</Button>} />
+<Result
+  status="forbidden"
+  description="需要项目 project-042 的查看权限，请联系项目管理员。"
+  actions={<Button variant="secondary" size="sm">申请权限</Button>}
+/>`,
         preview: "result/variants",
       },
       {
@@ -1400,24 +1486,38 @@ function RunList() {
         title: "真实业务示例",
         kind: "business",
         description: "提交计算任务后的结论页：回显任务 ID 与影响范围，给出追踪入口与返回动作。",
-        code: `<Result
+        code: `import { Button } from "@/components/ui/button";
+import { Result } from "@/components/ui/result";
+import { Num } from "@/components/ui/typography";
+
+<Result
   status="success"
   title="计算任务已提交"
   description="任务 run-28003 已加入队列，将使用 示例项目（project-042）的额度。"
-  actions={[
-    <Button key="track" variant="primary">查看任务状态</Button>,
-    <Button key="back" variant="secondary">返回任务列表</Button>,
-  ]}
-/>`,
+  actions={
+    <>
+      <Button size="sm">查看任务状态</Button>
+      <Button variant="secondary" size="sm">返回任务列表</Button>
+    </>
+  }
+>
+  <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+    <dt className="text-muted-foreground">任务 ID</dt><dd className="m-0"><Num mono>run-28003</Num></dd>
+    <dt className="text-muted-foreground">预计用时</dt><dd className="m-0"><Num>≤ 300</Num> 秒</dd>
+  </dl>
+</Result>`,
         preview: "result/business",
       },
     ],
     props: [
-      { name: "status", type: '"success" | "info" | "warning" | "danger" | "404" | "403"', required: true, description: "结论类型；404/403 为预置页面级变体。" },
-      { name: "title", type: "string", required: true, description: "结论文案，一句话说明结果。" },
-      { name: "description", type: "string", description: "原因或影响范围的补充说明；失败时写清原因。" },
-      { name: "actions", type: "ReactNode", description: "后续动作，最多两个按钮，主按钮指向下一步。" },
-      { name: "extra", type: "ReactNode", description: "可选补充信息区，如任务 ID、引用或日志摘要。" },
+      { name: "status", type: '"success" | "warning" | "danger" | "info" | "forbidden" | "not-found"', required: true, description: "结论类型，决定图标与语义色；forbidden / not-found 带预置标题与说明。" },
+      { name: "title", type: "ReactNode", description: "结论文案，一句话说明结果；forbidden / not-found 缺省为“无访问权限”/“页面不存在”。" },
+      { name: "description", type: "ReactNode", description: "原因或影响范围；失败时写清原因，403 建议写明所需权限。" },
+      { name: "icon", type: "ReactNode", description: "覆盖该状态的默认图标。" },
+      { name: "actions", type: "ReactNode", description: "后续动作，最多两个 Button，主动作在前；窄屏纵向全宽。" },
+      { name: "children", type: "ReactNode", description: "补充信息区（带底色的卡片），如任务 ID、预计用时、日志摘要。" },
+      { name: "autoFocus", type: "boolean", default: "false", description: "挂载后把焦点移到标题，读屏器先朗读结论；整页结果时使用。" },
+      { name: "className", type: "string", description: "追加样式，例如 py-4 收紧留白用于卡片内。" },
     ],
     states: [
       { name: "default", note: "居中：语义图标 + 标题 + 说明 + 动作，图标与语义色绑定。" },
@@ -1428,28 +1528,28 @@ function RunList() {
       { name: "loading", note: "提交进行中不渲染结果页，用 Button loading 或 Progress；结论确定后立即出现。" },
       { name: "empty", note: "不适用：无数据场景用 Empty；结果页必须有明确结论。", applicable: false },
       { name: "error", note: "danger 状态即错误结论：写清失败原因、影响与重试入口。" },
-      { name: "permission-limited", note: "403 变体说明所需权限与联系人入口，不只写「无权限」。" },
+      { name: "permission-limited", note: "forbidden 状态说明所需权限与联系人入口，不只写「无权限」。" },
       { name: "mobile", note: "图标与文案居中，动作按钮纵向排列全宽。" },
       { name: "dark-mode", note: "语义色与图标使用令牌自动适配。" },
     ],
     interaction: [
-      "结果页出现后焦点移到标题，读屏器首先朗读结论。",
+      "整页结果传 autoFocus，出现后焦点移到标题，读屏器首先朗读结论；局部结果不抢焦点。",
       "动作最多两个：下一步（主）+ 返回/关闭（次）。",
       "失败结果必须给出可重试或人工接管的入口，不做死路页面。",
-      "404/403 使用预置文案与动作，业务不自由改写。",
+      "forbidden / not-found 使用预置标题与说明，业务只补充权限说明与动作。",
     ],
     keyboard: [
       "动作按钮按视觉顺序进入 Tab 序列。",
-      "页面加载完成焦点落在结果标题（tabindex=-1），Esc 不关闭结果页。",
+      "autoFocus 时焦点落在结果标题（tabindex=-1），Esc 不关闭结果页。",
     ],
     accessibility: [
       "图标 aria-hidden，结论由标题文本承载。",
-      "使用 role=\"status\"（成功/提示）或 role=\"alert\"（失败）向读屏器宣告。",
+      "自动设置 role=\"status\"（成功/提示/警告/403/404）或 role=\"alert\"（danger）向读屏器宣告。",
       "不只用颜色与图标表达结论，标题必须写清结果。",
     ],
     responsive: [
       "移动端动作按钮纵向全宽排列。",
-      "标题与说明不截断，图标尺寸缩小一档。" ,
+      "标题与说明不截断，说明文字最大宽度 28rem 居中换行。",
     ],
     content: [
       "标题写结论：任务已提交、任务失败；说明写原因与影响范围。",
@@ -1459,7 +1559,7 @@ function RunList() {
     dos: [
       "结论页回显任务 ID 与影响范围。",
       "失败给出重试或人工接管入口。",
-      "404/403 使用预置变体。",
+      "403/404 使用 forbidden / not-found 预置状态。",
     ],
     donts: [
       "不要用结果页表达局部错误（用 Alert/Message）。",

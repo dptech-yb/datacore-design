@@ -4,7 +4,7 @@ import { Check, Copy, WrapText } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-export interface CodeBlockProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+export interface CodeBlockProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title" | "onCopy"> {
   /** 代码文本。 */
   code: string;
   /** 语言标签（bash / json / python …），只做标注。 */
