@@ -1,34 +1,34 @@
 import {
-  AlertTriangle,
   ArrowRight,
-  ArrowUpRight,
   Bell,
   Check,
-  CheckCircle2,
   Copy,
+  Database,
   Eye,
-  FileQuestion,
-  Inbox,
-  Info,
   Loader2,
-  Lock,
   MoreHorizontal,
   Pencil,
   RefreshCw,
   SearchX,
   Share2,
+  Sparkles,
   Trash2,
   X,
-  XCircle,
 } from "lucide-react";
 import { useState } from "react";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Empty } from "@/components/ui/empty";
+import { Link } from "@/components/ui/link";
+import { Result } from "@/components/ui/result";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tag, TagGroup } from "@/components/ui/tag";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { H1, H2, H3, InlineCode, Lead, Num, Small, Text } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 import type { PreviewFn } from "./types";
 
@@ -82,33 +82,6 @@ function ButtonBusiness() {
       </div>
     </div>
   );
-}
-
-/* ---------- shared demo styles ---------- */
-const tagStyle: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 5,
-  padding: "3px 9px",
-  borderRadius: 6,
-  fontSize: 12,
-  fontWeight: 600,
-  border: "1px solid var(--line)",
-  background: "var(--surface-soft)",
-  color: "var(--text-muted)",
-};
-
-function iconCircle(color: string, bg: string, size = 44): CSSProperties {
-  return {
-    width: size,
-    height: size,
-    borderRadius: "50%",
-    display: "grid",
-    placeItems: "center",
-    color,
-    background: bg,
-    flex: "0 0 auto",
-  };
 }
 
 /** 带 Tooltip 的图标按钮：动作名称同时用于 aria-label 与 Tooltip。 */
@@ -227,14 +200,14 @@ const stopNav = (e: { preventDefault: () => void }) => e.preventDefault();
 function LinkBasic() {
   return (
     <div className="demo-stack">
-      <p style={{ margin: 0, color: "var(--text-muted)", fontSize: 14, lineHeight: 1.7 }}>
-        数据集 <span className="mono">ds-118</span> 已同步到{" "}
-        <a className="text-link" href="#/components/link" onClick={stopNav}>示例项目（project-042）</a>
+      <p className="m-0 text-base leading-7 text-muted-foreground">
+        数据集 <Num mono>ds-118</Num> 已同步到{" "}
+        <Link href="#/components/link" onClick={stopNav}>示例项目（project-042）</Link>
         ，可在项目内直接引用。
       </p>
       <div className="demo-row">
-        <a className="text-link" href="#/components/link" onClick={stopNav}>查看运行详情 <ArrowRight size={13} /></a>
-        <a className="text-link" href="#/components/link" onClick={stopNav}>字段规范文档 <ArrowUpRight size={13} /></a>
+        <Link href="#/components/link" onClick={stopNav}>查看运行详情 <ArrowRight /></Link>
+        <Link href="https://example.com/docs/fields" external onClick={stopNav}>字段规范文档</Link>
       </div>
     </div>
   );
@@ -244,41 +217,43 @@ function LinkVariants() {
   return (
     <div className="demo-stack">
       <div className="demo-row">
-        <a className="text-link" style={{ color: "var(--text-muted)" }} href="#/components/link" onClick={stopNav}>返回数据集列表</a>
-        <a className="text-link" style={{ color: "var(--red)" }} href="#/components/link" onClick={stopNav}>放弃本次编辑并离开</a>
+        <Link variant="muted" href="#/components/link" onClick={stopNav}>返回数据集列表</Link>
+        <Link variant="danger" href="#/components/link" onClick={stopNav}>放弃本次编辑并离开</Link>
+        <Link disabled>导出记录（CSV）</Link>
+        <span className="text-xs text-muted-foreground">需要导出权限</span>
       </div>
-      <p className="demo-note">muted 用于次级导航；danger 链接只允许「离开/放弃」类导航，破坏性动作用 Button + 确认。</p>
+      <p className="demo-note">muted 用于次级导航；danger 只允许「离开/放弃」类导航；disabled 去掉 href 并在邻近文案说明原因。</p>
     </div>
   );
 }
 
 function LinkBusiness() {
+  const rows = [
+    { id: "project-042", name: "示例电解液项目", status: <Badge tone="primary" dot>进行中</Badge> },
+    { id: "project-051", name: "正极材料对照组", status: <Badge tone="neutral" dot>已归档</Badge> },
+  ];
   return (
     <div className="demo-stack">
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr><th>项目</th><th>负责人</th><th>状态</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <a className="text-link" href="#/components/link" onClick={stopNav}>示例电解液项目</a>
-                <span className="table-secondary">project-042</span>
-              </td>
-              <td>示例用户</td>
-              <td><span className="status-badge badge-info"><span className="badge-dot" />进行中</span></td>
-            </tr>
-            <tr>
-              <td>
-                <a className="text-link" href="#/components/link" onClick={stopNav}>正极材料对照组</a>
-                <span className="table-secondary">project-051</span>
-              </td>
-              <td>示例用户</td>
-              <td><span className="status-badge badge-neutral"><span className="badge-dot" />已归档</span></td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="overflow-hidden rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow><TableHead>项目</TableHead><TableHead>负责人</TableHead><TableHead>状态</TableHead></TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell>
+                  <div className="flex items-baseline gap-2">
+                    <Link href={`#/components/link`} onClick={stopNav}>{row.name}</Link>
+                    <Num mono className="text-xs text-muted-foreground">{row.id}</Num>
+                  </div>
+                </TableCell>
+                <TableCell>示例用户</TableCell>
+                <TableCell>{row.status}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
       <p className="demo-note">实体名称渲染为链接跳转详情；ID 用等宽字体跟随，不重复做链接。</p>
     </div>
@@ -288,26 +263,28 @@ function LinkBusiness() {
 /* ---------- Typography ---------- */
 function TypographyBasic() {
   return (
-    <div className="type-samples">
-      <div>
-        <span className="type-label">Display · 页面主标题</span>
-        <div className="type-display">示例项目（project-042）</div>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <Small>H1 · 页面主标题</Small>
+        <H1>示例项目（project-042）</H1>
       </div>
-      <div>
-        <span className="type-label">Heading · 区块标题</span>
-        <div className="type-heading">基础信息</div>
+      <div className="flex flex-col gap-1">
+        <Small>H2 / H3 · 区块标题</Small>
+        <H2>基础信息</H2>
+        <H3>计算参数</H3>
       </div>
-      <div>
-        <span className="type-label">Body · 正文</span>
-        <div className="type-body">本项目用于验证电解液配方的筛选流程，覆盖导入、计算与复核三个环节。</div>
+      <div className="flex flex-col gap-1">
+        <Small>Lead / Text · 导语与正文</Small>
+        <Lead>覆盖导入、计算与复核三个环节。</Lead>
+        <Text>本项目用于验证电解液配方的筛选流程，字段 <InlineCode>cycle_count</InlineCode> 为必填。</Text>
       </div>
-      <div>
-        <span className="type-label">Label · 辅助说明</span>
-        <span style={{ color: "var(--text-muted)", fontSize: 14 }}>最近更新 · 2026-09-18</span>
+      <div className="flex flex-col gap-1">
+        <Small>Small · 辅助说明</Small>
+        <Small>最近更新 · 2026-09-18</Small>
       </div>
-      <div>
-        <span className="type-label">Mono · ID 与数值</span>
-        <span className="type-mono">run-28003</span>
+      <div className="flex flex-col gap-1">
+        <Small>Num · ID 与数值</Small>
+        <Text><Num mono>run-28003</Num> · 容量保持率 <Num>92.41%</Num></Text>
       </div>
     </div>
   );
@@ -316,22 +293,39 @@ function TypographyBasic() {
 function TypographyVariants() {
   return (
     <div className="demo-stack">
-      <span style={{ color: "var(--green)", fontSize: 14 }}>计算完成 · 用时 214 秒</span>
-      <span style={{ color: "var(--amber)", fontSize: 14 }}>3 个字段待人工复核</span>
-      <span style={{ color: "var(--red)", fontSize: 14 }}>任务失败：输入文件缺失</span>
-      <span style={{ color: "var(--violet)", fontSize: 14 }}>以下内容由 Agent 生成，请复核后采纳</span>
+      <Text tone="success">计算完成 · 用时 214 秒</Text>
+      <Text tone="warning">3 个字段待人工复核</Text>
+      <Text tone="danger">任务失败：输入文件缺失</Text>
+      <Text tone="agent">以下内容由 Agent 生成，请复核后采纳</Text>
+      <Text tone="muted">muted：次要说明</Text>
+      <Text tone="subtle">subtle：最弱提示，如占位与时间戳</Text>
       <p className="demo-note">语义色只用于状态文本，与 Badge 同一套规则，不用于装饰。</p>
     </div>
   );
 }
 
 function TypographyBusiness() {
+  const metrics = [
+    { label: "循环次数", value: "500" },
+    { label: "容量保持率", value: "92.41%" },
+    { label: "平均库仑效率", value: "99.87%" },
+  ];
   return (
-    <div className="demo-stack" style={{ gap: 6 }}>
-      <span className="type-display" style={{ fontSize: 24.0 }}>NCM811 高温循环实验</span>
-      <span className="type-mono">run-28003</span>
-      <span style={{ color: "var(--text-muted)", fontSize: 14 }}>所属项目 示例项目（project-042）· 数据集 ds-118</span>
-      <p className="demo-note" style={{ marginTop: 8 }}>名称用 display，ID 用 mono 紧随名称，归属信息用 label —— 层级一眼可扫。</p>
+    <div className="flex flex-col gap-1.5">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <H2>NCM811 高温循环实验</H2>
+        <Num mono className="text-sm text-muted-foreground">run-28003</Num>
+      </div>
+      <Text tone="muted" size="sm">所属项目 示例项目（project-042）· 数据集 ds-118</Text>
+      <div className="mt-3 flex flex-wrap gap-8">
+        {metrics.map((m) => (
+          <div key={m.label} className="flex flex-col">
+            <Small>{m.label}</Small>
+            <Num className="text-xl font-semibold text-foreground">{m.value}</Num>
+          </div>
+        ))}
+      </div>
+      <p className="demo-note" style={{ marginTop: 8 }}>名称用 H2，ID 用 Num mono 紧随名称，归属信息用 muted 小号正文，指标用 tabular 数字对齐。</p>
     </div>
   );
 }
@@ -479,78 +473,78 @@ function BadgeBusiness() {
 function TagBasic() {
   return (
     <div className="demo-stack">
-      <div className="demo-row">
-        <span style={tagStyle}>电解液</span>
-        <span className="status-badge badge-info" style={{ borderRadius: 6 }}>内部数据</span>
-        <span className="status-badge badge-violet" style={{ borderRadius: 6 }}>Agent 标注</span>
-        <span className="status-badge badge-warning" style={{ borderRadius: 6 }}>待确认来源</span>
-      </div>
+      <TagGroup aria-label="数据集属性">
+        <Tag>电解液</Tag>
+        <Tag tone="primary">内部数据</Tag>
+        <Tag tone="agent" icon={<Sparkles />}>Agent 标注</Tag>
+        <Tag tone="warning">待确认来源</Tag>
+        <Tag tone="outline">草稿</Tag>
+      </TagGroup>
+      <TagGroup>
+        <Tag size="sm">sm · 表格行内</Tag>
+        <Tag>default · 属性区</Tag>
+      </TagGroup>
       <p className="demo-note">语义色与 Badge 同一套规则，含义不扩展；普通分类用中性样式。</p>
     </div>
   );
 }
 
+const defaultFilters = ["项目：project-042", "状态：进行中"];
+
 function TagVariants() {
-  const [filters, setFilters] = useState<string[]>(["项目：project-042", "状态：进行中"]);
-  const [checked, setChecked] = useState(true);
+  const [filters, setFilters] = useState<string[]>(defaultFilters);
+  const [selected, setSelected] = useState<string[]>(["高温循环"]);
+  const toggle = (name: string) =>
+    setSelected((cur) => (cur.includes(name) ? cur.filter((n) => n !== name) : [...cur, name]));
   return (
     <div className="demo-stack">
-      <div className="demo-row">
+      <TagGroup aria-label="已选筛选">
         {filters.map((filter) => (
-          <span key={filter} style={tagStyle}>
+          <Tag key={filter} onRemove={() => setFilters(filters.filter((item) => item !== filter))} removeLabel={`移除筛选 ${filter}`}>
             {filter}
-            <button
-              aria-label={`移除筛选 ${filter}`}
-              onClick={() => setFilters(filters.filter((item) => item !== filter))}
-              style={{ display: "inline-flex", padding: 0, background: "transparent", color: "var(--faint)", cursor: "pointer" }}
-            >
-              <X size={11} />
-            </button>
-          </span>
+          </Tag>
         ))}
         {filters.length === 0 && (
-          <button className="text-link" onClick={() => setFilters(["项目：project-042", "状态：进行中"])}>恢复筛选条件</button>
+          <Button variant="link" size="sm" onClick={() => setFilters(defaultFilters)}>恢复筛选条件</Button>
         )}
-      </div>
-      <div className="demo-row">
-        <button
-          aria-pressed={checked}
-          onClick={() => setChecked(!checked)}
-          style={{
-            ...tagStyle,
-            cursor: "pointer",
-            background: checked ? "var(--brand-soft)" : "var(--surface-soft)",
-            color: checked ? "var(--brand)" : "var(--text-muted)",
-            borderColor: checked ? "color-mix(in srgb, var(--brand) 40%, var(--line))" : "var(--line)",
-          }}
-        >
-          高温循环
-        </button>
-        <span className="demo-note">可关闭用于已选筛选条件；可选择用填充色表达选中，不用勾选图标。</span>
-      </div>
+      </TagGroup>
+      <TagGroup aria-label="实验分类（可多选）">
+        {["高温循环", "倍率性能", "阻抗谱"].map((name) => {
+          const on = selected.includes(name);
+          return (
+            <Tag key={name} asChild tone={on ? "primary" : "outline"}>
+              <button type="button" aria-pressed={on} onClick={() => toggle(name)}>{name}</button>
+            </Tag>
+          );
+        })}
+      </TagGroup>
+      <p className="demo-note">onRemove 用于已选筛选条件；可选择通过 asChild 包一个 button aria-pressed，选中用 primary 填充色表达。</p>
     </div>
   );
 }
 
 function TagBusiness() {
+  const [filters, setFilters] = useState<string[]>(defaultFilters.slice().reverse());
   return (
     <div className="demo-stack">
-      <div>
-        <span className="type-label">数据集 ds-118 · 属性</span>
-        <div className="demo-row">
-          <span style={tagStyle}>来源：导入</span>
-          <span style={tagStyle}>格式：CSV</span>
-          <span className="status-badge badge-violet" style={{ borderRadius: 6 }}>Agent 标注：含异常点</span>
-        </div>
+      <div className="flex flex-col gap-1.5">
+        <Small>数据集 ds-118 · 属性</Small>
+        <TagGroup aria-label="数据集属性">
+          <Tag>来源：导入</Tag>
+          <Tag>格式：CSV</Tag>
+          <Tag tone="agent" icon={<Sparkles />}>Agent 标注：含异常点</Tag>
+        </TagGroup>
       </div>
-      <div>
-        <span className="type-label">已选筛选</span>
-        <div className="demo-row">
-          <span style={tagStyle}>状态：进行中 <X size={11} style={{ color: "var(--faint)" }} /></span>
-          <span style={tagStyle}>项目：project-042 <X size={11} style={{ color: "var(--faint)" }} /></span>
-        </div>
+      <div className="flex flex-col gap-1.5">
+        <Small>已选筛选</Small>
+        <TagGroup aria-label="已选筛选">
+          {filters.map((f) => (
+            <Tag key={f} onRemove={() => setFilters(filters.filter((x) => x !== f))} removeLabel={`移除筛选 ${f}`}>{f}</Tag>
+          ))}
+          {filters.length === 0 && <Text as="span" tone="subtle" size="sm">未设置筛选条件</Text>}
+        </TagGroup>
       </div>
-      <p className="demo-note">属性标签格式「维度：值」；Agent 生成的标注用 violet 并注明来源。</p>
+      <p className="demo-note">属性标签格式「维度：值」；Agent 生成的标注用 agent 色并注明来源。</p>
     </div>
   );
 }
@@ -632,25 +626,27 @@ function CardBusiness() {
 /* ---------- Empty ---------- */
 function EmptyBasic() {
   return (
-    <div className="demo-stack" style={{ justifyItems: "center", textAlign: "center", padding: "12px 0" }}>
-      <span style={{ ...iconCircle("var(--faint)", "var(--surface-soft)"), borderRadius: 12 }}><Inbox size={20} /></span>
-      <strong style={{ fontSize: 14 }}>还没有实验记录</strong>
-      <span className="demo-note">创建第一个实验后，数据会展示在这里。</span>
-      <Button size="sm">新建实验</Button>
-    </div>
+    <Empty
+      title="还没有实验记录"
+      description="创建第一个实验后，数据会展示在这里。"
+      actions={<Button size="sm">新建实验</Button>}
+    />
   );
 }
 
 function EmptyVariants() {
   return (
     <div className="demo-stack">
-      <div className="demo-stack" style={{ justifyItems: "center", textAlign: "center", padding: "4px 0" }}>
-        <span style={{ ...iconCircle("var(--faint)", "var(--surface-soft)"), borderRadius: 12 }}><SearchX size={20} /></span>
-        <strong style={{ fontSize: 14 }}>没有符合条件的结果</strong>
-        <span className="demo-note">尝试调整筛选条件或关键字。</span>
-        <Button variant="secondary" size="sm">清除筛选</Button>
+      <Empty
+        icon={<SearchX />}
+        title="没有符合条件的结果"
+        description="尝试调整筛选条件或关键字。"
+        actions={<Button variant="secondary" size="sm">清除筛选</Button>}
+      />
+      <div className="rounded-lg border">
+        <Empty size="compact" icon={null} description="暂无附件" />
       </div>
-      <div className="empty-line"><span>暂无附件（行内 sm 空态，只保留说明文字）</span></div>
+      <p className="demo-note">上：筛选无结果（换图标，给清除筛选）；下：size=&quot;compact&quot; 的行内空态，只保留说明文字。</p>
     </div>
   );
 }
@@ -659,15 +655,21 @@ function EmptyBusiness() {
   return (
     <div className="demo-stack">
       <div className="demo-grid-2">
-        <Card className="demo-stack p-4" style={{ justifyItems: "center", textAlign: "center" }}>
-          <strong style={{ fontSize: 14 }}>示例项目（project-042）还没有数据集</strong>
-          <span className="demo-note">导入或新建数据集后即可开始计算。</span>
-          <Button size="sm">导入数据集</Button>
+        <Card>
+          <Empty
+            icon={<Database />}
+            title="示例项目（project-042）还没有数据集"
+            description="导入或新建数据集后即可开始计算。"
+            actions={<Button size="sm">导入数据集</Button>}
+          />
         </Card>
-        <Card className="demo-stack p-4" style={{ justifyItems: "center", textAlign: "center" }}>
-          <strong style={{ fontSize: 14 }}>没有符合「进行中」的数据集</strong>
-          <span className="demo-note">当前筛选条件下没有结果。</span>
-          <Button variant="ghost" size="sm">清除筛选</Button>
+        <Card>
+          <Empty
+            icon={<SearchX />}
+            title="没有符合「进行中」的数据集"
+            description="当前筛选条件下没有结果。"
+            actions={<Button variant="ghost" size="sm">清除筛选</Button>}
+          />
         </Card>
       </div>
       <p className="demo-note">「没有数据」给创建入口，「筛选无结果」给清除筛选 —— 两种空态的文案与动作不同。</p>
@@ -785,20 +787,12 @@ function SkeletonBusiness() {
 
 /* ---------- Result ---------- */
 function ResultBasic() {
-  const items = [
-    { icon: <CheckCircle2 size={22} />, color: "var(--green)", bg: "var(--green-soft)", title: "任务已提交" },
-    { icon: <Info size={22} />, color: "var(--brand)", bg: "var(--brand-soft)", title: "正在排队" },
-    { icon: <AlertTriangle size={22} />, color: "var(--amber)", bg: "var(--amber-soft)", title: "部分字段待复核" },
-    { icon: <XCircle size={22} />, color: "var(--red)", bg: "var(--red-soft)", title: "任务失败" },
-  ];
   return (
     <div className="demo-grid-2">
-      {items.map((item) => (
-        <div key={item.title} className="demo-stack" style={{ justifyItems: "center", textAlign: "center", gap: 8, padding: 8 }}>
-          <span style={iconCircle(item.color, item.bg, 40)}>{item.icon}</span>
-          <strong style={{ fontSize: 14 }}>{item.title}</strong>
-        </div>
-      ))}
+      <Result status="success" title="任务已提交" description="任务 ID：run-28003" className="py-4" />
+      <Result status="info" title="正在排队" description="前方还有 2 个任务" className="py-4" />
+      <Result status="warning" title="部分字段待复核" description="3 个字段需要人工确认" className="py-4" />
+      <Result status="danger" title="任务失败" description="输入文件缺失：electrolyte.csv" className="py-4" />
     </div>
   );
 }
@@ -806,17 +800,15 @@ function ResultBasic() {
 function ResultVariants() {
   return (
     <div className="demo-grid-2">
-      <Card className="demo-stack p-4" style={{ justifyItems: "center", textAlign: "center" }}>
-        <span style={iconCircle("var(--faint)", "var(--surface-soft)", 40)}><FileQuestion size={20} /></span>
-        <strong style={{ fontSize: 14 }}>404 · 页面不存在</strong>
-        <span className="demo-note">页面可能已被移动或删除。</span>
-        <Button variant="secondary" size="sm">返回首页</Button>
+      <Card>
+        <Result status="not-found" actions={<Button variant="secondary" size="sm">返回首页</Button>} />
       </Card>
-      <Card className="demo-stack p-4" style={{ justifyItems: "center", textAlign: "center" }}>
-        <span style={iconCircle("var(--amber)", "var(--amber-soft)", 40)}><Lock size={20} /></span>
-        <strong style={{ fontSize: 14 }}>403 · 无访问权限</strong>
-        <span className="demo-note">需要项目 project-042 的查看权限，请联系项目管理员。</span>
-        <Button variant="secondary" size="sm">申请权限</Button>
+      <Card>
+        <Result
+          status="forbidden"
+          description="需要项目 project-042 的查看权限，请联系项目管理员。"
+          actions={<Button variant="secondary" size="sm">申请权限</Button>}
+        />
       </Card>
     </div>
   );
@@ -824,17 +816,23 @@ function ResultVariants() {
 
 function ResultBusiness() {
   return (
-    <div className="demo-stack" style={{ justifyItems: "center", textAlign: "center", padding: "8px 0" }}>
-      <span style={iconCircle("var(--green)", "var(--green-soft)")}><CheckCircle2 size={22} /></span>
-      <strong style={{ fontSize: 15.0 }}>计算任务已提交</strong>
-      <span className="demo-note">
-        任务 <span className="mono">run-28003</span> 已加入队列，将使用 示例项目（project-042）的额度。
-      </span>
-      <div className="demo-row" style={{ justifyContent: "center" }}>
-        <Button size="sm">查看任务状态</Button>
-        <Button variant="secondary" size="sm">返回任务列表</Button>
-      </div>
-    </div>
+    <Result
+      status="success"
+      title="计算任务已提交"
+      description="任务 run-28003 已加入队列，将使用 示例项目（project-042）的额度。"
+      actions={
+        <>
+          <Button size="sm">查看任务状态</Button>
+          <Button variant="secondary" size="sm">返回任务列表</Button>
+        </>
+      }
+    >
+      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+        <dt className="text-muted-foreground">任务 ID</dt><dd className="m-0"><Num mono>run-28003</Num></dd>
+        <dt className="text-muted-foreground">预计用时</dt><dd className="m-0"><Num>≤ 300</Num> 秒</dd>
+        <dt className="text-muted-foreground">计费项目</dt><dd className="m-0">示例项目（project-042）</dd>
+      </dl>
+    </Result>
   );
 }
 
