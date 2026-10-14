@@ -99,13 +99,15 @@ function SubmitRunAction() {
       },
     ],
     props: [
-      { name: "variant", type: '"primary" | "secondary" | "ghost" | "danger"', default: '"secondary"', description: "视觉层级。primary 一屏最多一个。" },
-      { name: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "sm 用于行内，lg 仅用于页面级主动作。" },
-      { name: "loading", type: "boolean", default: "false", description: "展示 spinner 并禁止重复点击，保留按钮宽度。" },
-      { name: "disabled", type: "boolean", default: "false", description: "禁止交互；原因必须由邻近文案或 Tooltip 说明。" },
-      { name: "icon", type: "ReactNode", description: "可选前置图标，仅在有语义时使用，尺寸 16。" },
-      { name: "children", type: "ReactNode", required: true, description: "按钮文案，必须以动词开头。" },
-      { name: "onClick", type: "() => void", description: "点击回调；异步动作必须进入 loading。" },
+      { name: "variant", type: '"default" | "secondary" | "ghost" | "soft" | "danger" | "link"', default: '"default"', description: "视觉层级。default 为实心主动作，一屏最多一个；secondary 带边框次动作；ghost/soft 低强调；danger 用于不可逆动作；link 无高度与内边距。" },
+      { name: "size", type: '"sm" | "default" | "lg" | "icon"', default: '"default"', description: "sm 高 28px 用于行内与工具条；default 32px；lg 40px 仅用于页面级主动作；icon 为 32×32 方形，用于图标按钮。" },
+      { name: "asChild", type: "boolean", default: "false", description: "为 true 时把按钮样式合并到唯一子元素（如 <a>），用于外观是按钮的跳转。" },
+      { name: "disabled", type: "boolean", default: "false", description: "原生禁用；原因必须由邻近文案或 Tooltip 说明。" },
+      { name: "type", type: '"button" | "submit" | "reset"', default: '"submit"', description: "原生属性；form 内的非提交按钮显式写 type=\"button\"，避免误提交。" },
+      { name: "onClick", type: "React.MouseEventHandler<HTMLButtonElement>", description: "点击回调；异步动作期间进入加载态。" },
+      { name: "children", type: "ReactNode", required: true, description: "按钮文案，以动词开头；lucide 图标直接放在文字前后，自动 16px。" },
+      { name: "className", type: "string", description: "追加样式，与变体样式合并（cn）；其余原生 button 属性与 ref 透传。" },
+      { name: "加载态", type: "组合", description: "无 loading 属性：disabled={isSubmitting} + <Loader2 className=\"animate-spin\" aria-hidden=\"true\" /> + 进行中文案（“正在提交”），可加 aria-busy。" },
     ],
     states: [
       { name: "default", note: "文案以动词开头，primary 一屏最多一个。" },
@@ -270,12 +272,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
       },
     ],
     props: [
-      { name: "icon", type: "ReactNode", required: true, description: "图标，尺寸 14–16px，不允许替换为插画或文字。" },
-      { name: "label", type: "string", required: true, description: "动作的完整名称，同时用于 aria-label 与 Tooltip。" },
-      { name: "variant", type: '"ghost" | "secondary" | "danger"', default: '"ghost"', description: "ghost 用于工具栏，secondary 用于需要边框的场景，danger 用于不可逆动作。" },
-      { name: "size", type: '"sm" | "md"', default: '"md"', description: "sm 高度 28px 用于行内，md 高度 32px。" },
-      { name: "disabled", type: "boolean", default: "false", description: "禁止交互；原因必须由 Tooltip 或邻近文案说明。" },
-      { name: "onClick", type: "() => void", description: "点击回调；异步动作由外部状态驱动 loading 替换图标位。" },
+      { name: "size", type: '"icon"', required: true, description: "图标按钮就是 <Button size=\"icon\">：32×32，图标 16px。行内紧凑尺寸用 className=\"size-7 [&_svg]:size-3.5\"（28px，图标 14px）。" },
+      { name: "variant", type: '"ghost" | "secondary" | "danger" | …', default: '"default"', description: "需显式指定：工具栏用 ghost，需要边框用 secondary；不可逆动作用 ghost + className=\"text-danger hover:bg-danger-soft\" 或 danger。" },
+      { name: "aria-label", type: "string", required: true, description: "动作完整名称（含对象），与 TooltipContent 文案一致。" },
+      { name: "children", type: "ReactNode", required: true, description: "单个 lucide 图标；不放文字或数字。" },
+      { name: "disabled", type: "boolean", default: "false", description: "原生禁用；原因由 Tooltip 或邻近文案说明。" },
+      { name: "onClick", type: "React.MouseEventHandler<HTMLButtonElement>", description: "点击回调；异步动作期间进入加载态。" },
+      { name: "Tooltip", type: "组合", description: "<Tooltip><TooltipTrigger asChild>{按钮}</TooltipTrigger><TooltipContent>名称</TooltipContent></Tooltip>；应用根部已挂 <TooltipProvider>。" },
+      { name: "TooltipContent.side", type: '"top" | "right" | "bottom" | "left"', default: '"top"', description: "提示方向，空间不足自动翻转；sideOffset 默认 4。" },
+      { name: "禁用说明", type: "组合", description: "disabled 按钮不触发指针事件：外包 <span tabIndex={0} className=\"inline-flex\"> 作为 TooltipTrigger，写明原因。" },
+      { name: "加载态", type: "组合", description: "disabled + aria-label=\"正在刷新\"，图标替换为 <Loader2 className=\"animate-spin\" />，尺寸不变。" },
     ],
     states: [
       { name: "default", note: "单个图标居中，无文案；动作名称由 label 通过 Tooltip 与 aria-label 提供。" },
@@ -302,9 +308,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
       "Esc 关闭由按钮打开的浮层后，焦点回到按钮本身。",
     ],
     accessibility: [
-      "使用原生 <button>，aria-label 等于 label。",
+      "使用原生 <button>，aria-label 与 Tooltip 文案一致。",
       "图标本身 aria-hidden，朗读只读动作名称。",
-      "disabled 使用 aria-disabled 保留焦点与 Tooltip 入口。",
+      "disabled 按钮外包可聚焦的 span 承载 Tooltip，保留焦点与原因入口。",
       "danger 不只依赖红色，动作名称必须写清后果（“删除数据集”而非“删除”）。",
     ],
     responsive: [
@@ -599,10 +605,11 @@ import { Separator } from "@/components/ui/separator";
       },
     ],
     props: [
-      { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"', description: "方向；垂直只用于工具栏与按钮组。" },
-      { name: "dashed", type: "boolean", default: "false", description: "虚线样式，用于可折叠或可选区块的弱分隔。" },
-      { name: "textPosition", type: '"start" | "center" | "end"', default: '"center"', description: "文字位置；区块标题推荐 start。" },
-      { name: "children", type: "ReactNode", description: "分割线文字，写区块名，一句话以内。" },
+      { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"', description: "方向；垂直只用于工具栏与按钮组，需在父容器给出高度或用 className=\"h-4\"。" },
+      { name: "className", type: "string", description: "间距与长度：水平用 my-5 留白；与文字并排时用 w-auto flex-1。组件只接受 orientation 与 className，其余属性不透传。" },
+      { name: "带文字", type: "组合", description: "无 children/textPosition：<div className=\"flex items-center gap-2.5\"><span>区块名</span><Separator className=\"w-auto flex-1\" /></div>，文字在左即区块标题。" },
+      { name: "虚线", type: "组合", description: "无 dashed：className=\"h-0 border-t border-dashed bg-transparent\"，用于弱分隔。" },
+      { name: "语义", type: "内置", description: "始终渲染 role=\"separator\"，垂直时带 aria-orientation=\"vertical\"；纯装饰场景在外层容器加 aria-hidden。" },
     ],
     states: [
       { name: "default", note: "1px line 色，上下间距 ≥ 20px，无投影无圆角。" },
@@ -626,8 +633,8 @@ import { Separator } from "@/components/ui/separator";
       "带文字分割线的文字是静态文本，不绑定快捷键。",
     ],
     accessibility: [
-      "使用 <hr> 或 role=\"separator\"，aria-orientation 与方向一致。",
-      "纯装饰分割线标记 aria-hidden。",
+      "Separator 渲染 role=\"separator\"，aria-orientation 随 orientation 同步。",
+      "纯装饰分割线在外层容器标记 aria-hidden（组件不透传 aria-*）。",
     ],
     responsive: [
       "移动端上下间距收缩到 16px。",
@@ -639,7 +646,7 @@ import { Separator } from "@/components/ui/separator";
     ],
     dos: [
       "优先用间距分组，其次才用线。",
-      "区块标题场景使用 textPosition=\"start\"。",
+      "区块标题场景把文字放在左侧，右侧接 <Separator className=\"flex-1\" />。",
       "空区块连同分割线一起移除。",
     ],
     donts: [
@@ -758,12 +765,12 @@ function RunStatusTable() {
       },
     ],
     props: [
-      { name: "status", type: '"success" | "warning" | "danger" | "info" | "violet" | "neutral"', default: '"neutral"', description: "语义色；与语义一一对应，不允许用颜色区分业务类型。" },
-      { name: "text", type: "string", description: "状态文案，2–4 个字。" },
-      { name: "dot", type: "boolean", default: "false", description: "点状变体，用于空间极小的行内状态。" },
-      { name: "count", type: "number", description: "数字徽标；与 text 互斥，只表达未读/待处理数量。" },
-      { name: "max", type: "number", default: "99", description: "count 超过该值显示为 max+。" },
-      { name: "pulse", type: "boolean", default: "false", description: "进行中状态的脉冲动效，仅 status=\"info\" 可用。" },
+      { name: "tone", type: '"neutral" | "primary" | "success" | "warning" | "danger" | "agent" | "outline"', default: '"neutral"', description: "语义色：success 完成、warning 待复核、danger 失败、primary 进行中、agent 仅用于 Agent/模型、outline 弱化标记；不用颜色区分业务类型。" },
+      { name: "dot", type: "boolean", default: "false", description: "文案前加当前色圆点（aria-hidden），文案仍需保留。" },
+      { name: "children", type: "ReactNode", description: "状态文案 2–4 字；可前置小图标。" },
+      { name: "className", type: "string", description: "追加样式；其余原生 span 属性（title、aria-*）透传。" },
+      { name: "进行中", type: "组合", description: "无 pulse：children 前放 <Loader2 className=\"size-2.5 animate-spin\" aria-hidden=\"true\" />，完成后替换为终态徽标。" },
+      { name: "计数", type: "组合", description: "无 count/max：tone=\"danger\" + 圆形绝对定位 className 叠在图标按钮右上角，内容 {count > 99 ? \"99+\" : count}；徽标 aria-hidden，数量写进按钮 aria-label。" },
     ],
     states: [
       { name: "default", note: "圆角胶囊，文案 2–4 字，颜色只按语义取值。" },
@@ -780,17 +787,17 @@ function RunStatusTable() {
     ],
     interaction: [
       "徽标本身不响应点击；点击行或名称跳详情。",
-      "进行中状态用 pulse 动效提示仍在变化，完成后立即替换为终态徽标。",
+      "进行中状态用旋转图标（Loader2 animate-spin）提示仍在变化，完成后立即替换为终态徽标。",
       "同一行最多两个徽标：状态 + 数量，不堆叠第三类标记。",
     ],
     keyboard: [
       "不适用：徽标不进入 Tab 序列。",
-      "count 徽标的入口（如通知中心）由相邻 IconButton 承载键盘行为。",
+      "计数徽标的入口（如通知中心）由相邻 IconButton 承载键盘行为。",
     ],
     accessibility: [
       "状态不只依赖颜色：dot/颜色之外必须有文案或图标。",
-      "count 徽标提供 aria-label，如“8 条未读通知”。",
-      "pulse 动效遵守 prefers-reduced-motion，降级为静态样式。",
+      "计数徽标本身 aria-hidden，数量写进所在按钮的 aria-label，如“通知（8 条未读）”。",
+      "进行中的旋转动效遵守 prefers-reduced-motion，降级为静态样式。",
     ],
     responsive: [
       "移动端不缩小字号；空间不足时隐藏文案、保留 dot 并提供 title。",
@@ -804,7 +811,7 @@ function RunStatusTable() {
     dos: [
       "颜色与语义一一对应，全站统一。",
       "状态未知或未返回时用 neutral 占位。",
-      "进行中用 info + pulse，完成即切终态。",
+      "进行中用 tone=\"primary\" 并加旋转图标，完成即切终态。",
     ],
     donts: [
       "不要用颜色区分业务类型或重要性。",
@@ -959,12 +966,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
         id: "variants",
         title: "变体示例",
         kind: "variant",
-        description: "hoverable 用于整卡可点的入口卡；loading 用骨架屏替换内容但保留卡片框架。",
+        description: "可点卡片需可聚焦、可键盘触发并有悬停反馈；加载时用 Skeleton 替换内容但保留卡片框架。",
         code: `import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-{/* hoverable 入口卡：整卡可点，需可聚焦、可键盘触发 */}
+{/* 入口卡：整卡可点，需可聚焦、可键盘触发 */}
 <Card
   role="button"
   tabIndex={0}
@@ -1021,13 +1028,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
       },
     ],
     props: [
-      { name: "title", type: "ReactNode", description: "卡片标题；无标题卡片用于纯指标或纯媒体。" },
-      { name: "extra", type: "ReactNode", description: "右上角辅助区，放链接或状态徽标，不放主按钮。" },
-      { name: "hoverable", type: "boolean", default: "false", description: "整卡可点的入口卡样式，必须配合 onClick 使用。" },
-      { name: "loading", type: "boolean", default: "false", description: "骨架屏替换内容，卡片框架与尺寸保留。" },
-      { name: "bordered", type: "boolean", default: "true", description: "是否显示边框；灰色背景上可关闭边框用投影分层。" },
-      { name: "onClick", type: "() => void", description: "hoverable 卡片的点击回调；卡内独立动作要阻止冒泡。" },
-      { name: "children", type: "ReactNode", required: true, description: "卡片内容；复杂内容用 Divider 分区，不嵌套卡片。" },
+      { name: "Card", type: "HTMLAttributes<HTMLDivElement>", required: true, description: "外框：圆角、1px 边框、card 背景；所有部件都接受 className 与原生 div 属性。" },
+      { name: "CardHeader", type: "HTMLAttributes<HTMLDivElement>", description: "标题行，flex 两端对齐，右侧放链接或状态徽标（不放主按钮）；标题与描述上下排列时加 className=\"flex-col gap-1\"。" },
+      { name: "CardTitle", type: "HTMLAttributes<HTMLHeadingElement>", description: "渲染 <h3>，写名词短语。" },
+      { name: "CardDescription", type: "HTMLAttributes<HTMLParagraphElement>", description: "渲染 <p>，弱化色辅助说明。" },
+      { name: "CardContent", type: "HTMLAttributes<HTMLDivElement>", description: "内容区（px-4 pb-4）；分区用 Separator，不嵌套卡片；底部动作也放在这里（无 CardFooter）。" },
+      { name: "可点卡片", type: "组合", description: "无 hoverable：Card 加 role=\"button\" tabIndex={0} onClick + onKeyDown(Enter)，以及 hover:border-primary/50 focus-visible:ring-2 样式；卡内独立动作阻止冒泡。" },
+      { name: "加载态", type: "组合", description: "无 loading：Card 加 aria-busy=\"true\"，保留 CardHeader/CardTitle，CardContent 内放 Skeleton。" },
     ],
     states: [
       { name: "default", note: "白底、1px 边框、圆角遵循 radius 令牌，内边距 16px。" },
@@ -1043,12 +1050,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
       { name: "dark-mode", note: "surface/line/shadow 令牌自动适配，不手写两套色。" },
     ],
     interaction: [
-      "整卡可点（hoverable）时，卡内不再放第二个跳转链接；独立动作阻止冒泡。",
+      "整卡可点时，卡内不再放第二个跳转链接；独立动作阻止冒泡。",
       "一卡一个主题；同类卡片保持相同的信息结构，方便横向扫描。",
       "加载、空、错误都只替换内容区，框架不动。",
     ],
     keyboard: [
-      "hoverable 卡片进入 Tab 序列，Enter 触发 onClick。",
+      "整卡可点的卡片设 tabIndex={0} 进入 Tab 序列，onKeyDown 中 Enter 触发 onClick。",
       "卡内动作的焦点顺序先内容后操作，与视觉顺序一致。",
     ],
     accessibility: [
@@ -1062,13 +1069,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
     ],
     content: [
       "标题写名词短语：计算资源、执行记录，不写句子。",
-      "辅助区（extra）放链接或状态徽标，不放第二个按钮。",
+      "标题行右侧辅助区放链接或状态徽标，不放第二个按钮。",
       "同类卡片之间的字段顺序保持一致。",
     ],
     dos: [
       "一卡一个主题，信息结构统一。",
       "加载用骨架屏替换内容，保留卡片框架。",
-      "入口卡使用 hoverable 并给出明确反馈。",
+      "入口卡整卡可点时给出明确的悬停与焦点反馈。",
     ],
     donts: [
       "不要卡片嵌套卡片。",
@@ -1299,12 +1306,12 @@ function RunList() {
       },
     ],
     props: [
-      { name: "loading", type: "boolean", required: true, description: "为 true 时渲染骨架，false 时原位渲染 children。" },
-      { name: "variant", type: '"text" | "table" | "card"', default: '"text"', description: "骨架形态，按真实内容结构选择。" },
-      { name: "rows", type: "number", default: "3", description: "占位行数，与真实内容行数接近，避免高度差。" },
-      { name: "avatar", type: "boolean", default: "false", description: "前置圆形占位，用于带头像/图标的列表项。" },
-      { name: "active", type: "boolean", default: "true", description: "呼吸动效；局部频繁刷新场景可关闭减少干扰。" },
-      { name: "children", type: "ReactNode", description: "加载完成后原位渲染的真实内容。" },
+      { name: "className", type: "string", required: true, description: "形状全靠 className：高度 h-2.5 / h-3，宽度 w-full / w-3/5，圆形 size-8 rounded-full；内置 animate-pulse 呼吸动效。" },
+      { name: "...props", type: "HTMLAttributes<HTMLDivElement>", description: "其余原生 div 属性透传；占位条本身不写文字。" },
+      { name: "加载切换", type: "组合", description: "无 loading/children：{isLoading ? 骨架 : 真实内容} 原位切换，骨架外层容器设 aria-busy=\"true\"。" },
+      { name: "多行", type: "组合", description: "无 rows/variant：按真实内容重复 <Skeleton>，末行缩短（w-3/5）；表格骨架复用真实表头与列宽，单元格内放 Skeleton。" },
+      { name: "头像位", type: "组合", description: "无 avatar：<Skeleton className=\"size-8 shrink-0 rounded-full\" />。" },
+      { name: "关闭动效", type: "组合", description: "无 active：频繁局部刷新时加 className=\"animate-none\"。" },
     ],
     states: [
       { name: "default", note: "浅灰占位条，形状与真实内容对应，使用呼吸动效。" },

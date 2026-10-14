@@ -177,13 +177,15 @@ Purpose: 触发一个动作或提交一段意图，是界面里最主要的动�
 Usage: 用于立即执行的动作（提交、保存、确认、重试）。跳转页面请用 Link；只有图标没有文字时请用 IconButton；危险且不可逆的动作必须使用 danger 变体并配合确认。
 
 Props:
-  - variant: "primary" | "secondary" | "ghost" | "danger" = "secondary" — 视觉层级。primary 一屏最多一个。
-  - size: "sm" | "md" | "lg" = "md" — sm 用于行内，lg 仅用于页面级主动作。
-  - loading: boolean = false — 展示 spinner 并禁止重复点击，保留按钮宽度。
-  - disabled: boolean = false — 禁止交互；原因必须由邻近文案或 Tooltip 说明。
-  - icon: ReactNode — 可选前置图标，仅在有语义时使用，尺寸 16。
-  - children (required): ReactNode — 按钮文案，必须以动词开头。
-  - onClick: () => void — 点击回调；异步动作必须进入 loading。
+  - variant: "default" | "secondary" | "ghost" | "soft" | "danger" | "link" = "default" — 视觉层级。default 为实心主动作，一屏最多一个；secondary 带边框次动作；ghost/soft 低强调；danger 用于不可逆动作；link 无高度与内边距。
+  - size: "sm" | "default" | "lg" | "icon" = "default" — sm 高 28px 用于行内与工具条；default 32px；lg 40px 仅用于页面级主动作；icon 为 32×32 方形，用于图标按钮。
+  - asChild: boolean = false — 为 true 时把按钮样式合并到唯一子元素（如 <a>），用于外观是按钮的跳转。
+  - disabled: boolean = false — 原生禁用；原因必须由邻近文案或 Tooltip 说明。
+  - type: "button" | "submit" | "reset" = "submit" — 原生属性；form 内的非提交按钮显式写 type="button"，避免误提交。
+  - onClick: React.MouseEventHandler<HTMLButtonElement> — 点击回调；异步动作期间进入加载态。
+  - children (required): ReactNode — 按钮文案，以动词开头；lucide 图标直接放在文字前后，自动 16px。
+  - className: string — 追加样式，与变体样式合并（cn）；其余原生 button 属性与 ref 透传。
+  - 加载态: 组合 — 无 loading 属性：disabled={isSubmitting} + <Loader2 className="animate-spin" aria-hidden="true" /> + 进行中文案（“正在提交”），可加 aria-busy。
 
 States:
   - default: 文案以动词开头，primary 一屏最多一个。
@@ -238,34 +240,49 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Button variant="primary">开始计算</Button>
+  import { ArrowRight } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+  
+  <Button>开始计算 <ArrowRight /></Button>
   <Button variant="secondary">保存草稿</Button>
   <Button variant="ghost">查看详情</Button>
   <Button variant="danger">撤销任务</Button>
   --- states (state) 状态示例
-  <Button variant="primary" loading>正在提交</Button>
-  <Button variant="primary" disabled>不可用</Button>
+  import { Loader2 } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+  
+  <Button disabled={isSubmitting}>
+    {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+    {isSubmitting ? "正在提交" : "提交"}
+  </Button>
+  <Button disabled>不可用（无权限）</Button>
   --- sizes (size) 尺寸示例
-  <Button size="sm" variant="secondary">行内操作</Button>
-  <Button size="md" variant="primary">默认尺寸</Button>
-  <Button size="lg" variant="primary">页面主动作</Button>
+  import { Button } from "@/components/ui/button";
+  
+  <Button variant="secondary" size="sm">行内操作</Button>
+  <Button>默认尺寸</Button>
+  <Button size="lg">页面主动作</Button>
   --- business (business) 真实业务示例
+  import { useState } from "react";
+  import { Loader2 } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+  
   function SubmitRunAction() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     return (
-      <div className="action-with-scope">
+      <div className="flex items-center gap-2">
         <Button
-          variant="primary"
-          loading={isSubmitting}
+          disabled={isSubmitting}
           onClick={async () => {
             setIsSubmitting(true);
             await submitRun({ projectId: "project-042" }); // synthetic
             setIsSubmitting(false);
           }}
         >
-          提交计算任务
+          {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+          {isSubmitting ? "正在提交" : "提交计算任务"}
         </Button>
-        <span>将使用 示例项目（project-042）· 预计最长 300 秒</span>
+        <span className="text-xs text-muted-foreground">将使用 示例项目（project-042）· 预计最长 300 秒</span>
       </div>
     );
   }
@@ -278,12 +295,16 @@ Purpose: 用一个语义明确的图标触发动作，是空间受限或高频�
 Usage: 用于工具栏、卡片角落、表格行内的高频动作（关闭、复制、刷新、更多）。图标含义必须已被约定俗成；含义不直观或低频的动作必须使用带文案的 Button，跳转用 Link。
 
 Props:
-  - icon (required): ReactNode — 图标，尺寸 14–16px，不允许替换为插画或文字。
-  - label (required): string — 动作的完整名称，同时用于 aria-label 与 Tooltip。
-  - variant: "ghost" | "secondary" | "danger" = "ghost" — ghost 用于工具栏，secondary 用于需要边框的场景，danger 用于不可逆动作。
-  - size: "sm" | "md" = "md" — sm 高度 28px 用于行内，md 高度 32px。
-  - disabled: boolean = false — 禁止交互；原因必须由 Tooltip 或邻近文案说明。
-  - onClick: () => void — 点击回调；异步动作由外部状态驱动 loading 替换图标位。
+  - size (required): "icon" — 图标按钮就是 <Button size="icon">：32×32，图标 16px。行内紧凑尺寸用 className="size-7 [&_svg]:size-3.5"（28px，图标 14px）。
+  - variant: "ghost" | "secondary" | "danger" | … = "default" — 需显式指定：工具栏用 ghost，需要边框用 secondary；不可逆动作用 ghost + className="text-danger hover:bg-danger-soft" 或 danger。
+  - aria-label (required): string — 动作完整名称（含对象），与 TooltipContent 文案一致。
+  - children (required): ReactNode — 单个 lucide 图标；不放文字或数字。
+  - disabled: boolean = false — 原生禁用；原因由 Tooltip 或邻近文案说明。
+  - onClick: React.MouseEventHandler<HTMLButtonElement> — 点击回调；异步动作期间进入加载态。
+  - Tooltip: 组合 — <Tooltip><TooltipTrigger asChild>{按钮}</TooltipTrigger><TooltipContent>名称</TooltipContent></Tooltip>；应用根部已挂 <TooltipProvider>。
+  - TooltipContent.side: "top" | "right" | "bottom" | "left" = "top" — 提示方向，空间不足自动翻转；sideOffset 默认 4。
+  - 禁用说明: 组合 — disabled 按钮不触发指针事件：外包 <span tabIndex={0} className="inline-flex"> 作为 TooltipTrigger，写明原因。
+  - 加载态: 组合 — disabled + aria-label="正在刷新"，图标替换为 <Loader2 className="animate-spin" />，尺寸不变。
 
 States:
   - default: 单个图标居中，无文案；动作名称由 label 通过 Tooltip 与 aria-label 提供。
@@ -310,9 +331,9 @@ Keyboard:
   - Esc 关闭由按钮打开的浮层后，焦点回到按钮本身。
 
 Accessibility:
-  - 使用原生 <button>，aria-label 等于 label。
+  - 使用原生 <button>，aria-label 与 Tooltip 文案一致。
   - 图标本身 aria-hidden，朗读只读动作名称。
-  - disabled 使用 aria-disabled 保留焦点与 Tooltip 入口。
+  - disabled 按钮外包可聚焦的 span 承载 Tooltip，保留焦点与原因入口。
   - danger 不只依赖红色，动作名称必须写清后果（“删除数据集”而非“删除”）。
 
 Responsive:
@@ -337,21 +358,76 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <IconButton icon={<X size={16} />} label="关闭面板" />
-  <IconButton icon={<Copy size={16} />} label="复制任务 ID" />
-  <IconButton icon={<RefreshCw size={16} />} label="刷新列表" />
-  <IconButton icon={<MoreHorizontal size={16} />} label="更多操作" />
+  import { Copy, MoreHorizontal, RefreshCw, X } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+  import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+  
+  {/* 每个图标按钮都配 Tooltip，文案与 aria-label 相同（以下省略 Tooltip 包裹） */}
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button variant="ghost" size="icon" aria-label="关闭面板"><X /></Button>
+    </TooltipTrigger>
+    <TooltipContent>关闭面板</TooltipContent>
+  </Tooltip>
+  <Button variant="ghost" size="icon" aria-label="复制任务 ID"><Copy /></Button>
+  <Button variant="ghost" size="icon" aria-label="刷新列表"><RefreshCw /></Button>
+  <Button variant="ghost" size="icon" aria-label="更多操作"><MoreHorizontal /></Button>
   --- states (state) 状态示例
-  <IconButton icon={<Trash2 size={16} />} label="删除数据集 ds-118" variant="danger" />
-  <IconButton icon={<Share2 size={16} />} label="分享（需要项目编辑权限）" disabled />
+  import { Loader2, Share2, Trash2 } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+  import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+  
+  <Button variant="ghost" size="icon" aria-label="删除数据集 ds-118" className="text-danger hover:bg-danger-soft">
+    <Trash2 />
+  </Button>
+  
+  {/* disabled 按钮不触发指针事件：用可聚焦的外层承载 Tooltip，写明原因 */}
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <span tabIndex={0} className="inline-flex rounded-md">
+        <Button variant="ghost" size="icon" aria-label="分享（需要项目编辑权限）" disabled>
+          <Share2 />
+        </Button>
+      </span>
+    </TooltipTrigger>
+    <TooltipContent>需要项目编辑权限</TooltipContent>
+  </Tooltip>
+  
+  <Button variant="ghost" size="icon" aria-label="正在刷新" disabled>
+    <Loader2 className="animate-spin text-primary" />
+  </Button>
   --- sizes (size) 尺寸示例
-  <IconButton size="sm" icon={<Pencil size={14} />} label="编辑" />
-  <IconButton size="md" icon={<Pencil size={16} />} label="编辑" />
+  import { Pencil } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+  
+  {/* sm：28px，图标 14px，用于表格行内 */}
+  <Button variant="ghost" size="icon" aria-label="编辑" className="size-7 [&_svg]:size-3.5"><Pencil /></Button>
+  {/* 默认：32px，图标 16px */}
+  <Button variant="ghost" size="icon" aria-label="编辑"><Pencil /></Button>
   --- business (business) 真实业务示例
-  <div className="row-actions">
-    <IconButton icon={<Eye size={15} />} label="查看 run-28003 详情" onClick={openDetail} />
-    <IconButton icon={<Copy size={15} />} label="复制任务 ID" onClick={copyRunId} />
-    <IconButton icon={<MoreHorizontal size={15} />} label="更多操作" onClick={openMenu} />
+  import { Copy, Eye, MoreHorizontal } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+  import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+  
+  <div className="flex items-center justify-end gap-0.5">
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="查看 run-28003 详情" onClick={openDetail}><Eye /></Button>
+      </TooltipTrigger>
+      <TooltipContent>查看详情</TooltipContent>
+    </Tooltip>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="复制任务 ID" onClick={copyRunId}><Copy /></Button>
+      </TooltipTrigger>
+      <TooltipContent>复制任务 ID</TooltipContent>
+    </Tooltip>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="更多操作" onClick={openMenu}><MoreHorizontal /></Button>
+      </TooltipTrigger>
+      <TooltipContent>更多操作</TooltipContent>
+    </Tooltip>
   </div>
 
 Related: button, dropdown, link, modal
@@ -518,10 +594,11 @@ Purpose: 在内容之间建立分组边界，帮助用户区分不同主题或�
 Usage: 用于分隔段落、卡片内功能分区、工具栏按钮分组。能用间距（≥24px）表达分组时不加线；列表行之间使用行分隔线，不逐行插 Divider。
 
 Props:
-  - orientation: "horizontal" | "vertical" = "horizontal" — 方向；垂直只用于工具栏与按钮组。
-  - dashed: boolean = false — 虚线样式，用于可折叠或可选区块的弱分隔。
-  - textPosition: "start" | "center" | "end" = "center" — 文字位置；区块标题推荐 start。
-  - children: ReactNode — 分割线文字，写区块名，一句话以内。
+  - orientation: "horizontal" | "vertical" = "horizontal" — 方向；垂直只用于工具栏与按钮组，需在父容器给出高度或用 className="h-4"。
+  - className: string — 间距与长度：水平用 my-5 留白；与文字并排时用 w-auto flex-1。组件只接受 orientation 与 className，其余属性不透传。
+  - 带文字: 组合 — 无 children/textPosition：<div className="flex items-center gap-2.5"><span>区块名</span><Separator className="w-auto flex-1" /></div>，文字在左即区块标题。
+  - 虚线: 组合 — 无 dashed：className="h-0 border-t border-dashed bg-transparent"，用于弱分隔。
+  - 语义: 内置 — 始终渲染 role="separator"，垂直时带 aria-orientation="vertical"；纯装饰场景在外层容器加 aria-hidden。
 
 States:
   - default: 1px line 色，上下间距 ≥ 20px，无投影无圆角。
@@ -545,8 +622,8 @@ Keyboard:
   - 带文字分割线的文字是静态文本，不绑定快捷键。
 
 Accessibility:
-  - 使用 <hr> 或 role="separator"，aria-orientation 与方向一致。
-  - 纯装饰分割线标记 aria-hidden。
+  - Separator 渲染 role="separator"，aria-orientation 随 orientation 同步。
+  - 纯装饰分割线在外层容器标记 aria-hidden（组件不透传 aria-*）。
 
 Responsive:
   - 移动端上下间距收缩到 16px。
@@ -558,7 +635,7 @@ Content guidelines:
 
 Do:
   - 优先用间距分组，其次才用线。
-  - 区块标题场景使用 textPosition="start"。
+  - 区块标题场景把文字放在左侧，右侧接 <Separator className="flex-1" />。
   - 空区块连同分割线一起移除。
 
 Don't:
@@ -569,16 +646,38 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
+  import { Separator } from "@/components/ui/separator";
+  
   <p>项目基础信息与说明。</p>
-  <Divider />
+  <Separator className="my-5" />
   <p>参数配置与执行记录。</p>
   --- variants (variant) 变体示例
-  <Divider textPosition="start">参数配置</Divider>
-  <Divider orientation="vertical" />
-  <Divider dashed />
+  import { Button } from "@/components/ui/button";
+  import { Separator } from "@/components/ui/separator";
+  
+  {/* 带文字：标记区块起点 */}
+  <div className="flex items-center gap-2.5">
+    <span className="text-base font-semibold">参数配置</span>
+    <Separator className="w-auto flex-1" />
+  </div>
+  
+  {/* 垂直：只用于工具栏按钮分组 */}
+  <div className="flex h-5 items-center gap-3">
+    <Button variant="ghost" size="sm">查看</Button>
+    <Separator orientation="vertical" className="h-4" />
+    <Button variant="ghost" size="sm">编辑</Button>
+  </div>
+  
+  {/* 虚线：弱分隔 */}
+  <Separator className="h-0 border-t border-dashed bg-transparent" />
   --- business (business) 真实业务示例
+  import { Separator } from "@/components/ui/separator";
+  
   <Descriptions items={baseItems} />
-  <Divider textPosition="start">执行记录</Divider>
+  <div className="flex items-center gap-2.5">
+    <span className="text-base font-semibold">执行记录</span>
+    <Separator className="w-auto flex-1" />
+  </div>
   <Timeline items={runEvents} />
 
 Related: typography, card, layout, stack
@@ -589,12 +688,12 @@ Purpose: 用语义色加短文案标记对象的状态或数量，是状态语�
 Usage: 用于表格状态列、任务与运行状态、通知计数。分类与属性用 Tag；需要整段说明的状态用 Alert；可点击的筛选条件用 Tag 或 FilterBar。
 
 Props:
-  - status: "success" | "warning" | "danger" | "info" | "violet" | "neutral" = "neutral" — 语义色；与语义一一对应，不允许用颜色区分业务类型。
-  - text: string — 状态文案，2–4 个字。
-  - dot: boolean = false — 点状变体，用于空间极小的行内状态。
-  - count: number — 数字徽标；与 text 互斥，只表达未读/待处理数量。
-  - max: number = 99 — count 超过该值显示为 max+。
-  - pulse: boolean = false — 进行中状态的脉冲动效，仅 status="info" 可用。
+  - tone: "neutral" | "primary" | "success" | "warning" | "danger" | "agent" | "outline" = "neutral" — 语义色：success 完成、warning 待复核、danger 失败、primary 进行中、agent 仅用于 Agent/模型、outline 弱化标记；不用颜色区分业务类型。
+  - dot: boolean = false — 文案前加当前色圆点（aria-hidden），文案仍需保留。
+  - children: ReactNode — 状态文案 2–4 字；可前置小图标。
+  - className: string — 追加样式；其余原生 span 属性（title、aria-*）透传。
+  - 进行中: 组合 — 无 pulse：children 前放 <Loader2 className="size-2.5 animate-spin" aria-hidden="true" />，完成后替换为终态徽标。
+  - 计数: 组合 — 无 count/max：tone="danger" + 圆形绝对定位 className 叠在图标按钮右上角，内容 {count > 99 ? "99+" : count}；徽标 aria-hidden，数量写进按钮 aria-label。
 
 States:
   - default: 圆角胶囊，文案 2–4 字，颜色只按语义取值。
@@ -611,17 +710,17 @@ States:
 
 Interaction rules:
   - 徽标本身不响应点击；点击行或名称跳详情。
-  - 进行中状态用 pulse 动效提示仍在变化，完成后立即替换为终态徽标。
+  - 进行中状态用旋转图标（Loader2 animate-spin）提示仍在变化，完成后立即替换为终态徽标。
   - 同一行最多两个徽标：状态 + 数量，不堆叠第三类标记。
 
 Keyboard:
   - 不适用：徽标不进入 Tab 序列。
-  - count 徽标的入口（如通知中心）由相邻 IconButton 承载键盘行为。
+  - 计数徽标的入口（如通知中心）由相邻 IconButton 承载键盘行为。
 
 Accessibility:
   - 状态不只依赖颜色：dot/颜色之外必须有文案或图标。
-  - count 徽标提供 aria-label，如“8 条未读通知”。
-  - pulse 动效遵守 prefers-reduced-motion，降级为静态样式。
+  - 计数徽标本身 aria-hidden，数量写进所在按钮的 aria-label，如“通知（8 条未读）”。
+  - 进行中的旋转动效遵守 prefers-reduced-motion，降级为静态样式。
 
 Responsive:
   - 移动端不缩小字号；空间不足时隐藏文案、保留 dot 并提供 title。
@@ -635,7 +734,7 @@ Content guidelines:
 Do:
   - 颜色与语义一一对应，全站统一。
   - 状态未知或未返回时用 neutral 占位。
-  - 进行中用 info + pulse，完成即切终态。
+  - 进行中用 tone="primary" 并加旋转图标，完成即切终态。
 
 Don't:
   - 不要用颜色区分业务类型或重要性。
@@ -645,25 +744,71 @@ Don't:
 
 Examples:
   --- basic (basic) 语义色示例
-  <Badge status="success" text="已完成" />
-  <Badge status="warning" text="待复核" />
-  <Badge status="danger" text="失败" />
-  <Badge status="info" text="进行中" />
-  <Badge status="violet" text="Agent 建议" />
-  <Badge status="neutral" text="已归档" />
+  import { Badge } from "@/components/ui/badge";
+  
+  <Badge tone="success" dot>已完成</Badge>
+  <Badge tone="warning" dot>待复核</Badge>
+  <Badge tone="danger" dot>失败</Badge>
+  <Badge tone="primary" dot>进行中</Badge>
+  <Badge tone="agent" dot>Agent 建议</Badge>
+  <Badge tone="neutral" dot>已归档</Badge>
   --- variants (variant) 变体示例
-  <Badge status="success" dot text="服务正常" />
-  <Badge status="info" dot pulse text="同步中" />
-  <Badge count={8} />
-  <Badge count={128} max={99} />
+  import { Bell, Loader2 } from "lucide-react";
+  import { Badge } from "@/components/ui/badge";
+  import { Button } from "@/components/ui/button";
+  
+  <Badge tone="success" dot>服务正常</Badge>
+  <Badge tone="primary">
+    <Loader2 className="size-2.5 animate-spin" aria-hidden="true" />同步中
+  </Badge>
+  
+  {/* 计数徽标：Badge 叠在图标按钮右上角，超过 99 显示 99+ */}
+  <span className="relative inline-flex">
+    <Button variant="ghost" size="icon" aria-label="通知（8 条未读）"><Bell /></Button>
+    <Badge
+      tone="danger"
+      aria-hidden="true"
+      className="absolute -right-1.5 -top-1 h-4 min-w-4 justify-center rounded-full bg-danger px-1 text-danger-foreground"
+    >
+      {count > 99 ? "99+" : count}
+    </Badge>
+  </span>
   --- business (business) 真实业务示例
+  import { Badge } from "@/components/ui/badge";
+  
   // synthetic 数据
   const runs = [
-    { id: "run-28003", name: "NCM811 高温循环", status: "success", statusText: "已完成" },
-    { id: "run-28004", name: "电解液配方筛选", status: "info", statusText: "进行中" },
-    { id: "run-28005", name: "阻抗谱拟合", status: "warning", statusText: "待复核" },
-    { id: "run-28006", name: "热稳定性预测", status: "danger", statusText: "失败" },
-  ];
+    { id: "run-28003", name: "NCM811 高温循环", status: "success" },
+    { id: "run-28004", name: "电解液配方筛选", status: "info" },
+    { id: "run-28005", name: "阻抗谱拟合", status: "warning" },
+    { id: "run-28006", name: "热稳定性预测", status: "danger" },
+  ] as const;
+  
+  const statusBadge = {
+    success: <Badge tone="success" dot>已完成</Badge>,
+    info: <Badge tone="primary" dot>进行中</Badge>,
+    warning: <Badge tone="warning" dot>待复核</Badge>,
+    danger: <Badge tone="danger" dot>失败</Badge>,
+  };
+  
+  function RunStatusTable() {
+    return (
+      <table>
+        <thead>
+          <tr><th>任务</th><th>项目</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          {runs.map((run) => (
+            <tr key={run.id}>
+              <td><strong>{run.name}</strong> <span className="font-mono">{run.id}</span></td>
+              <td className="font-mono">project-042</td>
+              <td>{statusBadge[run.status]}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
 
 Related: tag, alert, table, run-status, message
 
@@ -756,13 +901,13 @@ Purpose: 把同一主题的内容与动作聚合为一个可扫描、可复用�
 Usage: 用于信息分组、指标卡、入口卡与列表项。整页只有一个主题时不要套卡；卡片内不嵌套卡片，分区用 Divider。
 
 Props:
-  - title: ReactNode — 卡片标题；无标题卡片用于纯指标或纯媒体。
-  - extra: ReactNode — 右上角辅助区，放链接或状态徽标，不放主按钮。
-  - hoverable: boolean = false — 整卡可点的入口卡样式，必须配合 onClick 使用。
-  - loading: boolean = false — 骨架屏替换内容，卡片框架与尺寸保留。
-  - bordered: boolean = true — 是否显示边框；灰色背景上可关闭边框用投影分层。
-  - onClick: () => void — hoverable 卡片的点击回调；卡内独立动作要阻止冒泡。
-  - children (required): ReactNode — 卡片内容；复杂内容用 Divider 分区，不嵌套卡片。
+  - Card (required): HTMLAttributes<HTMLDivElement> — 外框：圆角、1px 边框、card 背景；所有部件都接受 className 与原生 div 属性。
+  - CardHeader: HTMLAttributes<HTMLDivElement> — 标题行，flex 两端对齐，右侧放链接或状态徽标（不放主按钮）；标题与描述上下排列时加 className="flex-col gap-1"。
+  - CardTitle: HTMLAttributes<HTMLHeadingElement> — 渲染 <h3>，写名词短语。
+  - CardDescription: HTMLAttributes<HTMLParagraphElement> — 渲染 <p>，弱化色辅助说明。
+  - CardContent: HTMLAttributes<HTMLDivElement> — 内容区（px-4 pb-4）；分区用 Separator，不嵌套卡片；底部动作也放在这里（无 CardFooter）。
+  - 可点卡片: 组合 — 无 hoverable：Card 加 role="button" tabIndex={0} onClick + onKeyDown(Enter)，以及 hover:border-primary/50 focus-visible:ring-2 样式；卡内独立动作阻止冒泡。
+  - 加载态: 组合 — 无 loading：Card 加 aria-busy="true"，保留 CardHeader/CardTitle，CardContent 内放 Skeleton。
 
 States:
   - default: 白底、1px 边框、圆角遵循 radius 令牌，内边距 16px。
@@ -778,12 +923,12 @@ States:
   - dark-mode: surface/line/shadow 令牌自动适配，不手写两套色。
 
 Interaction rules:
-  - 整卡可点（hoverable）时，卡内不再放第二个跳转链接；独立动作阻止冒泡。
+  - 整卡可点时，卡内不再放第二个跳转链接；独立动作阻止冒泡。
   - 一卡一个主题；同类卡片保持相同的信息结构，方便横向扫描。
   - 加载、空、错误都只替换内容区，框架不动。
 
 Keyboard:
-  - hoverable 卡片进入 Tab 序列，Enter 触发 onClick。
+  - 整卡可点的卡片设 tabIndex={0} 进入 Tab 序列，onKeyDown 中 Enter 触发 onClick。
   - 卡内动作的焦点顺序先内容后操作，与视觉顺序一致。
 
 Accessibility:
@@ -797,13 +942,13 @@ Responsive:
 
 Content guidelines:
   - 标题写名词短语：计算资源、执行记录，不写句子。
-  - 辅助区（extra）放链接或状态徽标，不放第二个按钮。
+  - 标题行右侧辅助区放链接或状态徽标，不放第二个按钮。
   - 同类卡片之间的字段顺序保持一致。
 
 Do:
   - 一卡一个主题，信息结构统一。
   - 加载用骨架屏替换内容，保留卡片框架。
-  - 入口卡使用 hoverable 并给出明确反馈。
+  - 入口卡整卡可点时给出明确的悬停与焦点反馈。
 
 Don't:
   - 不要卡片嵌套卡片。
@@ -813,22 +958,72 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Card title="计算资源" extra={<Link href="#/quota">额度明细</Link>}>
-    <p>本月已用 1,280 / 3,000 核时</p>
-    <Button variant="secondary" size="sm">申请扩容</Button>
+  import { Button } from "@/components/ui/button";
+  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  
+  <Card className="max-w-[420px]">
+    <CardHeader>
+      <CardTitle>计算资源</CardTitle>
+      <Button variant="link" size="sm" asChild>
+        <a href="#/quota">额度明细</a>
+      </Button>
+    </CardHeader>
+    <CardContent className="space-y-3">
+      <p className="text-sm text-muted-foreground">本月已用 1,280 / 3,000 核时</p>
+      <Button variant="secondary" size="sm">申请扩容</Button>
+    </CardContent>
   </Card>
   --- variants (variant) 变体示例
-  <Card hoverable onClick={openProject}>
-    <h4>示例项目（project-042）</h4>
-    <p>12 个数据集 · 34 次运行</p>
+  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+  import { Skeleton } from "@/components/ui/skeleton";
+  import { cn } from "@/lib/utils";
+  
+  {/* 入口卡：整卡可点，需可聚焦、可键盘触发 */}
+  <Card
+    role="button"
+    tabIndex={0}
+    onClick={openProject}
+    onKeyDown={(e) => e.key === "Enter" && openProject()}
+    className={cn(
+      "cursor-pointer transition-colors hover:border-primary/50 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring",
+      selected && "border-primary",
+    )}
+  >
+    <CardHeader className="flex-col gap-1">
+      <CardTitle>示例项目（project-042）</CardTitle>
+      <CardDescription>12 个数据集 · 34 次运行</CardDescription>
+    </CardHeader>
   </Card>
-  <Card title="执行记录" loading />
+  
+  {/* loading：保留卡片框架与标题，只把内容区换成骨架 */}
+  <Card aria-busy="true">
+    <CardHeader>
+      <CardTitle>执行记录</CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-2">
+      <Skeleton className="h-2.5 w-full" />
+      <Skeleton className="h-2.5 w-full" />
+      <Skeleton className="h-2.5 w-3/5" />
+    </CardContent>
+  </Card>
   --- business (business) 真实业务示例
-  <Card title="示例电解液项目" extra={<Badge status="info" text="进行中" />}>
-    <p>目标：筛选高温稳定配方</p>
-    <Statistic title="数据集" value={12} />
-    <Statistic title="运行次数" value={34} />
-    <Button size="sm" variant="ghost">查看详情</Button>
+  import { Badge } from "@/components/ui/badge";
+  import { Button } from "@/components/ui/button";
+  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  
+  <Card className="max-w-[420px]">
+    <CardHeader>
+      <CardTitle>示例电解液项目</CardTitle>
+      <Badge tone="primary" dot>进行中</Badge>
+    </CardHeader>
+    <CardContent className="space-y-3">
+      <p className="text-sm text-muted-foreground">目标：筛选高温稳定配方，覆盖 3 种溶剂体系。</p>
+      <div className="flex gap-6">
+        <span><strong className="text-lg">12</strong> <span className="text-xs text-muted-foreground">数据集</span></span>
+        <span><strong className="text-lg">34</strong> <span className="text-xs text-muted-foreground">运行次数</span></span>
+      </div>
+      <Button variant="ghost" size="sm" className="-ml-2.5">查看详情</Button>
+    </CardContent>
   </Card>
 
 Related: empty, skeleton, statistic, divider, button
@@ -928,12 +1123,12 @@ Purpose: 在数据到达前按真实内容的布局占位，让加载前后结�
 Usage: 用于首屏加载与区块级加载（表格、卡片、详情）。超过 10 秒的长任务用 Progress + 日志反馈进度；局部刷新保留旧数据并配合 Spin，不用骨架屏整区替换。
 
 Props:
-  - loading (required): boolean — 为 true 时渲染骨架，false 时原位渲染 children。
-  - variant: "text" | "table" | "card" = "text" — 骨架形态，按真实内容结构选择。
-  - rows: number = 3 — 占位行数，与真实内容行数接近，避免高度差。
-  - avatar: boolean = false — 前置圆形占位，用于带头像/图标的列表项。
-  - active: boolean = true — 呼吸动效；局部频繁刷新场景可关闭减少干扰。
-  - children: ReactNode — 加载完成后原位渲染的真实内容。
+  - className (required): string — 形状全靠 className：高度 h-2.5 / h-3，宽度 w-full / w-3/5，圆形 size-8 rounded-full；内置 animate-pulse 呼吸动效。
+  - ...props: HTMLAttributes<HTMLDivElement> — 其余原生 div 属性透传；占位条本身不写文字。
+  - 加载切换: 组合 — 无 loading/children：{isLoading ? 骨架 : 真实内容} 原位切换，骨架外层容器设 aria-busy="true"。
+  - 多行: 组合 — 无 rows/variant：按真实内容重复 <Skeleton>，末行缩短（w-3/5）；表格骨架复用真实表头与列宽，单元格内放 Skeleton。
+  - 头像位: 组合 — 无 avatar：<Skeleton className="size-8 shrink-0 rounded-full" />。
+  - 关闭动效: 组合 — 无 active：频繁局部刷新时加 className="animate-none"。
 
 States:
   - default: 浅灰占位条，形状与真实内容对应，使用呼吸动效。
@@ -985,20 +1180,76 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Skeleton loading={isLoading} rows={3} avatar>
+  import { Skeleton } from "@/components/ui/skeleton";
+  
+  {isLoading ? (
+    <div className="space-y-3" aria-busy="true">
+      <div className="flex items-center gap-3">
+        <Skeleton className="size-8 shrink-0 rounded-full" />
+        <div className="flex-1 space-y-1.5">
+          <Skeleton className="h-3 w-2/5" />
+          <Skeleton className="h-2.5 w-[70%]" />
+        </div>
+      </div>
+      <Skeleton className="h-2.5 w-full" />
+      <Skeleton className="h-2.5 w-full" />
+      <Skeleton className="h-2.5 w-3/5" />
+    </div>
+  ) : (
     <ProjectSummary projectId="project-042" />
-  </Skeleton>
+  )}
   --- variants (variant) 变体示例
-  <Skeleton loading variant="table" rows={4} />
-  <Skeleton loading variant="card" />
+  import { Card } from "@/components/ui/card";
+  import { Skeleton } from "@/components/ui/skeleton";
+  
+  {/* 表格骨架：保留表头与列结构，只替换单元格内容 */}
+  <table aria-busy="true">
+    <thead>
+      <tr><th>任务</th><th>状态</th><th>用时</th></tr>
+    </thead>
+    <tbody>
+      {[0, 1, 2, 3].map((row) => (
+        <tr key={row}>
+          <td><Skeleton className="h-2.5 w-4/5" /></td>
+          <td><Skeleton className="h-2.5 w-[56%]" /></td>
+          <td><Skeleton className="h-2.5 w-2/5" /></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  
+  {/* 卡片骨架：保留卡片框架 */}
+  <Card className="space-y-2 p-4" aria-busy="true">
+    <Skeleton className="h-3 w-[45%]" />
+    <Skeleton className="h-2.5 w-full" />
+    <Skeleton className="h-2.5 w-full" />
+    <Skeleton className="h-2.5 w-3/5" />
+  </Card>
   --- business (business) 真实业务示例
+  import { Skeleton } from "@/components/ui/skeleton";
+  
+  function RunTableSkeleton({ rows = 4 }: { rows?: number }) {
+    return (
+      <table aria-busy="true">
+        <thead>
+          <tr><th>任务</th><th>状态</th><th>用时</th></tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: rows }, (_, row) => (
+            <tr key={row}>
+              <td><Skeleton className="h-2.5 w-4/5" /></td>
+              <td><Skeleton className="h-2.5 w-[56%]" /></td>
+              <td><Skeleton className="h-2.5 w-2/5" /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+  
   function RunList() {
     const { data, isLoading } = useRuns("project-042"); // synthetic: run-28003 等
-    return (
-      <Skeleton loading={isLoading} variant="table" rows={4}>
-        <Table columns={runColumns} dataSource={data} />
-      </Skeleton>
-    );
+    return isLoading ? <RunTableSkeleton rows={4} /> : <RunTable runs={data} />;
   }
 
 Related: spin, progress, empty, card, table
@@ -1718,10 +1969,15 @@ Purpose: 在同一页面内切换同层级的内容区块，切换后上下文�
 Usage: 用于同一对象的不同方面（任务详情的概览 / 参数 / 日志 / 产物）。跨页面导航用 Menu——Tabs 不换页、URL 可以不变，Menu 整页替换；2–5 个需要即时生效的视图切换可用 Segmented。标签超过一屏时横向滚动，不换行堆叠。
 
 Props:
-  - items (required): { key: string; label: ReactNode; badge?: ReactNode; disabled?: boolean }[] — 标签数组，2–7 个为宜。
-  - activeKey (required): string — 当前激活标签，受控。
-  - onChange: (key: string) => void — 切换回调；需要可分享时同步到 URL hash。
-  - destroyInactive: boolean = false — 是否销毁非活动面板；默认保留，切换不丢状态。
+  - Tabs.value / onValueChange: string / (value: string) => void — 受控当前标签；需要可分享时从 URL hash 读取并在 onValueChange 中写回。
+  - Tabs.defaultValue: string — 非受控初始标签。
+  - Tabs.activationMode: "automatic" | "manual" = "automatic" — automatic 方向键移动即切换；面板加载较重时用 manual（Enter / Space 才切换）。
+  - TabsList (required): aria-label, className — 下划线式标签条（底边线，超出横向滚动）；必须给 aria-label 说明这组标签的对象。
+  - TabsTrigger.value (required): string — 标签值，与 TabsContent.value 对应；children 为 2–4 字文案，可附 Badge 计数或状态点。
+  - TabsTrigger.disabled: boolean = false — 禁用标签；配 title 说明原因，并加 className="disabled:cursor-not-allowed disabled:opacity-50"。
+  - TabsContent.value (required): string — 对应面板；role="tabpanel" 与 aria-controls 由 Radix 自动关联。
+  - TabsContent.forceMount: true — Radix 默认卸载非活动面板；需保留滚动与输入状态时 forceMount + className="data-[state=inactive]:hidden"，或把状态提升到 Tabs 外。
+  - 分段控件: 组合 — 同一视图内的即时切换改用 SegmentedList / SegmentedTrigger（见 Segmented），状态仍由 Tabs 承载。
 
 States:
   - default: 当前标签品牌色下划线 + 加粗，面板即时渲染。
@@ -1769,43 +2025,64 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Tabs
-    activeKey="overview"
-    onChange={setActiveKey}
-    items={[
-      { key: "overview", label: "概览" },
-      { key: "params", label: "参数" },
-      { key: "logs", label: "日志" },
-      { key: "artifacts", label: "产物" },
-    ]}
-  />
+  import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  
+  <Tabs value={activeKey} onValueChange={setActiveKey}>
+    <TabsList aria-label="任务详情">
+      <TabsTrigger value="overview">概览</TabsTrigger>
+      <TabsTrigger value="params">参数</TabsTrigger>
+      <TabsTrigger value="logs">日志</TabsTrigger>
+      <TabsTrigger value="artifacts">产物</TabsTrigger>
+    </TabsList>
+  </Tabs>
   --- badges (variant) 带计数徽章
-  <Tabs
-    activeKey={activeKey}
-    onChange={setActiveKey}
-    items={[
-      { key: "all", label: "全部" },
-      { key: "running", label: "运行中", badge: 3 },
-      { key: "queued", label: "排队中", badge: 12 },
-      { key: "done", label: "已完成", badge: 128 },
-    ]}
-  />
+  import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  import { Badge } from "@/components/ui/badge";
+  
+  const tabs = [
+    { value: "all", label: "全部", count: 0 },
+    { value: "running", label: "运行中", count: 3 },
+    { value: "queued", label: "排队中", count: 12 },
+    { value: "done", label: "已完成", count: 128 },
+  ];
+  
+  <Tabs value={activeKey} onValueChange={setActiveKey}>
+    <TabsList aria-label="任务状态">
+      {tabs.map((tab) => (
+        <TabsTrigger key={tab.value} value={tab.value}>
+          {tab.label}
+          {tab.count > 0 && (
+            <Badge tone={activeKey === tab.value ? "primary" : "neutral"}>{tab.count}</Badge>
+          )}
+        </TabsTrigger>
+      ))}
+    </TabsList>
+  </Tabs>
   --- business (business) 真实业务示例
-  <Tabs
-    activeKey={activeKey}
-    onChange={setActiveKey}
-    items={[
-      { key: "overview", label: "运行概览" },
-      { key: "logs", label: "实时日志", badge: <BadgeDot status="processing" /> },
-      { key: "curves", label: "电导率曲线" },
-      {
-        key: "audit",
-        label: "审计记录",
-        disabled: true,
-        disabledReason: "仅项目管理员可见",
-      },
-    ]}
-  />
+  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  import { Lock } from "lucide-react";
+  
+  <Tabs value={activeKey} onValueChange={setActiveKey}>
+    <TabsList aria-label="run-28003 详情">
+      <TabsTrigger value="overview">运行概览</TabsTrigger>
+      <TabsTrigger value="logs">
+        实时日志
+        <span className="size-1.5 rounded-full bg-success" aria-label="运行中" />
+      </TabsTrigger>
+      <TabsTrigger value="curves">电导率曲线</TabsTrigger>
+      <TabsTrigger
+        value="audit"
+        disabled
+        title="仅项目管理员可见"
+        className="disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        审计记录 <Lock className="!size-3" aria-hidden />
+      </TabsTrigger>
+    </TabsList>
+    <TabsContent value="overview"><RunOverview runId="run-28003" /></TabsContent>
+    <TabsContent value="logs"><RunLogs runId="run-28003" follow /></TabsContent>
+    <TabsContent value="curves"><ConductivityChart runId="run-28003" /></TabsContent>
+  </Tabs>
 
 Related: menu, segmented, page-header, badge, skeleton
 
@@ -2005,10 +2282,17 @@ Purpose: 把一组低频动作收进触发元素背后的浮层菜单，保持�
 Usage: 用于“更多操作”、用户菜单、带选项的动作按钮。菜单项是页面导航时用 Menu；需要确认的单个动作用 Popconfirm；从选项里选一个值用 Select。菜单项不超过 9 个，超过时先分组，再考虑换交互。
 
 Props:
-  - menu (required): { items: MenuItem[]; onSelect?: (key: string) => void } — 菜单配置；项支持 icon、danger、disabled、divider。
-  - trigger: ("click" | "hover")[] = ["click"] — 打开方式；动作菜单用 click，hover 只用于纯浏览型菜单。
-  - placement: "bottomLeft" | "bottomRight" | "topLeft" | "topRight" = "bottomLeft" — 浮层相对触发器的位置，边缘自动翻转。
-  - children (required): ReactElement — 触发元素，通常是 Button 或 IconButton。
+  - DropdownMenu.open / onOpenChange: boolean / (open: boolean) => void — 可选的受控展开状态；只支持点击 / 键盘打开，不支持 hover 触发。
+  - DropdownMenu.modal: boolean = true — 选中某项后要打开 AlertDialog 等浮层时设为 false，避免焦点与 pointer-events 残留。
+  - DropdownMenuTrigger.asChild: boolean — 包住触发元素，通常是 Button 或图标按钮（size="icon" + aria-label）。
+  - DropdownMenuContent.align / side: "start" | "center" | "end" / "top" | "right" | "bottom" | "left" = "center" / "bottom" — 相对触发器的位置，边缘自动翻转；sideOffset 默认 4，宽度用 className="w-40"。
+  - DropdownMenuItem.onSelect: (event: Event) => void — 选中回调，随后菜单关闭；event.preventDefault() 可保持打开。
+  - DropdownMenuItem.disabled: boolean = false — 禁用项；在项内右侧用小字写明所需权限。
+  - DropdownMenuItem.inset: boolean = false — 左侧留出图标位，与带图标 / 勾选的项对齐。
+  - 危险项: 组合 — 无 danger：放在 DropdownMenuSeparator 之后，className="text-danger focus:bg-danger-soft focus:text-danger"，onSelect 打开 AlertDialog 二次确认。
+  - DropdownMenuSeparator / Label / Group / Shortcut: 部件 — 分组线、组标题、分组容器与右侧快捷键提示。
+  - DropdownMenuCheckboxItem / RadioGroup + RadioItem: 部件 — 可勾选项（checked / onCheckedChange）与单选项（value / onValueChange）。
+  - DropdownMenuSub / SubTrigger / SubContent: 部件 — 二级菜单；层级不超过两级。
 
 States:
   - default: 浮层带阴影贴近触发器，层级高于页面内容。
@@ -2025,7 +2309,7 @@ States:
 
 Interaction rules:
   - 点击外部或 Esc 关闭，选中一项后关闭。
-  - 危险项先经 Popconfirm 二次确认再执行，确认文案回显作用对象。
+  - 危险项先经 AlertDialog（或 Popconfirm）二次确认再执行，确认文案回显作用对象。
   - 打开时浮层不超出视口，边缘自动翻转方向。
 
 Keyboard:
@@ -2057,58 +2341,111 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Dropdown
-    menu={{
-      items: [
-        { key: "detail", label: "查看详情" },
-        { key: "copy", label: "复制任务 ID" },
-        { key: "rerun", label: "重新运行" },
-      ],
-      onSelect: (key) => handleAction(key),
-    }}
-  >
-    <Button variant="secondary">更多操作</Button>
-  </Dropdown>
+  import { Button } from "@/components/ui/button";
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu";
+  import { ChevronDown } from "lucide-react";
+  
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="secondary">
+        更多操作 <ChevronDown />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="start" className="w-40">
+      <DropdownMenuItem onSelect={() => handleAction("detail")}>查看详情</DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => handleAction("copy")}>复制任务 ID</DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => handleAction("rerun")}>重新运行</DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
   --- danger (variant) 分组与危险项
-  <Dropdown
-    menu={{
-      items: [
-        { key: "detail", label: "查看详情" },
-        { key: "share", label: "分享链接" },
-        { type: "divider" },
-        { key: "revoke", label: "撤销任务", danger: true },
-      ],
-    }}
-  >
-    <IconButton aria-label="更多操作" icon={<MoreHorizontal size={16} />} />
-  </Dropdown>
+  import { Button } from "@/components/ui/button";
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu";
+  import { MoreHorizontal } from "lucide-react";
+  
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="ghost" size="icon" aria-label="更多操作">
+        <MoreHorizontal />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="start" className="w-44">
+      <DropdownMenuItem>查看详情</DropdownMenuItem>
+      <DropdownMenuItem>分享链接</DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem className="text-danger focus:bg-danger-soft focus:text-danger">
+        撤销任务
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
   --- business (business) 真实业务示例
-  <Dropdown
-    trigger={["click"]}
-    menu={{
-      items: [
-        { key: "detail", label: "查看详情" },
-        { key: "logs", label: "下载日志" },
-        { key: "clone", label: "以此为模板新建" },
-        {
-          key: "audit",
-          label: "审计记录",
-          disabled: true,
-          disabledReason: "需要项目管理员权限",
-        },
-        { type: "divider" },
-        {
-          key: "revoke",
-          label: "撤销任务 run-28003",
-          danger: true,
-          confirm: "撤销后不可恢复",
-        },
-      ],
-      onSelect: handleRunAction,
-    }}
-  >
-    <Button variant="ghost">更多操作</Button>
-  </Dropdown>
+  import { Button, buttonVariants } from "@/components/ui/button";
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu";
+  import {
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  } from "@/components/ui/alert-dialog";
+  import { ChevronDown, Lock } from "lucide-react";
+  
+  {/* modal={false}：菜单关闭后再打开确认框，焦点与指针事件不残留 */}
+  <DropdownMenu modal={false}>
+    <DropdownMenuTrigger asChild>
+      <Button variant="ghost">
+        更多操作 <ChevronDown />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="start" className="w-56">
+      <DropdownMenuItem onSelect={() => handleRunAction("detail")}>查看详情</DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => handleRunAction("logs")}>下载日志</DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => handleRunAction("clone")}>以此为模板新建</DropdownMenuItem>
+      <DropdownMenuItem disabled>
+        <Lock aria-hidden /> 审计记录
+        <span className="ml-auto text-xs text-muted-foreground">需要项目管理员权限</span>
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        className="text-danger focus:bg-danger-soft focus:text-danger"
+        onSelect={() => setConfirming(true)}
+      >
+        撤销任务 run-28003
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+  
+  <AlertDialog open={confirming} onOpenChange={setConfirming}>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>撤销任务 run-28003？</AlertDialogTitle>
+        <AlertDialogDescription>撤销后不可恢复，已排队资源立即释放。</AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>取消</AlertDialogCancel>
+        <AlertDialogAction
+          className={buttonVariants({ variant: "danger" })}
+          onClick={() => revokeRun("run-28003")}
+        >
+          确认撤销
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 
 Related: button, icon-button, popconfirm, menu, modal
 
@@ -2118,10 +2455,13 @@ Purpose: 少量互斥选项的即时切换器，选中立即生效，像开关�
 Usage: 用于 2–5 个互斥选项的即时切换：视图（表格 / 卡片）、时间范围、单位。选项更多或需要确认时用 Select 或 Radio；切换整页内容用 Tabs 或 Menu。Segmented 不产生提交动作，选中即应用。
 
 Props:
-  - options (required): (string | { label: ReactNode; value: string; icon?: ReactNode; disabled?: boolean })[] — 选项数组，2–5 个。
-  - value (required): string — 当前选中值，受控。
-  - onChange: (value: string) => void — 切换回调，选中即生效。
-  - size: "sm" | "md" = "md" — sm 高 28px，md 高 32px。
+  - Tabs.value / onValueChange (required): string / (value: string) => void — 外层仍是 Tabs，负责选中状态；选中即生效，在 onValueChange 里直接应用（如重新拉取指标）。
+  - SegmentedList (required): aria-label, className — 分段容器（h-8 灰底胶囊）；必须给 aria-label。
+  - SegmentedTrigger.value (required): string — 选项值；children 为 1–4 字文案，可前置 size-3.5 图标（className="gap-1.5"）。
+  - SegmentedTrigger.disabled: boolean = false — 禁用选项；配 title 说明原因，并加 className="disabled:cursor-not-allowed disabled:opacity-50"。
+  - SegmentedTrigger.aria-label: string — 纯图标选项必填，同时配 Tooltip。
+  - 尺寸: 组合 — 无 size：默认列表 32px / 选项 28px；sm 用 SegmentedList className="h-7" + SegmentedTrigger className="h-6 px-2.5 text-xs"。
+  - 结果区: 组合 — 通常不配 TabsContent，由外部按 value 渲染紧邻的结果区域。
 
 States:
   - default: 选中项浮起（surface + 阴影），未选中项中性文字。
@@ -2146,7 +2486,7 @@ Keyboard:
   - ←/→ 移动选中，选中即生效。
 
 Accessibility:
-  - 容器 role="radiogroup"，选项 role="radio" 并设 aria-checked。
+  - 基于 Radix Tabs：容器 role="tablist"，选项 role="tab" 并自动同步 aria-selected。
   - 纯图标选项必须有 Tooltip 与 aria-label。
 
 Responsive:
@@ -2169,30 +2509,62 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Segmented
-    value={view}
-    onChange={setView}
-    options={[
-      { label: "表格", value: "table" },
-      { label: "卡片", value: "card" },
-    ]}
-  />
+  import { Tabs, SegmentedList, SegmentedTrigger } from "@/components/ui/tabs";
+  import { LayoutGrid, List } from "lucide-react";
+  
+  <Tabs value={view} onValueChange={setView}>
+    <SegmentedList aria-label="视图">
+      <SegmentedTrigger value="table" className="gap-1.5">
+        <List className="size-3.5" aria-hidden /> 表格
+      </SegmentedTrigger>
+      <SegmentedTrigger value="card" className="gap-1.5">
+        <LayoutGrid className="size-3.5" aria-hidden /> 卡片
+      </SegmentedTrigger>
+    </SegmentedList>
+  </Tabs>
   --- sizes (size) 尺寸
-  <Segmented size="sm" value="7d" options={["24h", "7 天", "30 天"]} />
-  <Segmented size="md" value="all" options={["全部", "运行中", "已完成"]} />
+  import { Tabs, SegmentedList, SegmentedTrigger } from "@/components/ui/tabs";
+  
+  {/* sm：列表高 28px、选项 12px 字 */}
+  <Tabs value={range} onValueChange={setRange}>
+    <SegmentedList aria-label="时间范围" className="h-7">
+      <SegmentedTrigger value="24h" className="h-6 px-2.5 text-xs">24h</SegmentedTrigger>
+      <SegmentedTrigger value="7d" className="h-6 px-2.5 text-xs">7 天</SegmentedTrigger>
+      <SegmentedTrigger value="30d" className="h-6 px-2.5 text-xs">30 天</SegmentedTrigger>
+    </SegmentedList>
+  </Tabs>
+  
+  {/* md：默认尺寸，列表高 32px */}
+  <Tabs value={filter} onValueChange={setFilter}>
+    <SegmentedList aria-label="任务状态">
+      <SegmentedTrigger value="all">全部</SegmentedTrigger>
+      <SegmentedTrigger value="running">运行中</SegmentedTrigger>
+      <SegmentedTrigger value="done">已完成</SegmentedTrigger>
+    </SegmentedList>
+  </Tabs>
   --- business (business) 真实业务示例
-  <Segmented
+  import { Tabs, SegmentedList, SegmentedTrigger } from "@/components/ui/tabs";
+  
+  <Tabs
     value={range}
-    onChange={(value) => {
+    onValueChange={(value) => {
       setRange(value);
       refetchMetrics({ runId: "run-28003", range: value });
     }}
-    options={[
-      { label: "24 小时", value: "24h" },
-      { label: "7 天", value: "7d" },
-      { label: "30 天", value: "30d", disabled: true, disabledReason: "任务运行未满 30 天" },
-    ]}
-  />
+  >
+    <SegmentedList aria-label="指标时间范围">
+      <SegmentedTrigger value="24h">24 小时</SegmentedTrigger>
+      <SegmentedTrigger value="7d">7 天</SegmentedTrigger>
+      <SegmentedTrigger
+        value="30d"
+        disabled
+        title="任务运行未满 30 天"
+        className="disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        30 天
+      </SegmentedTrigger>
+    </SegmentedList>
+  </Tabs>
 
 Related: tabs, radio, select, switch, filter-bar
 
@@ -2202,14 +2574,16 @@ Purpose: 收集单行短文本，是表单里最基础的信息录入单元。
 Usage: 用于名称、编号、简短标识等单行文本。多行内容用 Textarea；纯数值用 InputNumber；从有限选项中选值用 Select；即时过滤查找用 SearchField。
 
 Props:
-  - value: string — 受控值；必须配合 onChange 使用，禁止半受控。
-  - placeholder: string — 占位提示，只写格式示例，不替代标签。
-  - maxLength: number — 最大字符数；接近上限时显示计数，超限禁止继续输入。
-  - allowClear: boolean = false — 有值时显示一键清除按钮，清除后焦点回到输入框。
-  - prefix: ReactNode — 前置内容（图标或固定前缀），不参与提交值。
-  - size: "sm" | "md" | "lg" = "md" — sm 用于筛选栏与行内，lg 仅用于页面级录入。
-  - disabled: boolean = false — 禁止编辑；原因必须由邻近文案说明。
-  - onChange: (value: string) => void — 值变化回调；受控使用时必须同步更新 value。
+  - value / defaultValue: string — 受控 / 非受控值；受控时必须配合 onChange，禁止半受控。
+  - onChange: React.ChangeEventHandler<HTMLInputElement> — 原生变化事件，取值用 event.target.value。
+  - id: string — 与 <Label htmlFor> 一致，关联可见标签。
+  - placeholder: string — 只写格式示例，不替代标签。
+  - maxLength: number — 原生最大字符数；接近上限时在辅助文本给出计数。
+  - disabled / readOnly: boolean = false — 禁用或只读；原因写在 aria-describedby 关联的辅助文本里。
+  - aria-invalid / aria-describedby: boolean | string — 出错时 aria-invalid，并指向错误文本 id；错误红边用 className="border-danger focus-visible:border-danger focus-visible:ring-danger/20"。
+  - className: string — 默认 h-8；sm 用 "h-7 text-sm"，lg 用 "h-10 text-md"。其余原生 input 属性与 ref 透传。
+  - 前缀: 组合 — 无 prefix：relative 容器 + 绝对定位 <span aria-hidden> 前缀，Input 加 pl-12 留位，前缀不参与输入值。
+  - 清除按钮: 组合 — 无 allowClear：有值时在右侧放 ghost 图标按钮，点击清空并通过 ref 把焦点还给输入框。
 
 States:
   - default: 显示当前值或占位文本；占位文本只用浅灰示意格式。
@@ -2226,7 +2600,7 @@ States:
 
 Interaction rules:
   - 失焦校验格式类规则（长度、字符集），提交时校验业务规则（重名、权限）。
-  - allowClear 只在有值时出现，点击后焦点回到输入框。
+  - 清除按钮只在有值时出现，点击后焦点回到输入框。
   - 粘贴内容同样触发校验，不允许绕过 maxLength。
   - 受控使用时 onChange 必须同步更新 value，禁止半受控。
 
@@ -2262,20 +2636,71 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Input label="项目名称" placeholder="例如：高导电解液筛选" />
-  <Input label="样本编号" prefix="SMP-" placeholder="00042" />
+  import { Input } from "@/components/ui/input";
+  import { Label } from "@/components/ui/label";
+  
+  <div className="grid gap-1.5">
+    <Label htmlFor="project-name">项目名称</Label>
+    <Input id="project-name" placeholder="例如：高导电解液筛选" />
+  </div>
+  <div className="grid gap-1.5">
+    <Label htmlFor="sample-no">样本编号</Label>
+    {/* 固定前缀不参与输入值：绝对定位在框内，Input 左侧留出空间 */}
+    <div className="relative">
+      <span aria-hidden="true" className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">
+        SMP-
+      </span>
+      <Input id="sample-no" className="pl-12" placeholder="00042" />
+    </div>
+  </div>
   --- sizes (size) 尺寸示例
-  <Input size="sm" placeholder="行内筛选" />
-  <Input size="md" placeholder="默认尺寸" />
-  <Input size="lg" placeholder="页面级录入" />
+  import { Input } from "@/components/ui/input";
+  
+  {/* 默认 h-8；sm / lg 用 className 覆盖高度与字号 */}
+  <Input className="h-7 text-sm" placeholder="sm · 筛选栏与行内" />
+  <Input placeholder="md · 默认尺寸" />
+  <Input className="h-10 text-md" placeholder="lg · 页面级录入" />
   --- states (state) 状态示例
-  <Input label="所属项目" value="示例项目（project-042）" disabled />
-  <Input label="任务名称" error="名称不能包含 / \ : 字符。" defaultValue="第 3 轮/优化" />
+  import { Input } from "@/components/ui/input";
+  import { Label } from "@/components/ui/label";
+  
+  <div className="grid gap-1.5">
+    <Label htmlFor="owner-project">所属项目</Label>
+    <Input id="owner-project" value="示例项目（project-042）" disabled readOnly aria-describedby="owner-project-help" />
+    <p id="owner-project-help" className="text-xs text-muted-foreground">项目归档后不可修改归属。</p>
+  </div>
+  <div className="grid gap-1.5">
+    <Label htmlFor="task-name">任务名称</Label>
+    <Input
+      id="task-name"
+      defaultValue="第 3 轮/优化"
+      aria-invalid="true"
+      aria-describedby="task-name-error"
+      className="border-danger focus-visible:border-danger focus-visible:ring-danger/20"
+    />
+    <p id="task-name-error" role="alert" className="text-xs text-danger">
+      名称不能包含 / \ : 字符。
+    </p>
+  </div>
   --- business (business) 真实业务示例
-  <div className="field">
-    <label htmlFor="project-name">项目名称</label>
-    <Input id="project-name" defaultValue="示例项目（project-042）" maxLength={40} allowClear />
-    <small>名称用于列表展示与导出文件命名，2–40 个字符，项目内唯一。</small>
+  import { useState } from "react";
+  import { Input } from "@/components/ui/input";
+  import { Label } from "@/components/ui/label";
+  
+  const [name, setName] = useState("示例项目（project-042）");
+  
+  <div className="grid gap-1.5">
+    <Label htmlFor="project-name">项目名称</Label>
+    <Input
+      id="project-name"
+      value={name}
+      maxLength={40}
+      onChange={(event) => setName(event.target.value)}
+      aria-describedby="project-name-help"
+    />
+    <p id="project-name-help" className="text-xs text-muted-foreground">
+      名称用于列表展示与导出文件命名，2–40 个字符，项目内唯一。当前 {name.length}/40。
+    </p>
   </div>
 
 Related: textarea, input-number, search-field, form
@@ -2364,14 +2789,15 @@ Purpose: 收集多行、较长的自由文本，如实验备注、失败原因�
 Usage: 用于超过一行的描述性内容。单行文本用 Input；结构化字段（日期、数值）用对应控件；代码 / JSON 片段的展示用 CodeBlock。
 
 Props:
-  - value: string — 受控值；配合 onChange 使用。
-  - rows: number = 3 — 初始可视行数。
-  - maxLength: number — 最大字符数；配合 showCount 给出实时计数。
-  - showCount: boolean = false — 显示 已输入/上限 计数，接近上限时变警示色。
-  - autoSize: boolean | { minRows: number; maxRows: number } = false — 随内容自动伸缩，超过 maxRows 出现滚动条。
-  - placeholder: string — 占位提示，引导内容结构，不替代标签。
-  - disabled: boolean = false — 禁止编辑；长文只读场景用只读样式保留全文可读。
-  - onChange: (value: string) => void — 值变化回调。
+  - value / defaultValue: string — 受控 / 非受控值；受控时配合 onChange。
+  - onChange: React.ChangeEventHandler<HTMLTextAreaElement> — 原生变化事件，取值用 event.target.value。
+  - rows: number — 原生可视行数；未设置时最小高度 60px，推荐 rows={3}。
+  - maxLength: number — 原生最大字符数，粘贴同样受限。
+  - placeholder: string — 引导内容结构，不替代标签。
+  - id / aria-describedby / aria-invalid: string | boolean — id 关联 Label；aria-describedby 指向计数与辅助文本（可空格分隔多个）；出错时 aria-invalid。
+  - className: string — 追加样式；其余原生 textarea 属性与 ref 透传。
+  - 字数计数: 组合 — 无 showCount：relative 容器 + 右下角绝对定位 <span id>{value.length}/上限</span>，Textarea 加 pb-6，接近上限切 text-warning。
+  - 自动高度: 组合 — 无 autoSize：className="[field-sizing:content] min-h-[92px] max-h-[192px] resize-none"，在约 3–8 行之间伸缩并封顶。
 
 States:
   - default: 显示当前内容或占位文本，默认可视三行。
@@ -2387,7 +2813,7 @@ States:
   - dark-mode: 使用语义令牌自动适配，不单独覆盖颜色。
 
 Interaction rules:
-  - autoSize 在 minRows / maxRows 之间伸缩，超出出现内部滚动条。
+  - 自动高度在最小 / 最大高度之间伸缩，超出出现内部滚动条。
   - 计数接近上限时变为警示色，超限禁止继续输入并红字提示。
   - 粘贴内容同样受 maxLength 约束，不静默丢弃。
 
@@ -2421,14 +2847,68 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Textarea label="实验备注" placeholder="记录实验现象、异常与处理" rows={3} />
+  import { Label } from "@/components/ui/label";
+  import { Textarea } from "@/components/ui/textarea";
+  
+  <div className="grid gap-1.5">
+    <Label htmlFor="exp-note">实验备注</Label>
+    <Textarea id="exp-note" rows={3} placeholder="记录实验现象、异常与处理" />
+  </div>
   --- count-autosize (variant) 字数限制与自动高度
-  <Textarea maxLength={500} showCount autoSize={{ minRows: 3, maxRows: 8 }} />
+  import { useState } from "react";
+  import { Label } from "@/components/ui/label";
+  import { Textarea } from "@/components/ui/textarea";
+  import { cn } from "@/lib/utils";
+  
+  const [reason, setReason] = useState("");
+  const nearLimit = reason.length > 450;
+  
+  <div className="grid gap-1.5">
+    <Label htmlFor="fail-reason">失败原因说明</Label>
+    <div className="relative">
+      {/* field-sizing: content 随内容伸缩，min/max 高度约等于 3–8 行 */}
+      <Textarea
+        id="fail-reason"
+        maxLength={500}
+        value={reason}
+        onChange={(event) => setReason(event.target.value)}
+        aria-describedby="fail-reason-count"
+        className="max-h-[192px] min-h-[92px] resize-none pb-6 [field-sizing:content]"
+      />
+      <span
+        id="fail-reason-count"
+        className={cn("absolute bottom-1.5 right-2.5 text-xs", nearLimit ? "text-warning" : "text-muted-foreground")}
+      >
+        {reason.length}/500
+      </span>
+    </div>
+  </div>
   --- business (business) 真实业务示例
-  <div className="field">
-    <label htmlFor="run-note">实验备注（run-28003）</label>
-    <Textarea id="run-note" maxLength={500} showCount defaultValue="第 3 轮配方 D，充电末期温升偏高，已降倍率复测。" />
-    <small>备注将进入审计记录，导出报告时一并携带，请客观描述事实。</small>
+  import { useState } from "react";
+  import { Label } from "@/components/ui/label";
+  import { Textarea } from "@/components/ui/textarea";
+  
+  const [note, setNote] = useState("第 3 轮配方 D，充电末期温升偏高，已降倍率复测。");
+  
+  <div className="grid gap-1.5">
+    <Label htmlFor="run-note">实验备注（run-28003）</Label>
+    <div className="relative">
+      <Textarea
+        id="run-note"
+        rows={3}
+        maxLength={500}
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+        aria-describedby="run-note-count run-note-help"
+        className="pb-6"
+      />
+      <span id="run-note-count" className="absolute bottom-1.5 right-2.5 text-xs text-muted-foreground">
+        {note.length}/500
+      </span>
+    </div>
+    <p id="run-note-help" className="text-xs text-muted-foreground">
+      备注将进入审计记录，导出报告时一并携带，请客观描述事实。
+    </p>
   </div>
 
 Related: input, form, code-block
@@ -2439,15 +2919,17 @@ Purpose: 从一组确定选项中选择单个或多个值，把自由录入变�
 Usage: 选项已知且有限时使用（状态、类型、所属项目）。选项量大或允许创建新值用 Combobox；选项 ≤5 且需要一眼看全用 Radio；布尔设置用 Switch。
 
 Props:
-  - value: string | string[] — 受控值；多选时为数组。
-  - options (required): { value: string; label: ReactNode; disabled?: boolean }[] — 选项列表；disabled 选项必须在 label 旁注明原因。
-  - mode: "single" | "multiple" = "single" — 单选或多选；多选已选值以 Tag 回显。
-  - showSearch: boolean = false — 面板内搜索，大小写不敏感；选项超过 8 个时必须开启。
-  - allowClear: boolean = false — 有值时显示一键清空按钮。
-  - placeholder: string — 占位提示，写选择对象（选择状态），不写“请选择”。
-  - loading: boolean = false — 选项异步加载中，面板内显示加载占位。
-  - disabled: boolean = false — 禁止展开面板；原因就近说明。
-  - onChange: (value: string | string[]) => void — 选中变化回调。
+  - Select.value / defaultValue: string — 受控 / 非受控选中值，只支持单个 string；受控置为 "" 时回到 placeholder（SelectItem 的 value 不能为空串）。
+  - Select.onValueChange: (value: string) => void — 选中变化回调，选中即关闭面板。
+  - Select.open / onOpenChange: boolean / (open: boolean) => void — 可选的受控展开状态。
+  - Select.disabled / required / name: boolean / boolean / string — 禁用整个选择器；required、name 用于原生表单提交。
+  - SelectTrigger: id, className, aria-invalid — 触发器（h-8 w-full）；id 供 Label htmlFor 关联，出错时加 aria-invalid 与 border-danger。
+  - SelectValue.placeholder: ReactNode — 未选时的占位，写选择对象（选择状态），不写“请选择”。
+  - SelectContent.position: "popper" | "item-aligned" = "popper" — 本库默认 popper：贴在触发器下方，宽度不小于触发器；接受 side、align、className。
+  - SelectItem (required): value: string; disabled?: boolean — 选项；value 必填且唯一，选中项右侧显示对勾；禁用原因写进选项文字。
+  - SelectGroup / SelectLabel / SelectSeparator: 部件 — 选项分组、组标题与组间分隔线。
+  - 多选: 组合 — Select 只支持单选：Popover + Checkbox 列表，已选值用 Badge 回显并可单个移除（见“多选与可清空”示例）。
+  - 搜索: 组合 — Select 不带搜索：Popover + Input + role="listbox" 选项列表，无匹配给出空态（见真实业务示例）；选项可创建时用 Combobox。
 
 States:
   - default: 显示已选值 label 或占位文本。
@@ -2499,33 +2981,124 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Select
-    placeholder="选择状态"
-    options={[
-      { value: "running", label: "运行中" },
-      { value: "queued", label: "排队中" },
-      { value: "finished", label: "已完成" },
-    ]}
-  />
+  import { Label } from "@/components/ui/label";
+  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+  
+  <div className="grid gap-1.5">
+    <Label htmlFor="task-status">任务状态</Label>
+    <Select defaultValue="running">
+      <SelectTrigger id="task-status">
+        <SelectValue placeholder="选择状态" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="running">运行中</SelectItem>
+        <SelectItem value="queued">排队中</SelectItem>
+        <SelectItem value="finished">已完成</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
   --- multiple (variant) 多选与可清空
-  <Select
-    mode="multiple"
-    allowClear
-    placeholder="选择标签"
-    options={tagOptions}
-    defaultValue={["high-conductivity", "round-3"]}
-  />
+  import { useState } from "react";
+  import { ChevronDown, X } from "lucide-react";
+  import { Badge } from "@/components/ui/badge";
+  import { Button } from "@/components/ui/button";
+  import { Checkbox } from "@/components/ui/checkbox";
+  import { Label } from "@/components/ui/label";
+  import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+  
+  // Select 只支持单选；多选 = Popover + Checkbox 列表，已选值用 Badge 回显。
+  const tagOptions = [
+    { value: "high-conductivity", label: "高导配方" },
+    { value: "round-3", label: "第 3 轮" },
+    { value: "to-review", label: "待复核" },
+  ];
+  const [tags, setTags] = useState(["high-conductivity", "round-3"]);
+  const toggle = (v: string) => setTags((list) => (list.includes(v) ? list.filter((t) => t !== v) : [...list, v]));
+  
+  <Label htmlFor="exp-tags">实验标签</Label>
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button id="exp-tags" variant="secondary" className="w-full justify-between px-3 text-sm font-normal">
+        {tags.length ? `已选 ${tags.length} 项` : "选择标签"}
+        <ChevronDown className="opacity-50" />
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-1">
+      {tagOptions.map((option) => (
+        <div key={option.value} className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-accent">
+          <Checkbox id={`tag-${option.value}`} checked={tags.includes(option.value)} onCheckedChange={() => toggle(option.value)} />
+          <Label htmlFor={`tag-${option.value}`} className="flex-1 font-normal">{option.label}</Label>
+        </div>
+      ))}
+    </PopoverContent>
+  </Popover>
+  <div className="flex flex-wrap items-center gap-1.5">
+    {tags.map((v) => (
+      <Badge key={v} tone="primary" className="pr-0.5">
+        {tagOptions.find((o) => o.value === v)?.label}
+        <Button variant="ghost" size="icon" aria-label="移除标签" onClick={() => toggle(v)} className="size-4 text-primary [&_svg]:size-3">
+          <X />
+        </Button>
+      </Badge>
+    ))}
+    {tags.length > 0 && <Button variant="ghost" size="sm" onClick={() => setTags([])}>清空</Button>}
+  </div>
   --- business (business) 真实业务示例
-  <Select
-    showSearch
-    placeholder="搜索数据集名称或编号"
-    options={[
-      { value: "ds-118", label: "电导率筛选第 3 轮（ds-118）" },
-      { value: "ds-120", label: "热稳定性复测（ds-120）" },
-      { value: "ds-121", label: "空白对照组（ds-121）" },
-    ]}
-    emptyText="没有匹配的数据集"
-  />
+  import { useState } from "react";
+  import { Check, ChevronDown } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+  import { Input } from "@/components/ui/input";
+  import { Label } from "@/components/ui/label";
+  import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+  import { cn } from "@/lib/utils";
+  
+  // Select 不带搜索；可搜索的单选 = Popover + Input + 选项列表，无匹配给出空态。
+  const datasets = [
+    { value: "ds-118", label: "电导率筛选第 3 轮" },
+    { value: "ds-120", label: "热稳定性复测" },
+    { value: "ds-121", label: "空白对照组" },
+  ];
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("ds-118");
+  const [keyword, setKeyword] = useState("");
+  const matched = datasets.filter((d) => d.label.includes(keyword) || d.value.includes(keyword));
+  const selected = datasets.find((d) => d.value === value);
+  
+  <Label htmlFor="dataset">输入数据集</Label>
+  <Popover open={open} onOpenChange={setOpen}>
+    <PopoverTrigger asChild>
+      <Button id="dataset" variant="secondary" role="combobox" aria-expanded={open} className="w-full justify-between px-3 text-sm font-normal">
+        {selected ? `${selected.label}（${selected.value}）` : "选择数据集"}
+        <ChevronDown className="opacity-50" />
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-1">
+      <Input aria-label="搜索数据集" placeholder="搜索数据集名称或编号" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="mb-1" />
+      <div role="listbox" aria-label="数据集">
+        {matched.length > 0 ? (
+          matched.map((d) => (
+            <Button
+              key={d.value}
+              role="option"
+              aria-selected={d.value === value}
+              variant="ghost"
+              size="sm"
+              className="w-full justify-between px-2 font-normal"
+              onClick={() => { setValue(d.value); setOpen(false); setKeyword(""); }}
+            >
+              <span className="flex items-center gap-2">
+                <Check className={cn(d.value === value ? "opacity-100" : "opacity-0")} />
+                {d.label}
+              </span>
+              <span className="font-mono text-xs text-muted-foreground">{d.value}</span>
+            </Button>
+          ))
+        ) : (
+          <p className="py-5 text-center text-sm text-muted-foreground">没有匹配的数据集</p>
+        )}
+      </div>
+    </PopoverContent>
+  </Popover>
 
 Related: combobox, radio, dropdown, form, tag
 
@@ -2784,13 +3357,15 @@ Purpose: 在一组互不排斥的选项中做多项选择，或确认一个需�
 Usage: 用于多选属性、批量选择行、勾选“我已阅读”。勾选只改变待提交状态，随表单或批量动作一起生效；需要即时生效的布尔设置用 Switch，二者不可混用。
 
 Props:
-  - checked: boolean — 是否选中；受控使用。
-  - indeterminate: boolean = false — 半选态，仅用于全选父级，视觉与未选明确区分。
-  - disabled: boolean = false — 禁止切换；原因就近说明。
-  - children: ReactNode — 选项文案，点击文案同样切换。
-  - onChange: (checked: boolean) => void — 切换回调；只更新待提交状态，不产生副作用。
-  - Checkbox.Group value: string[] — 组受控值，选中的 value 数组。
-  - Checkbox.Group options: { value: string; label: ReactNode; disabled?: boolean }[] — 组选项配置。
+  - checked / defaultChecked: boolean | "indeterminate" — 受控 / 非受控选中态；"indeterminate" 为半选，仅用于全选父级。
+  - onCheckedChange: (checked: boolean | "indeterminate") => void — 切换回调；只更新待提交状态，不产生副作用。
+  - id: string — 与 <Label htmlFor> 一致，点击文案同样切换。
+  - disabled: boolean = false — 禁用；原因写在文案或辅助文本里。
+  - required / name / value: boolean / string / string — 参与原生表单提交时使用。
+  - className: string — 追加样式；可用 data-[state=checked] / data-[state=indeterminate] 选择器定制。
+  - 半选样式: 组合 — registry Checkbox 只画对勾：checked="indeterminate" 时用 className 隐藏对勾并画横线（见“全选与半选”示例）。
+  - 复选组: 组合 — 无 Checkbox.Group：string[] 状态 + 逐项 Checkbox/Label；分组用 fieldset/legend 或 role="group" + aria-label。
+  - 卡片样式: 组合 — Label 包住 Checkbox，className="has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary-soft"。
 
 States:
   - default: 未选 / 已选 / 半选三种视觉明确区分，不依赖颜色单一通道。
@@ -2816,8 +3391,8 @@ Keyboard:
   - Space 切换选中。
 
 Accessibility:
-  - 使用原生 input type="checkbox"，半选态同步 aria-checked="mixed"。
-  - Group 使用 fieldset / legend 或 role="group" + aria-label 表达分组含义。
+  - Radix 渲染 role="checkbox" 的按钮，半选时自动同步 aria-checked="mixed"。
+  - 一组复选框使用 fieldset / legend 或 role="group" + aria-label 表达分组含义。
   - 必勾选错误时 aria-invalid="true"，错误文案 role="alert" 就近播报。
 
 Responsive:
@@ -2841,22 +3416,73 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Checkbox defaultChecked>同时导出原始数据</Checkbox>
-  <Checkbox>包含失败步骤</Checkbox>
-  <Checkbox>仅当前项目（project-042）</Checkbox>
+  import { Checkbox } from "@/components/ui/checkbox";
+  import { Label } from "@/components/ui/label";
+  
+  <div className="flex items-center gap-2">
+    <Checkbox id="export-raw" defaultChecked />
+    <Label htmlFor="export-raw" className="font-normal">同时导出原始数据</Label>
+  </div>
+  <div className="flex items-center gap-2">
+    <Checkbox id="include-failed" />
+    <Label htmlFor="include-failed" className="font-normal">包含失败步骤</Label>
+  </div>
+  <div className="flex items-center gap-2">
+    <Checkbox id="current-project" />
+    <Label htmlFor="current-project" className="font-normal">仅当前项目（project-042）</Label>
+  </div>
   --- indeterminate (variant) 全选与半选
-  <Checkbox indeterminate={selected.length > 0 && selected.length < total} checked={selected.length === total}>
-    全选
-  </Checkbox>
-  <Checkbox.Group value={selected} options={datasetOptions} onChange={setSelected} />
+  import { Checkbox } from "@/components/ui/checkbox";
+  import { Label } from "@/components/ui/label";
+  
+  // checked 传 "indeterminate" 表示半选；registry Checkbox 默认只画对勾，半选态用 className 画横线。
+  const indeterminateCls =
+    "relative data-[state=indeterminate]:bg-primary data-[state=indeterminate]:[&_svg]:hidden " +
+    "data-[state=indeterminate]:after:absolute data-[state=indeterminate]:after:inset-x-[3px] data-[state=indeterminate]:after:top-1/2 " +
+    "data-[state=indeterminate]:after:h-0.5 data-[state=indeterminate]:after:-translate-y-1/2 data-[state=indeterminate]:after:rounded-full " +
+    "data-[state=indeterminate]:after:bg-primary-foreground data-[state=indeterminate]:after:content-['']";
+  const parentChecked = selected.length === 0 ? false : selected.length === total ? true : "indeterminate";
+  
+  <div className="flex items-center gap-2">
+    <Checkbox
+      id="select-all"
+      checked={parentChecked}
+      onCheckedChange={() => setSelected(selected.length === total ? [] : allIds)}
+      className={indeterminateCls}
+    />
+    <Label htmlFor="select-all">全选（已选 {selected.length} / {total}）</Label>
+  </div>
+  <div className="grid gap-2.5 pl-6">
+    {allIds.map((id) => (
+      <div key={id} className="flex items-center gap-2">
+        <Checkbox id={id} checked={selected.includes(id)} onCheckedChange={() => toggle(id)} />
+        <Label htmlFor={id} className="font-mono font-normal">{id}</Label>
+      </div>
+    ))}
+  </div>
   --- business (business) 真实业务示例
-  <Checkbox.Group value={selected} onChange={setSelected}>
-    <Checkbox value="ds-118">电导率筛选第 3 轮（ds-118）</Checkbox>
-    <Checkbox value="ds-120">热稳定性复测（ds-120）</Checkbox>
-    <Checkbox value="ds-121">空白对照组（ds-121）</Checkbox>
-  </Checkbox.Group>
-  <span>已选 {selected.length} / 3 项</span>
-  <Button variant="secondary" size="sm" disabled={selected.length === 0}>批量导出</Button>
+  import { Button } from "@/components/ui/button";
+  import { Checkbox } from "@/components/ui/checkbox";
+  import { Label } from "@/components/ui/label";
+  
+  {datasets.map((dataset) => (
+    <Label
+      key={dataset.id}
+      htmlFor={dataset.id}
+      className="flex items-center gap-2.5 rounded-lg border px-3 py-2.5 font-normal has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary-soft"
+    >
+      <Checkbox id={dataset.id} checked={selected.includes(dataset.id)} onCheckedChange={() => toggle(dataset.id)} />
+      <span className="grid">
+        <span className="font-semibold">{dataset.name}</span>
+        <span className="font-mono text-xs text-muted-foreground">{dataset.id}</span>
+      </span>
+    </Label>
+  ))}
+  <div className="flex items-center gap-2">
+    <span className="text-sm text-muted-foreground">已选 {selected.length} / 3 项</span>
+    <Button variant="secondary" size="sm" disabled={selected.length === 0}>批量导出</Button>
+    <Button variant="ghost" size="sm" disabled={selected.length === 0} onClick={() => setSelected([])}>清空选择</Button>
+  </div>
 
 Related: switch, radio, form, table
 
@@ -2866,12 +3492,14 @@ Purpose: 在少量互斥选项中选择唯一值，所有选项平铺可见。
 Usage: 用于 2–5 个互斥选项且需要一眼看全的场景：计算模式、精度档位。选项多或需节省空间用 Select；布尔设置用 Switch 或 Checkbox。
 
 Props:
-  - value: string — 组受控值。
-  - options (required): { value: string; label: ReactNode; description?: ReactNode; disabled?: boolean }[] — 选项配置；description 用于卡片样式。
-  - optionType: "default" | "card" = "default" — default 为圆点平铺；card 为带描述的卡片。
-  - defaultValue: string — 默认选中；仅在有安全默认时使用。
-  - disabled: boolean = false — 整组禁用；单个选项禁用用 options.disabled。
-  - onChange: (value: string) => void — 选中变化回调。
+  - RadioGroup.value / defaultValue: string — 受控 / 非受控选中值；仅在有安全默认时给 defaultValue。
+  - RadioGroup.onValueChange: (value: string) => void — 选中变化回调。
+  - RadioGroup.aria-label: string — 组名称；也可用 aria-labelledby 指向可见标题。
+  - RadioGroup.disabled / required / name: boolean / boolean / string — 禁用整组；required、name 用于原生表单提交。
+  - RadioGroup.className: string — 默认 grid gap-2 纵向排列；横排用 "flex gap-4"，卡片两列用 "grid gap-3 sm:grid-cols-2"。
+  - RadioGroupItem.value (required): string — 选项值，组内唯一。
+  - RadioGroupItem.id / disabled: string / boolean — id 与 <Label htmlFor> 关联；禁用选项在描述里写明原因。
+  - 卡片样式: 组合 — 无 optionType：Label 包住 RadioGroupItem 与名称/描述，className="has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary-soft"。
 
 States:
   - default: 当前选中项清晰；无安全默认时不替用户预选。
@@ -2921,34 +3549,73 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Radio.Group
-    defaultValue="all"
-    options={[
-      { value: "all", label: "全部" },
-      { value: "running", label: "运行中" },
-      { value: "finished", label: "已完成" },
-    ]}
-  />
+  import { Label } from "@/components/ui/label";
+  import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+  
+  <RadioGroup defaultValue="all" aria-label="任务状态" className="flex gap-4">
+    <div className="flex items-center gap-2">
+      <RadioGroupItem id="status-all" value="all" />
+      <Label htmlFor="status-all" className="font-normal">全部</Label>
+    </div>
+    <div className="flex items-center gap-2">
+      <RadioGroupItem id="status-running" value="running" />
+      <Label htmlFor="status-running" className="font-normal">运行中</Label>
+    </div>
+    <div className="flex items-center gap-2">
+      <RadioGroupItem id="status-finished" value="finished" />
+      <Label htmlFor="status-finished" className="font-normal">已完成</Label>
+    </div>
+  </RadioGroup>
   --- card-options (variant) 带描述的卡片样式
-  <Radio.Group
-    optionType="card"
-    defaultValue="fast"
-    options={[
-      { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒" },
-      { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 消耗额度" },
-    ]}
-  />
+  import { Label } from "@/components/ui/label";
+  import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+  
+  // 卡片样式：Label 包住 RadioGroupItem，选中样式用 :has() 跟随子项状态。
+  const modes = [
+    { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒" },
+    { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 消耗额度" },
+  ];
+  
+  <RadioGroup defaultValue="fast" aria-label="计算模式" className="grid gap-3 sm:grid-cols-2">
+    {modes.map((mode) => (
+      <Label
+        key={mode.value}
+        htmlFor={`mode-${mode.value}`}
+        className="flex items-start gap-2.5 rounded-lg border p-3 font-normal has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary-soft"
+      >
+        <RadioGroupItem id={`mode-${mode.value}`} value={mode.value} className="mt-0.5" />
+        <span className="grid gap-0.5">
+          <span className="font-semibold">{mode.label}</span>
+          <span className="text-xs text-muted-foreground">{mode.description}</span>
+        </span>
+      </Label>
+    ))}
+  </RadioGroup>
   --- business (business) 真实业务示例
-  <Radio.Group
-    optionType="card"
-    value={mode}
-    onChange={setMode}
-    options={[
-      { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒 · 不计额度" },
-      { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 计入 project-042 额度" },
-      { value: "ultra", label: "超高精度", description: "需申请权限", disabled: true },
-    ]}
-  />
+  import { Label } from "@/components/ui/label";
+  import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+  
+  const modes = [
+    { value: "fast", label: "快速筛选", description: "CPU · 约 30 秒 · 不计额度" },
+    { value: "precise", label: "高精度计算", description: "GPU · 约 300 秒 · 计入 project-042 额度" },
+    { value: "ultra", label: "超高精度", description: "需申请权限", disabled: true },
+  ];
+  
+  <RadioGroup value={mode} onValueChange={setMode} aria-label="计算模式" className="grid gap-3 sm:grid-cols-2">
+    {modes.map((m) => (
+      <Label
+        key={m.value}
+        htmlFor={`mode-${m.value}`}
+        className="flex items-start gap-2.5 rounded-lg border p-3 font-normal has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary-soft has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
+      >
+        <RadioGroupItem id={`mode-${m.value}`} value={m.value} disabled={m.disabled} className="mt-0.5" />
+        <span className="grid gap-0.5">
+          <span className="font-semibold">{m.label}</span>
+          <span className="text-xs text-muted-foreground">{m.description}</span>
+        </span>
+      </Label>
+    ))}
+  </RadioGroup>
 
 Related: select, checkbox, switch, segmented, form
 
@@ -2958,11 +3625,14 @@ Purpose: 切换一个即时生效的二元设置，开 / 关语义一目了然�
 Usage: 用于通知开关、自动刷新、对团队可见等即时生效的设置。需要随表单提交才生效的选择用 Checkbox：这是两者唯一的分工标准。两个非布尔互斥项用 Radio 或 Segmented。
 
 Props:
-  - checked: boolean — 是否开启；受控使用。
-  - loading: boolean = false — 异步写入中显示 spinner 并锁定，防止反复点击。
-  - disabled: boolean = false — 禁止切换；原因就近说明。
-  - aria-label: string — 控制对象名称；旁边无可见文案时必填。
-  - onChange: (checked: boolean) => void | Promise<void> — 切换回调；返回 Promise 时失败必须回滚到原状态。
+  - checked / defaultChecked: boolean — 受控 / 非受控开关状态。
+  - onCheckedChange: (checked: boolean) => void — 切换回调；异步写入成功后再更新 checked，失败保持原值即回滚。
+  - id / aria-label: string — id 与 <Label htmlFor> 关联；旁边无可见文案时必须给 aria-label。
+  - aria-describedby: string — 指向“开启后的行为”说明文本。
+  - disabled: boolean = false — 禁用；无权限时在标签里注明原因。
+  - name / value / required: string / string / boolean — 参与原生表单提交时使用（即时生效场景通常不需要）。
+  - className: string — 追加样式；可用 data-[state=checked] 选择器定制。
+  - 写入中: 组合 — 无 loading：disabled={pending} + aria-busy + 旁边 <Loader2 className="size-3 animate-spin" />，失败时 role="alert" 文案提示已回滚。
 
 States:
   - default: 开为品牌色、关为中性灰，位置与颜色双重编码。
@@ -3013,24 +3683,71 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Switch defaultChecked aria-label="邮件通知" /> 邮件通知
-  <Switch aria-label="自动保存" /> 自动保存
+  import { Label } from "@/components/ui/label";
+  import { Switch } from "@/components/ui/switch";
+  
+  <div className="flex items-center gap-2.5">
+    <Switch id="mail-notify" defaultChecked />
+    <Label htmlFor="mail-notify" className="font-normal">邮件通知</Label>
+  </div>
+  <div className="flex items-center gap-2.5">
+    <Switch id="auto-save" />
+    <Label htmlFor="auto-save" className="font-normal">自动保存</Label>
+  </div>
   --- states (state) 异步切换与回滚
-  <Switch
-    checked={enabled}
-    loading={pending}
-    onChange={async (next) => {
-      setPending(true);
-      await updateSetting({ autoRefresh: next }); // 失败时抛出，Switch 回滚
-      setPending(false);
-    }}
-  />
+  import { AlertCircle, Loader2 } from "lucide-react";
+  import { Label } from "@/components/ui/label";
+  import { Switch } from "@/components/ui/switch";
+  
+  // registry Switch 没有 loading：写入期间 disabled + 旁边的 spinner；成功后才更新 checked，失败保持原值并提示。
+  <div className="flex items-center gap-2.5">
+    <Switch
+      id="remote-sync"
+      checked={enabled}
+      disabled={pending}
+      aria-busy={pending}
+      onCheckedChange={async (next) => {
+        setPending(true);
+        try {
+          await updateSetting({ remoteSync: next });
+          setEnabled(next);
+        } catch {
+          setFailed(true); // 未改变 checked，即回滚
+        } finally {
+          setPending(false);
+        }
+      }}
+    />
+    <Label htmlFor="remote-sync" className="font-normal">远程同步</Label>
+    {pending && <Loader2 className="size-3 animate-spin text-muted-foreground" aria-label="写入中" />}
+    {failed && (
+      <span role="alert" className="inline-flex items-center gap-1 text-xs text-danger">
+        <AlertCircle className="size-3" aria-hidden="true" />
+        保存失败，已回滚
+      </span>
+    )}
+  </div>
+  <div className="flex items-center gap-2.5">
+    <Switch id="analytics" checked={false} disabled />
+    <Label htmlFor="analytics" className="font-normal text-muted-foreground">数据分析（需管理员开启）</Label>
+  </div>
   --- business (business) 真实业务示例
-  <div className="setting-row">
-    <Switch checked={autoRefresh} onChange={setAutoRefresh} aria-label="任务自动刷新" />
-    <div>
-      <strong>任务自动刷新</strong>
-      <p>开启后每 30 秒刷新 run-28003 的状态，关闭即停止。</p>
+  import { Label } from "@/components/ui/label";
+  import { Switch } from "@/components/ui/switch";
+  
+  <div className="flex items-start gap-3 rounded-lg border bg-card p-4">
+    <Switch
+      id="auto-refresh"
+      checked={autoRefresh}
+      onCheckedChange={setAutoRefresh}
+      aria-describedby="auto-refresh-desc"
+      className="mt-0.5"
+    />
+    <div className="grid gap-1">
+      <Label htmlFor="auto-refresh" className="text-base font-semibold">任务自动刷新</Label>
+      <p id="auto-refresh-desc" className="text-sm text-muted-foreground">
+        开启后每 30 秒刷新 run-28003 的状态，关闭即停止。
+      </p>
     </div>
   </div>
 
@@ -3042,13 +3759,16 @@ Purpose: 组织一组字段的标签、辅助说明、校验与提交，把录�
 Usage: 任何需要用户录入并提交的场景：新建项目、提交计算任务、修改配置。只读展示用 Descriptions；单字段即时设置（如开关）不需要包一层 Form。
 
 Props:
-  - layout: "vertical" | "inline" = "vertical" — 垂直布局是默认；inline 仅用于筛选区等紧凑场景。
-  - validateTrigger: "onBlur" | "onChange" | "onSubmit" = "onBlur" — 失焦校验格式类规则，提交校验业务规则。
-  - onSubmit (required): (values: Record<string, unknown>) => void | Promise<void> — 提交回调；异步期间提交按钮 loading 并禁止重复提交。
-  - Form.Item label (required): ReactNode — 字段标签，必须可见并通过 htmlFor 关联控件。
-  - Form.Item required: boolean = false — 必填标记；视觉星号、aria-required 与校验规则三者配套。
-  - Form.Item help: ReactNode — 辅助说明，常驻显示在控件下方，写约束与影响范围。
-  - Form.Item error: ReactNode — 校验错误文案；出现时控件红边 + aria-invalid="true"。
+  - <form>.onSubmit (required): React.FormEventHandler<HTMLFormElement> — 原生 form：preventDefault 后校验业务规则；无 Form 组件，字段由下列结构组合。
+  - 字段结构: 组合 — <div className="grid gap-1.5">：Label → 控件 → 辅助/错误文本；表单 className="grid gap-4" 垂直排列。
+  - Label.htmlFor (required): string — 与控件 id 一致；Select 指向 SelectTrigger 的 id。
+  - 必填: 组合 — Label 内 <span aria-hidden="true" className="ml-0.5 text-danger">*</span> + 控件 required（SelectTrigger 加 aria-required="true"）。
+  - 控件.aria-describedby: string — 指向辅助文本与错误文本的 id，可空格分隔多个。
+  - 控件.aria-invalid: boolean — 出错时设置，并加 className="border-danger focus-visible:border-danger focus-visible:ring-danger/20"。
+  - 辅助文本: 组合 — <p id className="text-xs text-muted-foreground">，常驻控件下方，写约束与影响。
+  - 错误文本: 组合 — <p id role="alert" className="text-xs text-danger">，就近显示在出错字段下方，写清怎么改。
+  - 提交按钮: 组合 — <Button type="submit" disabled={submitting}> + Loader2 + 进行中文案；按钮旁写影响范围。
+  - 校验时机: 组合 — 无 validateTrigger：格式类规则在控件 onBlur 中校验，业务规则在 onSubmit 中校验；失败后把焦点移到首个错误字段。
 
 States:
   - default: 标签在上、控件居中、辅助文本常驻；必填星号与校验规则配套。
@@ -3104,35 +3824,97 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Form layout="vertical" onSubmit={handleSubmit}>
-    <Form.Item label="任务名称" required help="用于列表与导出命名，2–40 个字符。">
-      <Input placeholder="例如：第 3 轮电导率优化" />
-    </Form.Item>
-    <Form.Item label="所属项目" required>
-      <Select options={projectOptions} placeholder="选择项目" />
-    </Form.Item>
-  </Form>
-  --- validation (state) 校验与错误就近
-  <Form.Item
-    label="样本质量"
-    required
-    error="质量需在 0–500 mg 之间，当前为 620 mg。"
-  >
-    <InputNumber unit="mg" min={0} max={500} aria-invalid="true" />
-  </Form.Item>
-  --- business (business) 真实业务示例
-  <Form layout="vertical" onSubmit={submitRun}>
-    <Form.Item label="任务名称" required help="用于列表与导出命名，2–40 个字符。">
-      <Input placeholder="例如：第 3 轮电导率优化" />
-    </Form.Item>
-    <Form.Item label="数据集" required>
-      <Select options={datasetOptions} placeholder="选择数据集" />
-    </Form.Item>
-    <div className="action-with-scope">
-      <Button variant="primary" loading={submitting}>创建计算任务</Button>
-      <span>将使用 示例项目（project-042）· 预计最长 300 秒</span>
+  import { Input } from "@/components/ui/input";
+  import { Label } from "@/components/ui/label";
+  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+  
+  <form className="grid gap-4" onSubmit={handleSubmit}>
+    <div className="grid gap-1.5">
+      <Label htmlFor="task-name">
+        任务名称<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+      </Label>
+      <Input id="task-name" required aria-describedby="task-name-help" placeholder="例如：第 3 轮电导率优化" />
+      <p id="task-name-help" className="text-xs text-muted-foreground">用于列表与导出命名，2–40 个字符。</p>
     </div>
-  </Form>
+    <div className="grid gap-1.5">
+      <Label htmlFor="project">
+        所属项目<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+      </Label>
+      <Select required>
+        <SelectTrigger id="project" aria-required="true" className="data-[placeholder]:text-muted-foreground">
+          <SelectValue placeholder="选择项目" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="project-042">示例项目（project-042）</SelectItem>
+          <SelectItem value="project-043">示例项目二（project-043）</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  </form>
+  --- validation (state) 校验与错误就近
+  import { Input } from "@/components/ui/input";
+  import { Label } from "@/components/ui/label";
+  
+  <div className="grid gap-1.5">
+    <Label htmlFor="sample-mass">
+      样本质量<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+    </Label>
+    <div className="relative">
+      <Input
+        id="sample-mass"
+        required
+        inputMode="decimal"
+        defaultValue="620"
+        aria-invalid="true"
+        aria-describedby="sample-mass-error"
+        className="pr-10 border-danger focus-visible:border-danger focus-visible:ring-danger/20"
+      />
+      <span aria-hidden="true" className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+        mg
+      </span>
+    </div>
+    <p id="sample-mass-error" role="alert" className="text-xs text-danger">
+      质量需在 0–500 mg 之间，当前为 620 mg。
+    </p>
+  </div>
+  --- business (business) 真实业务示例
+  import { Loader2 } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+  import { Input } from "@/components/ui/input";
+  import { Label } from "@/components/ui/label";
+  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+  
+  <form className="grid gap-4" onSubmit={submitRun}>
+    <div className="grid gap-1.5">
+      <Label htmlFor="task-name">
+        任务名称<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+      </Label>
+      <Input id="task-name" required defaultValue="第 3 轮电导率优化" aria-describedby="task-name-help" />
+      <p id="task-name-help" className="text-xs text-muted-foreground">用于列表与导出命名，2–40 个字符。</p>
+    </div>
+    <div className="grid gap-1.5">
+      <Label htmlFor="dataset">
+        数据集<span aria-hidden="true" className="ml-0.5 text-danger">*</span>
+      </Label>
+      <Select required defaultValue="ds-118">
+        <SelectTrigger id="dataset" aria-required="true">
+          <SelectValue placeholder="选择数据集" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ds-118">电导率筛选第 3 轮（ds-118）</SelectItem>
+          <SelectItem value="ds-120">热稳定性复测（ds-120）</SelectItem>
+          <SelectItem value="ds-121">空白对照组（ds-121）</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+    <div className="flex flex-wrap items-center gap-3">
+      <Button type="submit" disabled={submitting}>
+        {submitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+        {submitting ? "正在创建" : "创建计算任务"}
+      </Button>
+      <span className="text-sm text-muted-foreground">将使用 示例项目（project-042）· 预计最长 300 秒</span>
+    </div>
+  </form>
 
 Related: input, select, checkbox, button, alert
 
@@ -3405,13 +4187,15 @@ Purpose: 以行列结构展示结构化数据，是列表页与详情页最核�
 Usage: 用于两条以上、字段结构一致的数据集合。单条记录的字段明细用 Descriptions；单个关键数值用 Statistic；层级数据用 Tree。数据超过一屏必须配合 Pagination 或虚拟滚动，不允许无限长高。
 
 Props:
-  - caption (required): string — 表格标题，说明内容范围（项目、时间、筛选）；视觉上可弱化，读屏必须可达。
-  - rowKey: string = "id" — 行稳定标识，排序保持、批量选择与刷新后的选中还原都依赖它。
-  - scroll: { x?: number | string; y?: number | string } — 达到临界尺寸后进入滚动；窄屏横向滚动由 x 触发。
-  - stickyFirstColumn: boolean = false — 横向滚动时冻结首列，保持行定位。
-  - loading: boolean = false — 骨架行替换数据行，表头与 caption 保留。
-  - empty: ReactNode — 空态内容：说明是无数据还是被筛选清空，并给出下一步动作。
-  - error: { message: string; onRetry?: () => void } — 错误态：原因 + 重试，保留表头与筛选上下文。
+  - Table (required): TableHTMLAttributes<HTMLTableElement> — 自带 relative w-full overflow-x-auto 外层容器；className 作用于 <table>，横向滚动给 min-w-[880px] 之类的最小宽度。
+  - <caption> (required): 原生元素 — 放在 Table 内第一个子元素，说明内容范围（项目、时间、筛选）；className="caption-top …" 置顶并弱化。
+  - TableHeader / TableBody: HTMLAttributes<HTMLTableSectionElement> — <thead> / <tbody>；加载、空、错误时只替换 TableBody，表头保留。
+  - TableRow: HTMLAttributes<HTMLTableRowElement> — 行，hover 浅底；key 用稳定 ID；选中行加 data-state="selected"（品牌色浅底）。
+  - TableHead: ThHTMLAttributes<HTMLTableCellElement> — 表头单元格；写 scope="col"，数字列加 className="text-right"，可排序列加 aria-sort。
+  - TableCell: TdHTMLAttributes<HTMLTableCellElement> — 单元格；数字列 className="text-right tabular-nums"，空 / 错误行用 colSpan 铺满。
+  - 外框: 组合 — 外包 <div className="rounded-lg border bg-card">。
+  - 冻结首列: 组合 — 无 stickyFirstColumn：首列 TableHead/TableCell 加 sticky left-0 z-[1] 与不透明背景（表头 bg-muted，单元格 bg-card）。
+  - 排序 / 选择 / 分页: 组合 — 无内置 columns/rowKey/scroll：排序按钮放进 TableHead 并同步 aria-sort；选择列用 Checkbox；分页用 Pagination。
 
 States:
   - default: 首列语义稳定（名称 + ID），数字列右对齐并使用等宽数字。
@@ -3446,7 +4230,7 @@ Accessibility:
 
 Responsive:
   - 窄屏进入横向滚动容器，列宽不压缩、文字不挤压换行。
-  - 横向滚动时首列可冻结（stickyFirstColumn），保持行定位。
+  - 横向滚动时首列可冻结（sticky left-0），保持行定位。
   - 移动端次要列可移入行内展开区，但首列与状态列始终可见。
 
 Content guidelines:
@@ -3467,75 +4251,169 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Table caption="示例项目（project-042）最近计算任务">
-    <TableHead>
-      <TableRow>
-        <TableHeader scope="col">任务</TableHeader>
-        <TableHeader scope="col">数据集</TableHeader>
-        <TableHeader scope="col" align="right">耗时（秒）</TableHeader>
-        <TableHeader scope="col">状态</TableHeader>
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      <TableRow>
-        <TableCell>run-28003</TableCell>
-        <TableCell>ds-118</TableCell>
-        <TableCell align="right">286.4</TableCell>
-        <TableCell><Badge color="success">已完成</Badge></TableCell>
-      </TableRow>
-    </TableBody>
-  </Table>
-  --- scroll (variant) 窄屏横向滚动
-  <Table
-    caption="数据集 ds-118 · 全部字段"
-    scroll={{ x: 960 }}
-    stickyFirstColumn
-  >
-    <TableHead>
-      <TableRow>
-        <TableHeader scope="col">任务</TableHeader>
-        <TableHeader scope="col">数据集</TableHeader>
-        <TableHeader scope="col">方法</TableHeader>
-        <TableHeader scope="col" align="right">截断能（eV）</TableHeader>
-        <TableHeader scope="col" align="right">耗时（秒）</TableHeader>
-        <TableHeader scope="col" align="right">费用（元）</TableHeader>
-        <TableHeader scope="col">状态</TableHeader>
-      </TableRow>
-    </TableHead>
-    <TableBody>{rows}</TableBody>
-  </Table>
-  --- states (state) 加载、空与错误
-  <Table caption="任务列表" loading />
-  <Table caption="任务列表" empty={<Empty description="当前筛选条件下没有任务" actionText="清除筛选" />} />
-  <Table caption="任务列表" error={{ message: "任务列表加载失败", onRetry: reload }} />
-  --- business (business) 真实业务示例
-  <Table caption="示例项目（project-042）· 计算任务列表" rowKey="id">
-    <TableHead>
-      <TableRow>
-        <TableHeader scope="col">任务</TableHeader>
-        <TableHeader scope="col">数据集</TableHeader>
-        <TableHeader scope="col" align="right">耗时（秒）</TableHeader>
-        <TableHeader scope="col" align="right">费用（元）</TableHeader>
-        <TableHeader scope="col">状态</TableHeader>
-        <TableHeader scope="col">操作</TableHeader>
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {runs.map((run) => (
-        <TableRow key={run.id}>
-          <TableCell>
-            <strong>{run.name}</strong>
-            <span className="table-secondary">{run.id}</span>
-          </TableCell>
-          <TableCell>{run.dataset}</TableCell>
-          <TableCell align="right">{run.seconds}</TableCell>
-          <TableCell align="right">{run.cost}</TableCell>
-          <TableCell><Badge color={run.statusColor}>{run.status}</Badge></TableCell>
-          <TableCell><Button size="sm" variant="ghost">查看日志</Button></TableCell>
+  import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+  import { Badge } from "@/components/ui/badge";
+  
+  <div className="rounded-lg border bg-card">
+    <Table className="border-collapse">
+      <caption className="caption-top px-3 py-2 text-left text-xs text-muted-foreground">
+        示例项目（project-042）· 最近计算任务
+      </caption>
+      <TableHeader>
+        <TableRow>
+          <TableHead scope="col">任务</TableHead>
+          <TableHead scope="col">数据集</TableHead>
+          <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+          <TableHead scope="col">状态</TableHead>
         </TableRow>
-      ))}
-    </TableBody>
-  </Table>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell>
+            <div className="flex flex-col">
+              <span className="font-medium">电导率计算</span>
+              <span className="font-mono text-xs text-muted-foreground">run-28003</span>
+            </div>
+          </TableCell>
+          <TableCell className="font-mono">ds-118</TableCell>
+          <TableCell className="text-right tabular-nums">286.4</TableCell>
+          <TableCell><Badge tone="success" dot>已完成</Badge></TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>
+            <div className="flex flex-col">
+              <span className="font-medium">结构优化</span>
+              <span className="font-mono text-xs text-muted-foreground">run-28002</span>
+            </div>
+          </TableCell>
+          <TableCell className="font-mono">ds-121</TableCell>
+          <TableCell className="text-right tabular-nums">412.7</TableCell>
+          <TableCell><Badge tone="danger" dot>失败</Badge></TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </div>
+  --- scroll (variant) 窄屏横向滚动
+  import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+  import { Badge } from "@/components/ui/badge";
+  
+  {/* Table 自带 overflow-x-auto 容器；给 table 最小宽度即可在窄屏横向滚动 */}
+  <div className="rounded-lg border bg-card">
+    <Table className="min-w-[880px] border-collapse">
+      <caption className="caption-top px-3 py-2 text-left text-xs text-muted-foreground">
+        数据集 ds-118 · 全部字段
+      </caption>
+      <TableHeader>
+        <TableRow>
+          <TableHead scope="col" className="sticky left-0 z-[1] bg-muted">任务</TableHead>
+          <TableHead scope="col">数据集</TableHead>
+          <TableHead scope="col">方法</TableHead>
+          <TableHead scope="col" className="text-right">截断能（eV）</TableHead>
+          <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+          <TableHead scope="col" className="text-right">费用（元）</TableHead>
+          <TableHead scope="col">状态</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell className="sticky left-0 z-[1] bg-card">电导率计算 · run-28003</TableCell>
+          <TableCell className="font-mono">ds-118</TableCell>
+          <TableCell>PBE0</TableCell>
+          <TableCell className="text-right tabular-nums">520</TableCell>
+          <TableCell className="text-right tabular-nums">286.4</TableCell>
+          <TableCell className="text-right tabular-nums">12.40</TableCell>
+          <TableCell><Badge tone="success" dot>已完成</Badge></TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </div>
+  --- states (state) 加载、空与错误
+  import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+  import { Skeleton } from "@/components/ui/skeleton";
+  import { Button } from "@/components/ui/button";
+  import { XCircle } from "lucide-react";
+  
+  {/* loading：骨架行替换数据行，表头（TableHeader）保留 */}
+  <TableBody>
+    {[0, 1, 2].map((i) => (
+      <TableRow key={i}>
+        <TableCell><Skeleton className="h-3.5 w-32" /></TableCell>
+        <TableCell><Skeleton className="h-3.5 w-14" /></TableCell>
+        <TableCell><Skeleton className="ml-auto h-3.5 w-12" /></TableCell>
+        <TableCell><Skeleton className="h-3.5 w-14" /></TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+  
+  {/* empty：说明原因并给出下一步 */}
+  <TableBody>
+    <TableRow>
+      <TableCell colSpan={4} className="h-24 text-center">
+        <span className="font-medium">当前筛选条件下没有任务</span>
+        <Button variant="link" size="sm" className="h-auto px-0" onClick={clearFilters}>清除筛选</Button>
+      </TableCell>
+    </TableRow>
+  </TableBody>
+  
+  {/* error：保留筛选上下文并提供重试 */}
+  <TableBody>
+    <TableRow>
+      <TableCell colSpan={4} className="h-24">
+        <div className="flex items-center justify-center gap-2 text-danger">
+          <XCircle className="size-4" />
+          <span className="font-medium">任务列表加载失败</span>
+          <Button variant="secondary" size="sm" onClick={reload}>重试</Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  </TableBody>
+  --- business (business) 真实业务示例
+  import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+  import { Badge } from "@/components/ui/badge";
+  import { Button } from "@/components/ui/button";
+  
+  const runs = [
+    { id: "run-28003", name: "电导率计算", dataset: "ds-118", seconds: "286.4", cost: "12.40", status: "已完成", tone: "success" },
+    { id: "run-28002", name: "结构优化", dataset: "ds-121", seconds: "412.7", cost: "17.90", status: "失败", tone: "danger" },
+    { id: "run-27998", name: "能带计算", dataset: "ds-118", seconds: "1,024.5", cost: "43.20", status: "排队中", tone: "neutral" },
+  ] as const;
+  
+  <div className="rounded-lg border bg-card">
+    <Table className="border-collapse">
+      <caption className="caption-top px-3 py-2 text-left text-xs text-muted-foreground">
+        示例项目（project-042）· 计算任务列表
+      </caption>
+      <TableHeader>
+        <TableRow>
+          <TableHead scope="col">任务</TableHead>
+          <TableHead scope="col">数据集</TableHead>
+          <TableHead scope="col" className="text-right">耗时（秒）</TableHead>
+          <TableHead scope="col" className="text-right">费用（元）</TableHead>
+          <TableHead scope="col">状态</TableHead>
+          <TableHead scope="col">操作</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {runs.map((run) => (
+          <TableRow key={run.id}>
+            <TableCell>
+              <div className="flex flex-col">
+                <span className="font-medium">{run.name}</span>
+                <span className="font-mono text-xs text-muted-foreground">{run.id}</span>
+              </div>
+            </TableCell>
+            <TableCell className="font-mono">{run.dataset}</TableCell>
+            <TableCell className="text-right tabular-nums">{run.seconds}</TableCell>
+            <TableCell className="text-right tabular-nums">{run.cost}</TableCell>
+            <TableCell><Badge tone={run.tone} dot>{run.status}</Badge></TableCell>
+            <TableCell>
+              <Button variant="ghost" size="sm">{run.status === "排队中" ? "取消排队" : "查看日志"}</Button>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </div>
 
 Related: pagination, filter-bar, badge, empty, skeleton
 
@@ -4317,12 +5195,14 @@ Purpose: 操作完成后的轻量全局反馈，自动出现、自动消失，�
 Usage: 用于保存成功、复制成功、提交已受理等即时结果反馈。三者分工：Message 是即时轻反馈（自动消失、无需处理）；Alert 是页面内持续提醒（需要看到或处理）；Notification 是异步事件通知（可停留、带操作）。
 
 Props:
-  - type (required): "success" | "error" | "warning" | "info" | "loading" — 类型，决定图标与颜色。
-  - content (required): ReactNode — 一句话结果 + 对象。
-  - duration: number = 3 — 自动关闭秒数；loading 默认 0，需手动关闭或更新。
-  - key: string — 同一 key 的后续调用更新内容而不是堆叠。
-  - maxCount: number = 3 — 同屏最多条数，超出进入队列。
-  - onClose: () => void — 关闭后的回调。
+  - toast.success / warning / error / info (required): (message: ReactNode, options?) => id — 按类型弹出一句话结果，返回 id；从 "@/components/ui/sonner" 导入。
+  - toast.loading: (message: ReactNode, options?) => id — 进行中提示，不自动消失；之后用同一 id 调 success/error 更新为结果。
+  - toast.promise: (promise, { loading, success, error }) => id — 按 Promise 状态自动从加载切换到成功 / 失败文案。
+  - options.id: string | number — 同一 id 的后续调用原位更新而不是堆叠。
+  - options.duration: number = 4000 — 自动关闭毫秒数；hover 时暂停计时，Infinity 为常驻。
+  - options.description: ReactNode — 第二行补充说明；需要标题 + 描述 + 操作时属于 Notification 场景。
+  - toast.dismiss: (id?: string | number) => void — 手动关闭指定或全部提示。
+  - <Toaster /> (required): 组件 — 在应用根节点挂载一次；本库默认 position="top-center"，主题跟随 <html data-theme>，同屏最多 3 条（visibleToasts）。
 
 States:
   - default: 顶部居中浮出，图标 + 一句话，白底阴影。
@@ -4330,7 +5210,7 @@ States:
   - focus-visible: 内嵌按钮（如重试）有品牌色焦点环。
   - pressed [N/A]: 不适用：Message 本体不可按压。
   - disabled [N/A]: 不适用：Message 无禁用态。
-  - loading: type="loading" 显示 spinner，用同一 key 更新为结果。
+  - loading: toast.loading 显示加载提示，用同一 id 更新为结果。
   - empty [N/A]: 不适用：无内容不弹出 Message。
   - error: type="error"：红色图标 + 原因 + 可选的重试按钮。
   - permission-limited: 权限失败用 error 类型并说明所需权限与申请入口。
@@ -4339,7 +5219,7 @@ States:
 
 Interaction rules:
   - 默认 3 秒自动消失，hover 暂停计时。
-  - 同一 key 的调用更新内容而不是堆叠（提交中 → 提交成功）。
+  - 同一 id 的调用更新内容而不是堆叠（提交中 → 提交成功）。
   - 同屏最多 3 条，超出进入队列。
 
 Keyboard:
@@ -4347,7 +5227,7 @@ Keyboard:
   - 内嵌按钮（重试等）可 Tab 到达。
 
 Accessibility:
-  - role="status" 播报；error 用 role="alert"。
+  - Toaster 区域是 aria-live="polite" 的通知区，新提示自动播报，无需手动加 role。
   - 自动消失时间 ≥ 3 秒，重要结果建议 5 秒。
 
 Responsive:
@@ -4360,7 +5240,7 @@ Content guidelines:
 
 Do:
   - 成功后指明作用对象。
-  - 异步动作用同一 key 从 loading 更新为结果。
+  - 异步动作用同一 id 从 loading 更新为结果。
   - 失败给出原因。
 
 Don't:
@@ -4370,23 +5250,53 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Button variant="primary" onClick={() => message.success("已保存到示例项目（project-042）")}>
+  import { Button } from "@/components/ui/button";
+  import { toast } from "@/components/ui/sonner";
+  
+  {/* 应用根节点已挂载 <Toaster />（顶部居中） */}
+  <Button onClick={() => toast.success("已保存到示例项目（project-042）")}>
     保存
   </Button>
-  <Button variant="secondary" onClick={() => message.error("保存失败：网络异常，请重试")}>
+  <Button variant="secondary" onClick={() => toast.error("保存失败：网络异常，请重试")}>
     演示失败
   </Button>
   --- types (variant) 类型变体
-  message.success("已复制任务 ID run-28003")
-  message.warning("项目额度剩余不足 20%")
-  message.error("提交失败：参数校验未通过")
-  message.loading("正在提交…", { duration: 0, key: "submit" })
+  import { toast } from "@/components/ui/sonner";
+  
+  toast.success("已复制任务 ID run-28003");
+  toast.warning("项目额度剩余不足 20%");
+  toast.error("提交失败：参数校验未通过");
+  
+  // loading 返回 id，之后用同一 id 更新为结果，不堆叠
+  const id = toast.loading("正在提交…");
+  toast.success("提交成功", { id });
   --- business (business) 真实业务示例
-  function handleSave() {
-    message.loading("正在保存到示例项目（project-042）…", { key: "save", duration: 0 });
-    saveDataset()
-      .then(() => message.success("已保存 · 版本 v3", { key: "save" }))
-      .catch(() => message.error("保存失败：网络异常，修改未丢失，请重试", { key: "save" }));
+  import { Loader2 } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+  import { toast } from "@/components/ui/sonner";
+  
+  function SaveDatasetButton() {
+    const [saving, setSaving] = useState(false);
+  
+    async function handleSave() {
+      setSaving(true);
+      const id = toast.loading("正在保存到示例项目（project-042）…");
+      try {
+        await saveDataset();
+        toast.success("已保存 · 版本 v3", { id });
+      } catch {
+        toast.error("保存失败：网络异常，修改未丢失，请重试", { id });
+      } finally {
+        setSaving(false);
+      }
+    }
+  
+    return (
+      <Button disabled={saving} onClick={handleSave}>
+        {saving && <Loader2 className="animate-spin" />}
+        {saving ? "正在保存" : "保存数据集"}
+      </Button>
+    );
   }
 
 Related: alert, notification, spin, button
@@ -4397,12 +5307,15 @@ Purpose: 系统侧的异步事件通知，带标题与操作，可停留等待�
 Usage: 用于任务完成、审批结果、预约到点等与当前页面上下文弱相关的事件。三者分工：Notification 是异步事件通知（带标题与操作、可停留）；Message 是当前操作的即时轻反馈；Alert 是页面内的持续上下文提醒。
 
 Props:
-  - type (required): "success" | "error" | "warning" | "info" — 类型，决定图标与语义。
-  - title (required): ReactNode — 事件结论。
-  - description (required): ReactNode — 事件详情，包含稳定 ID（如 run-28003）。
-  - actions: Array<{ label: string; href?: string; onClick?: () => void }> — 操作按钮，最多 2 个，第一个为主跳转。
-  - duration: number = 4.5 — 自动关闭秒数；0 表示常驻。
-  - placement: "topRight" | "bottomRight" = "topRight" — 弹出位置。
+  - toast.success / warning / error / info (required): (title: ReactNode, options?) => id — 第一个参数是事件结论（标题），类型决定图标。
+  - options.description (required): ReactNode — 事件详情，包含稳定 ID（如 run-28003）。
+  - options.action: { label: ReactNode; onClick: (event) => void } — 主操作按钮（如“查看结果”），点击后通知自动关闭；次操作用 options.cancel。
+  - options.position: "top-right" | "bottom-right" | "top-center" | … = "top-center" — Toaster 默认顶部居中；通知类传 "top-right"。
+  - options.duration: number = 4000 — 自动关闭毫秒数；示例用 4500，error 用 Infinity 常驻直到处理。
+  - options.closeButton: boolean = false — 显示关闭按钮；常驻通知必须开启。
+  - options.id: string | number — 同一事件重复通知时传同一 id，原位更新不堆叠。
+  - 常驻卡片形态: 组合 — 通知中心或页面内：Card role="alert" + 类型图标 + 标题/描述 + link 按钮 + 关闭 IconButton（见真实业务示例）。
+  - <Toaster /> (required): 组件 — 与 Message 共用，在应用根节点挂载一次。
 
 States:
   - default: 右上角滑入卡片：类型图标 + 标题 + 描述 + 操作。
@@ -4427,8 +5340,8 @@ Keyboard:
   - 通知内的操作与关闭按钮可 Tab 到达。
 
 Accessibility:
-  - role="status"；error 用 role="alert"。
-  - 常驻通知必须有可见的关闭按钮。
+  - 浮层通知经 Toaster 的 aria-live 区域播报；常驻卡片形态用 role="alert"。
+  - 常驻通知必须有可见的关闭按钮（closeButton: true）。
 
 Responsive:
   - 移动端全宽浮层，左右各留 16px。
@@ -4450,27 +5363,55 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Button variant="secondary" onClick={() =>
-    notification.open({
-      type: "success",
-      title: "计算任务已完成",
-      description: "run-28003 电导率计算已完成，耗时 286.4 秒。",
-      actions: [{ label: "查看结果", href: "#/runs/run-28003" }],
-    })
-  }>
+  import { Button } from "@/components/ui/button";
+  import { toast } from "@/components/ui/sonner";
+  
+  <Button
+    variant="secondary"
+    onClick={() =>
+      toast.success("计算任务已完成", {
+        description: "run-28003 电导率计算已完成，耗时 286.4 秒。",
+        position: "top-right",
+        duration: 4500,
+        action: { label: "查看结果", onClick: () => navigate("/runs/run-28003") },
+      })
+    }
+  >
     演示通知
   </Button>
   --- business (business) 真实业务示例
-  notification.open({
-    type: "error",
-    title: "计算任务执行失败",
+  import { XCircle, X } from "lucide-react";
+  import { toast } from "@/components/ui/sonner";
+  import { Card } from "@/components/ui/card";
+  import { Badge } from "@/components/ui/badge";
+  import { Button } from "@/components/ui/button";
+  
+  // 浮层形态：error 常驻（duration: Infinity）直到用户处理
+  toast.error("计算任务执行失败", {
     description: "run-28002 结构优化失败：K 点网格与截断能设置冲突。",
-    duration: 0,
-    actions: [
-      { label: "查看日志", href: "#/runs/run-28002/logs" },
-      { label: "重新提交", onClick: () => retryRun("run-28002") },
-    ],
-  })
+    position: "top-right",
+    duration: Infinity,
+    closeButton: true,
+    action: { label: "查看日志", onClick: () => navigate("/runs/run-28002/logs") },
+  });
+  
+  // 常驻卡片形态（通知中心 / 页面内）：Card + 语义令牌组合
+  <Card role="alert" className="flex w-80 max-w-full items-start gap-2.5 p-3.5 shadow-md">
+    <XCircle className="mt-0.5 size-4 shrink-0 text-danger" />
+    <div className="grid min-w-0 gap-1">
+      <div className="flex items-center gap-1.5 font-semibold">
+        计算任务执行失败 <Badge tone="danger">常驻</Badge>
+      </div>
+      <p className="text-muted-foreground">run-28002 结构优化失败：K 点网格与截断能设置冲突。</p>
+      <div className="flex gap-3">
+        <Button variant="link" size="sm" className="h-auto px-0">查看日志</Button>
+        <Button variant="link" size="sm" className="h-auto px-0" onClick={() => retryRun("run-28002")}>重新提交</Button>
+      </div>
+    </div>
+    <Button variant="ghost" size="icon" className="ml-auto size-7" aria-label="关闭通知" onClick={dismiss}>
+      <X />
+    </Button>
+  </Card>
 
 Related: alert, message, run-status, badge
 
@@ -4480,11 +5421,12 @@ Purpose: 展示确定性任务的完成比例，让用户知道还要等多久�
 Usage: 用于可量化进度：数据导入、文件上传、批量计算完成度。无法量化进度的等待用 Spin；任务整体状态用 run-status / Steps。
 
 Props:
-  - percent (required): number — 完成百分比，0–100。
-  - status: "active" | "success" | "error" — 状态；缺省时按 percent 推断。
-  - showInfo: boolean = true — 是否显示百分比文字。
-  - size: "default" | "sm" = "default" — sm 用于表格行内等紧凑场景。
-  - format: (percent: number) => ReactNode — 自定义文字，如“导入中断”。
+  - value (required): number — 完成百分比 0–100；同步到 aria-valuenow（role="progressbar" 由 Radix 提供）。
+  - tone: "primary" | "success" | "warning" = "primary" — 指示条颜色：进行中 primary，完成 success，需关注 warning。
+  - className: string — 轨道样式（默认 h-1.5 w-full）；组件只接受 value、tone、className，不透传 aria-label 等属性。
+  - 百分比文字: 组合 — 无 showInfo/format：旁边放 <span className="w-10 text-right font-mono tabular-nums">62%</span>，或写“已完成”“导入中断”。
+  - 失败态: 组合 — 无 danger tone：停在失败点，className="[&>div]:bg-danger" + 邻近红字写明原因。
+  - 进度说明: 组合 — 下方文案写对象、当前位置与预计剩余时间，可配取消按钮。
 
 States:
   - default: 品牌色进度条，右侧等宽百分比。
@@ -4493,7 +5435,7 @@ States:
   - pressed [N/A]: 不适用：进度条不可按压。
   - disabled [N/A]: 不适用：进度条无禁用态。
   - loading: status="active" 即进行中，轨道动画表达活跃。
-  - empty [N/A]: 不适用：percent 为 0 即初始态，不是空态。
+  - empty [N/A]: 不适用：value 为 0 即初始态，不是空态。
   - error: status="error" 红色并停在失败点，邻近文案给出原因。
   - permission-limited [N/A]: 不适用：无权限时不展示任务本身，由权限提示承担。
   - mobile: 行内尺寸降为 sm，百分比保留。
@@ -4501,7 +5443,7 @@ States:
 
 Interaction rules:
   - 进行中的任务可配置取消操作，取消后进度条消失并用 Message 反馈。
-  - 完成瞬间从 active 过渡到 success，时长 < 300ms，并给出结果入口。
+  - 完成瞬间切换为 tone="success"，时长 < 300ms，并给出结果入口。
 
 Keyboard:
   - 进度条本身不在 Tab 序列。
@@ -4531,16 +5473,45 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Progress percent={62} />
-  <Progress percent={100} status="success" />
+  import { Check } from "lucide-react";
+  import { Progress } from "@/components/ui/progress";
+  
+  <div className="flex items-center gap-2.5">
+    <Progress value={62} />
+    <span className="w-10 text-right font-mono text-sm tabular-nums text-muted-foreground">62%</span>
+  </div>
+  <div className="flex items-center gap-2.5">
+    <Progress value={100} tone="success" />
+    <span className="inline-flex items-center gap-1 text-sm text-success">
+      <Check className="size-3.5" />
+      已完成
+    </span>
+  </div>
   --- status (variant) 状态变体
-  <Progress percent={80} status="active" />
-  <Progress percent={45} status="error" format={() => "导入中断"} />
+  import { Progress } from "@/components/ui/progress";
+  
+  <div className="flex items-center gap-2.5">
+    <Progress value={80} />
+    <span className="w-10 text-right font-mono text-sm tabular-nums text-muted-foreground">80%</span>
+  </div>
+  {/* 失败态：停在失败点，用语义令牌覆盖指示条颜色 */}
+  <div className="flex items-center gap-2.5">
+    <Progress value={45} className="[&>div]:bg-danger" />
+    <span className="text-sm text-danger">导入中断</span>
+  </div>
   --- business (business) 真实业务示例
-  <div className="import-progress">
-    <Progress percent={62} status="active" />
-    <span>正在导入 ds-118 · 第 620/1,000 行 · 预计剩余 40 秒</span>
-    <Button size="sm" variant="ghost" onClick={cancelImport}>取消</Button>
+  import { Progress } from "@/components/ui/progress";
+  import { Button } from "@/components/ui/button";
+  
+  <div className="grid gap-2.5">
+    <div className="flex items-center gap-2.5">
+      <Progress value={62} />
+      <span className="w-10 text-right font-mono text-sm tabular-nums text-muted-foreground">62%</span>
+    </div>
+    <div className="flex flex-wrap items-center gap-2.5">
+      <span className="text-sm text-muted-foreground">正在导入 ds-118 · 第 620/1,000 行 · 预计剩余 40 秒</span>
+      <Button variant="ghost" size="sm" className="ml-auto" onClick={cancelImport}>取消</Button>
+    </div>
   </div>
 
 Related: spin, message, file-list, run-status
@@ -4622,13 +5593,16 @@ Purpose: 在当前页面之上展示需要专注处理的内容或确认，阻�
 Usage: 用于需要用户完成一件事才能继续的场景：创建任务、编辑参数、聚焦查看。与 ConfirmPanel 的关系：ConfirmPanel 基于 Modal 实现，额外回显目标、范围、预算与副作用——凡是有外部副作用或不可恢复的确认动作必须用 ConfirmPanel；轻量就地确认用 Popconfirm；大表单与详情用 Drawer。
 
 Props:
-  - open (required): boolean — 受控开关。
-  - title (required): ReactNode — 对话框目的，aria-labelledby 指向它。
-  - onClose (required): () => void — Esc、遮罩、关闭按钮的统一出口。
-  - footer: ReactNode — 动作区，主按钮右置。
-  - width: number = 520 — 内容宽度；超过 640 考虑 Drawer。
-  - maskClosable: boolean = true — 点击遮罩关闭；表单类与提交中必须禁用。
-  - destroyOnClose: boolean = false — 关闭后销毁内容，下次打开重置。
+  - Dialog.open / onOpenChange (required): boolean / (open: boolean) => void — 受控开关；Esc、遮罩、右上角关闭与 DialogClose 都经 onOpenChange(false)，提交中可在这里忽略关闭。
+  - DialogTrigger.asChild: boolean — 包住触发按钮；关闭后焦点自动回到它。
+  - DialogContent.className: string — 内容面板，默认 max-w-lg，内置右上角关闭按钮；常用 "max-w-md"，超过 640px 考虑 Drawer。
+  - DialogContent.onEscapeKeyDown / onInteractOutside: (event) => void — 调用 event.preventDefault() 阻止 Esc / 点遮罩关闭；表单类与提交中必须阻止。
+  - DialogHeader / DialogTitle (required): 部件 — DialogTitle 写对话框目的，Radix 用它做 aria-labelledby，不可省略。
+  - DialogDescription: 部件 — 补充说明，回显对象与范围，自动关联 aria-describedby。
+  - DialogFooter: 部件 — 动作区，次动作在前、主动作在后；常用 className="gap-2 sm:space-x-0"。
+  - DialogClose.asChild: boolean — 包住“取消”按钮，点击即关闭。
+  - 关闭后重置: 内置 — 关闭即卸载内容，非受控输入下次打开自动重置；需要保留时把状态提升到 Dialog 外。
+  - 危险确认: 组合 — 不可逆动作用 AlertDialog：AlertDialogContent/Title/Description + AlertDialogCancel + AlertDialogAction（危险时 className={buttonVariants({ variant: "danger" })}）；点遮罩不关闭，打开时焦点在取消。
 
 States:
   - default: role="dialog" aria-modal="true"，居中浮层 + 半透明遮罩，标题即对话框目的。
@@ -4650,7 +5624,7 @@ Interaction rules:
   - 背景滚动锁定；表单类对话框禁用遮罩点击关闭。
 
 Keyboard:
-  - Esc 触发 onClose（提交中禁用）。
+  - Esc 触发 onOpenChange(false)（提交中在 onEscapeKeyDown 中阻止）。
   - Tab 循环陷阱：焦点在对话框内首尾循环。
   - 焦点顺序：关闭按钮 → 内容区 → footer 次动作 → 主动作。
 
@@ -4683,37 +5657,83 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
+  import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "@/components/ui/dialog";
+  import { Button } from "@/components/ui/button";
+  import { Input } from "@/components/ui/input";
+  
   const [open, setOpen] = useState(false);
   
-  <Button variant="primary" onClick={() => setOpen(true)}>打开对话框</Button>
-  <Modal
-    open={open}
-    title="重命名数据集"
-    onClose={() => setOpen(false)}
-    footer={
-      <>
-        <Button variant="secondary" onClick={() => setOpen(false)}>取消</Button>
-        <Button variant="primary" onClick={handleSave}>保存</Button>
-      </>
-    }
-  >
-    <Input defaultValue="ds-118 电导率实验数据" aria-label="数据集名称" />
-  </Modal>
+  <Dialog open={open} onOpenChange={setOpen}>
+    <DialogTrigger asChild>
+      <Button>打开对话框</Button>
+    </DialogTrigger>
+    <DialogContent className="max-w-md">
+      <DialogHeader>
+        <DialogTitle>重命名数据集</DialogTitle>
+        <DialogDescription>修改数据集 ds-118 的显示名称，数据集 ID 保持不变。</DialogDescription>
+      </DialogHeader>
+      <Input defaultValue="ds-118 电导率实验数据" aria-label="数据集名称" />
+      <DialogFooter className="gap-2 sm:space-x-0">
+        <DialogClose asChild>
+          <Button variant="secondary">取消</Button>
+        </DialogClose>
+        <Button onClick={handleSave}>保存</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
   --- business (business) 真实业务示例
-  <Modal
-    open={open}
-    title="创建计算任务"
-    onClose={() => setOpen(false)}
-    footer={
-      <>
-        <Button variant="secondary" onClick={() => setOpen(false)} disabled={submitting}>取消</Button>
-        <Button variant="primary" loading={submitting} onClick={handleSubmit}>确认创建</Button>
-      </>
-    }
-  >
-    <p>将在 示例项目（project-042）下创建电导率计算任务。</p>
-    <p>输入数据集 ds-118 · 方法 PBE0 · 预计最长 300 秒。</p>
-  </Modal>
+  import { Loader2 } from "lucide-react";
+  import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "@/components/ui/dialog";
+  import { Button } from "@/components/ui/button";
+  
+  {/* 提交中：忽略 onOpenChange，并阻止 Esc 与遮罩关闭 */}
+  <Dialog open={open} onOpenChange={(next) => !submitting && setOpen(next)}>
+    <DialogTrigger asChild>
+      <Button>创建计算任务</Button>
+    </DialogTrigger>
+    <DialogContent
+      className="max-w-md"
+      onEscapeKeyDown={(e) => submitting && e.preventDefault()}
+      onInteractOutside={(e) => submitting && e.preventDefault()}
+    >
+      <DialogHeader>
+        <DialogTitle>创建计算任务</DialogTitle>
+        <DialogDescription>
+          将在 示例项目（project-042）下创建电导率计算任务：输入数据集 ds-118 · 方法 PBE0 · 预计最长 300 秒。
+        </DialogDescription>
+      </DialogHeader>
+      <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+        确认后创建可追踪任务并记录审计日志；危险或不可逆动作请使用 ConfirmPanel。
+      </div>
+      <DialogFooter className="gap-2 sm:space-x-0">
+        <DialogClose asChild>
+          <Button variant="secondary" disabled={submitting}>取消</Button>
+        </DialogClose>
+        <Button disabled={submitting} onClick={handleSubmit}>
+          {submitting && <Loader2 className="animate-spin" />}
+          {submitting ? "正在创建" : "确认创建"}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 
 Related: confirm-panel, drawer, popconfirm, button, form
 
@@ -4805,13 +5825,14 @@ Purpose: 在操作元素旁弹出的小型确认气泡，用于轻量、影响�
 Usage: 用于删除一行、移除标签等轻量确认。涉及计算、费用、外部副作用或不可恢复的动作必须用 ConfirmPanel；需要在气泡里放表单或复杂内容时用 Modal。
 
 Props:
-  - title (required): ReactNode — 确认问题，是一个问句（“删除该文件？”）。
-  - description: ReactNode — 影响说明：对象与后果。
-  - okText: string = "确认" — 主按钮文案，写动作本身（“删除”），不写“确定”。
-  - cancelText: string = "取消" — 次按钮文案。
-  - okDanger: boolean = false — 危险动作，主按钮红色。
-  - onConfirm: () => void | Promise<void> — 确认回调；返回 Promise 时主按钮 loading 直到完成。
-  - placement: "top" | "bottom" | "left" | "right" = "top" — 气泡方向，空间不足自动翻转。
+  - Popover.open / onOpenChange (required): boolean / (open: boolean) => void — 受控开关；确认进行中用 (next) => !busy && setOpen(next) 忽略关闭。
+  - PopoverTrigger.asChild: boolean — 包住触发按钮。
+  - PopoverContent.side: "top" | "right" | "bottom" | "left" = "bottom" — 气泡方向，推荐 top；空间不足自动翻转。
+  - PopoverContent.align / sideOffset: "start" | "center" | "end" / number = "center" / 4 — 相对触发器的对齐与间距。
+  - PopoverContent.role / aria-label: string — 确认气泡写 role="alertdialog" aria-label="删除确认"；className="w-[268px] p-3"（默认 w-72 p-4）。
+  - 问题与描述: 组合 — AlertTriangle 图标 + <p className="font-semibold">问句</p> + 弱化色描述写清影响对象与后果。
+  - 按钮区: 组合 — 取消：<Button variant="secondary" size="sm" onClick={() => setOpen(false)}>；确认：<Button size="sm">，危险时 variant="danger"，文案写动作本身。
+  - 确认中: 组合 — 无 onConfirm Promise：disabled={busy} + <Loader2 className="animate-spin" /> + “删除中…”，完成后关闭并 toast.success。
 
 States:
   - default: 气泡宽 240–280px，警告图标 + 问句 + 两个按钮。
@@ -4829,11 +5850,11 @@ States:
 Interaction rules:
   - 点击触发元素外部或 Esc 取消，不产生任何副作用。
   - 确认按钮 loading 期间禁止重复点击。
-  - 危险动作 okDanger + 描述写清影响对象。
+  - 危险动作主按钮用 variant="danger"，描述写清影响对象。
 
 Keyboard:
   - Esc 取消并关闭，焦点回到触发元素。
-  - 打开后焦点默认在取消按钮；Tab 在气泡内循环。
+  - 打开后焦点默认落在第一个按钮（取消）；需要 Tab 在气泡内循环时给 Popover 设 modal。
 
 Accessibility:
   - role="alertdialog" + aria-describedby 指向描述。
@@ -4860,26 +5881,66 @@ Don't:
 
 Examples:
   --- basic (basic) 基础示例
-  <Popconfirm
-    title="删除该文件？"
-    description="structure.cif 将从数据集 ds-118 移除，任务产物不受影响。"
-    okText="删除"
-    cancelText="取消"
-    onConfirm={handleDelete}
-  >
-    <Button size="sm" variant="danger">删除</Button>
-  </Popconfirm>
+  import { AlertTriangle } from "lucide-react";
+  import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+  import { Button } from "@/components/ui/button";
+  
+  <Popover open={open} onOpenChange={setOpen}>
+    <PopoverTrigger asChild>
+      <Button variant="danger" size="sm">删除</Button>
+    </PopoverTrigger>
+    <PopoverContent side="top" align="start" className="w-[268px] p-3" role="alertdialog" aria-label="删除确认">
+      <div className="flex gap-2">
+        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+        <div className="grid gap-1">
+          <p className="font-semibold">删除该文件？</p>
+          <p className="text-sm text-muted-foreground">structure.cif 将从数据集 ds-118 移除，任务产物不受影响。</p>
+        </div>
+      </div>
+      <div className="mt-3 flex justify-end gap-1.5">
+        <Button variant="secondary" size="sm" onClick={() => setOpen(false)}>取消</Button>
+        <Button size="sm" onClick={handleDelete}>删除</Button>
+      </div>
+    </PopoverContent>
+  </Popover>
   --- business (business) 真实业务示例
-  <Popconfirm
-    title="删除该文件？"
-    description="raw-data.csv 将从数据集 ds-118 移除，已完成的 2 个任务产物保留。"
-    okText="删除"
-    cancelText="取消"
-    okDanger
-    onConfirm={() => removeFile("f-03")}
-  >
-    <Button size="sm" variant="ghost">删除</Button>
-  </Popconfirm>
+  import { AlertTriangle, Loader2 } from "lucide-react";
+  import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+  import { Button } from "@/components/ui/button";
+  import { toast } from "@/components/ui/sonner";
+  
+  async function confirmRemove() {
+    setBusy(true);
+    await removeFile("f-03");
+    setBusy(false);
+    setOpen(false);
+    toast.success("已删除 raw-data.csv");
+  }
+  
+  {/* 确认中忽略关闭，主按钮 loading 防重复点击 */}
+  <Popover open={open} onOpenChange={(next) => !busy && setOpen(next)}>
+    <PopoverTrigger asChild>
+      <Button variant="ghost" size="sm" className="text-danger">删除</Button>
+    </PopoverTrigger>
+    <PopoverContent side="top" align="end" className="w-[268px] p-3" role="alertdialog" aria-label="删除确认">
+      <div className="flex gap-2">
+        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+        <div className="grid gap-1">
+          <p className="font-semibold">删除该文件？</p>
+          <p className="text-sm text-muted-foreground">
+            raw-data.csv 将从数据集 ds-118 移除，已完成的 2 个任务产物保留。
+          </p>
+        </div>
+      </div>
+      <div className="mt-3 flex justify-end gap-1.5">
+        <Button variant="secondary" size="sm" onClick={() => setOpen(false)}>取消</Button>
+        <Button variant="danger" size="sm" disabled={busy} onClick={confirmRemove}>
+          {busy && <Loader2 className="animate-spin" />}
+          {busy ? "删除中…" : "删除"}
+        </Button>
+      </div>
+    </PopoverContent>
+  </Popover>
 
 Related: modal, confirm-panel, button, file-list
 

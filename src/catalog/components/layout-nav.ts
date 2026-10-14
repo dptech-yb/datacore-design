@@ -899,10 +899,15 @@ import { Lock } from "lucide-react";
       },
     ],
     props: [
-      { name: "items", type: "{ key: string; label: ReactNode; badge?: ReactNode; disabled?: boolean }[]", required: true, description: "标签数组，2–7 个为宜。" },
-      { name: "activeKey", type: "string", required: true, description: "当前激活标签，受控。" },
-      { name: "onChange", type: "(key: string) => void", description: "切换回调；需要可分享时同步到 URL hash。" },
-      { name: "destroyInactive", type: "boolean", default: "false", description: "是否销毁非活动面板；默认保留，切换不丢状态。" },
+      { name: "Tabs.value / onValueChange", type: "string / (value: string) => void", description: "受控当前标签；需要可分享时从 URL hash 读取并在 onValueChange 中写回。" },
+      { name: "Tabs.defaultValue", type: "string", description: "非受控初始标签。" },
+      { name: "Tabs.activationMode", type: '"automatic" | "manual"', default: '"automatic"', description: "automatic 方向键移动即切换；面板加载较重时用 manual（Enter / Space 才切换）。" },
+      { name: "TabsList", type: "aria-label, className", required: true, description: "下划线式标签条（底边线，超出横向滚动）；必须给 aria-label 说明这组标签的对象。" },
+      { name: "TabsTrigger.value", type: "string", required: true, description: "标签值，与 TabsContent.value 对应；children 为 2–4 字文案，可附 Badge 计数或状态点。" },
+      { name: "TabsTrigger.disabled", type: "boolean", default: "false", description: "禁用标签；配 title 说明原因，并加 className=\"disabled:cursor-not-allowed disabled:opacity-50\"。" },
+      { name: "TabsContent.value", type: "string", required: true, description: "对应面板；role=\"tabpanel\" 与 aria-controls 由 Radix 自动关联。" },
+      { name: "TabsContent.forceMount", type: "true", description: "Radix 默认卸载非活动面板；需保留滚动与输入状态时 forceMount + className=\"data-[state=inactive]:hidden\"，或把状态提升到 Tabs 外。" },
+      { name: "分段控件", type: "组合", description: "同一视图内的即时切换改用 SegmentedList / SegmentedTrigger（见 Segmented），状态仍由 Tabs 承载。" },
     ],
     states: [
       { name: "default", note: "当前标签品牌色下划线 + 加粗，面板即时渲染。" },
@@ -1326,10 +1331,17 @@ import { ChevronDown, Lock } from "lucide-react";
       },
     ],
     props: [
-      { name: "menu", type: "{ items: MenuItem[]; onSelect?: (key: string) => void }", required: true, description: "菜单配置；项支持 icon、danger、disabled、divider。" },
-      { name: "trigger", type: '("click" | "hover")[]', default: '["click"]', description: "打开方式；动作菜单用 click，hover 只用于纯浏览型菜单。" },
-      { name: "placement", type: '"bottomLeft" | "bottomRight" | "topLeft" | "topRight"', default: '"bottomLeft"', description: "浮层相对触发器的位置，边缘自动翻转。" },
-      { name: "children", type: "ReactElement", required: true, description: "触发元素，通常是 Button 或 IconButton。" },
+      { name: "DropdownMenu.open / onOpenChange", type: "boolean / (open: boolean) => void", description: "可选的受控展开状态；只支持点击 / 键盘打开，不支持 hover 触发。" },
+      { name: "DropdownMenu.modal", type: "boolean", default: "true", description: "选中某项后要打开 AlertDialog 等浮层时设为 false，避免焦点与 pointer-events 残留。" },
+      { name: "DropdownMenuTrigger.asChild", type: "boolean", description: "包住触发元素，通常是 Button 或图标按钮（size=\"icon\" + aria-label）。" },
+      { name: "DropdownMenuContent.align / side", type: '"start" | "center" | "end" / "top" | "right" | "bottom" | "left"', default: '"center" / "bottom"', description: "相对触发器的位置，边缘自动翻转；sideOffset 默认 4，宽度用 className=\"w-40\"。" },
+      { name: "DropdownMenuItem.onSelect", type: "(event: Event) => void", description: "选中回调，随后菜单关闭；event.preventDefault() 可保持打开。" },
+      { name: "DropdownMenuItem.disabled", type: "boolean", default: "false", description: "禁用项；在项内右侧用小字写明所需权限。" },
+      { name: "DropdownMenuItem.inset", type: "boolean", default: "false", description: "左侧留出图标位，与带图标 / 勾选的项对齐。" },
+      { name: "危险项", type: "组合", description: "无 danger：放在 DropdownMenuSeparator 之后，className=\"text-danger focus:bg-danger-soft focus:text-danger\"，onSelect 打开 AlertDialog 二次确认。" },
+      { name: "DropdownMenuSeparator / Label / Group / Shortcut", type: "部件", description: "分组线、组标题、分组容器与右侧快捷键提示。" },
+      { name: "DropdownMenuCheckboxItem / RadioGroup + RadioItem", type: "部件", description: "可勾选项（checked / onCheckedChange）与单选项（value / onValueChange）。" },
+      { name: "DropdownMenuSub / SubTrigger / SubContent", type: "部件", description: "二级菜单；层级不超过两级。" },
     ],
     states: [
       { name: "default", note: "浮层带阴影贴近触发器，层级高于页面内容。" },
@@ -1346,7 +1358,7 @@ import { ChevronDown, Lock } from "lucide-react";
     ],
     interaction: [
       "点击外部或 Esc 关闭，选中一项后关闭。",
-      "危险项先经 Popconfirm 二次确认再执行，确认文案回显作用对象。",
+      "危险项先经 AlertDialog（或 Popconfirm）二次确认再执行，确认文案回显作用对象。",
       "打开时浮层不超出视口，边缘自动翻转方向。",
     ],
     keyboard: [
@@ -1467,10 +1479,13 @@ import { LayoutGrid, List } from "lucide-react";
       },
     ],
     props: [
-      { name: "options", type: "(string | { label: ReactNode; value: string; icon?: ReactNode; disabled?: boolean })[]", required: true, description: "选项数组，2–5 个。" },
-      { name: "value", type: "string", required: true, description: "当前选中值，受控。" },
-      { name: "onChange", type: "(value: string) => void", description: "切换回调，选中即生效。" },
-      { name: "size", type: '"sm" | "md"', default: '"md"', description: "sm 高 28px，md 高 32px。" },
+      { name: "Tabs.value / onValueChange", type: "string / (value: string) => void", required: true, description: "外层仍是 Tabs，负责选中状态；选中即生效，在 onValueChange 里直接应用（如重新拉取指标）。" },
+      { name: "SegmentedList", type: "aria-label, className", required: true, description: "分段容器（h-8 灰底胶囊）；必须给 aria-label。" },
+      { name: "SegmentedTrigger.value", type: "string", required: true, description: "选项值；children 为 1–4 字文案，可前置 size-3.5 图标（className=\"gap-1.5\"）。" },
+      { name: "SegmentedTrigger.disabled", type: "boolean", default: "false", description: "禁用选项；配 title 说明原因，并加 className=\"disabled:cursor-not-allowed disabled:opacity-50\"。" },
+      { name: "SegmentedTrigger.aria-label", type: "string", description: "纯图标选项必填，同时配 Tooltip。" },
+      { name: "尺寸", type: "组合", description: "无 size：默认列表 32px / 选项 28px；sm 用 SegmentedList className=\"h-7\" + SegmentedTrigger className=\"h-6 px-2.5 text-xs\"。" },
+      { name: "结果区", type: "组合", description: "通常不配 TabsContent，由外部按 value 渲染紧邻的结果区域。" },
     ],
     states: [
       { name: "default", note: "选中项浮起（surface + 阴影），未选中项中性文字。" },
@@ -1495,7 +1510,7 @@ import { LayoutGrid, List } from "lucide-react";
       "←/→ 移动选中，选中即生效。",
     ],
     accessibility: [
-      "容器 role=\"radiogroup\"，选项 role=\"radio\" 并设 aria-checked。",
+      "基于 Radix Tabs：容器 role=\"tablist\"，选项 role=\"tab\" 并自动同步 aria-selected。",
       "纯图标选项必须有 Tooltip 与 aria-label。",
     ],
     responsive: [

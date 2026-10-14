@@ -78,18 +78,18 @@
       "props": [
         {
           "name": "variant",
-          "type": "\"primary\" | \"secondary\" | \"ghost\" | \"danger\"",
-          "default": "\"secondary\"",
+          "type": "\"default\" | \"secondary\" | \"ghost\" | \"soft\" | \"danger\" | \"link\"",
+          "default": "\"default\"",
           "required": false
         },
         {
           "name": "size",
-          "type": "\"sm\" | \"md\" | \"lg\"",
-          "default": "\"md\"",
+          "type": "\"sm\" | \"default\" | \"lg\" | \"icon\"",
+          "default": "\"default\"",
           "required": false
         },
         {
-          "name": "loading",
+          "name": "asChild",
           "type": "boolean",
           "default": "false",
           "required": false
@@ -101,8 +101,14 @@
           "required": false
         },
         {
-          "name": "icon",
-          "type": "ReactNode",
+          "name": "type",
+          "type": "\"button\" | \"submit\" | \"reset\"",
+          "default": "\"submit\"",
+          "required": false
+        },
+        {
+          "name": "onClick",
+          "type": "React.MouseEventHandler<HTMLButtonElement>",
           "required": false
         },
         {
@@ -111,8 +117,13 @@
           "required": true
         },
         {
-          "name": "onClick",
-          "type": "() => void",
+          "name": "className",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "加载态",
+          "type": "组合",
           "required": false
         }
       ],
@@ -167,31 +178,31 @@
         "error"
       ],
       "requiredProps": [
-        "icon",
-        "label"
+        "size",
+        "aria-label",
+        "children"
       ],
       "props": [
         {
-          "name": "icon",
-          "type": "ReactNode",
-          "required": true
-        },
-        {
-          "name": "label",
-          "type": "string",
+          "name": "size",
+          "type": "\"icon\"",
           "required": true
         },
         {
           "name": "variant",
-          "type": "\"ghost\" | \"secondary\" | \"danger\"",
-          "default": "\"ghost\"",
+          "type": "\"ghost\" | \"secondary\" | \"danger\" | …",
+          "default": "\"default\"",
           "required": false
         },
         {
-          "name": "size",
-          "type": "\"sm\" | \"md\"",
-          "default": "\"md\"",
-          "required": false
+          "name": "aria-label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true
         },
         {
           "name": "disabled",
@@ -201,14 +212,35 @@
         },
         {
           "name": "onClick",
-          "type": "() => void",
+          "type": "React.MouseEventHandler<HTMLButtonElement>",
+          "required": false
+        },
+        {
+          "name": "Tooltip",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "TooltipContent.side",
+          "type": "\"top\" | \"right\" | \"bottom\" | \"left\"",
+          "default": "\"top\"",
+          "required": false
+        },
+        {
+          "name": "禁用说明",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "加载态",
+          "type": "组合",
           "required": false
         }
       ],
       "accessibility": [
-        "使用原生 <button>，aria-label 等于 label。",
+        "使用原生 <button>，aria-label 与 Tooltip 文案一致。",
         "图标本身 aria-hidden，朗读只读动作名称。",
-        "disabled 使用 aria-disabled 保留焦点与 Tooltip 入口。",
+        "disabled 按钮外包可聚焦的 span 承载 Tooltip，保留焦点与原因入口。",
         "danger 不只依赖红色，动作名称必须写清后果（“删除数据集”而非“删除”）。"
       ],
       "keyboard": [
@@ -428,26 +460,29 @@
           "required": false
         },
         {
-          "name": "dashed",
-          "type": "boolean",
-          "default": "false",
+          "name": "className",
+          "type": "string",
           "required": false
         },
         {
-          "name": "textPosition",
-          "type": "\"start\" | \"center\" | \"end\"",
-          "default": "\"center\"",
+          "name": "带文字",
+          "type": "组合",
           "required": false
         },
         {
-          "name": "children",
-          "type": "ReactNode",
+          "name": "虚线",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "语义",
+          "type": "内置",
           "required": false
         }
       ],
       "accessibility": [
-        "使用 <hr> 或 role=\"separator\"，aria-orientation 与方向一致。",
-        "纯装饰分割线标记 aria-hidden。"
+        "Separator 渲染 role=\"separator\"，aria-orientation 随 orientation 同步。",
+        "纯装饰分割线在外层容器标记 aria-hidden（组件不透传 aria-*）。"
       ],
       "keyboard": [
         "不适用：分割线不进入 Tab 序列。",
@@ -493,14 +528,9 @@
       "requiredProps": [],
       "props": [
         {
-          "name": "status",
-          "type": "\"success\" | \"warning\" | \"danger\" | \"info\" | \"violet\" | \"neutral\"",
+          "name": "tone",
+          "type": "\"neutral\" | \"primary\" | \"success\" | \"warning\" | \"danger\" | \"agent\" | \"outline\"",
           "default": "\"neutral\"",
-          "required": false
-        },
-        {
-          "name": "text",
-          "type": "string",
           "required": false
         },
         {
@@ -510,31 +540,34 @@
           "required": false
         },
         {
-          "name": "count",
-          "type": "number",
+          "name": "children",
+          "type": "ReactNode",
           "required": false
         },
         {
-          "name": "max",
-          "type": "number",
-          "default": "99",
+          "name": "className",
+          "type": "string",
           "required": false
         },
         {
-          "name": "pulse",
-          "type": "boolean",
-          "default": "false",
+          "name": "进行中",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "计数",
+          "type": "组合",
           "required": false
         }
       ],
       "accessibility": [
         "状态不只依赖颜色：dot/颜色之外必须有文案或图标。",
-        "count 徽标提供 aria-label，如“8 条未读通知”。",
-        "pulse 动效遵守 prefers-reduced-motion，降级为静态样式。"
+        "计数徽标本身 aria-hidden，数量写进所在按钮的 aria-label，如“通知（8 条未读）”。",
+        "进行中的旋转动效遵守 prefers-reduced-motion，降级为静态样式。"
       ],
       "keyboard": [
         "不适用：徽标不进入 Tab 序列。",
-        "count 徽标的入口（如通知中心）由相邻 IconButton 承载键盘行为。"
+        "计数徽标的入口（如通知中心）由相邻 IconButton 承载键盘行为。"
       ],
       "examples": [
         "badge/basic",
@@ -664,46 +697,43 @@
         "disabled"
       ],
       "requiredProps": [
-        "children"
+        "Card"
       ],
       "props": [
         {
-          "name": "title",
-          "type": "ReactNode",
-          "required": false
-        },
-        {
-          "name": "extra",
-          "type": "ReactNode",
-          "required": false
-        },
-        {
-          "name": "hoverable",
-          "type": "boolean",
-          "default": "false",
-          "required": false
-        },
-        {
-          "name": "loading",
-          "type": "boolean",
-          "default": "false",
-          "required": false
-        },
-        {
-          "name": "bordered",
-          "type": "boolean",
-          "default": "true",
-          "required": false
-        },
-        {
-          "name": "onClick",
-          "type": "() => void",
-          "required": false
-        },
-        {
-          "name": "children",
-          "type": "ReactNode",
+          "name": "Card",
+          "type": "HTMLAttributes<HTMLDivElement>",
           "required": true
+        },
+        {
+          "name": "CardHeader",
+          "type": "HTMLAttributes<HTMLDivElement>",
+          "required": false
+        },
+        {
+          "name": "CardTitle",
+          "type": "HTMLAttributes<HTMLHeadingElement>",
+          "required": false
+        },
+        {
+          "name": "CardDescription",
+          "type": "HTMLAttributes<HTMLParagraphElement>",
+          "required": false
+        },
+        {
+          "name": "CardContent",
+          "type": "HTMLAttributes<HTMLDivElement>",
+          "required": false
+        },
+        {
+          "name": "可点卡片",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "加载态",
+          "type": "组合",
+          "required": false
         }
       ],
       "accessibility": [
@@ -712,7 +742,7 @@
         "loading 时设置 aria-busy=\"true\"。"
       ],
       "keyboard": [
-        "hoverable 卡片进入 Tab 序列，Enter 触发 onClick。",
+        "整卡可点的卡片设 tabIndex={0} 进入 Tab 序列，onKeyDown 中 Enter 触发 onClick。",
         "卡内动作的焦点顺序先内容后操作，与视觉顺序一致。"
       ],
       "examples": [
@@ -837,41 +867,37 @@
         "disabled"
       ],
       "requiredProps": [
-        "loading"
+        "className"
       ],
       "props": [
         {
-          "name": "loading",
-          "type": "boolean",
+          "name": "className",
+          "type": "string",
           "required": true
         },
         {
-          "name": "variant",
-          "type": "\"text\" | \"table\" | \"card\"",
-          "default": "\"text\"",
+          "name": "...props",
+          "type": "HTMLAttributes<HTMLDivElement>",
           "required": false
         },
         {
-          "name": "rows",
-          "type": "number",
-          "default": "3",
+          "name": "加载切换",
+          "type": "组合",
           "required": false
         },
         {
-          "name": "avatar",
-          "type": "boolean",
-          "default": "false",
+          "name": "多行",
+          "type": "组合",
           "required": false
         },
         {
-          "name": "active",
-          "type": "boolean",
-          "default": "true",
+          "name": "头像位",
+          "type": "组合",
           "required": false
         },
         {
-          "name": "children",
-          "type": "ReactNode",
+          "name": "关闭动效",
+          "type": "组合",
           "required": false
         }
       ],
@@ -1518,29 +1544,56 @@
         "pressed"
       ],
       "requiredProps": [
-        "items",
-        "activeKey"
+        "TabsList",
+        "TabsTrigger.value",
+        "TabsContent.value"
       ],
       "props": [
         {
-          "name": "items",
-          "type": "{ key: string; label: ReactNode; badge?: ReactNode; disabled?: boolean }[]",
+          "name": "Tabs.value / onValueChange",
+          "type": "string / (value: string) => void",
+          "required": false
+        },
+        {
+          "name": "Tabs.defaultValue",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "Tabs.activationMode",
+          "type": "\"automatic\" | \"manual\"",
+          "default": "\"automatic\"",
+          "required": false
+        },
+        {
+          "name": "TabsList",
+          "type": "aria-label, className",
           "required": true
         },
         {
-          "name": "activeKey",
+          "name": "TabsTrigger.value",
           "type": "string",
           "required": true
         },
         {
-          "name": "onChange",
-          "type": "(key: string) => void",
+          "name": "TabsTrigger.disabled",
+          "type": "boolean",
+          "default": "false",
           "required": false
         },
         {
-          "name": "destroyInactive",
-          "type": "boolean",
-          "default": "false",
+          "name": "TabsContent.value",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "TabsContent.forceMount",
+          "type": "true",
+          "required": false
+        },
+        {
+          "name": "分段控件",
+          "type": "组合",
           "required": false
         }
       ],
@@ -1742,32 +1795,66 @@
         "pressed",
         "empty"
       ],
-      "requiredProps": [
-        "menu",
-        "children"
-      ],
+      "requiredProps": [],
       "props": [
         {
-          "name": "menu",
-          "type": "{ items: MenuItem[]; onSelect?: (key: string) => void }",
-          "required": true
-        },
-        {
-          "name": "trigger",
-          "type": "(\"click\" | \"hover\")[]",
-          "default": "[\"click\"]",
+          "name": "DropdownMenu.open / onOpenChange",
+          "type": "boolean / (open: boolean) => void",
           "required": false
         },
         {
-          "name": "placement",
-          "type": "\"bottomLeft\" | \"bottomRight\" | \"topLeft\" | \"topRight\"",
-          "default": "\"bottomLeft\"",
+          "name": "DropdownMenu.modal",
+          "type": "boolean",
+          "default": "true",
           "required": false
         },
         {
-          "name": "children",
-          "type": "ReactElement",
-          "required": true
+          "name": "DropdownMenuTrigger.asChild",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "DropdownMenuContent.align / side",
+          "type": "\"start\" | \"center\" | \"end\" / \"top\" | \"right\" | \"bottom\" | \"left\"",
+          "default": "\"center\" / \"bottom\"",
+          "required": false
+        },
+        {
+          "name": "DropdownMenuItem.onSelect",
+          "type": "(event: Event) => void",
+          "required": false
+        },
+        {
+          "name": "DropdownMenuItem.disabled",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "DropdownMenuItem.inset",
+          "type": "boolean",
+          "default": "false",
+          "required": false
+        },
+        {
+          "name": "危险项",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "DropdownMenuSeparator / Label / Group / Shortcut",
+          "type": "部件",
+          "required": false
+        },
+        {
+          "name": "DropdownMenuCheckboxItem / RadioGroup + RadioItem",
+          "type": "部件",
+          "required": false
+        },
+        {
+          "name": "DropdownMenuSub / SubTrigger / SubContent",
+          "type": "部件",
+          "required": false
         }
       ],
       "accessibility": [
@@ -1817,34 +1904,50 @@
         "error"
       ],
       "requiredProps": [
-        "options",
-        "value"
+        "Tabs.value / onValueChange",
+        "SegmentedList",
+        "SegmentedTrigger.value"
       ],
       "props": [
         {
-          "name": "options",
-          "type": "(string | { label: ReactNode; value: string; icon?: ReactNode; disabled?: boolean })[]",
+          "name": "Tabs.value / onValueChange",
+          "type": "string / (value: string) => void",
           "required": true
         },
         {
-          "name": "value",
+          "name": "SegmentedList",
+          "type": "aria-label, className",
+          "required": true
+        },
+        {
+          "name": "SegmentedTrigger.value",
           "type": "string",
           "required": true
         },
         {
-          "name": "onChange",
-          "type": "(value: string) => void",
+          "name": "SegmentedTrigger.disabled",
+          "type": "boolean",
+          "default": "false",
           "required": false
         },
         {
-          "name": "size",
-          "type": "\"sm\" | \"md\"",
-          "default": "\"md\"",
+          "name": "SegmentedTrigger.aria-label",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "尺寸",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "结果区",
+          "type": "组合",
           "required": false
         }
       ],
       "accessibility": [
-        "容器 role=\"radiogroup\"，选项 role=\"radio\" 并设 aria-checked。",
+        "基于 Radix Tabs：容器 role=\"tablist\"，选项 role=\"tab\" 并自动同步 aria-selected。",
         "纯图标选项必须有 Tooltip 与 aria-label。"
       ],
       "keyboard": [
@@ -1892,7 +1995,17 @@
       "requiredProps": [],
       "props": [
         {
-          "name": "value",
+          "name": "value / defaultValue",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "React.ChangeEventHandler<HTMLInputElement>",
+          "required": false
+        },
+        {
+          "name": "id",
           "type": "string",
           "required": false
         },
@@ -1907,31 +2020,29 @@
           "required": false
         },
         {
-          "name": "allowClear",
+          "name": "disabled / readOnly",
           "type": "boolean",
           "default": "false",
           "required": false
         },
         {
-          "name": "prefix",
-          "type": "ReactNode",
+          "name": "aria-invalid / aria-describedby",
+          "type": "boolean | string",
           "required": false
         },
         {
-          "name": "size",
-          "type": "\"sm\" | \"md\" | \"lg\"",
-          "default": "\"md\"",
+          "name": "className",
+          "type": "string",
           "required": false
         },
         {
-          "name": "disabled",
-          "type": "boolean",
-          "default": "false",
+          "name": "前缀",
+          "type": "组合",
           "required": false
         },
         {
-          "name": "onChange",
-          "type": "(value: string) => void",
+          "name": "清除按钮",
+          "type": "组合",
           "required": false
         }
       ],
@@ -2076,14 +2187,18 @@
       "requiredProps": [],
       "props": [
         {
-          "name": "value",
+          "name": "value / defaultValue",
           "type": "string",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "React.ChangeEventHandler<HTMLTextAreaElement>",
           "required": false
         },
         {
           "name": "rows",
           "type": "number",
-          "default": "3",
           "required": false
         },
         {
@@ -2092,31 +2207,28 @@
           "required": false
         },
         {
-          "name": "showCount",
-          "type": "boolean",
-          "default": "false",
-          "required": false
-        },
-        {
-          "name": "autoSize",
-          "type": "boolean | { minRows: number; maxRows: number }",
-          "default": "false",
-          "required": false
-        },
-        {
           "name": "placeholder",
           "type": "string",
           "required": false
         },
         {
-          "name": "disabled",
-          "type": "boolean",
-          "default": "false",
+          "name": "id / aria-describedby / aria-invalid",
+          "type": "string | boolean",
           "required": false
         },
         {
-          "name": "onChange",
-          "type": "(value: string) => void",
+          "name": "className",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "字数计数",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "自动高度",
+          "type": "组合",
           "required": false
         }
       ],
@@ -2165,57 +2277,63 @@
       ],
       "notApplicableStates": [],
       "requiredProps": [
-        "options"
+        "SelectItem"
       ],
       "props": [
         {
-          "name": "value",
-          "type": "string | string[]",
-          "required": false
-        },
-        {
-          "name": "options",
-          "type": "{ value: string; label: ReactNode; disabled?: boolean }[]",
-          "required": true
-        },
-        {
-          "name": "mode",
-          "type": "\"single\" | \"multiple\"",
-          "default": "\"single\"",
-          "required": false
-        },
-        {
-          "name": "showSearch",
-          "type": "boolean",
-          "default": "false",
-          "required": false
-        },
-        {
-          "name": "allowClear",
-          "type": "boolean",
-          "default": "false",
-          "required": false
-        },
-        {
-          "name": "placeholder",
+          "name": "Select.value / defaultValue",
           "type": "string",
           "required": false
         },
         {
-          "name": "loading",
-          "type": "boolean",
-          "default": "false",
+          "name": "Select.onValueChange",
+          "type": "(value: string) => void",
           "required": false
         },
         {
-          "name": "disabled",
-          "type": "boolean",
-          "default": "false",
+          "name": "Select.open / onOpenChange",
+          "type": "boolean / (open: boolean) => void",
           "required": false
         },
         {
-          "name": "onChange",
-          "type": "(value: string | string[]) => void",
+          "name": "Select.disabled / required / name",
+          "type": "boolean / boolean / string",
+          "required": false
+        },
+        {
+          "name": "SelectTrigger",
+          "type": "id, className, aria-invalid",
+          "required": false
+        },
+        {
+          "name": "SelectValue.placeholder",
+          "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "SelectContent.position",
+          "type": "\"popper\" | \"item-aligned\"",
+          "default": "\"popper\"",
+          "required": false
+        },
+        {
+          "name": "SelectItem",
+          "type": "value: string; disabled?: boolean",
+          "required": true
+        },
+        {
+          "name": "SelectGroup / SelectLabel / SelectSeparator",
+          "type": "部件",
+          "required": false
+        },
+        {
+          "name": "多选",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "搜索",
+          "type": "组合",
           "required": false
         }
       ],
@@ -2530,14 +2648,18 @@
       "requiredProps": [],
       "props": [
         {
-          "name": "checked",
-          "type": "boolean",
+          "name": "checked / defaultChecked",
+          "type": "boolean | \"indeterminate\"",
           "required": false
         },
         {
-          "name": "indeterminate",
-          "type": "boolean",
-          "default": "false",
+          "name": "onCheckedChange",
+          "type": "(checked: boolean | \"indeterminate\") => void",
+          "required": false
+        },
+        {
+          "name": "id",
+          "type": "string",
           "required": false
         },
         {
@@ -2547,29 +2669,34 @@
           "required": false
         },
         {
-          "name": "children",
-          "type": "ReactNode",
+          "name": "required / name / value",
+          "type": "boolean / string / string",
           "required": false
         },
         {
-          "name": "onChange",
-          "type": "(checked: boolean) => void",
+          "name": "className",
+          "type": "string",
           "required": false
         },
         {
-          "name": "Checkbox.Group value",
-          "type": "string[]",
+          "name": "半选样式",
+          "type": "组合",
           "required": false
         },
         {
-          "name": "Checkbox.Group options",
-          "type": "{ value: string; label: ReactNode; disabled?: boolean }[]",
+          "name": "复选组",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "卡片样式",
+          "type": "组合",
           "required": false
         }
       ],
       "accessibility": [
-        "使用原生 input type=\"checkbox\"，半选态同步 aria-checked=\"mixed\"。",
-        "Group 使用 fieldset / legend 或 role=\"group\" + aria-label 表达分组含义。",
+        "Radix 渲染 role=\"checkbox\" 的按钮，半选时自动同步 aria-checked=\"mixed\"。",
+        "一组复选框使用 fieldset / legend 或 role=\"group\" + aria-label 表达分组含义。",
         "必勾选错误时 aria-invalid=\"true\"，错误文案 role=\"alert\" 就近播报。"
       ],
       "keyboard": [
@@ -2614,39 +2741,47 @@
         "loading"
       ],
       "requiredProps": [
-        "options"
+        "RadioGroupItem.value"
       ],
       "props": [
         {
-          "name": "value",
+          "name": "RadioGroup.value / defaultValue",
           "type": "string",
           "required": false
         },
         {
-          "name": "options",
-          "type": "{ value: string; label: ReactNode; description?: ReactNode; disabled?: boolean }[]",
+          "name": "RadioGroup.onValueChange",
+          "type": "(value: string) => void",
+          "required": false
+        },
+        {
+          "name": "RadioGroup.aria-label",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "RadioGroup.disabled / required / name",
+          "type": "boolean / boolean / string",
+          "required": false
+        },
+        {
+          "name": "RadioGroup.className",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "RadioGroupItem.value",
+          "type": "string",
           "required": true
         },
         {
-          "name": "optionType",
-          "type": "\"default\" | \"card\"",
-          "default": "\"default\"",
+          "name": "RadioGroupItem.id / disabled",
+          "type": "string / boolean",
           "required": false
         },
         {
-          "name": "defaultValue",
-          "type": "string",
-          "required": false
-        },
-        {
-          "name": "disabled",
-          "type": "boolean",
-          "default": "false",
-          "required": false
-        },
-        {
-          "name": "onChange",
-          "type": "(value: string) => void",
+          "name": "卡片样式",
+          "type": "组合",
           "required": false
         }
       ],
@@ -2700,14 +2835,23 @@
       "requiredProps": [],
       "props": [
         {
-          "name": "checked",
+          "name": "checked / defaultChecked",
           "type": "boolean",
           "required": false
         },
         {
-          "name": "loading",
-          "type": "boolean",
-          "default": "false",
+          "name": "onCheckedChange",
+          "type": "(checked: boolean) => void",
+          "required": false
+        },
+        {
+          "name": "id / aria-label",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "aria-describedby",
+          "type": "string",
           "required": false
         },
         {
@@ -2717,13 +2861,18 @@
           "required": false
         },
         {
-          "name": "aria-label",
+          "name": "name / value / required",
+          "type": "string / string / boolean",
+          "required": false
+        },
+        {
+          "name": "className",
           "type": "string",
           "required": false
         },
         {
-          "name": "onChange",
-          "type": "(checked: boolean) => void | Promise<void>",
+          "name": "写入中",
+          "type": "组合",
           "required": false
         }
       ],
@@ -2774,46 +2923,58 @@
         "pressed"
       ],
       "requiredProps": [
-        "onSubmit",
-        "Form.Item label"
+        "<form>.onSubmit",
+        "Label.htmlFor"
       ],
       "props": [
         {
-          "name": "layout",
-          "type": "\"vertical\" | \"inline\"",
-          "default": "\"vertical\"",
-          "required": false
-        },
-        {
-          "name": "validateTrigger",
-          "type": "\"onBlur\" | \"onChange\" | \"onSubmit\"",
-          "default": "\"onBlur\"",
-          "required": false
-        },
-        {
-          "name": "onSubmit",
-          "type": "(values: Record<string, unknown>) => void | Promise<void>",
+          "name": "<form>.onSubmit",
+          "type": "React.FormEventHandler<HTMLFormElement>",
           "required": true
         },
         {
-          "name": "Form.Item label",
-          "type": "ReactNode",
+          "name": "字段结构",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "Label.htmlFor",
+          "type": "string",
           "required": true
         },
         {
-          "name": "Form.Item required",
+          "name": "必填",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "控件.aria-describedby",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "控件.aria-invalid",
           "type": "boolean",
-          "default": "false",
           "required": false
         },
         {
-          "name": "Form.Item help",
-          "type": "ReactNode",
+          "name": "辅助文本",
+          "type": "组合",
           "required": false
         },
         {
-          "name": "Form.Item error",
-          "type": "ReactNode",
+          "name": "错误文本",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "提交按钮",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "校验时机",
+          "type": "组合",
           "required": false
         }
       ],
@@ -3128,45 +3289,53 @@
       ],
       "notApplicableStates": [],
       "requiredProps": [
-        "caption"
+        "Table",
+        "<caption>"
       ],
       "props": [
         {
-          "name": "caption",
-          "type": "string",
+          "name": "Table",
+          "type": "TableHTMLAttributes<HTMLTableElement>",
           "required": true
         },
         {
-          "name": "rowKey",
-          "type": "string",
-          "default": "\"id\"",
+          "name": "<caption>",
+          "type": "原生元素",
+          "required": true
+        },
+        {
+          "name": "TableHeader / TableBody",
+          "type": "HTMLAttributes<HTMLTableSectionElement>",
           "required": false
         },
         {
-          "name": "scroll",
-          "type": "{ x?: number | string; y?: number | string }",
+          "name": "TableRow",
+          "type": "HTMLAttributes<HTMLTableRowElement>",
           "required": false
         },
         {
-          "name": "stickyFirstColumn",
-          "type": "boolean",
-          "default": "false",
+          "name": "TableHead",
+          "type": "ThHTMLAttributes<HTMLTableCellElement>",
           "required": false
         },
         {
-          "name": "loading",
-          "type": "boolean",
-          "default": "false",
+          "name": "TableCell",
+          "type": "TdHTMLAttributes<HTMLTableCellElement>",
           "required": false
         },
         {
-          "name": "empty",
-          "type": "ReactNode",
+          "name": "外框",
+          "type": "组合",
           "required": false
         },
         {
-          "name": "error",
-          "type": "{ message: string; onRetry?: () => void }",
+          "name": "冻结首列",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "排序 / 选择 / 分页",
+          "type": "组合",
           "required": false
         }
       ],
@@ -3955,45 +4124,54 @@
         "empty"
       ],
       "requiredProps": [
-        "type",
-        "content"
+        "toast.success / warning / error / info",
+        "<Toaster />"
       ],
       "props": [
         {
-          "name": "type",
-          "type": "\"success\" | \"error\" | \"warning\" | \"info\" | \"loading\"",
+          "name": "toast.success / warning / error / info",
+          "type": "(message: ReactNode, options?) => id",
           "required": true
         },
         {
-          "name": "content",
+          "name": "toast.loading",
+          "type": "(message: ReactNode, options?) => id",
+          "required": false
+        },
+        {
+          "name": "toast.promise",
+          "type": "(promise, { loading, success, error }) => id",
+          "required": false
+        },
+        {
+          "name": "options.id",
+          "type": "string | number",
+          "required": false
+        },
+        {
+          "name": "options.duration",
+          "type": "number",
+          "default": "4000",
+          "required": false
+        },
+        {
+          "name": "options.description",
           "type": "ReactNode",
+          "required": false
+        },
+        {
+          "name": "toast.dismiss",
+          "type": "(id?: string | number) => void",
+          "required": false
+        },
+        {
+          "name": "<Toaster />",
+          "type": "组件",
           "required": true
-        },
-        {
-          "name": "duration",
-          "type": "number",
-          "default": "3",
-          "required": false
-        },
-        {
-          "name": "key",
-          "type": "string",
-          "required": false
-        },
-        {
-          "name": "maxCount",
-          "type": "number",
-          "default": "3",
-          "required": false
-        },
-        {
-          "name": "onClose",
-          "type": "() => void",
-          "required": false
         }
       ],
       "accessibility": [
-        "role=\"status\" 播报；error 用 role=\"alert\"。",
+        "Toaster 区域是 aria-live=\"polite\" 的通知区，新提示自动播报，无需手动加 role。",
         "自动消失时间 ≥ 3 秒，重要结果建议 5 秒。"
       ],
       "keyboard": [
@@ -4038,47 +4216,63 @@
         "empty"
       ],
       "requiredProps": [
-        "type",
-        "title",
-        "description"
+        "toast.success / warning / error / info",
+        "options.description",
+        "<Toaster />"
       ],
       "props": [
         {
-          "name": "type",
-          "type": "\"success\" | \"error\" | \"warning\" | \"info\"",
+          "name": "toast.success / warning / error / info",
+          "type": "(title: ReactNode, options?) => id",
           "required": true
         },
         {
-          "name": "title",
+          "name": "options.description",
           "type": "ReactNode",
           "required": true
         },
         {
-          "name": "description",
-          "type": "ReactNode",
-          "required": true
-        },
-        {
-          "name": "actions",
-          "type": "Array<{ label: string; href?: string; onClick?: () => void }>",
+          "name": "options.action",
+          "type": "{ label: ReactNode; onClick: (event) => void }",
           "required": false
         },
         {
-          "name": "duration",
+          "name": "options.position",
+          "type": "\"top-right\" | \"bottom-right\" | \"top-center\" | …",
+          "default": "\"top-center\"",
+          "required": false
+        },
+        {
+          "name": "options.duration",
           "type": "number",
-          "default": "4.5",
+          "default": "4000",
           "required": false
         },
         {
-          "name": "placement",
-          "type": "\"topRight\" | \"bottomRight\"",
-          "default": "\"topRight\"",
+          "name": "options.closeButton",
+          "type": "boolean",
+          "default": "false",
           "required": false
+        },
+        {
+          "name": "options.id",
+          "type": "string | number",
+          "required": false
+        },
+        {
+          "name": "常驻卡片形态",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "<Toaster />",
+          "type": "组件",
+          "required": true
         }
       ],
       "accessibility": [
-        "role=\"status\"；error 用 role=\"alert\"。",
-        "常驻通知必须有可见的关闭按钮。"
+        "浮层通知经 Toaster 的 aria-live 区域播报；常驻卡片形态用 role=\"alert\"。",
+        "常驻通知必须有可见的关闭按钮（closeButton: true）。"
       ],
       "keyboard": [
         "出现时不抢占焦点。",
@@ -4121,34 +4315,38 @@
         "permission-limited"
       ],
       "requiredProps": [
-        "percent"
+        "value"
       ],
       "props": [
         {
-          "name": "percent",
+          "name": "value",
           "type": "number",
           "required": true
         },
         {
-          "name": "status",
-          "type": "\"active\" | \"success\" | \"error\"",
+          "name": "tone",
+          "type": "\"primary\" | \"success\" | \"warning\"",
+          "default": "\"primary\"",
           "required": false
         },
         {
-          "name": "showInfo",
-          "type": "boolean",
-          "default": "true",
+          "name": "className",
+          "type": "string",
           "required": false
         },
         {
-          "name": "size",
-          "type": "\"default\" | \"sm\"",
-          "default": "\"default\"",
+          "name": "百分比文字",
+          "type": "组合",
           "required": false
         },
         {
-          "name": "format",
-          "type": "(percent: number) => ReactNode",
+          "name": "失败态",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "进度说明",
+          "type": "组合",
           "required": false
         }
       ],
@@ -4274,47 +4472,58 @@
       ],
       "notApplicableStates": [],
       "requiredProps": [
-        "open",
-        "title",
-        "onClose"
+        "Dialog.open / onOpenChange",
+        "DialogHeader / DialogTitle"
       ],
       "props": [
         {
-          "name": "open",
-          "type": "boolean",
+          "name": "Dialog.open / onOpenChange",
+          "type": "boolean / (open: boolean) => void",
           "required": true
         },
         {
-          "name": "title",
-          "type": "ReactNode",
+          "name": "DialogTrigger.asChild",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "DialogContent.className",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "DialogContent.onEscapeKeyDown / onInteractOutside",
+          "type": "(event) => void",
+          "required": false
+        },
+        {
+          "name": "DialogHeader / DialogTitle",
+          "type": "部件",
           "required": true
         },
         {
-          "name": "onClose",
-          "type": "() => void",
-          "required": true
-        },
-        {
-          "name": "footer",
-          "type": "ReactNode",
+          "name": "DialogDescription",
+          "type": "部件",
           "required": false
         },
         {
-          "name": "width",
-          "type": "number",
-          "default": "520",
+          "name": "DialogFooter",
+          "type": "部件",
           "required": false
         },
         {
-          "name": "maskClosable",
+          "name": "DialogClose.asChild",
           "type": "boolean",
-          "default": "true",
           "required": false
         },
         {
-          "name": "destroyOnClose",
-          "type": "boolean",
-          "default": "false",
+          "name": "关闭后重置",
+          "type": "内置",
+          "required": false
+        },
+        {
+          "name": "危险确认",
+          "type": "组合",
           "required": false
         }
       ],
@@ -4325,7 +4534,7 @@
         "必须有可见关闭按钮，不能只靠遮罩点击。"
       ],
       "keyboard": [
-        "Esc 触发 onClose（提交中禁用）。",
+        "Esc 触发 onOpenChange(false)（提交中在 onEscapeKeyDown 中阻止）。",
         "Tab 循环陷阱：焦点在对话框内首尾循环。",
         "焦点顺序：关闭按钮 → 内容区 → footer 次动作 → 主动作。"
       ],
@@ -4455,46 +4664,49 @@
         "empty"
       ],
       "requiredProps": [
-        "title"
+        "Popover.open / onOpenChange"
       ],
       "props": [
         {
-          "name": "title",
-          "type": "ReactNode",
+          "name": "Popover.open / onOpenChange",
+          "type": "boolean / (open: boolean) => void",
           "required": true
         },
         {
-          "name": "description",
-          "type": "ReactNode",
-          "required": false
-        },
-        {
-          "name": "okText",
-          "type": "string",
-          "default": "\"确认\"",
-          "required": false
-        },
-        {
-          "name": "cancelText",
-          "type": "string",
-          "default": "\"取消\"",
-          "required": false
-        },
-        {
-          "name": "okDanger",
+          "name": "PopoverTrigger.asChild",
           "type": "boolean",
-          "default": "false",
           "required": false
         },
         {
-          "name": "onConfirm",
-          "type": "() => void | Promise<void>",
+          "name": "PopoverContent.side",
+          "type": "\"top\" | \"right\" | \"bottom\" | \"left\"",
+          "default": "\"bottom\"",
           "required": false
         },
         {
-          "name": "placement",
-          "type": "\"top\" | \"bottom\" | \"left\" | \"right\"",
-          "default": "\"top\"",
+          "name": "PopoverContent.align / sideOffset",
+          "type": "\"start\" | \"center\" | \"end\" / number",
+          "default": "\"center\" / 4",
+          "required": false
+        },
+        {
+          "name": "PopoverContent.role / aria-label",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "问题与描述",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "按钮区",
+          "type": "组合",
+          "required": false
+        },
+        {
+          "name": "确认中",
+          "type": "组合",
           "required": false
         }
       ],
@@ -4504,7 +4716,7 @@
       ],
       "keyboard": [
         "Esc 取消并关闭，焦点回到触发元素。",
-        "打开后焦点默认在取消按钮；Tab 在气泡内循环。"
+        "打开后焦点默认落在第一个按钮（取消）；需要 Tab 在气泡内循环时给 Popover 设 modal。"
       ],
       "examples": [
         "popconfirm/basic",
