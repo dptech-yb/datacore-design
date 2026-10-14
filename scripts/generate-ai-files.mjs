@@ -159,6 +159,13 @@ const llmsTxt = `# DataCore Design
 - Full contract: \`llms-full.txt\`
 - Machine-readable registry: \`component-registry.json\`
 - Human site: \`https://design.datacore.dp.cd.mba/\`
+- Installable source components (shadcn registry format): \`https://design.datacore.dp.cd.mba/r/registry.json\`
+
+## Install components (React 18 + Tailwind 3 + TS, alias \`@/\` → \`src/\`)
+
+1. Theme first: \`npx shadcn@2.3.0 add https://design.datacore.dp.cd.mba/r/theme.json\`, then add \`presets: [require("./datacore.preset.js")]\` to tailwind.config and import \`datacore-tokens.css\` in the entry CSS.
+2. Then components: \`npx shadcn@2.3.0 add https://design.datacore.dp.cd.mba/r/<name>.json\` (dependencies are pulled automatically). Offline: \`node add.mjs https://design.datacore.dp.cd.mba/r <names...>\` (download \`/r/add.mjs\`).
+3. Use only semantic token classes (bg-primary, text-muted-foreground, bg-success-soft…), never raw palette colors or hex. Dark mode: \`data-theme="dark"\` on <html> or a \`dark\` class on a container.
 
 ## Product context
 
