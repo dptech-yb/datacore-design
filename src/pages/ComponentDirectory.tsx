@@ -78,9 +78,12 @@ export function ComponentDirectory() {
             </div>
             <h2>{d.chineseName}</h2>
             <p>{d.purpose}</p>
-            <span className={`directory-status chip-${d.status}`}>
-              {d.status}
-            </span>
+            {/* 全部转正后只标注非正式版，避免每张卡都重复 stable */}
+            {d.status !== "stable" && (
+              <span className={`directory-status chip-${d.status}`}>
+                {d.status}
+              </span>
+            )}
           </a>
         ))}
       </div>

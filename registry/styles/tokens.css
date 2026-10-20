@@ -1,5 +1,5 @@
 /*
- * DataCore 设计令牌（Phase 0 草案）
+ * DataCore 设计令牌
  * 第一层 · 全局色阶：blue / gray 两组 0–1000（只在本文件出现）
  * 第二层 · 语义别名：--primary / --foreground / --border …（组件只能用这一层）
  * 值用 HSL 三元组，便于 Tailwind 透明度修饰。

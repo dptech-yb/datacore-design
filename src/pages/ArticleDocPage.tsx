@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Check, Clipboard } from "lucide-react";
 import type { ArticleDoc } from "../catalog/types";
+import { getArticle, getComponent } from "../catalog";
 import { getPreview } from "../previews";
 import { navigate } from "../router";
 
@@ -76,9 +77,16 @@ function CodeBlock({ code, title }: { code: string; title?: string }) {
   );
 }
 
+/** 相关内容：组件显示「英文名 中文名」，模式/模板显示英文名；找不到对应文档时退回路径末段。 */
 function relatedLabel(path: string) {
-  const parts = path.split("/").filter(Boolean);
-  return parts[parts.length - 1] ?? path;
+  const [kind, id] = path.split("/").filter(Boolean);
+  if (kind === "components") {
+    const doc = getComponent(id);
+    if (doc) return `${doc.name} ${doc.chineseName}`;
+  }
+  const articleKind = ({ patterns: "pattern", templates: "template", foundations: "foundation" } as const)[kind as "patterns"];
+  const article = articleKind ? getArticle(articleKind, id) : undefined;
+  return article ? article.name : id ?? path;
 }
 
 function statusLabel(status: ArticleDoc["status"]) {
