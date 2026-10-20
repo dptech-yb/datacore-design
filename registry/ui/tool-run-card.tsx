@@ -1,16 +1,17 @@
 // ToolRunCard 工具运行卡片：一次工具调用的留痕（工具名、状态、耗时、参数摘要、输入输出），完整参数默认折叠，失败给错误摘要与重试。
 import * as React from "react";
-import { ChevronDown, CircleCheck, CircleX, LoaderCircle, Lock, RotateCcw, Wrench } from "lucide-react";
+import { ChevronDown, CircleAlert, CircleCheck, CircleX, LoaderCircle, Lock, RotateCcw, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-export type ToolRunStatus = "running" | "succeeded" | "failed";
+export type ToolRunStatus = "running" | "succeeded" | "partial" | "failed";
 
-const statusMeta: Record<ToolRunStatus, { label: string; tone: "primary" | "success" | "danger"; icon: React.ComponentType<{ className?: string }> }> = {
+const statusMeta: Record<ToolRunStatus, { label: string; tone: "primary" | "success" | "warning" | "danger"; icon: React.ComponentType<{ className?: string }> }> = {
   running: { label: "运行中", tone: "primary", icon: LoaderCircle },
   succeeded: { label: "已完成", tone: "success", icon: CircleCheck },
+  partial: { label: "部分完成", tone: "warning", icon: CircleAlert },
   failed: { label: "已失败", tone: "danger", icon: CircleX },
 };
 
