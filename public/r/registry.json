@@ -21,7 +21,7 @@
         {
           "path": "tailwind.preset.js",
           "type": "registry:file",
-          "target": "datacore.preset.js"
+          "target": "src/datacore.preset.js"
         }
       ]
     },

@@ -1,6 +1,6 @@
 /**
- * DataCore Tailwind preset（Phase 0 草案）。
- * 语义令牌全部来自 CSS 变量（src/tokens.css），浅/深两套；组件只用语义名，不用原色。
+ * DataCore Tailwind preset。
+ * 语义令牌全部来自 CSS 变量（src/styles/datacore-tokens.css），浅/深两套；组件只用语义名，不用原色。
  */
 import animate from "tailwindcss-animate";
 

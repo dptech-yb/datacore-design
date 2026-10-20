@@ -1655,7 +1655,7 @@ formatDuration(214000); // "3m34s"
     ],
     props: [
       { name: "tool", type: "string", required: true, description: "工具名，mono 字体展示，与注册表中的名称一致。" },
-      { name: "status", type: '"running" | "succeeded" | "failed"', required: true, description: "调用状态，映射固定图标与徽章配色（运行中 / 已完成 / 已失败）。" },
+      { name: "status", type: '"running" | "succeeded" | "partial" | "failed"', required: true, description: "调用状态，映射固定图标与徽章配色（运行中 / 已完成 / 部分完成 / 已失败）；部分完成时在 output 写明完成与未完成数量。" },
       { name: "paramsSummary", type: "string", description: "单行参数摘要，超长截断，只放关键参数。" },
       { name: "duration", type: "number", description: "耗时（毫秒），格式化为 300ms / 1.2s / 3m34s。" },
       { name: "startedAt", type: "number", description: "running 时的开始时间戳（毫秒），每秒刷新实时耗时。" },

@@ -34,7 +34,7 @@ export const patternDocs: ArticleDoc[] = [
         ],
       },
     ],
-    related: ["/components/agent-activity", "/components/confirm-panel", "/components/run-status"],
+    related: ["/components/agent-activity", "/components/confirm-panel", "/components/run-status", "/components/steps", "/templates/agent-workspace"],
   },
   {
     id: "data-import",
@@ -99,7 +99,7 @@ export const patternDocs: ArticleDoc[] = [
         ],
       },
     ],
-    related: ["/components/upload", "/components/data-quality-notice", "/components/table", "/patterns/agent-confirmation"],
+    related: ["/components/upload", "/components/steps", "/components/table", "/components/data-quality-notice", "/templates/data-import-page", "/patterns/audit-versioning"],
   },
   {
     id: "citation-source",
@@ -145,22 +145,22 @@ export const patternDocs: ArticleDoc[] = [
         ],
       },
     ],
-    related: ["/components/citation", "/components/source-card"],
+    related: ["/components/citation", "/components/source-card", "/templates/agent-workspace"],
   },
   {
     id: "project-permission",
     name: "Project Permission",
     chineseName: "项目与权限边界",
     status: "stable",
-    summary: "角色与资源范围决定可见与可操作：无权限的动作禁用并解释原因，前端可见性永远只是提示，授权由后端二次校验兜底。",
+    summary: "权限级别与资源范围决定可见与可操作：无权限的动作禁用并解释原因，前端可见性永远只是提示，授权由后端二次校验兜底。",
     keywords: ["permission", "role", "权限", "角色", "项目", "授权", "可见性"],
     sections: [
       {
         id: "model",
-        heading: "角色与资源范围",
+        heading: "权限级别与资源范围",
         body: [
-          "权限模型围绕两个维度：角色（项目管理员、项目成员、外部访客）与资源范围（项目、数据集、任务、设备）。任何动作在界面前先回答“谁对什么能做什么”。",
-          "界面按当前用户的角色与范围渲染：可见的数据才渲染，可见但不可操作的动作禁用并附原因。",
+          "权限模型围绕两个维度：权限级别（可见 / 可编辑 / 可执行 / 管理员，从低到高逐级包含）与资源范围（项目、数据集、任务、设备）。任何动作在界面前先回答“谁对什么能做什么”。",
+          "界面按当前用户在该资源上的级别渲染：可见的数据才渲染，可见但不可操作的动作禁用并附原因；选择项目时，级别不足的项目可见不可选，并给出申请入口。",
         ],
         preview: "project-permission/model",
       },
@@ -172,7 +172,7 @@ export const patternDocs: ArticleDoc[] = [
           "数据级差异（只能看部分列、部分行）用明确的标记表达，而不是让数据悄悄消失。",
         ],
         list: [
-          "禁用按钮旁说明原因：“仅项目管理员可删除项目”。",
+          "禁用按钮旁说明缺口：“需要可执行权限 · 申请升级”。",
           "入口可见但数据不可见时，展示申请入口而非空白。",
           "权限不足的错误页提供返回与申请两个出口。",
         ],
@@ -182,17 +182,17 @@ export const patternDocs: ArticleDoc[] = [
         heading: "后端二次校验",
         body: [
           "前端的一切权限表达都只是提示。后端必须对每个请求重新鉴权：伪造一个可用按钮、直接调用接口都必须被拒绝。",
-          "鉴权失败返回结构化的权限错误（所需角色、资源 ID），前端据此渲染一致的解释，而不是通用的 403 页。",
+          "鉴权失败返回结构化的权限错误（所需级别、资源 ID），前端据此渲染一致的解释，而不是通用的 403 页。",
         ],
       },
     ],
-    related: ["/components/permission-scope", "/components/project-selector", "/components/alert"],
+    related: ["/components/permission-scope", "/components/project-selector", "/components/result", "/patterns/audit-versioning"],
   },
   {
     id: "reservation-scheduling",
     name: "Reservation Scheduling",
     chineseName: "预约与排程",
-    status: "beta",
+    status: "stable",
     summary: "先选设备再选时段，冲突即时提示并给出替代方案；确认后完整回显预约结果，日历视图按统一语义着色。",
     keywords: ["reservation", "schedule", "预约", "排程", "设备", "时段", "日历"],
     sections: [
@@ -235,7 +235,7 @@ export const patternDocs: ArticleDoc[] = [
         ],
       },
     ],
-    related: ["/components/date-picker", "/components/date-range-picker", "/components/alert", "/patterns/project-permission"],
+    related: ["/components/select", "/components/date-picker", "/components/date-range-picker", "/components/descriptions", "/patterns/project-permission"],
   },
   {
     id: "run-status-logs",
@@ -250,7 +250,7 @@ export const patternDocs: ArticleDoc[] = [
         heading: "状态机",
         body: [
           "状态机是全平台唯一的状态来源：任何页面、任何组件展示同一个任务时，状态文案与语义色完全一致。",
-          "终态有三种：成功、失败、部分完成。部分完成必须说明完成比例与未完成原因，不允许与成功混用。",
+          "终态有三种：成功、失败、部分完成。部分完成必须说明完成比例与未完成原因，不允许与成功混用；“需重试”是失败后等待用户处理的过渡态。",
         ],
         list: [
           "排队：已受理、等待资源，展示队列位置或预计等待时间。",
@@ -281,13 +281,13 @@ export const patternDocs: ArticleDoc[] = [
         ],
       },
     ],
-    related: ["/components/run-status", "/components/tool-run-card", "/components/progress"],
+    related: ["/components/run-status", "/components/tool-run-card", "/components/code-block", "/components/progress", "/templates/task-workbench"],
   },
   {
     id: "audit-versioning",
     name: "Audit & Versioning",
     chineseName: "审计与版本",
-    status: "beta",
+    status: "stable",
     summary: "每一次变更都回答谁、何时、改了什么；版本之间可对比，任何状态可回溯，审计记录只增不改。",
     keywords: ["audit", "version", "审计", "版本", "对比", "回溯", "时间线"],
     sections: [
@@ -317,6 +317,6 @@ export const patternDocs: ArticleDoc[] = [
         ],
       },
     ],
-    related: ["/components/audit-timeline", "/components/timeline", "/patterns/run-status-logs"],
+    related: ["/components/audit-timeline", "/components/timeline", "/components/table", "/patterns/run-status-logs"],
   },
 ];

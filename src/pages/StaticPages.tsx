@@ -1,8 +1,18 @@
-import { BookOpen, CheckCircle2, CircleAlert, Code2, FileText, GitBranch, Keyboard, ShieldCheck, Terminal } from "lucide-react";
+import { BookOpen, Check, CheckCircle2, Clipboard, CircleAlert, Code2, FileText, GitBranch, Keyboard, ShieldCheck, Terminal } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { navigate } from "../router";
 
 const REGISTRY = "https://design.datacore.dp.cd.mba/r";
+
+function CopyBlock({ code, label }: { code: string; label?: string }) {
+  return (
+    <div className="copy-block">
+      {label && <div className="copy-block-label">{label}</div>}
+      <pre><code>{code}</code></pre>
+      <span className="copy-block-btn"><CopyButton text={code} label={label ? `复制 ${label}` : "复制命令"} /></span>
+    </div>
+  );
+}
 
 export function StartPage() {
   return (
@@ -17,13 +27,29 @@ export function StartPage() {
       <section className="doc-section">
         <h2>给前端</h2>
         <p className="doc-paragraph">组件以源码形式分发（shadcn/ui 的 registry 格式）：装进项目后代码就在你自己的 <code>src/components/ui/</code> 里，可读可改。要求 React 18 + Tailwind 3 + TypeScript，路径别名 <code>@/</code> 指向 <code>src/</code>。</p>
-        <ol className="rule-list">
-          <li>先装主题（令牌 CSS + Tailwind 预设）：<code>npx shadcn@2.3.0 add {REGISTRY}/theme.json</code>，然后在 <code>tailwind.config.js</code> 里 <code>import preset from "./datacore.preset.js"</code> 并加入 <code>presets: [preset]</code>，在入口 CSS 顶部引入 <code>datacore-tokens.css</code>。</li>
-          <li>再按需装组件：<code>npx shadcn@2.3.0 add {REGISTRY}/button.json</code>。每个组件页顶部都有可复制的安装命令，依赖会自动一并安装。</li>
-          <li>内网访问不了 ui.shadcn.com 时，用离线脚本：下载 <a href="./r/add.mjs">add.mjs</a>，<code>node add.mjs {REGISTRY} theme button select</code>；它默认不覆盖已有文件，升级时加 <code>--force</code> 再看 git diff。</li>
+        <ol className="start-steps">
+          <li>
+            <h3>装主题（令牌 CSS + Tailwind 预设）</h3>
+            <CopyBlock code={`npx shadcn@2.3.0 add ${REGISTRY}/theme.json`} />
+            <p>会生成 <code>src/styles/datacore-tokens.css</code> 和 <code>src/datacore.preset.js</code>，再接两处：</p>
+            <CopyBlock label="tailwind.config.js" code={`import preset from "./src/datacore.preset.js";\n\nexport default {\n  presets: [preset],\n  content: ["./index.html", "./src/**/*.{ts,tsx}"],\n};`} />
+            <CopyBlock label="src/index.css（顶部）" code={`@import "./styles/datacore-tokens.css";\n\n@tailwind base;\n@tailwind components;\n@tailwind utilities;`} />
+          </li>
+          <li>
+            <h3>按需装组件</h3>
+            <CopyBlock code={`npx shadcn@2.3.0 add ${REGISTRY}/button.json`} />
+            <p>每个组件页顶部都有可复制的安装命令，依赖的组件和 npm 包会一并安装。</p>
+          </li>
+          <li>
+            <h3>内网访问不了 ui.shadcn.com 时</h3>
+            <p>下载 <a href="./r/add.mjs">add.mjs</a>，用离线脚本安装；默认不覆盖已有文件，升级时加 <code>--force</code> 再看 git diff。</p>
+            <CopyBlock code={`node add.mjs ${REGISTRY} theme button select`} />
+          </li>
+        </ol>
+        <ul className="rule-list">
           <li>示例的“代码”标签就是可直接粘贴的写法；对照“状态契约”补齐 loading、empty、error、disabled、permission 状态。</li>
           <li>深色模式：在 <code>&lt;html&gt;</code> 上设 <code>data-theme="dark"</code>（或任意容器加 <code>dark</code> 类），组件自动切换。</li>
-        </ol>
+        </ul>
       </section>
       <section className="doc-section">
         <h2>给设计师</h2>
@@ -140,9 +166,38 @@ function AiFilePage({ title, eyebrow, purpose, src }: { title: string; eyebrow: 
         </div>
       </header>
       <section className="doc-section">
-        <div className="example-code"><pre><code>{content}</code></pre></div>
+        <div className="file-viewer">
+          <div className="file-viewer-head">
+            <span>{src.replace("./", "")} · {content.split("\n").length.toLocaleString()} 行</span>
+            <CopyButton text={content} label={`复制 ${title}`} />
+          </div>
+          <pre><code>{content}</code></pre>
+        </div>
       </section>
     </article>
+  );
+}
+
+function CopyButton({ text, label }: { text: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      className="install-copy"
+      aria-label={label}
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          setCopied(true);
+          window.setTimeout(() => setCopied(false), 1600);
+        } catch {
+          /* 复制被拒时用户可手动选中 */
+        }
+      }}
+    >
+      {copied ? <Check size={14} /> : <Clipboard size={14} />}
+      {copied ? "已复制" : "复制"}
+    </button>
   );
 }
 
@@ -224,7 +279,7 @@ function ContributingPage() {
           <button className="related-chip" onClick={() => navigate("/ai/registry")}><Code2 size={13} /> 查看注册表</button>
           <a className="related-chip" href="https://github.com/dptech-yb/datacore-design" target="_blank" rel="noreferrer"><GitBranch size={13} /> GitHub</a>
           <a className="related-chip" href="./llms-full.txt"><Terminal size={13} /> llms-full.txt</a>
-          <span className="related-chip related-chip-static"><Keyboard size={13} /> ⌘K 全局搜索</span>
+          <span className="related-chip related-chip-static"><Keyboard size={13} /> ⌘K / Ctrl+K 全局搜索</span>
         </div>
       </section>
     </article>

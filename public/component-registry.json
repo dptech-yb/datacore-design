@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "DataCore Design",
   "version": "0.1.0",
-  "generated": "2026-10-14",
+  "generated": "2026-10-20",
   "purpose": "Machine-readable UI contracts for the DataCore main platform and AION-compatible surfaces. Synthetic examples only.",
   "source": "Generated from src/catalog — do not edit by hand.",
   "categories": [
@@ -6416,7 +6416,7 @@
         },
         {
           "name": "status",
-          "type": "\"running\" | \"succeeded\" | \"failed\"",
+          "type": "\"running\" | \"succeeded\" | \"partial\" | \"failed\"",
           "required": true
         },
         {
@@ -6522,7 +6522,7 @@
       "id": "project-permission",
       "name": "Project Permission",
       "chineseName": "项目与权限边界",
-      "summary": "角色与资源范围决定可见与可操作：无权限的动作禁用并解释原因，前端可见性永远只是提示，授权由后端二次校验兜底。",
+      "summary": "权限级别与资源范围决定可见与可操作：无权限的动作禁用并解释原因，前端可见性永远只是提示，授权由后端二次校验兜底。",
       "page": "#/patterns/project-permission"
     },
     {

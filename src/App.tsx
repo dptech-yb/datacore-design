@@ -26,6 +26,9 @@ import { ComponentDirectory } from "./pages/ComponentDirectory";
 import { AiPage, PrinciplesPage, StartPage } from "./pages/StaticPages";
 import { componentToc, articleToc } from "./toc";
 
+// 快捷键提示随平台显示：Mac 用 ⌘，其余用 Ctrl（两者都能触发搜索）。
+const IS_MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+
 // Examples and their preview registry load only when a documentation page opens.
 const ComponentDocPage = lazy(() =>
   import("./pages/ComponentDocPage").then((m) => ({
@@ -246,7 +249,7 @@ export default function App() {
             >
               <Search size={16} />
               <span>搜索文档</span>
-              <kbd>⌘ K</kbd>
+              <kbd>{IS_MAC ? "⌘ K" : "Ctrl K"}</kbd>
             </button>
             <a
               className="icon-button github-link"
@@ -540,7 +543,7 @@ function notFound(what: string) {
             <h1>没有找到{what}</h1>
             <p className="doc-purpose">
               它可能还没有被收录。目前共有 {componentDocs.length}{" "}
-              个组件，可以从左侧导航或 ⌘K 搜索查找； 也可以{" "}
+              个组件，可以从左侧导航或 ⌘K / Ctrl+K 搜索查找； 也可以{" "}
               <button className="text-link" onClick={() => navigate("/")}>
                 返回总览
               </button>

@@ -875,10 +875,9 @@ input:disabled {
 .hero-primary {
   background: var(--home-c10);
   color: var(--home-c11);
-  border: 1px solid white;
+  border: 0;
   border-radius: 7px;
   padding: 12px 18px;
-  box-shadow: 0 1px 2px #0006;
   transition: background 0.16s;
 }
 .hero-primary:hover {
@@ -888,7 +887,7 @@ input:disabled {
   color: var(--home-c13);
 }
 .hero-secondary:hover {
-  color: white;
+  color: var(--text);
 }
 .hero-note {
   display: flex;
@@ -1087,7 +1086,7 @@ input:disabled {
   color: var(--home-c27);
 }
 .home-text-link:hover {
-  color: white;
+  color: var(--text);
 }
 .component-showcase {
   display: grid;
@@ -1250,7 +1249,7 @@ input:disabled {
   width: 31px;
   height: 31px;
   border-radius: 50%;
-  border: 1px solid #ffffff20;
+  border: 1px solid var(--line);
   background: #edf1f8;
 }
 .token-swatches i:nth-child(2) {
@@ -1276,22 +1275,23 @@ input:disabled {
   margin-left: 12px;
 }
 .resource-card p {
-  color: #858e9e;
+  color: var(--text-muted);
   font-size: 0.875rem;
   line-height: 1.8;
   margin: 0;
-  max-width: 280px;
+  max-width: none;
 }
 .resource-bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 24px;
+  margin-top: auto;
+  padding-top: 24px;
   font-size: 0.75rem;
-  color: #b0b9c8;
+  color: var(--text-muted);
 }
 .resource-card:hover .resource-bottom {
-  color: white;
+  color: var(--text);
 }
 .home-ai {
   display: grid;
@@ -1306,7 +1306,7 @@ input:disabled {
   font-size: 38px;
 }
 .home-ai h2 span {
-  color: #8e98aa;
+  color: var(--text-muted);
 }
 .home-ai .home-text-link {
   margin-top: 28px;
@@ -1973,3 +1973,31 @@ input:disabled {
 /* 参数表：属性/默认值不折行，类型列限宽可折行 */
 .props-table td:nth-child(1), .props-table td:nth-child(3), .props-table th { white-space: nowrap; }
 .props-table td:nth-child(2) { max-width: 260px; }
+
+/* 开始使用 · 分步安装 */
+.start-steps { counter-reset: step; list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 22px; max-width: 760px; }
+.start-steps > li { counter-increment: step; position: relative; padding-left: 36px; min-width: 0; }
+.start-steps > li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); font-size: 0.75rem; font-weight: 600; }
+.start-steps h3 { margin: 1px 0 10px; font-size: 0.9375rem; font-weight: 600; color: var(--text); }
+.start-steps p { margin: 10px 0; color: var(--text-muted); font-size: 0.8125rem; line-height: 1.7; }
+.start-steps p code { padding: 1px 5px; border-radius: 4px; background: var(--surface-soft); color: var(--text); font-size: 0.75rem; overflow-wrap: anywhere; }
+.copy-block { position: relative; margin: 8px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-soft); min-width: 0; }
+.copy-block-label { padding: 7px 12px; border-bottom: 1px solid var(--line); color: var(--text-muted); font: 500 0.75rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.copy-block pre { margin: 0; padding: 12px 84px 12px 12px; overflow-x: auto; font: 0.8125rem/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); }
+.copy-block-btn { position: absolute; right: 8px; bottom: 8px; }
+@media (max-width: 640px) {
+  .start-steps > li { padding-left: 32px; }
+  .copy-block pre { padding-right: 12px; padding-bottom: 44px; }
+}
+
+/* 页头已有分隔线：紧随其后的第一节不再画第二条线 */
+.doc-header:not(.doc-header-compact) + .doc-section,
+.doc-header:not(.doc-header-compact) ~ section.doc-section:first-of-type { border-top: 0; margin-top: 4px; }
+
+/* AI 文件查看：限高滚动，避免整页被几万行 JSON 撑开 */
+.file-viewer { border: 1px solid var(--line); border-radius: 10px; background: var(--surface-soft); overflow: hidden; }
+.file-viewer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 10px 8px 14px; border-bottom: 1px solid var(--line); color: var(--text-muted); font-size: 0.75rem; }
+.file-viewer pre { margin: 0; max-height: min(70vh, 720px); overflow: auto; padding: 14px; font: 0.78rem/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); }
+
+/* 原则卡片按内容高度，不留大块空白 */
+.principle-card { min-height: 0; }
