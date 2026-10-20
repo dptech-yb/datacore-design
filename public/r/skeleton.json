@@ -11,7 +11,7 @@
     {
       "path": "ui/skeleton.tsx",
       "type": "registry:ui",
-      "content": "// 源自 shadcn/ui（MIT，shadcn@2.3.0 new-york），已套 DataCore 令牌。\nimport { cn } from \"@/lib/utils\"\n\nfunction Skeleton({\n  className,\n  ...props\n}: React.HTMLAttributes<HTMLDivElement>) {\n  return (\n    <div\n      className={cn(\"animate-pulse rounded-md bg-primary/10\", className)}\n      {...props}\n    />\n  )\n}\n\nexport { Skeleton }\n"
+      "content": "// 源自 shadcn/ui（MIT，shadcn@2.3.0 new-york），已套 DataCore 令牌。改动：占位色用 accent 灰（原版 bg-primary/10 在我们主题里会带蓝色）。\nimport { cn } from \"@/lib/utils\"\n\nfunction Skeleton({\n  className,\n  ...props\n}: React.HTMLAttributes<HTMLDivElement>) {\n  return (\n    <div\n      className={cn(\"animate-pulse rounded-md bg-accent\", className)}\n      {...props}\n    />\n  )\n}\n\nexport { Skeleton }\n"
     }
   ]
 }
