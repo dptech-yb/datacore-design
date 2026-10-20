@@ -8,7 +8,7 @@ export const layoutNavComponents: ComponentDoc[] = [
     chineseName: "页面骨架",
     category: "layout",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "定义应用骨架：侧边导航、顶栏与内容区的固定结构，所有页面共享同一副骨架。",
     usage:
       "不提供 Layout 组件：骨架直接用 Tailwind 的 flex / sticky / max-w 工具类组合语义标签（<aside> <header> <main>），侧栏放 NavMenu，顶栏放 Breadcrumb，内容区顶部放 PageHeader。每个应用只写一次骨架。页面内部的区块排列用 Stack / Grid 写法；内容区需要可拖拽分栏时用 Splitter（Resizable）；弹窗、抽屉和卡片内部不要再套一层骨架。",
@@ -161,7 +161,7 @@ import { Lock } from "lucide-react";
     chineseName: "堆叠布局",
     category: "layout",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "沿一个方向（垂直或水平）排列子元素并统一间距，是使用频率最高的局部布局写法。",
     usage:
       "不提供 Stack 组件：直接用 Tailwind 的 flex + gap 工具类。垂直 flex flex-col gap-3，水平 flex flex-wrap items-center gap-2。用于表单字段、按钮组、卡片列表等一维排列。二维行列关系用 Grid 写法；需要拖拽调整两个区域的比例用 Splitter；整页骨架见 Layout。",
@@ -293,7 +293,7 @@ import { AlertTriangle } from "lucide-react";
     chineseName: "栅格",
     category: "layout",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "用 CSS Grid 组织二维布局，让卡片与统计块在不同断点下保持对齐。",
     usage:
       "不提供 Grid 组件：直接用 Tailwind 的 grid / grid-cols-* / gap-* 工具类。用于卡片矩阵、仪表盘统计块、多列表单等二维排列。单一方向的排列用 Stack 写法；整页骨架见 Layout；两个区域间需要拖拽调整用 Splitter。",
@@ -463,7 +463,7 @@ export function ProjectGrid() {
     chineseName: "分栏器",
     category: "layout",
     status: "experimental",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "把内容区拆成可拖拽调整的面板，让用户按任务需要自行分配空间。",
     usage:
       "实现为 resizable（ResizablePanelGroup / ResizablePanel / ResizableHandle，基于 react-resizable-panels）。用于主从结构的双栏场景：任务列表 + 日志详情、编辑器 + 预览。固定比例的布局用 Grid 写法；只做视觉分隔用 Divider；窄屏不要用分栏，回退为上下堆叠或 Tabs。",
@@ -602,7 +602,7 @@ export function ProjectGrid() {
     chineseName: "页头",
     category: "navigation",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "页面顶部的标题区：标题、说明、状态与页面级动作，告诉用户当前页面是什么、能做什么。",
     usage:
       "每个内容页使用一次，位于内容区最上方。弹窗与抽屉内的标题不用 PageHeader；跨页位置用 breadcrumb 插槽放 Breadcrumb，单层返回用 backHref。页面级主动作最多一个 primary，其余动作降级为 secondary / ghost 或收入 DropdownMenu。",
@@ -778,7 +778,7 @@ import { ChevronDown } from "lucide-react";
     chineseName: "面包屑",
     category: "navigation",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "展示当前页面在层级中的位置，并提供逐级向上返回的路径。",
     usage:
       "用于两层以上的层级页面（项目 → 数据集 → 任务详情）。同级内容切换用 Tabs；全局功能入口用 NavMenu；只有一层时不渲染。当前页用 BreadcrumbPage，永远不可点击。",
@@ -965,7 +965,7 @@ import { Lock } from "lucide-react";
     chineseName: "导航菜单",
     category: "navigation",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "应用的侧边导航：组织跨页面的功能入口，并标示当前所在位置。",
     usage:
       "实现为 nav-menu（NavMenu / NavMenuGroup / NavMenuItem）。用于全局或项目级导航，点击后切换整个页面（URL 变化、页面内容整体替换）。同页内的内容切换用 Tabs——NavMenu 决定“去哪一页”，Tabs 决定“这一页里看哪部分”；少量并列视图的即时切换用 Segmented；动作菜单用 DropdownMenu。入口多时用 NavMenuGroup 分组并可折叠。",
@@ -1128,7 +1128,7 @@ import { FileText, FlaskConical, Home, Lock, Users } from "lucide-react";
     chineseName: "标签页",
     category: "navigation",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在同一页面内切换同层级的内容区块，切换后上下文与已输入状态不丢失。",
     usage:
       "用于同一对象的不同方面（任务详情的概览 / 参数 / 日志 / 产物）。跨页面导航用 Menu——Tabs 不换页、URL 可以不变，Menu 整页替换；2–5 个需要即时生效的视图切换可用 Segmented。标签超过一屏时横向滚动，不换行堆叠。",
@@ -1275,7 +1275,7 @@ import { Lock } from "lucide-react";
     chineseName: "步骤条",
     category: "navigation",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "把多阶段流程拆成有序步骤，告诉用户流程进行到哪一步、每一步的结果。",
     usage:
       "用于有明确先后顺序的流程：数据导入、表单向导、任务流水线。并列内容切换用 Tabs；可以乱序访问的入口用 NavMenu。步骤数 2–7 为宜；每步只有 wait（等待）/ process（进行）/ finish（完成）/ error（失败）四种状态。",
@@ -1413,7 +1413,7 @@ import { XCircle } from "lucide-react";
     chineseName: "分页",
     category: "navigation",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "把长列表分页，告诉用户总量与当前位置，并允许翻页与调整每页条数。",
     usage:
       "实现为 pagination（Pagination / PaginationContent / PaginationItem / PaginationLink / PaginationEllipsis）组合：页码窗口由业务计算，总量文案与每页条数（Select）放在同一行。用于数据量超过一屏的列表与表格。持续增长的流式数据（实时日志）用“加载更多”或虚拟滚动；总数少于两页时不渲染。翻页必须保留筛选与排序条件。",
@@ -1627,7 +1627,7 @@ const goTo = (nextPage: number) => (event: React.MouseEvent) => {
     chineseName: "下拉菜单",
     category: "navigation",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "把一组低频动作收进触发元素背后的浮层菜单，保持界面清爽。",
     usage:
       "用于“更多操作”、用户菜单、带选项的动作按钮。菜单项是页面导航时用 Menu；需要确认的单个动作用 Popconfirm；从选项里选一个值用 Select。菜单项不超过 9 个，超过时先分组，再考虑换交互。",
@@ -1824,7 +1824,7 @@ import { ChevronDown, Lock } from "lucide-react";
     chineseName: "分段选择器",
     category: "navigation",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "少量互斥选项的即时切换器，选中立即生效，像开关一样轻量。",
     usage:
       "用于 2–5 个互斥选项的即时切换：视图（表格 / 卡片）、时间范围、单位。选项更多或需要确认时用 Select 或 Radio；切换整页内容用 Tabs 或 Menu。Segmented 不产生提交动作，选中即应用。",

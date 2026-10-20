@@ -111,9 +111,9 @@ if (errors.length > 0) {
 const registry = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
   name: "DataCore Design",
-  version: "0.1.0",
+  version: "0.9.0",
   generated: new Date().toISOString().slice(0, 10),
-  purpose: "Machine-readable UI contracts for the DataCore main platform and AION-compatible surfaces. Synthetic examples only.",
+  purpose: "Machine-readable UI contracts for DataCore product surfaces. Synthetic examples only.",
   source: "Generated from src/catalog — do not edit by hand.",
   categories: componentCategories.map((c) => ({ id: c.id, name: c.name, chineseName: c.chineseName })),
   components: componentDocs.map((doc) => ({
@@ -169,7 +169,7 @@ const llmsTxt = `# DataCore Design
 
 ## Product context
 
-DataCore is a data-governance and intelligent-collaboration platform for projects, experiments, structured data, agent recommendations, execution systems, and auditable results. AION shares the same interaction principles.
+DataCore is a data-governance and intelligent-collaboration platform for projects, experiments, structured data, agent recommendations, execution systems, and auditable results.
 
 ## Non-negotiable interaction rules
 

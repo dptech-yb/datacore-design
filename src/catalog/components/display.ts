@@ -8,7 +8,7 @@ export const displayComponents: ComponentDoc[] = [
     chineseName: "表格",
     category: "display",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "以行列结构展示结构化数据，是列表页与详情页最核心的数据载体。",
     usage:
       "用于两条以上、字段结构一致的数据集合。单条记录的字段明细用 Descriptions；单个关键数值用 Statistic；层级数据用 Tree。数据超过一屏必须配合 Pagination 或虚拟滚动，不允许无限长高。",
@@ -274,7 +274,7 @@ const runs = [
     chineseName: "描述列表",
     category: "display",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "以“标签 + 值”的形式成组展示单条记录的字段，是详情页的标准载体。",
     usage:
       "用于一条记录（任务、数据集、项目）的字段明细。多条记录的对比用 Table；层级数据用 Tree。超过 12 个字段时分组，次要字段收入 Collapse。",
@@ -405,7 +405,7 @@ import { Badge } from "@/components/ui/badge";
     chineseName: "统计数值",
     category: "display",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "突出展示单个关键数值及其趋势，用于看板与概览区。",
     usage:
       "用于需要一眼读到的核心指标（任务数、成功率、费用）。成组字段明细用 Descriptions；完整分布用 Table 或图表。一屏统计卡不超过 6 个。",
@@ -539,7 +539,7 @@ const link =
     chineseName: "时间线",
     category: "display",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "按时间顺序展示事件流，表达“发生了什么、进行到哪、接下来是什么”。",
     usage:
       "用于任务执行记录、审计事件、版本历史等有明确时间顺序的场景。纯步骤导航用 Steps；层级结构用 Tree；审计场景优先使用 audit-timeline。",
@@ -666,7 +666,7 @@ import { Button } from "@/components/ui/button";
     chineseName: "树",
     category: "display",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "以缩进层级展示父子结构数据，支持展开、选择与定位。",
     usage:
       "用于项目目录、数据集层级、分类体系。扁平列表用 Table；时间顺序用 Timeline。层级超过 4 层时必须提供搜索定位。",
@@ -824,7 +824,7 @@ const [selected, setSelected] = useState<string | null>("ds-118");
     chineseName: "折叠面板",
     category: "display",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "将次要内容折叠进面板，让页面默认只呈现主线信息。",
     usage:
       "用于高级参数、详情补充、FAQ 等低频但必要的内容。层级导航用 Tree；单条记录的字段分组用 Descriptions 分组。关键副作用、费用、错误信息不允许折叠。",
@@ -946,7 +946,7 @@ import { Badge } from "@/components/ui/badge";
     chineseName: "代码块",
     category: "display",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "以等宽字体展示代码与命令，支持语言标签、行号、高亮行、换行切换与一键复制。",
     usage:
       "用于 API 调用示例、配置文件、命令行片段。结构化 JSON 的浏览用 JsonViewer；超长日志用日志查看器。超过 50 行的文件用文件预览，不用 CodeBlock。",
@@ -1078,7 +1078,7 @@ $ curl https://api.example.com/v1/runs/run-28003/logs?tail=200 \\\\
     chineseName: "JSON 查看器",
     category: "display",
     status: "experimental",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "以可折叠树展示 JSON 数据，支持按路径展开与复制节点值。",
     usage:
       "用于调试面板、参数快照、API 响应预览等开发态场景。面向普通用户的结构化信息用 Descriptions 或 Table；纯代码文本用 CodeBlock。",
@@ -1190,7 +1190,7 @@ import { toast } from "@/components/ui/sonner";
     chineseName: "文件列表",
     category: "display",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "以列表展示文件及其状态，支持预览、下载、删除与上传进度。",
     usage:
       "用于数据集附件、任务产物、导入文件清单。大目录浏览用 Tree + Table；上传交互本身用 Upload；轻量删除确认用 Popconfirm。",
@@ -1338,7 +1338,7 @@ const visible = expanded ? attachments : attachments.slice(0, 3);
     chineseName: "警告提示",
     category: "feedback",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在页面或区块内展示需要持续关注的上下文提示，随内容出现，不自动消失。",
     usage:
       "用于与当前上下文强相关、需要用户看到或处理的信息：数据质量问题、权限提醒、阻断原因。三者分工：操作结果的轻量反馈用 Message（自动消失）；与当前页面弱相关的异步事件用 Notification（可停留）；需要持续关注的上下文信息用 Alert（常驻页面）。",
@@ -1493,7 +1493,7 @@ import { Button } from "@/components/ui/button";
     chineseName: "全局提示",
     category: "feedback",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "操作完成后的轻量全局反馈，自动出现、自动消失，不打断流程。",
     usage:
       "用于保存成功、复制成功、提交已受理等即时结果反馈。三者分工：Message 是即时轻反馈（自动消失、无需处理）；Alert 是页面内持续提醒（需要看到或处理）；Notification 是异步事件通知（可停留、带操作）。",
@@ -1629,7 +1629,7 @@ function SaveDatasetButton() {
     chineseName: "通知",
     category: "feedback",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "系统侧的异步事件通知，带标题与操作，可停留等待用户处理。",
     usage:
       "用于任务完成、审批结果、预约到点等与当前页面上下文弱相关的事件。三者分工：Notification 是异步事件通知（带标题与操作、可停留）；Message 是当前操作的即时轻反馈；Alert 是页面内的持续上下文提醒。",
@@ -1761,7 +1761,7 @@ toast.error("计算任务执行失败", {
     chineseName: "进度条",
     category: "feedback",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "展示确定性任务的完成比例，让用户知道还要等多久。",
     usage:
       "用于可量化进度：数据导入、文件上传、批量计算完成度。无法量化进度的等待用 Spin；任务整体状态用 run-status / Steps。",
@@ -1886,7 +1886,7 @@ import { Button } from "@/components/ui/button";
     chineseName: "加载中",
     category: "feedback",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "表示正在加载但无法量化进度，以内联或遮罩方式表达等待。",
     usage:
       "用于区块加载、按钮内加载、提交中等待。可量化进度用 Progress；整页首屏骨架用 Skeleton；异步任务的状态跟踪用 run-status。",
@@ -2012,7 +2012,7 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components
     chineseName: "对话框",
     category: "overlay",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在当前页面之上展示需要专注处理的内容或确认，阻断对背景的交互。",
     usage:
       "用于需要用户完成一件事才能继续的场景：创建任务、编辑参数、聚焦查看。与 ConfirmPanel 的关系：ConfirmPanel 基于 Modal 实现，额外回显目标、范围、预算与副作用——凡是有外部副作用或不可恢复的确认动作必须用 ConfirmPanel；轻量就地确认用 Popconfirm；大表单与详情用 Drawer。",
@@ -2180,7 +2180,7 @@ import { Button } from "@/components/ui/button";
     chineseName: "抽屉",
     category: "overlay",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "从屏幕边缘滑出的辅助面板，承载与当前页强相关的详情或操作，不打断页面上下文。",
     usage:
       "用于任务详情、日志查看、宽表单等需要较大空间但不想离开当前列表的场景。简短确认用 Popconfirm；聚焦单件事用 Modal；有副作用的确认用 ConfirmPanel。",
@@ -2325,7 +2325,7 @@ const [open, setOpen] = useState(false);
     chineseName: "气泡确认",
     category: "overlay",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在操作元素旁弹出的小型确认气泡，用于轻量、影响范围小的确认。",
     usage:
       "用于删除一行、移除标签等轻量确认。涉及计算、费用、外部副作用或不可恢复的动作必须用 ConfirmPanel；需要在气泡里放表单或复杂内容时用 Modal。",

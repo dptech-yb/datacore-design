@@ -17,7 +17,7 @@
 
 ## Product context
 
-DataCore is a data-governance and intelligent-collaboration platform for projects, experiments, structured data, agent recommendations, execution systems, and auditable results. AION shares the same interaction principles.
+DataCore is a data-governance and intelligent-collaboration platform for projects, experiments, structured data, agent recommendations, execution systems, and auditable results.
 
 ## Non-negotiable interaction rules
 

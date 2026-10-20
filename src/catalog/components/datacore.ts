@@ -8,7 +8,7 @@ export const datacoreComponents: ComponentDoc[] = [
     chineseName: "引用角标",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在正文或 Agent 答复中为关键论断标注来源，并把角标与来源清单联动，让每一条结论都可追溯。",
     usage:
       "用于 Agent 答复、报告正文与数据结论旁的来源标注。角标必须绑定稳定的 citationId，点击后在来源清单中定位并高亮对应条目。无需追溯的常识不标注；需要展示来源完整信息（发布方、更新时间、可访问性）时配合 SourceCard。",
@@ -188,7 +188,7 @@ const { locatedId, locate } = useCitationLocator();
     chineseName: "来源卡片",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "以卡片形式展示一条来源的完整信息：标题、发布方、更新时间与可访问状态，并提供打开原文的入口。",
     usage:
       "用于来源清单、引用详情与数据血缘面板。正文中的轻量标注用 Citation；需要展示更新时间与可访问性、支持打开原文时用 SourceCard。",
@@ -315,7 +315,7 @@ const { locatedId, locate } = useCitationLocator();
     chineseName: "Agent 活动",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "实时展示 Agent 当前在做什么：所处步骤、正在调用的工具、以及是否在等待用户确认。",
     usage:
       "用于 Agent 工作区与任务详情页的实时活动流。Agent 语义统一使用紫色；只展示任务的最终状态用 RunStatus，确认动作本身用 ConfirmPanel，单次工具调用的详情用 ToolRunCard。",
@@ -473,7 +473,7 @@ const optimizeSteps: AgentStep[] = [
     chineseName: "运行状态",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "用一致的徽章与状态行表达任务生命周期：排队、运行中、成功、失败、部分完成、需重试。",
     usage:
       "用于任务列表、任务详情与批处理结果。六态是封闭集合，不允许新增第七种状态色；需要展示实时进度时配合 Progress，需要展示执行过程时配合 AgentActivity。",
@@ -625,7 +625,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
     chineseName: "确认面板",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在执行产生副作用的动作前，回显目标、范围、项目、预算与副作用，让用户在完整知情下明确确认。",
     usage:
       "用于 Agent 推荐执行、批量操作与危险动作的确认。确认面板之外不允许“顺手执行”。简单的行内二次确认（删除一行）用 Popconfirm；涉及项目、预算或外部副作用的动作必须用 ConfirmPanel。",
@@ -788,7 +788,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
     chineseName: "项目选择器",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "选择动作归属的项目，同时展示项目 ID、默认项目标记与当前用户在项目内的权限状态。",
     usage:
       "用于提交任务、创建资源前的项目归属选择。项目是所有计算与数据动作的归属边界，不允许“无项目”提交；只读展示项目信息时用 Descriptions。",
@@ -924,7 +924,7 @@ const canExecute = hasPermission(current?.permission, "executor");
     chineseName: "数据集选择器",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "按数据集、批次、版本与来源选择计算或分析的输入数据，并让版本与来源显式可见。",
     usage:
       "用于选择训练集、优化输入与分析对象。版本必须显式选择或显式标注默认到最新稳定版，不允许隐式漂移；仅需上传本地文件时用 Upload。",
@@ -1064,7 +1064,7 @@ import { DatasetPicker } from "@/components/ui/dataset-picker";
     chineseName: "权限范围",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "用固定四级语义表达权限范围：可见、可编辑、可执行、管理员，并说明每一级能做什么、不能做什么。",
     usage:
       "用于项目成员列表、共享设置与动作前的权限提示。四级是封闭集合；权限判断在服务端执行，前端只做展示与引导，不允许用隐藏按钮代替权限校验。",
@@ -1191,7 +1191,7 @@ import { hasPermission, PermissionScope } from "@/components/ui/permission-scope
     chineseName: "审计时间线",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "按时间顺序记录谁在何时对什么做了什么，让每一次变更可追溯、可问责。",
     usage:
       "用于项目审计、任务历史与数据版本变更记录。审计记录只增不改；需要展示未来计划或流程进度时用 ExperimentStep 或 Steps。",
@@ -1316,7 +1316,7 @@ import { hasPermission, PermissionScope } from "@/components/ui/permission-scope
     chineseName: "实验步骤",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "把一次实验表达为有序的业务节点流：配置、排队、运行、分析、完成，并标记当前节点与失败节点。",
     usage:
       "用于实验详情与优化轮次进度。节点是业务语义步骤（不是 UI 分步表单）；表单分步填写用 Steps。任务粒度的状态用 RunStatus。",
@@ -1450,7 +1450,7 @@ import { hasPermission, PermissionScope } from "@/components/ui/permission-scope
     chineseName: "数据质量提示",
     category: "datacore",
     status: "experimental",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在数据进入计算前暴露质量问题：缺失、冲突、来源不可靠、待人工确认，并给出每条问题的处理路径。",
     usage:
       "用于数据导入报告、数据集详情与计算前检查。问题分提醒与阻断两级：阻断级未处理前不允许提交计算；纯粹的统计概览用 Statistic，单条全局提示用 Alert。",
@@ -1581,7 +1581,7 @@ const blocked = hasBlockingIssues(issues);
     chineseName: "工具运行卡片",
     category: "datacore",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "展示一次工具调用的完整留痕：工具名、参数摘要、输入输出、耗时与结果状态。",
     usage:
       "用于 Agent 活动流、任务日志与调试面板。工具调用必须留痕可查；只展示最终答案不需要 ToolRunCard，过程性步骤用 AgentActivity。",

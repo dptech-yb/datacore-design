@@ -25,7 +25,7 @@ export function HomePage() {
         <div className="hero-copy">
           <a className="release-link" href="#/start">
             <span>DataCore Design</span>
-            <span>设计系统 0.1</span>
+            <span>设计系统 0.9</span>
             <ArrowUpRight size={14} />
           </a>
           <h1>

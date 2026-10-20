@@ -11,7 +11,7 @@ export const entryComponents: ComponentDoc[] = [
     chineseName: "输入框",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "收集单行短文本，是表单里最基础的信息录入单元。",
     usage:
       "用于名称、编号、简短标识等单行文本。多行内容用 Textarea；纯数值用 NumberInput；从有限选项中选值用 Select；即时过滤查找用 SearchField。",
@@ -178,7 +178,7 @@ const [name, setName] = useState("示例项目（project-042）");
     chineseName: "数字输入框",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "录入带范围、步长和精度约束的数值，把非法数字拦在输入阶段。",
     usage:
       "用于质量、浓度、温度、循环次数等数值字段。展示用数字不要用它（用 Statistic）；编号即使全是数字也用 Input，避免丢失前导零。",
@@ -324,7 +324,7 @@ const missing = mass === null;
     chineseName: "多行文本框",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "收集多行、较长的自由文本，如实验备注、失败原因、方法描述。",
     usage:
       "用于超过一行的描述性内容。单行文本用 Input；结构化字段（日期、数值）用对应控件；代码 / JSON 片段的展示用 CodeBlock。",
@@ -478,7 +478,7 @@ const [note, setNote] = useState("第 3 轮配方 D，充电末期温升偏高�
     chineseName: "选择器",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "从一组确定选项中选择单个或多个值，把自由录入变成受控选择。",
     usage:
       "选项已知且有限时使用（状态、类型、所属项目）。选项量大或允许创建新值用 Combobox；选项 ≤5 且需要一眼看全用 Radio；布尔设置用 Switch。",
@@ -691,7 +691,7 @@ const selected = datasets.find((d) => d.value === value);
     chineseName: "组合框",
     category: "entry",
     status: "experimental",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在可搜索的选项列表中既可选择已有值，也允许输入并创建新值。",
     usage:
       "选项量大或允许用户扩展时使用：试剂名称、仪器编号、标签。选项固定且少时用 Select；纯自由文本用 Input。",
@@ -844,7 +844,7 @@ const [value, setValue] = useState<string[]>(["round-3"]);
     chineseName: "日期选择器",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "选择单个日期或日期时间，保证格式合法、范围受控。",
     usage:
       "用于实验日期、截止日、计划开始时间。选择时间段用 DateRangePicker；只按相对时间筛选（最近 7 天）可直接用 FilterBar 的快捷项。",
@@ -969,7 +969,7 @@ import { Label } from "@/components/ui/label";
     chineseName: "日期范围选择器",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "选择一个起止时间段，常用于列表筛选与统计区间。",
     usage:
       "用于按创建时间筛选任务、导出某区间数据。单日选择用 DatePicker；高频相对区间（最近 7 天）必须提供快捷项，不让用户逐日点选。",
@@ -1105,7 +1105,7 @@ const [range, setRange] = useState<DateRange | null>({
     chineseName: "复选框",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在一组互不排斥的选项中做多项选择，或确认一个需要显式同意的条款。",
     usage:
       "用于多选属性、批量选择行、勾选“我已阅读”。勾选只改变待提交状态，随表单或批量动作一起生效；需要即时生效的布尔设置用 Switch，二者不可混用。",
@@ -1264,7 +1264,7 @@ import { Label } from "@/components/ui/label";
     chineseName: "单选框",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在少量互斥选项中选择唯一值，所有选项平铺可见。",
     usage:
       "用于 2–5 个互斥选项且需要一眼看全的场景：计算模式、精度档位。选项多或需节省空间用 Select；布尔设置用 Switch 或 Checkbox。",
@@ -1421,7 +1421,7 @@ const modes = [
     chineseName: "开关",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "切换一个即时生效的二元设置，开 / 关语义一目了然。",
     usage:
       "用于通知开关、自动刷新、对团队可见等即时生效的设置。需要随表单提交才生效的选择用 Checkbox：这是两者唯一的分工标准。两个非布尔互斥项用 Radio 或 Segmented。",
@@ -1579,7 +1579,7 @@ import { Switch } from "@/components/ui/switch";
     chineseName: "表单",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "组织一组字段的标签、辅助说明、校验与提交，把录入错误拦在提交之前。",
     usage:
       "任何需要用户录入并提交的场景：新建项目、提交计算任务、修改配置。只读展示用 Descriptions；单字段即时设置（如开关）不需要包一层 Form。",
@@ -1768,7 +1768,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
     chineseName: "上传",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "把本地文件送入平台，是数据导入流程的入口；原始文件必须完整保留、可追溯。",
     usage:
       "用于导入仪器原始数据（.csv / .txt / .xlsx）与上传附件。粘贴小段文本用 Textarea；选择平台已有数据用 DatasetPicker。",
@@ -1915,7 +1915,7 @@ import { Upload, UploadFileList } from "@/components/ui/upload";
     chineseName: "搜索框",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "输入关键词即时定位对象，是列表与全局导航的查找入口。",
     usage:
       "用于按名称 / 编号搜索数据集、任务、项目。枚举条件组合筛选用 FilterBar；精确单字段录入用 Input。",
@@ -2030,7 +2030,7 @@ import { Upload, UploadFileList } from "@/components/ui/upload";
     chineseName: "筛选栏",
     category: "entry",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "组织列表的筛选条件：常用条件外露，其余收起，已选条件一目了然。",
     usage:
       "用于任务 / 数据集 / 项目列表顶部。单一关键词查找用 SearchField；筛选只改变查询，不产生任何写操作。",

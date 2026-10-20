@@ -10,7 +10,7 @@ export const generalComponents: ComponentDoc[] = [
     chineseName: "按钮",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "触发一个动作或提交一段意图，是界面里最主要的动作载体。",
     usage:
       "用于立即执行的动作（提交、保存、确认、重试）。跳转页面请用 Link；只有图标没有文字时请用 IconButton；危险且不可逆的动作必须使用 danger 变体并配合确认。",
@@ -168,7 +168,7 @@ function SubmitRunAction() {
     chineseName: "图标按钮",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "用一个语义明确的图标触发动作，是空间受限或高频场景下的紧凑动作载体。",
     usage:
       "用于工具栏、卡片角落、表格行内的高频动作（关闭、复制、刷新、更多）。图标含义必须已被约定俗成；含义不直观或低频的动作必须使用带文案的 Button，跳转用 Link。",
@@ -341,7 +341,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
     chineseName: "链接",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "导航到另一个页面、资源或位置，只负责跳转，不执行动作。",
     usage:
       "用于页面跳转、打开详情、访问外部文档。提交、保存、删除等动作用 Button；当前位置导航用 Breadcrumb；主导航用 Menu。",
@@ -452,7 +452,7 @@ import { Num } from "@/components/ui/typography";
     chineseName: "排版",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "用固定的字号、字重与语义色层级表达信息结构，保证全站文字可读、可扫、一致。",
     usage:
       "用于标题、正文、辅助说明、ID 与数值的展示。需要表达状态用 Badge；大段代码用 CodeBlock；不要用手写字号的方式伪造层级。",
@@ -577,7 +577,7 @@ import { Num } from "@/components/ui/typography";
     chineseName: "分割线",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在内容之间建立分组边界，帮助用户区分不同主题或功能区块。",
     usage:
       "用于分隔段落、卡片内功能分区、工具栏按钮分组。能用间距（≥24px）表达分组时不加线；列表行之间使用行分隔线，不逐行插 Divider。",
@@ -695,7 +695,7 @@ import { Separator } from "@/components/ui/separator";
     chineseName: "徽标",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "用语义色加短文案标记对象的状态或数量，是状态语义的最小载体。",
     usage:
       "用于表格状态列、任务与运行状态、通知计数。分类与属性用 Tag；需要整段说明的状态用 Alert；可点击的筛选条件用 Tag 或 FilterBar。",
@@ -859,7 +859,7 @@ function RunStatusTable() {
     chineseName: "标签",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "标记对象的分类、属性或来源，支持移除与选择，是属性维度的最小载体。",
     usage:
       "用于数据集属性、筛选条件的已选值、用户自定义分类。状态（已完成/失败）用 Badge，不用 Tag；大量选项的管理用 Select。",
@@ -993,7 +993,7 @@ import { Tag, TagGroup } from "@/components/ui/tag";
     chineseName: "卡片",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "把同一主题的内容与动作聚合为一个可扫描、可复用的容器。",
     usage:
       "用于信息分组、指标卡、入口卡与列表项。整页只有一个主题时不要套卡；卡片内不嵌套卡片，分区用 Divider。",
@@ -1150,7 +1150,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
     chineseName: "空状态",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在没有内容可展示时告诉用户发生了什么、是否需要操作、下一步做什么。",
     usage:
       "用于列表无数据、筛选无结果、未选择对象等场景。错误导致的无内容用 Result 或 Alert；加载中用 Skeleton；无权限用 Result（403）。",
@@ -1281,7 +1281,7 @@ import { Empty } from "@/components/ui/empty";
     chineseName: "骨架屏",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在数据到达前按真实内容的布局占位，让加载前后结构一致、不闪烁、不跳动。",
     usage:
       "用于首屏加载与区块级加载（表格、卡片、详情）。超过 10 秒的长任务用 Progress + 日志反馈进度；局部刷新保留旧数据并配合 Spin，不用骨架屏整区替换。",
@@ -1446,7 +1446,7 @@ function RunList() {
     chineseName: "结果页",
     category: "general",
     status: "stable",
-    version: "0.1.0",
+    version: "0.9.0",
     purpose: "在流程结束或整页异常时给出明确结论、原因说明与后续动作。",
     usage:
       "用于提交成功、整页错误、404、403 等页面级结论。局部错误用 Alert 或 Message；无数据用 Empty；流程中的状态用 Badge 或 RunStatus。",
